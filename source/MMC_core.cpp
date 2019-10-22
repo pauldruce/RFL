@@ -136,7 +136,7 @@ double Geom24::MMC_core(const double& scale, gsl_rng* engine, double* s_i, doubl
     }
     else
     {
-        e = exp(-dS);
+        double e = exp(-dS);
         double p = gsl_rng_uniform(engine);
 
         if(e>p)
