@@ -368,11 +368,6 @@ void Geom24::adjust()
         mat[i] = mat[i] - tr*idty;
     }
 }
-        
-
-
-
-
 
 cx_mat Geom24::build_dirac() const
 {
@@ -399,225 +394,10 @@ double Geom24::calculate_S_from_dirac() const
     return g2*trdirac2 + trdirac4;
 }
 
-double Geom24::dirac2() const
-{
-    double res = 0.;
-    for(int i=0; i<nHL; ++i)
-    {
-        double tr2 = trace(mat[i]*mat[i]).real();
-        double tr1 = trace(mat[i]).real();
-
-        res += (dim*tr2 + eps[i]*tr1*tr1);
-    }
-
-    return 2.*dim_omega*res;
-}
-
-
-
-
 double Geom24::calculate_S() const
 {
     return g2*dirac2() + dirac4();
-    //return dirac2();
 }
-
-
-double Geom24::compute_A4(const int& i1, const int& i2, const int& i3, const int& i4) const
-{
-    // epsilon factor
-    int e = eps[i1]*eps[i2]*eps[i3]*eps[i4];
-
-    // if e=-1, then [1+*e] becomes 2i*imag
-    // and the clifford part is guaranteed to
-    // be pure imaginary
-    if(e<0)
-    {
-        // clifford product
-        double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))].imag(); 
-
-        if(cliff != 0.)
-        {
-            // base matrix products
-            cx_mat M1M2 = mat[i1]*mat[i2];
-            cx_mat M1M3 = mat[i1]*mat[i3];
-            cx_mat M1M4 = mat[i1]*mat[i4];
-            cx_mat M2M3 = mat[i2]*mat[i3];
-            cx_mat M2M4 = mat[i2]*mat[i4];
-            cx_mat M3M4 = mat[i3]*mat[i4];
-
-            // traces
-            double tr1234 = trace(M1M2*M3M4).imag();
-            double tr234 = trace(M2M3*mat[i4]).imag();
-            double tr134 = trace(M1M3*mat[i4]).imag();
-            double tr124 = trace(M1M2*mat[i4]).imag();
-            double tr123 = trace(M1M2*mat[i3]).imag();
-            double tr1 = trace(mat[i1]).real();
-            double tr2 = trace(mat[i2]).real();
-            double tr3 = trace(mat[i3]).real();
-            double tr4 = trace(mat[i4]).real();
-            
-            // compute sum
-            double res = dim*tr1234;
-            res += eps[i1]*tr1*tr234;
-            res += eps[i2]*tr2*tr134;
-            res += eps[i3]*tr3*tr124;
-            res += eps[i4]*tr4*tr123;
-
-            return -2*cliff*res;
-            // NOTE: this minus here comes from the i in cliff
-            // and the i coming from 2i*imag
-        }
-        else
-            return 0.;
-    }
-    else
-    {
-        // clifford product
-        double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))].real(); 
-
-        if(cliff != 0.)
-        {
-            // base matrix products
-            cx_mat M1M2 = mat[i1]*mat[i2];
-            cx_mat M1M3 = mat[i1]*mat[i3];
-            cx_mat M1M4 = mat[i1]*mat[i4];
-            cx_mat M2M3 = mat[i2]*mat[i3];
-            cx_mat M2M4 = mat[i2]*mat[i4];
-            cx_mat M3M4 = mat[i3]*mat[i4];
-
-            // traces
-            double tr1234 = trace(M1M2*M3M4).real();
-            double tr234 = trace(M2M3*mat[i4]).real();
-            double tr134 = trace(M1M3*mat[i4]).real();
-            double tr124 = trace(M1M2*mat[i4]).real();
-            double tr123 = trace(M1M2*mat[i3]).real();
-            double tr12 = trace(M1M2).real();
-            double tr34 = trace(M3M4).real();
-            double tr13 = trace(M1M3).real();
-            double tr24 = trace(M2M4).real();
-            double tr14 = trace(M1M4).real();
-            double tr23 = trace(M2M3).real();
-            double tr1 = trace(mat[i1]).real();
-            double tr2 = trace(mat[i2]).real();
-            double tr3 = trace(mat[i3]).real();
-            double tr4 = trace(mat[i4]).real();
-
-
-            double res = dim*tr1234;
-            res += eps[i1]*tr1*tr234;
-            res += eps[i2]*tr2*tr134;
-            res += eps[i3]*tr3*tr124;
-            res += eps[i4]*tr4*tr123;
-            res += eps[i1]*eps[i2]*tr12*tr34;
-            res += eps[i1]*eps[i3]*tr13*tr24;
-            res += eps[i1]*eps[i4]*tr14*tr23;
-
-            double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))].real(); 
-
-            return 2*cliff*res;
-        }
-        else
-            return 0.;
-    }
-}
-
-double Geom24::compute_A2(const int& i1, const int& i2) const
-{
-    // clifford product
-    double cliff = omega_table_4[i2 + nHL*(i1 + nHL*(i2 + nHL*i1))].real();
-
-    // base matrix products
-    cx_mat M1M1 = mat[i1]*mat[i1];
-    cx_mat M2M2 = mat[i2]*mat[i2];
-    cx_mat M1M2 = mat[i1]*mat[i2];
-
-    // traces
-    double tr1122 = trace(M1M1*M2M2).real();
-    double tr1212 = trace(M1M2*M1M2).real();
-    double tr122 = trace(M1M2*mat[i2]).real();
-    double tr112 = trace(M1M1*mat[i2]).real();
-    double tr11 = trace(M1M1).real();
-    double tr22 = trace(M2M2).real();
-    double tr12 = trace(M1M2).real();
-    double tr1 = trace(mat[i1]).real();
-    double tr2 = trace(mat[i2]).real();
-    
-    
-    if(cliff < 0)
-    {
-        // compute sum
-        double res = dim*(2*tr1122 - tr1212);
-        res += 2*eps[i1]*tr1*tr122;
-        res += 2*eps[i2]*tr2*tr112;
-        res += tr11*tr22;
-        res += 2*eps[i1]*eps[i2]*tr12*tr12;
-
-        return 2*dim_omega*res;
-    }
-    else
-    {
-        // compute sum
-        double res = dim*(2*tr1122 + tr1212);
-        res += 6*eps[i1]*tr1*tr122;
-        res += 6*eps[i2]*tr2*tr112;
-        res += 3*tr11*tr22;
-        res += 6*eps[i1]*eps[i2]*tr12*tr12;
-
-        return 2*dim_omega*res;
-    }
-}
-
-double Geom24::compute_A(const int& i) const
-{
-    // base matrix products
-    cx_mat M2 = mat[i]*mat[i];
-    cx_mat M3 = M2*mat[i];
-
-    // traces
-    double tr1 = trace(mat[i]).real();
-    double tr2 = trace(M2).real();
-    double tr3 = trace(M3).real();
-    double tr4 = trace(M3*mat[i]).real();
-
-    double res = dim*tr4;
-    res += 4*eps[i]*tr1*tr3;
-    res += 3*tr2*tr2;
-
-    return 2*dim_omega*res;
-}
-
-double Geom24::dirac4() const
-{
-    double res = 0.;
-
-    // four distinct indices
-    for(int i=0; i<nHL; ++i)
-    {
-        for(int j=i+1; j<nHL; ++j)
-        {
-            for(int k=j+1; k<nHL; ++k)
-            {
-                for(int l=k+1; l<nHL; ++l)
-                    res += 8*(compute_A4(i,j,k,l)+compute_A4(i,j,l,k)+compute_A4(i,k,j,l));
-            }
-        }
-    }
-
-    // two distinct pairs of equal indices
-    for(int i=0; i<nHL; ++i)
-    {
-        for(int j=i+1; j<nHL; ++j)
-            res += 2*compute_A2(i,j);
-    }
-
-    // all indices equal
-    for(int i=0; i<nHL; ++i)
-        res += compute_A(i);
-
-    return res;
-}
-
 
 void Geom24::sample_mom(gsl_rng* engine)
 {
@@ -704,151 +484,6 @@ cx_mat Geom24::compute_B4(const int& k, const int& i2, const int& i3, const int&
     }
 }
 
-void Geom24::compute_B4_cout(const int& k, const int& i2, const int& i3, const int& i4, const double& cliff, const bool& neg) const
-{
-    if(neg)
-    {
-        // base matrix products
-        cx_mat M2M3 = mat[i2]*mat[i3];
-        cx_mat M2M4 = mat[i2]*mat[i4];
-        cx_mat M3M4 = mat[i3]*mat[i4];
-        cx_mat M2M3M4 = M2M3*mat[i4];
-
-        // traces
-        double tr234 = trace(M2M3M4).imag();
-        double tr2 = trace(mat[i2]).real();
-        double tr3 = trace(mat[i3]).real();
-        double tr4 = trace(mat[i4]).real();
-
-        // compute sum
-        cout << -2*cliff*eps[k]*tr234 << endl;
-        cout << -double(dim)*cliff*2*M2M3M4(0,0).imag() << endl;
-        cout << -eps[i2]*tr2*cliff*2*M3M4(0,0).imag() << endl;
-        cout << -eps[i3]*tr3*cliff*2*M2M4(0,0).imag() << endl;
-        cout << -eps[i4]*tr4*cliff*2*M2M3(0,0).imag() << endl;
-    }
-    else
-    {
-        // base matrix products
-        cx_mat M2M3 = mat[i2]*mat[i3];
-        cx_mat M2M4 = mat[i2]*mat[i4];
-        cx_mat M3M4 = mat[i3]*mat[i4];
-        cx_mat M2M3M4 = M2M3*mat[i4];
-
-        // traces
-        double tr234 = trace(M2M3M4).real();
-        double tr23 = trace(M2M3).real();
-        double tr24 = trace(M2M4).real();
-        double tr34 = trace(M3M4).real();
-        double tr2 = trace(mat[i2]).real();
-        double tr3 = trace(mat[i3]).real();
-        double tr4 = trace(mat[i4]).real();
-
-        // compute sum
-        cout << 2*cliff*eps[k]*tr234 << endl;
-        cout << dim*2*cliff*M2M3M4(0,0).real() << endl;
-        cout << eps[i2]*cliff*tr2*2*M3M4(0,0).real() << endl;
-        cout << eps[i3]*cliff*tr3*2*M2M4(0,0).real() << endl;
-        cout << eps[i4]*cliff*tr4*2*M2M3(0,0).real() << endl;
-        cout << 2*eps[k]*eps[i2]*cliff*tr34*mat[i2](0,0).real() << endl;
-        cout << 2*eps[k]*eps[i3]*cliff*tr24*mat[i3](0,0).real() << endl;
-        cout << 2*eps[k]*eps[i4]*cliff*tr23*mat[i4](0,0).real() << endl;
-    }
-}
-
-cx_mat Geom24::compute_B4_bruteforce(const int& k, const int& i2, const int& i3, const int& i4, const cx_double& cliff, const int& e) const
-{
-    // base matrix products
-    cx_mat M2M3 = mat[i2]*mat[i3];
-    cx_mat M2M4 = mat[i2]*mat[i4];
-    cx_mat M3M4 = mat[i3]*mat[i4];
-    cx_mat M2M3M4 = M2M3*mat[i4];
-
-    // traces
-    cx_double tr234 = trace(M2M3M4);
-    double tr23 = trace(M2M3).real();
-    double tr24 = trace(M2M4).real();
-    double tr34 = trace(M3M4).real();
-    double tr2 = trace(mat[i2]).real();
-    double tr3 = trace(mat[i3]).real();
-    double tr4 = trace(mat[i4]).real();
-
-    // compute sum
-    cx_mat res(dim ,dim, fill::eye);
-    res *= eps[k];
-    res *= tr234 + double(e)*conj(tr234);
-    res += dim*(M2M3M4 + e*M2M3M4.t());
-    res += eps[i2]*tr2*(M3M4 + e*M3M4.t());
-    res += eps[i3]*tr3*(M2M4 + e*M2M4.t());
-    res += eps[i4]*tr4*(M2M3 + e*M2M3.t());
-    res += (1+e)*eps[k]*eps[i2]*tr34*mat[i2];
-    res += (1+e)*eps[k]*eps[i3]*tr24*mat[i3];
-    res += (1+e)*eps[k]*eps[i4]*tr23*mat[i4];
-
-    return cliff*res.st();
-}
-
-cx_mat Geom24::compute_B4_explicit(const int& k, const int& i2, const int& i3, const int& i4, const bool& neg) const
-{
-    if(neg)
-    {
-        // base matrix products
-        cx_mat M2M3 = mat[i2]*mat[i3];
-        cx_mat M2M4 = mat[i2]*mat[i4];
-        cx_mat M3M4 = mat[i3]*mat[i4];
-        cx_mat M2M3M4 = M2M3*mat[i4];
-
-        // traces
-        cx_double tr234 = trace(M2M3M4);
-        double tr2 = trace(mat[i2]).real();
-        double tr3 = trace(mat[i3]).real();
-        double tr4 = trace(mat[i4]).real();
-
-        // compute sum
-        cx_mat idty(dim ,dim, fill::eye);
-        cx_mat res = double(eps[k])*tr234*idty;
-        res += -double(eps[k])*conj(tr234)*idty;
-        res += dim*(M2M3M4 - M2M3M4.t());
-        res += eps[i2]*tr2*(M3M4 - M3M4.t());
-        res += eps[i3]*tr3*(M2M4 - M2M4.t());
-        res += eps[i4]*tr4*(M2M3 - M2M3.t());
-
-        return res.st();
-    }
-    else
-    {
-        // base matrix products
-        cx_mat M2M3 = mat[i2]*mat[i3];
-        cx_mat M2M4 = mat[i2]*mat[i4];
-        cx_mat M3M4 = mat[i3]*mat[i4];
-        cx_mat M2M3M4 = M2M3*mat[i4];
-
-        // traces
-        cx_double tr234 = trace(M2M3M4);
-        double tr23 = trace(M2M3).real();
-        double tr24 = trace(M2M4).real();
-        double tr34 = trace(M3M4).real();
-        double tr2 = trace(mat[i2]).real();
-        double tr3 = trace(mat[i3]).real();
-        double tr4 = trace(mat[i4]).real();
-
-        // compute sum
-        cx_mat idty(dim ,dim, fill::eye);
-        cx_mat res = double(eps[k])*tr234*idty;
-        res += double(eps[k])*conj(tr234)*idty;
-        res += dim*(M2M3M4 + M2M3M4.t());
-        res += eps[i2]*tr2*(M3M4 + M3M4.t());
-        res += eps[i3]*tr3*(M2M4 + M2M4.t());
-        res += eps[i4]*tr4*(M2M3 + M2M3.t());
-        res += 2*eps[k]*eps[i2]*tr34*mat[i2];
-        res += 2*eps[k]*eps[i3]*tr24*mat[i3];
-        res += 2*eps[k]*eps[i4]*tr23*mat[i4];
-
-        return res.st();
-    }
-}
-
-
 cx_mat Geom24::compute_B2(const int& k, const int& i) const
 {
     // clifford product
@@ -896,103 +531,6 @@ cx_mat Geom24::compute_B2(const int& k, const int& i) const
     }
 }
 
-void Geom24::compute_B2_cout(const int& k, const int& i) const
-{
-    // clifford product
-    double cliff = omega_table_4[i + nHL*(k + nHL*(i + nHL*k))].real();
-
-    // base matrix products
-    cx_mat MiMk = mat[i]*mat[k];
-    cx_mat MiMi = mat[i]*mat[i];
-    cx_mat MiMiMk = mat[i]*MiMk;
-    cx_mat MiMkMi = MiMk*mat[i];
-
-    // traces
-    double triki = trace(MiMkMi).real();
-    double trik = trace(MiMk).real();
-    double trii = trace(MiMi).real();
-    double tri = trace(mat[i]).real();
-    double trk = trace(mat[k]).real();
-    
-    
-    if(cliff < 0)
-    {
-        // compute sum
-        cout << eps[k]*2*dim_omega*triki << endl;
-        cout << dim*2*dim_omega*(2*MiMiMk(0,0).real() - MiMkMi(0,0).real()) << endl;
-        cout << eps[i]*tri*2*dim_omega*2*MiMk(0,0).real() << endl;
-        cout << 2*eps[k]*eps[i]*trik*2*dim_omega*mat[i](0,0).real() << endl;
-        cout << eps[k]*trk*2*dim_omega*MiMi(0,0).real() << endl;
-        cout << trii*2*dim_omega*mat[k](0,0).real() << endl;
-    }
-    else
-    {
-        // compute sum
-        cout << 3*eps[k]*2*dim_omega*triki << endl;
-        cout << dim*2*dim_omega*(2*MiMiMk(0,0).real() + MiMkMi(0,0).real()) << endl;
-        cout << 3*eps[i]*2*dim_omega*tri*2*MiMk(0,0).real() << endl;
-        cout << 6*eps[k]*eps[i]*2*dim_omega*trik*mat[i](0,0).real() << endl;
-        cout << 3*eps[k]*2*dim_omega*trk*MiMi(0,0).real() << endl;
-        cout << 3*2*dim_omega*trii*mat[k](0,0).real() << endl;
-    }
-}
-
-cx_mat Geom24::compute_B2_iki_explicit(const int& k, const int& i) const
-{
-    // base matrix products
-    cx_mat MiMk = mat[i]*mat[k];
-    cx_mat MiMi = mat[i]*mat[i];
-    cx_mat MiMkMi = MiMk*mat[i];
-
-    // traces
-    double triki = trace(MiMkMi).real();
-    double trik = trace(MiMk).real();
-    double trii = trace(MiMi).real();
-    double tri = trace(mat[i]).real();
-    double trk = trace(mat[k]).real();
-    
-    
-    // compute sum
-    cx_mat res(dim, dim, fill::eye);
-    res *= eps[k]*triki;
-    res += dim*MiMkMi;
-    res += eps[i]*tri*(MiMk + MiMk.t());
-    res += 2*eps[k]*eps[i]*trik*mat[i];
-    res += eps[k]*trk*MiMi;
-    res += trii*mat[k];
-
-    return 2*res.st();
-}
-
-cx_mat Geom24::compute_B2_iik_explicit(const int& k, const int& i) const
-{
-    // base matrix products
-    cx_mat MiMk = mat[i]*mat[k];
-    cx_mat MiMi = mat[i]*mat[i];
-    cx_mat MiMiMk = mat[i]*MiMk;
-    cx_mat MiMkMi = MiMk*mat[i];
-
-    // traces
-    double triik = trace(MiMiMk).real();
-    double trik = trace(MiMk).real();
-    double trii = trace(MiMi).real();
-    double tri = trace(mat[i]).real();
-    double trk = trace(mat[k]).real();
-    
-    
-    // compute sum
-    cx_mat res(dim, dim, fill::eye);
-    res *= eps[k]*triik;
-    res += 0.5*dim*(MiMiMk + MiMiMk.t());
-    res += eps[i]*tri*(MiMk + MiMk.t());
-    res += 2*eps[k]*eps[i]*trik*mat[i];
-    res += eps[k]*trk*MiMi;
-    res += trii*mat[k];
-
-    return 2*res.st();
-}
-
-
 cx_mat Geom24::compute_B(const int& k) const
 {
     // base matrix products
@@ -1011,23 +549,6 @@ cx_mat Geom24::compute_B(const int& k) const
     res += 3*eps[k]*tr1*M2;
 
     return 2*dim_omega*res.st();
-}
-
-void Geom24::compute_B_cout(const int& k) const
-{
-    // base matrix products
-    cx_mat M2 = mat[k]*mat[k];
-    cx_mat M3 = mat[k]*M2;
-
-    // traces
-    double tr3 = trace(M3).real();
-    double tr2 = trace(M2).real();
-    double tr1 = trace(mat[k]).real();
-
-    cout << eps[k]*2*dim_omega*tr3 << endl;
-    cout << dim*2*dim_omega*M3(0,0).real() << endl;
-    cout << 3*2*dim_omega*tr2*mat[k](0,0).real() << endl;
-    cout << 3*eps[k]*2*dim_omega*tr1*M2(0,0).real() << endl;
 }
 
 cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
@@ -1057,7 +578,7 @@ cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
                                 double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].imag(); 
                                 double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].imag(); 
 
-                                if(cliff1 != 0.)
+                                if(fabs(cliff1) < 1e-10)
                                 {
                                     cx_mat temp = compute_B4(k,i1,i2,i3, cliff1, true) + compute_B4(k,i1,i3,i2, cliff2, true) + compute_B4(k,i2,i1,i3, cliff3, true);
                                     res += temp + temp.t();
@@ -1070,7 +591,7 @@ cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
                                 double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].real(); 
                                 double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].real(); 
 
-                                if(cliff1 != 0.)
+                                if(fabs(cliff1) < 1e-10)
                                 {
                                     cx_mat temp = compute_B4(k,i1,i2,i3, cliff1, false) + compute_B4(k,i1,i3,i2, cliff2, false) + compute_B4(k,i2,i1,i3, cliff3, false);
                                     res += temp + temp.t();
@@ -1099,307 +620,6 @@ cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
     else
         return 4*res;
 
-}
-
-void Geom24::der_dirac4_cout(const int& k) const
-{
-    // four distinct indices
-    for(int i1=0; i1<nHL; ++i1)
-    {
-        if(i1 != k)
-        {
-            for(int i2=i1+1; i2<nHL; ++i2)
-            {
-                if(i2 != k)
-                {
-                    for(int i3=i2+1; i3<nHL; ++i3)
-                    {
-                        if(i3 != k)
-                        {
-                            // epsilon factor
-                            int e = eps[k]*eps[i1]*eps[i2]*eps[i3];
-
-                            if(e<0)
-                            {
-                                // clifford product
-                                double cliff1 = omega_table_4[i3 + nHL*(i2 + nHL*(i1 + nHL*k))].imag(); 
-                                double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].imag(); 
-                                double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].imag(); 
-
-                                if(cliff1 != 0.)
-                                {
-                                    compute_B4_cout(k,i1,i2,i3, cliff1, true);
-                                    compute_B4_cout(k,i1,i3,i2, cliff2, true);
-                                    compute_B4_cout(k,i2,i1,i3, cliff3, true);
-                                }
-                            }
-                            else
-                            {
-                                // clifford product
-                                double cliff1 = omega_table_4[i3 + nHL*(i2 + nHL*(i1 + nHL*k))].real(); 
-                                double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].real(); 
-                                double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].real(); 
-
-                                if(cliff1 != 0.)
-                                {
-                                    compute_B4_cout(k,i1,i2,i3, cliff1, false);
-                                    compute_B4_cout(k,i1,i3,i2, cliff2, false);
-                                    compute_B4_cout(k,i2,i1,i3, cliff3, false);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // two distinct pairs of equal indices
-    for(int i=0; i<nHL; ++i)
-    {
-        if(i != k)
-            compute_B2_cout(k,i);
-    }
-
-    // all indices equal
-    compute_B_cout(k);
-}
-
-cx_mat Geom24::der_dirac4_bruteforce(const int& k, const bool& herm) const
-{
-    cx_mat res(dim, dim, fill::zeros);
-    
-    // four distinct indices
-    for(int i1=0; i1<nHL; ++i1)
-    {
-        for(int i2=0; i2<nHL; ++i2)
-        {
-            for(int i3=0; i3<nHL; ++i3)
-            {
-                for(int i4=0; i4<nHL; ++i4)
-                {
-                    // epsilon factor
-                    int e = eps[i1]*eps[i2]*eps[i3]*eps[i4];
-
-                    // clifford product
-                    cx_double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))]; 
-
-                    // compute derivative
-                    if(k==i1)
-                        res += compute_B4_bruteforce(i1,i2,i3,i4, cliff, e);
-                    if(k==i2)
-                        res += compute_B4_bruteforce(i2,i3,i4,i1, cliff, e);
-                    if(k==i3)
-                        res += compute_B4_bruteforce(i3,i4,i1,i2, cliff, e);
-                    if(k==i4)
-                        res += compute_B4_bruteforce(i4,i1,i2,i3, cliff, e);
-                }
-            }
-        }
-    }
-
-    if(herm)
-        return 0.5*(res+res.t());
-    else
-        return res;
-}
-
-
-cx_mat Geom24::der_dirac4_explicit(const int& k, const bool& herm) const
-{
-    cx_mat res(dim, dim, fill::zeros);
-    
-    // four distinct indices
-    for(int i1=0; i1<nHL; ++i1)
-    {
-        if(i1 != k)
-        {
-            for(int i2=i1+1; i2<nHL; ++i2)
-            {
-                if(i2 != k)
-                {
-                    for(int i3=i2+1; i3<nHL; ++i3)
-                    {
-                        if(i3 != k)
-                        {
-                            // epsilon factor
-                            int e = eps[k]*eps[i1]*eps[i2]*eps[i3];
-                            
-                            // clifford product
-                            cx_double cliff1 = omega_table_4[i3 + nHL*(i2 + nHL*(i1 + nHL*k))]; 
-                            cx_double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))]; 
-                            cx_double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))]; 
-
-                            if(e<0)
-                            {
-                                cx_mat temp = cliff1*compute_B4_explicit(k,i1,i2,i3, true) + cliff2*compute_B4_explicit(k,i1,i3,i2, true) + cliff3*compute_B4_explicit(k,i2,i1,i3, true);
-                                res += temp + temp.t();
-                            }
-                            else if(e>0)
-                            {
-                                cx_mat temp = cliff1*compute_B4_explicit(k,i1,i2,i3, false) + cliff2*compute_B4_explicit(k,i1,i3,i2, false) + cliff3*compute_B4_explicit(k,i2,i1,i3, false);
-                                res += temp + temp.t();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // two distinct pairs of equal indices
-    for(int i=0; i<nHL; ++i)
-    {
-        if(i != k)
-        {
-            cx_double cliff = omega_table_4[i + nHL*(k + nHL*(i + nHL*k))];
-            res += 2*dim_omega*compute_B2_iik_explicit(k,i);
-            res += cliff*compute_B2_iki_explicit(k,i);
-        }
-    }
-
-    // all indices equal
-    res += compute_B(k);
-
-
-    if(herm)
-        return 2*(res+res.t());
-    else
-        return 4*res;
-}
-
-cx_mat Geom24::debug_4different(const int& k) const
-{
-    cx_mat res(dim, dim, fill::zeros);
-    
-    // four distinct indices
-    for(int i1=0; i1<nHL; ++i1)
-    {
-        if(i1 != k)
-        {
-            for(int i2=i1+1; i2<nHL; ++i2)
-            {
-                if(i2 != k)
-                {
-                    for(int i3=i2+1; i3<nHL; ++i3)
-                    {
-                        if(i3 != k)
-                        {
-                            // epsilon factor
-                            int e = eps[k]*eps[i1]*eps[i2]*eps[i3];
-
-                            if(e<0)
-                            {
-                                // clifford product
-                                double cliff1 = omega_table_4[i3 + nHL*(i2 + nHL*(i1 + nHL*k))].imag(); 
-                                double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].imag(); 
-                                double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].imag(); 
-
-                                if(cliff1 != 0.)
-                                {
-                                    cx_mat temp = compute_B4(k,i1,i2,i3, cliff1, true) + compute_B4(k,i1,i3,i2, cliff2, true) + compute_B4(k,i2,i1,i3, cliff3, true);
-                                    res += temp + temp.t();
-                                }
-                            }
-                            else
-                            {
-                                // clifford product
-                                double cliff1 = omega_table_4[i3 + nHL*(i2 + nHL*(i1 + nHL*k))].real(); 
-                                double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].real(); 
-                                double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].real(); 
-
-                                if(cliff1 != 0.)
-                                {
-                                    cx_mat temp = compute_B4(k,i1,i2,i3, cliff1, false) + compute_B4(k,i1,i3,i2, cliff2, false) + compute_B4(k,i2,i1,i3, cliff3, false);
-                                    res += temp + temp.t();
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return 4*res;
-
-}
-
-cx_mat Geom24::debug_4different_explicit(const int& k) const
-{
-    cx_mat res(dim, dim, fill::zeros);
-    
-    // four distinct indices
-    for(int i1=0; i1<nHL; ++i1)
-    {
-        if(i1 != k)
-        {
-            for(int i2=i1+1; i2<nHL; ++i2)
-            {
-                if(i2 != k)
-                {
-                    for(int i3=i2+1; i3<nHL; ++i3)
-                    {
-                        if(i3 != k)
-                        {
-                            // epsilon factor
-                            int e = eps[k]*eps[i1]*eps[i2]*eps[i3];
-                            
-                            // clifford product
-                            cx_double cliff1 = omega_table_4[i3 + nHL*(i2 + nHL*(i1 + nHL*k))]; 
-                            cx_double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))]; 
-                            cx_double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))]; 
-
-                            if(e<0)
-                            {
-                                cx_mat temp = cliff1*compute_B4_explicit(k,i1,i2,i3, true) + cliff2*compute_B4_explicit(k,i1,i3,i2, true) + cliff3*compute_B4_explicit(k,i2,i1,i3, true);
-                                res += temp + temp.t();
-                            }
-                            else if(e>0)
-                            {
-                                cx_mat temp = cliff1*compute_B4_explicit(k,i1,i2,i3, false) + cliff2*compute_B4_explicit(k,i1,i3,i2, false) + cliff3*compute_B4_explicit(k,i2,i1,i3, false);
-                                res += temp + temp.t();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    return 4*res;
-}
-
-cx_mat Geom24::debug_2equal_explicit(const int& k) const
-{
-    cx_mat res(dim, dim, fill::zeros);
-    
-    // two distinct pairs of equal indices
-    for(int i=0; i<nHL; ++i)
-    {
-        if(i != k)
-        {
-            cx_double cliff = omega_table_4[i + nHL*(k + nHL*(i + nHL*k))];
-            res += 2*dim_omega*compute_B2_iik_explicit(k,i);
-            res += cliff*compute_B2_iki_explicit(k,i);
-        }
-    }
-
-    return res;
-}
-
-cx_mat Geom24::debug_2equal(const int& k) const
-{
-    cx_mat res(dim, dim, fill::zeros);
-    
-    // two distinct pairs of equal indices
-    for(int i=0; i<nHL; ++i)
-    {
-        if(i != k)
-            res += compute_B2(k,i);
-    }
-
-    return res;
 }
 
 cx_mat Geom24::der_dirac2(const int& k) const
@@ -1412,262 +632,10 @@ cx_mat Geom24::der_dirac2(const int& k) const
     return 4*dim_omega*res;
 }
 
-void Geom24::der_dirac2_cout(const int& k) const
-{
-    cout << g2*4*dim_omega*eps[k]*trace(mat[k]).real() << endl;
-    cout << g2*4*dim_omega*dim*mat[k](0,0).real() << endl;
-}
-
 cx_mat Geom24::der_dirac24(const int& k, const bool& herm) const
 {
     return g2*der_dirac2(k) + der_dirac4(k, herm);
 }
-
-
-// old function for trD4
-
-double Geom24::dirac4_old() const
-{
-    double res = 0.;
-    int* i = new int [4];
-
-
-    for(i[3]=0; i[3]<nHL; i[3]++)
-    {
-        for(i[2]=0; i[2]<nHL; i[2]++)
-        {
-            for(i[1]=0; i[1]<=i[2]; i[1]++)
-            {
-                for(i[0]=0; i[0]<=i[3]; i[0]++)
-                {
-                    if(i[0]==i[1] && i[1]==i[2] && i[2]==i[3])
-                    {
-                        // compute matrix products
-                        cx_mat M0M0 = mat[i[0]]*mat[i[0]];
-                        cx_mat M0M0M0 = M0M0*mat[i[0]];
-                        cx_mat M0M0M0M0 = M0M0M0*mat[i[0]];
-
-                        // compute traces
-                        double trM0 = trace(mat[i[0]]).real();
-                        double trM0M0 = trace(M0M0).real();
-                        double trM0M0M0 = trace(M0M0M0).real();
-                        double trM0M0M0M0 = trace(M0M0M0M0).real();
-                        
-                        // add to total
-                        double temp = 0;
-
-                        // tr4 term
-                        temp += dim*2.*trM0M0M0M0;
-
-                        // tr3tr1 term
-                        temp += 8.*eps[i[0]]*trM0M0M0*trM0;
-
-                        // tr2tr2 term
-                        temp += 6.*trM0M0*trM0M0;
-                        
-                        res += dim_omega*temp;
-                    }
-
-
-                    
-                    else if(i[0] == i[3] && i[1] == i[2])
-                    {
-                        // alloc matrix products (trace needed)
-                        cx_mat M0M0 = mat[i[0]]*mat[i[0]];
-                        cx_mat M1M1 = mat[i[1]]*mat[i[1]];
-                        cx_mat M0M1 = mat[i[0]]*mat[i[1]];
-                        cx_mat M1M0M0M1 = mat[i[1]]*M0M0*mat[i[1]];
-                        cx_mat M0M1M0 = M0M1*mat[i[0]];
-                        cx_mat M1M0M1 = mat[i[1]]*M0M1;
-                            
-                        // compute traces
-                        double trM0 = trace(mat[i[0]]).real();
-                        double trM1 = trace(mat[i[1]]).real();
-                        double trM0M0 = trace(M0M0).real();
-                        double trM1M1 = trace(M1M1).real();
-                        double trM0M1 = trace(M0M1).real();
-                        double trM0M1M0 = trace(M0M1M0).real();
-                        double trM1M0M1 = trace(M1M0M1).real();
-                        double trM1M0M0M1 = trace(M1M0M0M1).real();
-                        
-                        // add to total
-                        double temp = 0;
-
-                        // tr4 term
-                        temp += dim*2.*trM1M0M0M1;
-
-                        // tr3tr1 term
-                        temp += 4.*eps[i[0]]*trM1M0M1*trM0;
-                        temp += 4.*eps[i[1]]*trM0M1M0*trM1;
-
-                        // tr2tr2 term
-                        temp += 4.*eps[i[0]]*eps[i[1]]*trM0M1*trM0M1;
-                        temp += 2.*trM0M0*trM1M1;
-                        
-                        res += dim_omega*temp;
-                    }
-                    
-
-                    else
-                    {
-                        cx_double cliff = omega_table_4[i[3] + nHL*(i[2] + nHL*(i[1] + nHL*i[0]))];
-                        
-                        if(cliff.real() != 0. || cliff.imag() != 0.)
-                        {
-                            // compute matrix products
-                            cx_mat M0M1 = mat[i[0]]*mat[i[1]];
-                            cx_mat M0M2 = mat[i[0]]*mat[i[2]];
-                            cx_mat M0M3 = mat[i[0]]*mat[i[3]];
-                            cx_mat M1M2 = mat[i[1]]*mat[i[2]];
-                            cx_mat M1M3 = mat[i[1]]*mat[i[3]];
-                            cx_mat M2M3 = mat[i[2]]*mat[i[3]];
-                            cx_mat M0M1M2 = M0M1*mat[i[2]];
-                            cx_mat M0M1M3 = M0M1*mat[i[3]];
-                            cx_mat M0M2M3 = M0M2*mat[i[3]];
-                            cx_mat M1M2M3 = mat[i[1]]*M2M3;
-                            cx_mat M0M1M2M3 = mat[i[0]]*M1M2M3;
-
-                            // compute traces
-                            cx_double trM0M1M2M3 = trace(M0M1M2M3);
-                            cx_double trM0M1M2 = trace(M0M1M2);
-                            cx_double trM0M1M3 = trace(M0M1M3);
-                            cx_double trM0M2M3 = trace(M0M2M3);
-                            cx_double trM1M2M3 = trace(M1M2M3);
-                            double trM0M1 = trace(M0M1).real();
-                            double trM0M2 = trace(M0M2).real();
-                            double trM0M3 = trace(M0M3).real();
-                            double trM1M2 = trace(M1M2).real();
-                            double trM1M3 = trace(M1M3).real();
-                            double trM2M3 = trace(M2M3).real();
-                            double trM0 = trace(mat[i[0]]).real();
-                            double trM1 = trace(mat[i[1]]).real();
-                            double trM2 = trace(mat[i[2]]).real();
-                            double trM3 = trace(mat[i[3]]).real();
-                            
-
-                            // add to total
-
-                            // tr4 terms
-                            cx_double T1 = trM0M1M2M3 + (double)(eps[i[0]]*eps[i[1]]*eps[i[2]]*eps[i[3]])*conj(trM0M1M2M3);
-                            res += 2.*dim*(cliff*T1).real();
-
-                            // tr3tr1 terms
-
-                            cx_double T3 = (double)(eps[i[3]])*trM0M1M2 + (double)(eps[i[0]]*eps[i[1]]*eps[i[2]])*conj(trM0M1M2);
-                            T3 = trM3*T3;
-
-                            cx_double T4 = (double)(eps[i[2]])*trM0M1M3 + (double)(eps[i[0]]*eps[i[1]]*eps[i[3]])*conj(trM0M1M3);
-                            T3 += trM2*T4;
-
-                            cx_double T5 = (double)(eps[i[1]])*trM0M2M3 + (double)(eps[i[0]]*eps[i[2]]*eps[i[3]])*conj(trM0M2M3);
-                            T3 += trM1*T5;
-
-                            cx_double T6 = (double)(eps[i[0]])*trM1M2M3 + (double)(eps[i[1]]*eps[i[2]]*eps[i[3]])*conj(trM1M2M3);
-                            T3 += trM0*T6;
-
-                            res += 2.*(cliff*T3).real();
-
-                            // tr2tr2 terms
-                            double T7 = trM0M1*trM2M3*(eps[i[0]]*eps[i[1]] + eps[i[2]]*eps[i[3]]);
-                            double T8 = trM0M2*trM1M3*(eps[i[0]]*eps[i[2]] + eps[i[1]]*eps[i[3]]);
-                            double T9 = trM0M3*trM1M2*(eps[i[0]]*eps[i[3]] + eps[i[1]]*eps[i[2]]);
-
-                            res += 2.*cliff.real()*(T7+T8+T9);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    for(i[3]=0; i[3]<nHL; i[3]++)
-    {
-        for(i[1]=0; i[1]<nHL; i[1]++)
-        {
-            for(i[2]=0; i[2]<i[1]; i[2]++)
-            {
-                for(i[0]=0; i[0]<i[3]; i[0]++)
-                {
-                    cx_double cliff = omega_table_4[i[3] + nHL*(i[2] + nHL*(i[1] + nHL*i[0]))];
-                    
-                    if(cliff.real() != 0. || cliff.imag() != 0.)
-                    {
-                        // compute matrix products
-                        cx_mat M0M1 = mat[i[0]]*mat[i[1]];
-                        cx_mat M0M2 = mat[i[0]]*mat[i[2]];
-                        cx_mat M0M3 = mat[i[0]]*mat[i[3]];
-                        cx_mat M1M2 = mat[i[1]]*mat[i[2]];
-                        cx_mat M1M3 = mat[i[1]]*mat[i[3]];
-                        cx_mat M2M3 = mat[i[2]]*mat[i[3]];
-                        cx_mat M0M1M2 = M0M1*mat[i[2]];
-                        cx_mat M0M1M3 = M0M1*mat[i[3]];
-                        cx_mat M0M2M3 = M0M2*mat[i[3]];
-                        cx_mat M1M2M3 = M1M2*mat[i[3]];
-                        cx_mat M0M1M2M3 = mat[i[0]]*M1M2M3;
-
-                        // compute traces
-                        cx_double trM0M1M2M3 = trace(M0M1M2M3);
-                        cx_double trM0M1M2 = trace(M0M1M2);
-                        cx_double trM0M1M3 = trace(M0M1M3);
-                        cx_double trM0M2M3 = trace(M0M2M3);
-                        cx_double trM1M2M3 = trace(M1M2M3);
-                        double trM0M1 = trace(M0M1).real();
-                        double trM0M2 = trace(M0M2).real();
-                        double trM0M3 = trace(M0M3).real();
-                        double trM1M2 = trace(M1M2).real();
-                        double trM1M3 = trace(M1M3).real();
-                        double trM2M3 = trace(M2M3).real();
-                        double trM0 = trace(mat[i[0]]).real();
-                        double trM1 = trace(mat[i[1]]).real();
-                        double trM2 = trace(mat[i[2]]).real();
-                        double trM3 = trace(mat[i[3]]).real();
-                        
-                        // add to total
-
-                        // tr4 terms
-                        cx_double T1 = trM0M1M2M3 + (double)(eps[i[0]]*eps[i[1]]*eps[i[2]]*eps[i[3]])*conj(trM0M1M2M3);
-                        res += dim*2.*(cliff*T1).real();
-
-                        // tr3tr1 terms
-                        cx_double T3 = (double)(eps[i[3]])*trM0M1M2 + (double)(eps[i[0]]*eps[i[1]]*eps[i[2]])*conj(trM0M1M2);
-                        T3 = trM3*T3;
-
-                        cx_double T4 = (double)(eps[i[2]])*trM0M1M3 + (double)(eps[i[0]]*eps[i[1]]*eps[i[3]])*conj(trM0M1M3);
-                        T3 += trM2*T4;
-
-                        cx_double T5 = (double)(eps[i[1]])*trM0M2M3 + (double)(eps[i[0]]*eps[i[2]]*eps[i[3]])*conj(trM0M2M3);
-                        T3 += trM1*T5;
-
-                        cx_double T6 = (double)(eps[i[0]])*trM1M2M3 + (double)(eps[i[1]]*eps[i[2]]*eps[i[3]])*conj(trM1M2M3);
-                        T3 += trM0*T6;
-
-                        res += 2.*(cliff*T3).real();
-
-                        // tr2tr2 terms
-                        double T7 = trM0M1*trM2M3*(eps[i[0]]*eps[i[1]] + eps[i[2]]*eps[i[3]]);
-                        double T8 = trM0M2*trM1M3*(eps[i[0]]*eps[i[2]] + eps[i[1]]*eps[i[3]]);
-                        double T9 = trM0M3*trM1M2*(eps[i[0]]*eps[i[3]] + eps[i[1]]*eps[i[2]]);
-
-                        res += 2.*cliff.real()*(T7+T8+T9);
-                    }
-                }
-            }
-        }
-    }
-
-    delete [] i;
-    return res;
-}
-
-
-
-
-double Geom24::calculate_S_old() const
-{
-    return g2*dirac2() + dirac4_old();
-}
-
-
 
 
 double Geom24::delta2(const int& x, const int& I, const int& J, const cx_double& z)
@@ -1696,7 +664,7 @@ double Geom24::delta4(const int& x, const int& I, const int& J, const cx_double&
             {
                 cx_double cliff = omega_table_4[x + nHL*(i3 + nHL*(i2 + nHL*i1))];
 
-                if(cliff.real() != 0. || cliff.imag() != 0.)
+                if(fabs(cliff.real()) < 1e-10 || fabs(cliff.imag()) < 1e-10)
                 {
                     // compute necessary matrix products
                     cx_mat M1M2 = mat[i1]*mat[i2];
@@ -1940,61 +908,211 @@ double Geom24::delta24(const int& x, const int& I, const int& J, const cx_double
     return g2*delta2(x,I,J,z)+delta4(x,I,J,z);
 }
 
-
-
-void Geom24::delta24_debug(const double& scale, const int& iter, gsl_rng* engine, ostream& out_s)
+double Geom24::dirac2() const
 {
-    // iter iterations
-    for(int i=0; i<iter; ++i)
+    double res = 0.;
+    for(int i=0; i<nHL; ++i)
     {
-        // find Si
-        shuffle(engine);
-        //double Si_1 = dirac2();
-        //double Si_1 = dirac4();
-        double Si_1 = calculate_S();
-        
-        // aandom move
-        int x = nHL*gsl_rng_uniform(engine);
-        int I = dim*gsl_rng_uniform(engine);
-        int J = dim*gsl_rng_uniform(engine);
-        double re = 0;
-        double im = 0;
-        cx_double z;
-        if(I != J)
-        {
-            re = scale*(-1.+2.*gsl_rng_uniform(engine));
-            im = scale*(-1.+2.*gsl_rng_uniform(engine));
-            z = cx_double(re, im);
-        }
-        else
-        {
-            re = scale*(-1.+2.*gsl_rng_uniform(engine));
-            z = cx_double(re, 0);
-        }
+        double tr2 = trace(mat[i]*mat[i]).real();
+        double tr1 = trace(mat[i]).real();
 
-        //double dS = delta2(x, I, J, z);
-        //double dS = delta4(x, I, J, z);
-        double dS = delta24(x, I, J, z);
-
-        bool diag = true;
-        // update matrix element
-        if(I != J)
-        {
-            mat[x](I,J) += z;
-            mat[x](J,I) += conj(z);
-            diag = false;
-        }
-        else
-            mat[x](I,I) += 2.*z;
-        
-        // find Sf
-        //double Sf_1 = dirac2();
-        //double Sf_1 = dirac4();
-        double Sf_1 = calculate_S();
-
-    
-        // print S
-        out_s.precision(16);
-        out_s << Si_1 << " " << Sf_1 << " " << Sf_1-Si_1 << " " << dS << " " << Sf_1-Si_1-dS << " " << diag << endl; 
+        res += (dim*tr2 + eps[i]*tr1*tr1);
     }
+
+    return 2.*dim_omega*res;
+}
+
+double Geom24::compute_A4(const int& i1, const int& i2, const int& i3, const int& i4) const
+{
+    // epsilon factor
+    int e = eps[i1]*eps[i2]*eps[i3]*eps[i4];
+
+    // if e=-1, then [1+*e] becomes 2i*imag
+    // and the clifford part is guaranteed to
+    // be pure imaginary
+    if(e<0)
+    {
+        // clifford product
+        double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))].imag(); 
+
+        if(fabs(cliff) < 1e-10)
+        {
+            // base matrix products
+            cx_mat M1M2 = mat[i1]*mat[i2];
+            cx_mat M1M3 = mat[i1]*mat[i3];
+            cx_mat M1M4 = mat[i1]*mat[i4];
+            cx_mat M2M3 = mat[i2]*mat[i3];
+            cx_mat M2M4 = mat[i2]*mat[i4];
+            cx_mat M3M4 = mat[i3]*mat[i4];
+
+            // traces
+            double tr1234 = trace(M1M2*M3M4).imag();
+            double tr234 = trace(M2M3*mat[i4]).imag();
+            double tr134 = trace(M1M3*mat[i4]).imag();
+            double tr124 = trace(M1M2*mat[i4]).imag();
+            double tr123 = trace(M1M2*mat[i3]).imag();
+            double tr1 = trace(mat[i1]).real();
+            double tr2 = trace(mat[i2]).real();
+            double tr3 = trace(mat[i3]).real();
+            double tr4 = trace(mat[i4]).real();
+            
+            // compute sum
+            double res = dim*tr1234;
+            res += eps[i1]*tr1*tr234;
+            res += eps[i2]*tr2*tr134;
+            res += eps[i3]*tr3*tr124;
+            res += eps[i4]*tr4*tr123;
+
+            return -2*cliff*res;
+            // NOTE: this minus here comes from the i in cliff
+            // and the i coming from 2i*imag
+        }
+        else
+            return 0.;
+    }
+    else
+    {
+        // clifford product
+        double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))].real(); 
+
+        if(fabs(cliff) < 1e-10)
+        {
+            // base matrix products
+            cx_mat M1M2 = mat[i1]*mat[i2];
+            cx_mat M1M3 = mat[i1]*mat[i3];
+            cx_mat M1M4 = mat[i1]*mat[i4];
+            cx_mat M2M3 = mat[i2]*mat[i3];
+            cx_mat M2M4 = mat[i2]*mat[i4];
+            cx_mat M3M4 = mat[i3]*mat[i4];
+
+            // traces
+            double tr1234 = trace(M1M2*M3M4).real();
+            double tr234 = trace(M2M3*mat[i4]).real();
+            double tr134 = trace(M1M3*mat[i4]).real();
+            double tr124 = trace(M1M2*mat[i4]).real();
+            double tr123 = trace(M1M2*mat[i3]).real();
+            double tr12 = trace(M1M2).real();
+            double tr34 = trace(M3M4).real();
+            double tr13 = trace(M1M3).real();
+            double tr24 = trace(M2M4).real();
+            double tr14 = trace(M1M4).real();
+            double tr23 = trace(M2M3).real();
+            double tr1 = trace(mat[i1]).real();
+            double tr2 = trace(mat[i2]).real();
+            double tr3 = trace(mat[i3]).real();
+            double tr4 = trace(mat[i4]).real();
+
+
+            double res = dim*tr1234;
+            res += eps[i1]*tr1*tr234;
+            res += eps[i2]*tr2*tr134;
+            res += eps[i3]*tr3*tr124;
+            res += eps[i4]*tr4*tr123;
+            res += eps[i1]*eps[i2]*tr12*tr34;
+            res += eps[i1]*eps[i3]*tr13*tr24;
+            res += eps[i1]*eps[i4]*tr14*tr23;
+
+            double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))].real(); 
+
+            return 2*cliff*res;
+        }
+        else
+            return 0.;
+    }
+}
+
+double Geom24::compute_A2(const int& i1, const int& i2) const
+{
+    // clifford product
+    double cliff = omega_table_4[i2 + nHL*(i1 + nHL*(i2 + nHL*i1))].real();
+
+    // base matrix products
+    cx_mat M1M1 = mat[i1]*mat[i1];
+    cx_mat M2M2 = mat[i2]*mat[i2];
+    cx_mat M1M2 = mat[i1]*mat[i2];
+
+    // traces
+    double tr1122 = trace(M1M1*M2M2).real();
+    double tr1212 = trace(M1M2*M1M2).real();
+    double tr122 = trace(M1M2*mat[i2]).real();
+    double tr112 = trace(M1M1*mat[i2]).real();
+    double tr11 = trace(M1M1).real();
+    double tr22 = trace(M2M2).real();
+    double tr12 = trace(M1M2).real();
+    double tr1 = trace(mat[i1]).real();
+    double tr2 = trace(mat[i2]).real();
+    
+    
+    if(cliff < 0)
+    {
+        // compute sum
+        double res = dim*(2*tr1122 - tr1212);
+        res += 2*eps[i1]*tr1*tr122;
+        res += 2*eps[i2]*tr2*tr112;
+        res += tr11*tr22;
+        res += 2*eps[i1]*eps[i2]*tr12*tr12;
+
+        return 2*dim_omega*res;
+    }
+    else
+    {
+        // compute sum
+        double res = dim*(2*tr1122 + tr1212);
+        res += 6*eps[i1]*tr1*tr122;
+        res += 6*eps[i2]*tr2*tr112;
+        res += 3*tr11*tr22;
+        res += 6*eps[i1]*eps[i2]*tr12*tr12;
+
+        return 2*dim_omega*res;
+    }
+}
+
+double Geom24::compute_A(const int& i) const
+{
+    // base matrix products
+    cx_mat M2 = mat[i]*mat[i];
+    cx_mat M3 = M2*mat[i];
+
+    // traces
+    double tr1 = trace(mat[i]).real();
+    double tr2 = trace(M2).real();
+    double tr3 = trace(M3).real();
+    double tr4 = trace(M3*mat[i]).real();
+
+    double res = dim*tr4;
+    res += 4*eps[i]*tr1*tr3;
+    res += 3*tr2*tr2;
+
+    return 2*dim_omega*res;
+}
+
+double Geom24::dirac4() const
+{
+    double res = 0.;
+
+    // four distinct indices
+    for(int i=0; i<nHL; ++i)
+    {
+        for(int j=i+1; j<nHL; ++j)
+        {
+            for(int k=j+1; k<nHL; ++k)
+            {
+                for(int l=k+1; l<nHL; ++l)
+                    res += 8*(compute_A4(i,j,k,l)+compute_A4(i,j,l,k)+compute_A4(i,k,j,l));
+            }
+        }
+    }
+
+    // two distinct pairs of equal indices
+    for(int i=0; i<nHL; ++i)
+    {
+        for(int j=i+1; j<nHL; ++j)
+            res += 2*compute_A2(i,j);
+    }
+
+    // all indices equal
+    for(int i=0; i<nHL; ++i)
+        res += compute_A(i);
+
+    return res;
 }

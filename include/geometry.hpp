@@ -49,38 +49,21 @@ class Geom24
         arma::cx_mat build_dirac() const;
         double dirac2() const;
         double dirac4() const;
-        double dirac4_old() const; // DEPRECATED
         double compute_A4(const int&, const int&, const int&, const int&) const;
         double compute_A2(const int&, const int&) const;
         double compute_A(const int&) const;
         double calculate_S() const; // using H and L decomposition
-        double calculate_S_old() const; // DEPRECATED using H and L decomposition
         double calculate_S_from_dirac() const; // using whole Dirac operator
         // ============== ACTION METHODS
         
 
         // ============== DERIVATIVE METHODS
         arma::cx_mat compute_B4(const int&, const int&, const int&, const int&, const double&, const bool&) const;
-        void compute_B4_cout(const int&, const int&, const int&, const int&, const double&, const bool&) const;
-        arma::cx_mat compute_B4_bruteforce(const int&, const int&, const int&, const int&, const arma::cx_double&, const int&) const;
-        arma::cx_mat compute_B4_explicit(const int&, const int&, const int&, const int&, const bool&) const;
         arma::cx_mat compute_B2(const int&, const int&) const;
-        void compute_B2_cout(const int&, const int&) const;
-        arma::cx_mat compute_B2_iik_explicit(const int&, const int&) const;
-        arma::cx_mat compute_B2_iki_explicit(const int&, const int&) const;
         arma::cx_mat compute_B(const int&) const;
-        void compute_B_cout(const int&) const;
         arma::cx_mat der_dirac4(const int&, const bool&) const;
-        void der_dirac4_cout(const int&) const;
-        arma::cx_mat der_dirac4_bruteforce(const int&, const bool&) const;
-        arma::cx_mat der_dirac4_explicit(const int&, const bool&) const;
         arma::cx_mat der_dirac2(const int&) const;
-        void der_dirac2_cout(const int&) const;
         arma::cx_mat der_dirac24(const int&, const bool&) const;
-        arma::cx_mat debug_2equal(const int&) const;
-        arma::cx_mat debug_2equal_explicit(const int&) const;
-        arma::cx_mat debug_4different_explicit(const int&) const;
-        arma::cx_mat debug_4different(const int&) const;
         // ============== DERIVATIVE METHODS
 
         // ============== HAMILTONIAN METHODS
@@ -88,32 +71,22 @@ class Geom24
         double calculate_K() const;
         double calculate_H() const;
         void leapfrog(const int&, const double&);
-        void leapfrog(const int&, const double&, const int&);
-        double HMC_fix_core(const int&, const double&, gsl_rng*, double*, double*);
-        double HMC_fix(const int&, double&, const int&, const int&, const int&, gsl_rng*, std::ostream&, std::ostream&, const double&, const double& =0.05, const double& =0.75, const int& =10);
-        double HMC_fix(const int&, double&, const int&, const int&, const int&, gsl_rng*, std::ostream&, const double&, const double& =0.05, const double& =0.75, const int& =10);
-        double HMC_fix(const int&, double&, const int&, const int&, gsl_rng*, const double&, const double& =0.05, const double& =0.75, const int& =10);
-        double HMC_fix(const int&, const double&, const int&, const int&, const int&, gsl_rng*, std::ostream&, std::ostream&);
-        double HMC_fix(const int&, const double&, const int&, const int&, const int&, gsl_rng*, std::ostream&);
-        double HMC_fix(const int&, const double&, const int&, const int&, gsl_rng*);
-        double HMC_rand_core(const int&, const int&, const double&, const double&, gsl_rng*, double*, double*);
-        double HMC_rand(const int&, const int&, const double&, const double&, const int&, const int&, const int&, gsl_rng*, std::ostream&, std::ostream&);
-        double HMC_rand(const int&, const int&, const double&, const double&, const int&, const int&, const int&, gsl_rng*, std::ostream&);
-        double HMC_rand(const int&, const int&, const double&, const double&, const int&, const int&, gsl_rng*);
+        double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*);
+        void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&);
+        double HMC_core(const int&, const double&, gsl_rng*, double*, double*);
+        double HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*);
+        double HMC(const int&, const double&, const int&, gsl_rng*);
+        double HMC(const int&, const double&, const double&, const int&, gsl_rng*);
         // ============== HAMILTONIAN METHODS
         
         // ============== METROPOLIS METHODS
         double delta2(const int&, const int&, const int&, const arma::cx_double&);
         double delta4(const int&, const int&, const int&, const arma::cx_double&);
         double delta24(const int&, const int&, const int&, const arma::cx_double&);
+        double MMC_duav_core(const double&, gsl_rng*, double*, double*);
+        void MMC_duav(double&, const int&, gsl_rng* engine, const double&);
         double MMC_core(const double&, gsl_rng*, double*, double*);
-        double MMC(double&, const int&, const int&, const int&, gsl_rng* engine, std::ostream&, std::ostream&, const double&, const double& =0.05, const double& =0.75, const int& =10);
-        double MMC(double&, const int&, const int&, const int&, gsl_rng* engine, std::ostream&, const double&, const double& =0.05, const double& =0.75, const int& =10);
-        double MMC(double&, const int&, const int&, gsl_rng* engine, const double&, const double& =0.05, const double& =0.75, const int& =10);
-        double MMC(const double&, const int&, const int&, const int&, gsl_rng* engine, std::ostream&, std::ostream&);
-        double MMC(const double&, const int&, const int&, const int&, gsl_rng* engine, std::ostream&);
-        double MMC(const double&, const int&, const int&, gsl_rng* engine);
-        void delta24_debug(const double&, const int&, gsl_rng*, std::ostream&);
+        double MMC(const double&, const int&, gsl_rng* engine);
         // ============== METROPOLIS METHODS
         
         void derived_parameters();
