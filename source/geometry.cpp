@@ -252,6 +252,24 @@ ostream& operator<<(ostream& out, const Geom24& G)
     return out;
 }
 
+void Geom24::print_S(ostream& out) const
+{
+    out << dirac2() << " " << dirac4();
+}
+
+void Geom24::print_HL(ostream& out) const
+{
+    for(int i=0; i<nHL; ++i)
+    {
+        for(int j=0; j<dim; ++j)
+        {
+            for(int k=j; k<dim; ++k)
+                out << mat[i](j,k).real() << " " << mat[i](j,k).imag() << " ";
+        }
+        out << endl;
+    }
+}
+
 void Geom24::shuffle(gsl_rng* engine)
 {
     for(int i=0; i<nHL; i++)
@@ -273,14 +291,22 @@ istream& Geom24::read_mat(istream& in)
             // loop on indices
             for(int j=0; j<dim; ++j)
             {
-                for(int k=0; k<dim; ++k)
+                for(int k=j; k<dim; ++k)
                 {
                     double x, y;
                     in >> x >> y;
-                    mat[i](j,k) = cx_double(x, y);
+                    
+                    if(j != k)
+                    {
+                        mat[i](j,k) = cx_double(x, y);
+                        mat[i](k,j) = cx_double(x, -y);
+                    }
+                    else
+                        mat[i](j,j) = cx_double(x, 0.);
                 }
             }
         }
+
          
         // clear input stream state
         in.clear();

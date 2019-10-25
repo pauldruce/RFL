@@ -91,12 +91,14 @@ class Geom24
         
         void derived_parameters();
         void shuffle(gsl_rng*);
-        std::istream& read_mat(std::istream& in);
+        std::istream& read_mat(std::istream&);
         void reverse_mom();
         void init_omega_table_4();
         void print_omega_table_4() const;
+        void print_S(std::ostream&) const;
+        void print_HL(std::ostream&) const;
         void adjust();
-        std::istream& read_parameters(std::istream& in);
+        std::istream& read_parameters(std::istream&);
 
 
 
