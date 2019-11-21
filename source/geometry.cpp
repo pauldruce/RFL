@@ -429,11 +429,14 @@ void Geom24::sample_mom(gsl_rng* engine)
 {
     for(int i=0; i<nHL; ++i)
     {
-        cx_mat temp(dim, dim);
-        temp.imbue( [&engine](){ return cx_double(gsl_ran_gaussian(engine, 1.), gsl_ran_gaussian(engine, 1.)); } );
-
-        mom[i] = (temp+temp.t())/2.;
+        mom[i].imbue( [&engine](){ return cx_double(gsl_ran_gaussian(engine, 1.), gsl_ran_gaussian(engine, 1.)); } );
+        mom[i] = (mom[i]+mom[i])/2.;
     }
+}
+
+cx_mat herm_der(const cx_mat& M)
+{
+    return 2*M-diagmat(M);
 }
 
 double Geom24::calculate_K() const
@@ -476,7 +479,8 @@ cx_mat Geom24::compute_B4(const int& k, const int& i2, const int& i3, const int&
         res += eps[i3]*tr3*iu*(M2M4 - M2M4.t());
         res += eps[i4]*tr4*iu*(M2M3 - M2M3.t());
 
-        return cliff*res.st();
+        //return cliff*res.st();
+        return cliff*res;
     }
     else
     {
@@ -506,7 +510,8 @@ cx_mat Geom24::compute_B4(const int& k, const int& i2, const int& i3, const int&
         res += 2*eps[k]*eps[i3]*tr24*mat[i3];
         res += 2*eps[k]*eps[i4]*tr23*mat[i4];
 
-        return cliff*res.st();
+        //return cliff*res.st();
+        return cliff*res;
     }
 }
 
@@ -540,7 +545,8 @@ cx_mat Geom24::compute_B2(const int& k, const int& i) const
         res += eps[k]*trk*MiMi;
         res += trii*mat[k];
 
-        return 2*dim_omega*res.st();
+        //return 2*dim_omega*res.st();
+        return 2*dim_omega*res;
     }
     else
     {
@@ -553,7 +559,8 @@ cx_mat Geom24::compute_B2(const int& k, const int& i) const
         res += 3*eps[k]*trk*MiMi;
         res += 3*trii*mat[k];
 
-        return 2*dim_omega*res.st();
+        //return 2*dim_omega*res.st();
+        return 2*dim_omega*res;
     }
 }
 
@@ -574,7 +581,8 @@ cx_mat Geom24::compute_B(const int& k) const
     res += 3*tr2*mat[k];
     res += 3*eps[k]*tr1*M2;
 
-    return 2*dim_omega*res.st();
+    //return 2*dim_omega*res.st();
+    return 2*dim_omega*res;
 }
 
 cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
@@ -604,7 +612,7 @@ cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
                                 double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].imag(); 
                                 double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].imag(); 
 
-                                if(fabs(cliff1) < 1e-10)
+                                if(fabs(cliff1) > 1e-10)
                                 {
                                     cx_mat temp = compute_B4(k,i1,i2,i3, cliff1, true) + compute_B4(k,i1,i3,i2, cliff2, true) + compute_B4(k,i2,i1,i3, cliff3, true);
                                     res += temp + temp.t();
@@ -617,7 +625,7 @@ cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
                                 double cliff2 = omega_table_4[i2 + nHL*(i3 + nHL*(i1 + nHL*k))].real(); 
                                 double cliff3 = omega_table_4[i3 + nHL*(i1 + nHL*(i2 + nHL*k))].real(); 
 
-                                if(fabs(cliff1) < 1e-10)
+                                if(fabs(cliff1) > 1e-10)
                                 {
                                     cx_mat temp = compute_B4(k,i1,i2,i3, cliff1, false) + compute_B4(k,i1,i3,i2, cliff2, false) + compute_B4(k,i2,i1,i3, cliff3, false);
                                     res += temp + temp.t();
@@ -653,7 +661,8 @@ cx_mat Geom24::der_dirac2(const int& k) const
     cx_mat res(dim, dim, fill::eye);
 
     res *= eps[k]*trace(mat[k]).real();
-    res += dim*mat[k].st();
+    //res += dim*mat[k].st();
+    res += dim*mat[k];
 
     return 4*dim_omega*res;
 }
