@@ -14,22 +14,17 @@ void Geom24::leapfrog(const int& Nt, const double& dt)
 {
     for(int i=0; i<nHL; ++i)
         mat[i] += (dt/2.)*mom[i];
-        //mat[i] += (dt/2.)*mom[i].st();
 
     for(int j=0; j<Nt-1; ++j)
     {
         for(int i=0; i<nHL; ++i)
-        {
-            mom[i] += -dt*der_dirac24(i, true);
-            //mat[i] += dt*mom[i].st();
+            mom[i] += -dt*der_dirac4(i, true);
+        for(int i=0; i<nHL; ++i)
             mat[i] += dt*mom[i];
-        }
     }
     
     for(int i=0; i<nHL; ++i)
-    {
         mom[i] += -dt*der_dirac24(i, true);
-        //mat[i] += (dt/2.)*mom[i].st();
+    for(int i=0; i<nHL; ++i)
         mat[i] += (dt/2.)*mom[i];
-    }
 }

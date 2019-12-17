@@ -49,6 +49,7 @@ class Geom24
         arma::cx_mat build_dirac() const;
         double dirac2() const;
         double dirac4() const;
+        void dirac4_literal(const int&, std::ostream&) const;
         double compute_A4(const int&, const int&, const int&, const int&) const;
         double compute_A2(const int&, const int&) const;
         double compute_A(const int&) const;
@@ -62,6 +63,8 @@ class Geom24
         arma::cx_mat compute_B2(const int&, const int&) const;
         arma::cx_mat compute_B(const int&) const;
         arma::cx_mat der_dirac4(const int&, const bool&) const;
+        arma::cx_mat der_dirac4_bruteforce(const int&) const;
+        void der_dirac4_literal(const int&, std::ostream&) const;
         arma::cx_mat der_dirac2(const int&) const;
         arma::cx_mat der_dirac24(const int&, const bool&) const;
         // ============== DERIVATIVE METHODS
@@ -153,6 +156,6 @@ class Geom24
 
 std::vector<int> base_conversion(int dec, const int& base, const int& max);
 std::ostream& operator<<(std::ostream& out, const Geom24& C);
-
+arma::cx_mat herm_der(const arma::cx_mat&);
 
 #endif

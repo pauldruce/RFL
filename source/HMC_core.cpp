@@ -8,7 +8,7 @@ using namespace arma;
 double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, double* en_i, double* en_f)
 {
     // acceptance probability (return value)
-    double e;
+    double e = 1;
     
     // resample momentum
     sample_mom(engine);
@@ -68,8 +68,6 @@ double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, d
             }
         }
     }
-    else
-        e = 1;
 
     delete [] mat_bk;
 
@@ -79,7 +77,7 @@ double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, d
 double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double* en_i, double* en_f)
 {
     // acceptance probability (return value)
-    double ret = 1;
+    double e = 1;
     
     // resample momentum
     sample_mom(engine);
@@ -109,7 +107,7 @@ double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double
     // so first of all address this case
     if(std::isnan(en_f[3]))
     {
-        ret = 0;
+        e = 0;
         // restore old configuration
         for(int j=0; j<nHL; ++j)
         {
@@ -124,11 +122,10 @@ double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double
     else if(en_f[3] > en_i[3])
     {
         double r = gsl_rng_uniform(engine);
-        double e = exp(en_i[3]-en_f[3]);
+        e = exp(en_i[3]-en_f[3]);
 
         if(r > e)
         {
-            ret = 0;
             // restore old configuration
             for(int j=0; j<nHL; ++j)
             {
@@ -143,14 +140,14 @@ double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double
 
     delete [] mat_bk;
 
-    return ret;
+    return e;
 }
 
 
 double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_max, gsl_rng* engine, double* en_i, double* en_f)
 {
     // acceptance probability (return value)
-    double ret = 1;
+    double e = 1;
     
     // resample momentum
     sample_mom(engine);
@@ -183,7 +180,7 @@ double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_ma
     // so first of all address this case
     if(std::isnan(en_f[3]))
     {
-        ret = 0;
+        e = 0;
         // restore old configuration
         for(int j=0; j<nHL; ++j)
         {
@@ -198,11 +195,10 @@ double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_ma
     else if(en_f[3] > en_i[3])
     {
         double r = gsl_rng_uniform(engine);
-        double e = exp(en_i[3]-en_f[3]);
+        e = exp(en_i[3]-en_f[3]);
 
         if(r > e)
         {
-            ret = 0;
             // restore old configuration
             for(int j=0; j<nHL; ++j)
             {
@@ -217,6 +213,6 @@ double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_ma
 
     delete [] mat_bk;
 
-    return ret;
+    return e;
 }
 

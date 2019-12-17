@@ -272,6 +272,7 @@ void Geom24::print_HL(ostream& out) const
 
 void Geom24::shuffle(gsl_rng* engine)
 {
+    /*
     for(int i=0; i<nHL; i++)
     {
         cx_mat temp(dim, dim);
@@ -279,6 +280,57 @@ void Geom24::shuffle(gsl_rng* engine)
 
         mat[i] = (temp+temp.t())/(2*dim*dim);
     }
+    */
+    
+    /*
+    for(int i=0; i<nHL; ++i)
+    {
+        mat[i].eye(dim, dim);
+        mom[i].eye(dim, dim);
+    }
+    */
+   
+    
+    for(int i=0; i<nHL; ++i)
+    {
+        // loop on indices
+        for(int j=0; j<dim; ++j)
+        {
+            double x;
+            x = gsl_ran_gaussian(engine, 1.);
+            mat[i](j,j) = cx_double(x, 0.);
+            
+            for(int k=j+1; k<dim; ++k)
+            {
+                double a, b;
+                a = gsl_ran_gaussian(engine, 1.);
+                b = gsl_ran_gaussian(engine, 1.);
+                mat[i](j,k) = cx_double(a, b)/sqrt(2.);
+                mat[i](k,j) = cx_double(a, -b)/sqrt(2.);
+            }
+        }
+    }
+    
+    for(int i=0; i<nHL; ++i)
+    {
+        // loop on indices
+        for(int j=0; j<dim; ++j)
+        {
+            double x;
+            x = gsl_ran_gaussian(engine, 1.);
+            mom[i](j,j) = cx_double(x, 0.);
+            
+            for(int k=j+1; k<dim; ++k)
+            {
+                double a, b;
+                a = gsl_ran_gaussian(engine, 1.);
+                b = gsl_ran_gaussian(engine, 1.);
+                mom[i](j,k) = cx_double(a, b)/sqrt(2.);
+                mom[i](k,j) = cx_double(a, -b)/sqrt(2.);
+            }
+        }
+    }
+    
 }
 
 istream& Geom24::read_mat(istream& in)
@@ -427,11 +479,37 @@ double Geom24::calculate_S() const
 
 void Geom24::sample_mom(gsl_rng* engine)
 {
+    
     for(int i=0; i<nHL; ++i)
     {
-        mom[i].imbue( [&engine](){ return cx_double(gsl_ran_gaussian(engine, 1.), gsl_ran_gaussian(engine, 1.)); } );
-        mom[i] = (mom[i]+mom[i])/2.;
+        // loop on indices
+        for(int j=0; j<dim; ++j)
+        {
+            double x;
+            x = gsl_ran_gaussian(engine, 1.);
+            mom[i](j,j) = cx_double(x, 0.);
+            
+            for(int k=j+1; k<dim; ++k)
+            {
+                double a, b;
+                a = gsl_ran_gaussian(engine, 1.);
+                b = gsl_ran_gaussian(engine, 1.);
+                mom[i](j,k) = cx_double(a, b)/sqrt(2.);
+                mom[i](k,j) = cx_double(a, -b)/sqrt(2.);
+            }
+        }
     }
+    
+    
+    /*
+    for(int i=0; i<nHL; ++i)
+    {
+        cx_mat temp(dim, dim);
+        temp.imbue( [&engine](){ return cx_double(gsl_ran_gaussian(engine, 1.), gsl_ran_gaussian(engine, 1.)); } );
+
+        mom[i] = (temp+temp.t())/2.;
+    }
+    */
 }
 
 cx_mat herm_der(const cx_mat& M)
@@ -654,6 +732,108 @@ cx_mat Geom24::der_dirac4(const int& k, const bool& herm) const
     else
         return 4*res;
 
+}
+
+cx_mat Geom24::der_dirac4_bruteforce(const int& a) const
+{
+    cx_mat res(dim, dim, fill::zeros);
+    
+    for(int b=0; b<nHL; ++b)
+    {
+        for(int c=0; c<nHL; ++c)
+        {
+            for(int d=0; d<nHL; ++d)
+            {
+                // epsilon factor
+                double e = eps[a]*eps[b]*eps[c]*eps[d];
+
+                // clifford product
+                cx_double cliff = omega_table_4[d + nHL*(c + nHL*(b + nHL*a))]; 
+                
+                if(fabs(cliff.real()) > 1e-10 || fabs(cliff.imag()) > 1e-10)
+                {
+                    // base matrix products
+                    cx_mat MbMc = mat[b]*mat[c];
+                    cx_mat MbMd = mat[b]*mat[d];
+                    cx_mat McMd = mat[c]*mat[d];
+                    cx_mat MbMcMd = MbMc*mat[d];
+
+                    // traces
+                    cx_double trbcd = trace(MbMcMd);
+                    cx_double trbc = trace(MbMc);
+                    cx_double trbd = trace(MbMd);
+                    cx_double trcd = trace(McMd);
+                    cx_double trb = trace(mat[b]);
+                    cx_double trc = trace(mat[c]);
+                    cx_double trd = trace(mat[d]);
+
+                    // compute sum
+                    cx_mat temp(dim ,dim, fill::eye);
+                    temp *= double(eps[a])*(trbcd + e*conj(trbcd));
+
+                    temp += double(dim)*(MbMcMd + e*MbMcMd.t());
+
+                    temp += double(eps[b])*trb*(McMd + e*McMd.t());
+                    temp += double(eps[c])*trc*(MbMd + e*MbMd.t());
+                    temp += double(eps[d])*trd*(MbMc + e*MbMc.t());
+                    
+                    temp += double(eps[a]*eps[b])*trcd*mat[b];
+                    temp += double(eps[a]*eps[c])*trbd*mat[c];
+                    temp += double(eps[a]*eps[d])*trbc*mat[d];
+
+                    // add
+                    res += cliff*temp;
+                }
+            }
+        }
+    }
+
+    return 2.*(res+res.t());
+}
+
+void Geom24::der_dirac4_literal(const int& a, ostream& out) const
+{
+    for(int b=0; b<nHL; ++b)
+    {
+        for(int c=0; c<nHL; ++c)
+        {
+            for(int d=0; d<nHL; ++d)
+            {
+                // epsilon factor
+                double e = eps[a]*eps[b]*eps[c]*eps[d];
+
+                // clifford product
+                cx_double cliff = omega_table_4[d + nHL*(c + nHL*(b + nHL*a))]; 
+                out << "{{" << a << b << c << d << "}}" << cliff << endl;
+
+                if(fabs(cliff.real()) > 1e-10 || fabs(cliff.imag()) > 1e-10)
+                {
+                    out << cliff << "*{" << endl;
+                    
+                    out << eps[a] << "*[ Tr(M" << b << "M" << c << "M" << d << ") + "
+                        << e << "*Tr(M" << d << "M" << c << "M" << b << ") ]*I" << endl;
+
+                    out << "n*[ M" << b << "M" << c << "M" << d << " + "
+                        << e << "*M" << d << "M" << c << "M" << b << " ]" << endl;
+
+                    out << eps[b] << "*Tr(M" << b << ")*[ M" << c << "M" << d << " + "
+                        << e << "*M" << d << "M" << c << " ]" << endl;
+                    
+                    out << eps[c] << "*Tr(M" << c << ")*[ M" << b << "M" << d << " + "
+                        << e << "*M" << d << "M" << b << " ]" << endl;
+                    
+                    out << eps[d] << "*Tr(M" << d << ")*[ M" << b << "M" << c << " + "
+                        << e << "*M" << c << "M" << b << " ]" << endl;
+                    
+                    out << eps[a] << "*" << eps[b] << "*" << "(1+" << e << ")*Tr(M" << c << "M" << d << ")*[ M" << b << " ]" << endl;
+                    out << eps[a] << "*" << eps[c] << "*" << "(1+" << e << ")*Tr(M" << b << "M" << d << ")*[ M" << c << " ]" << endl;
+                    out << eps[a] << "*" << eps[d] << "*" << "(1+" << e << ")*Tr(M" << b << "M" << c << ")*[ M" << d << " ]" << endl;
+                    
+                    out << "}" << endl;
+                }
+            }
+        }
+    }
 }
 
 cx_mat Geom24::der_dirac2(const int& k) const
@@ -1150,4 +1330,56 @@ double Geom24::dirac4() const
         res += compute_A(i);
 
     return res;
+}
+
+void Geom24::dirac4_literal(const int& k, ostream& out) const
+{
+    // four distinct indices
+    for(int i1=0; i1<nHL; ++i1)
+    {
+        for(int i2=0; i2<nHL; ++i2)
+        {
+            for(int i3=0; i3<nHL; ++i3)
+            {
+                for(int i4=0; i4<nHL; ++i4)
+                {
+                    if(i1 == k || i2 == k || i3 == k || i4 == k)
+                    {
+                        // epsilon factor
+                        double e = eps[i1]*eps[i2]*eps[i3]*eps[i4];
+
+                        // clifford product
+                        cx_double cliff = omega_table_4[i4 + nHL*(i3 + nHL*(i2 + nHL*i1))]; 
+                        out << "{{" << i1 << i2 << i3 << i4 << "}}" << cliff << endl;
+
+                        if(fabs(cliff.real()) > 1e-10 || fabs(cliff.imag()) > 1e-10)
+                        {
+                            out << cliff << "*{" << endl;
+                            
+                            out << "n*[ Tr(M" << i1 << "M" << i2 << "M" << i3 << "M" << i4 << ") + "
+                                << e << "*Tr(M" << i4 << "M" << i3 << "M" << i2 << "M" << i1 << ") ]" << endl;
+                            
+                            out << eps[i1] << "*Tr(M" << i1 << ")*[ M" << i2 << "M" << i3 << "M" << i4 << " + "
+                                << e << "*M" << i4 << "M" << i3 << "M" << i2 << " ]" << endl;
+                            
+                            out << eps[i2] << "*Tr(M" << i2 << ")*[ M" << i1 << "M" << i3 << "M" << i4 << " + "
+                                << e << "*M" << i4 << "M" << i3 << "M" << i1 << " ]" << endl;
+
+                            out << eps[i3] << "*Tr(M" << i3 << ")*[ M" << i1 << "M" << i2 << "M" << i4 << " + "
+                                << e << "*M" << i4 << "M" << i2 << "M" << i1 << " ]" << endl;
+
+                            out << eps[i4] << "*Tr(M" << i4 << ")*[ M" << i1 << "M" << i2 << "M" << i3 << " + "
+                                << e << "*M" << i3 << "M" << i2 << "M" << i1 << " ]" << endl;
+
+                            out << eps[i1] << "*" << eps[i2] << "*" << "(1+" << e << ")*Tr(M" << i1 << "M" << i2 << ")*Tr(M" << i3 << "M" << i4 << ")" << endl;
+                            out << eps[i1] << "*" << eps[i3] << "*" << "(1+" << e << ")*Tr(M" << i1 << "M" << i3 << ")*Tr(M" << i2 << "M" << i4 << ")" << endl;
+                            out << eps[i1] << "*" << eps[i4] << "*" << "(1+" << e << ")*Tr(M" << i1 << "M" << i4 << ")*Tr(M" << i2 << "M" << i3 << ")" << endl;
+                            
+                            out << "}" << endl;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
