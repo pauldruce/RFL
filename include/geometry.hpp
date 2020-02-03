@@ -41,32 +41,31 @@ class Geom24
 
         // ============== SET METHODS
         void mult_mat(const int& i, const double& d) { mat[i] *= d; }
+        void set_mat(const int& i, const arma::cx_mat& m) { mat[i] = m; }
+        void set_mom(const int& i, const arma::cx_mat& m) { mom[i] = m; }
         // ============== SET METHODS
 
         
 
         // ============== ACTION METHODS
         arma::cx_mat build_dirac() const;
+        double calculate_S_from_dirac() const; // using whole Dirac operator
+        double calculate_S() const; // using H and L decomposition
         double dirac2() const;
         double dirac4() const;
-        void dirac4_literal(const int&, std::ostream&) const;
         double compute_A4(const int&, const int&, const int&, const int&) const;
         double compute_A2(const int&, const int&) const;
         double compute_A(const int&) const;
-        double calculate_S() const; // using H and L decomposition
-        double calculate_S_from_dirac() const; // using whole Dirac operator
         // ============== ACTION METHODS
         
 
         // ============== DERIVATIVE METHODS
+        arma::cx_mat der_dirac24(const int&, const bool&) const;
+        arma::cx_mat der_dirac2(const int&) const;
+        arma::cx_mat der_dirac4(const int&, const bool&) const;
         arma::cx_mat compute_B4(const int&, const int&, const int&, const int&, const double&, const bool&) const;
         arma::cx_mat compute_B2(const int&, const int&) const;
         arma::cx_mat compute_B(const int&) const;
-        arma::cx_mat der_dirac4(const int&, const bool&) const;
-        arma::cx_mat der_dirac4_bruteforce(const int&) const;
-        void der_dirac4_literal(const int&, std::ostream&) const;
-        arma::cx_mat der_dirac2(const int&) const;
-        arma::cx_mat der_dirac24(const int&, const bool&) const;
         // ============== DERIVATIVE METHODS
 
         // ============== HAMILTONIAN METHODS
@@ -74,9 +73,11 @@ class Geom24
         double calculate_K() const;
         double calculate_H() const;
         void leapfrog(const int&, const double&);
+        void omelyan(const int&, const double&);
         double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*);
         void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&);
         double HMC_core(const int&, const double&, gsl_rng*, double*, double*);
+        double HMC_core_debug(const int&, const double&, gsl_rng*);
         double HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*);
         double HMC(const int&, const double&, const int&, gsl_rng*);
         double HMC(const int&, const double&, const double&, const int&, gsl_rng*);

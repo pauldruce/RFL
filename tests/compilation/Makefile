@@ -19,18 +19,18 @@ all: rmxeq mkdep mkxeq
 
 # main programs and required modules 
 
-MAIN = compilation
+MAIN = main
 
-SOURCE = clifford geometry HMC_core HMC MMC_core MMC leapfrog
+SOURCE = action clifford derivative hamiltonian metropolis HMC_core HMC misc MMC_core MMC leapfrog
 
 # search path for modules
 
-VPATH = ../source
+VPATH = ../../source
 
 
 # additional include directories
 
-INCPATH = ../include /home/pmxmd10/gsl/include
+INCPATH = ../../include /home/pmxmd10/gsl/include
 
 
 # additional libraries to be included 

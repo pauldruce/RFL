@@ -231,9 +231,6 @@ void Cliff::init_gamma()
     vector<Cliff>::const_iterator begin = vec.begin();
     vector<Cliff>::const_iterator end = vec.end();
     
-    //for(vector<Cliff>::const_iterator iter = begin; iter != end; ++iter)
-        //cout << (*iter) << endl;
-    
     Cliff C1 = (*begin);
 
     for(vector<Cliff>::const_iterator iter = begin+1; iter != end; ++iter)
