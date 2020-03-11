@@ -1,5 +1,4 @@
 #include "action.cpp"
-#include "clifford.cpp"
 #include "derivative.cpp"
 #include "hamiltonian.cpp"
 #include "HMC_core.cpp"

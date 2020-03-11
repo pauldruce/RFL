@@ -238,7 +238,7 @@ ostream& operator<<(ostream& out, const Geom24& G)
 
 void Geom24::print_S(ostream& out) const
 {
-    out << dirac2() << " " << dirac4();
+    out << dirac2() << " " << dirac4() << endl;
 }
 
 void Geom24::print_HL(ostream& out) const
@@ -252,6 +252,7 @@ void Geom24::print_HL(ostream& out) const
         }
         out << endl;
     }
+    out << endl;
 }
 
 void Geom24::reverse_mom()
