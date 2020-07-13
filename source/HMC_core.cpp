@@ -5,7 +5,7 @@ using namespace std;
 using namespace arma;
 
 
-double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, double* en_i, double* en_f, void integrator(const int&, const double&))
+double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, double* en_i, double* en_f, const string& integrator)
 {
     // acceptance probability (return value)
     double e = 1;
@@ -22,8 +22,11 @@ double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, d
     en_i[2] = calculate_K();
     en_i[3] = g2*en_i[0]+en_i[1]+en_i[2];
 
-    // leapfrog
-    integrator(Nt, dt);
+    // integration
+    if(integrator == "leapfrog")
+        leapfrog(Nt, dt);
+    else if(integrator == "omelyan")
+        omelyan(Nt, dt);
 
     // calculate final hamiltonian
     en_f[0] = dirac2();
@@ -70,7 +73,7 @@ double Geom24::HMC_duav_core(const int& Nt, const double& dt, gsl_rng* engine, d
     return e;
 }
 
-double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double* en_i, double* en_f, void integrator(const int&, const double&))
+double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double* en_i, double* en_f, const string& integrator)
 {
     // acceptance probability (return value)
     double e = 1;
@@ -87,8 +90,11 @@ double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double
     en_i[2] = calculate_K();
     en_i[3] = g2*en_i[0]+en_i[1]+en_i[2];
 
-    // leapfrog
-    integrator(Nt, dt);
+    // integration
+    if(integrator == "leapfrog")
+        leapfrog(Nt, dt);
+    else if(integrator == "omelyan")
+        omelyan(Nt, dt);
 
     // calculate final hamiltonian
     en_f[0] = dirac2();
@@ -120,7 +126,7 @@ double Geom24::HMC_core(const int& Nt, const double& dt, gsl_rng* engine, double
     return e;
 }
 
-double Geom24::HMC_core_debug(const int& Nt, const double& dt, gsl_rng* engine, void integrator(const int&, const double&))
+double Geom24::HMC_core_debug(const int& Nt, const double& dt, gsl_rng* engine, const string& integrator)
 {
     // exp(-dH) (return value)
     double e;
@@ -138,8 +144,11 @@ double Geom24::HMC_core_debug(const int& Nt, const double& dt, gsl_rng* engine, 
     double Ki = calculate_K();
     double Hi = Si+Ki;
 
-    // leapfrog
-    integrator(Nt, dt);
+    // integration
+    if(integrator == "leapfrog")
+        leapfrog(Nt, dt);
+    else if(integrator == "omelyan")
+        omelyan(Nt, dt);
 
     // calculate final hamiltonian
     double Sf = calculate_S();
@@ -167,7 +176,7 @@ double Geom24::HMC_core_debug(const int& Nt, const double& dt, gsl_rng* engine, 
 }
 
 
-double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_max, gsl_rng* engine, double* en_i, double* en_f, void integrator(const int&, const double&))
+double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_max, gsl_rng* engine, double* en_i, double* en_f, const string& integrator)
 {
     // acceptance probability (return value)
     double e = 1;
@@ -187,8 +196,11 @@ double Geom24::HMC_core(const int& Nt, const double& dt_min, const double& dt_ma
     en_i[2] = calculate_K();
     en_i[3] = g2*en_i[0]+en_i[1]+en_i[2];
 
-    // leapfrog
-    integrator(Nt, dt);
+    // integration
+    if(integrator == "leapfrog")
+        leapfrog(Nt, dt);
+    else if(integrator == "omelyan")
+        omelyan(Nt, dt);
 
     // calculate final hamiltonian
     en_f[0] = dirac2();

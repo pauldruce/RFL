@@ -6,7 +6,7 @@ using namespace arma;
 
 
 // HMC routine that performs dual averaging
-void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engine, const double& target, void integrator(const int&, const double&))
+void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engine, const double& target, const string& integrator)
 {
     // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian 
     double* en_i = new double [4];
@@ -56,7 +56,7 @@ void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engin
 }
 
 // HMC routine that doesn't perform dual averaging
-double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* engine, void integrator(const int&, const double&))
+double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* engine, const string& integrator)
 {
     // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian 
     double* en_i = new double [4];
@@ -92,7 +92,7 @@ double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* en
 }
 
 // HMC routine with randomized integration step
-double Geom24::HMC(const int& Nt, const double& dt_min, const double& dt_max, const int& iter, gsl_rng* engine, void integrator(const int&, const double&))
+double Geom24::HMC(const int& Nt, const double& dt_min, const double& dt_max, const int& iter, gsl_rng* engine, const string& integrator)
 {
     // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian 
     double* en_i = new double [4];

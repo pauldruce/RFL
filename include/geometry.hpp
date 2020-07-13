@@ -2,6 +2,7 @@
 #define GEOMETRY_HPP
 
 #include <armadillo>
+#include <string>
 #include <gsl/gsl_rng.h>
 
 #define MAT(i) get_mat(i)
@@ -74,13 +75,13 @@ class Geom24
         double calculate_H() const;
         void leapfrog(const int&, const double&);
         void omelyan(const int&, const double&);
-        double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*, void integrator(const int&, const double&));
-        void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&, void integrator(const int&, const double&));
-        double HMC_core(const int&, const double&, gsl_rng*, double*, double*, void integrator(const int&, const double&));
-        double HMC_core_debug(const int&, const double&, gsl_rng*, void integrator(const int&, const double&));
-        double HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*, void integrator(const int&, const double&));
-        double HMC(const int&, const double&, const int&, gsl_rng*, void integrator(const int&, const double&));
-        double HMC(const int&, const double&, const double&, const int&, gsl_rng*, void integrator(const int&, const double&));
+        double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*, const std::string& integrator);
+        void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&, const std::string& integrator);
+        double HMC_core(const int&, const double&, gsl_rng*, double*, double*, const std::string& integrator);
+        double HMC_core_debug(const int&, const double&, gsl_rng*, const std::string& integrator);
+        double HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*, const std::string& integrator);
+        double HMC(const int&, const double&, const int&, gsl_rng*, const std::string& integrator);
+        double HMC(const int&, const double&, const double&, const int&, gsl_rng*, const std::string& integrator);
         // ============== HAMILTONIAN METHODS
         
         // ============== METROPOLIS METHODS
