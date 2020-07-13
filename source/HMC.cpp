@@ -6,7 +6,7 @@ using namespace arma;
 
 
 // HMC routine that performs dual averaging
-void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engine, const double& target)
+void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engine, const double& target, void integrator(const int&, const double&))
 {
     // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian 
     double* en_i = new double [4];
@@ -38,7 +38,7 @@ void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engin
 
         
         // core part of HMC
-        Stat += target - HMC_duav_core(Nt, dt, engine, en_i, en_f);
+        Stat += target - HMC_duav_core(Nt, dt, engine, en_i, en_f, integrator);
         
         // perform dual averaging on dt
         double log_dt = mu - Stat*sqrt(i+1)/(shr*(i+1+i0));
@@ -56,7 +56,7 @@ void Geom24::HMC_duav(const int& Nt, double& dt, const int& iter, gsl_rng* engin
 }
 
 // HMC routine that doesn't perform dual averaging
-double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* engine)
+double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* engine, void integrator(const int&, const double&))
 {
     // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian 
     double* en_i = new double [4];
@@ -82,7 +82,7 @@ double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* en
         }
         
         // core part of HMC
-        Stat += HMC_core(Nt, dt, engine, en_i, en_f);
+        Stat += HMC_core(Nt, dt, engine, en_i, en_f, integrator);
     }
 
     delete [] en_i;
@@ -92,7 +92,7 @@ double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* en
 }
 
 // HMC routine with randomized integration step
-double Geom24::HMC(const int& Nt, const double& dt_min, const double& dt_max, const int& iter, gsl_rng* engine)
+double Geom24::HMC(const int& Nt, const double& dt_min, const double& dt_max, const int& iter, gsl_rng* engine, void integrator(const int&, const double&))
 {
     // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian 
     double* en_i = new double [4];
@@ -119,7 +119,7 @@ double Geom24::HMC(const int& Nt, const double& dt_min, const double& dt_max, co
 
         
         // core part of HMC
-        Stat += HMC_core(Nt, dt_min, dt_max, engine, en_i, en_f);
+        Stat += HMC_core(Nt, dt_min, dt_max, engine, en_i, en_f, integrator);
     }
 
     delete [] en_i;

@@ -74,13 +74,13 @@ class Geom24
         double calculate_H() const;
         void leapfrog(const int&, const double&);
         void omelyan(const int&, const double&);
-        double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*);
-        void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&);
-        double HMC_core(const int&, const double&, gsl_rng*, double*, double*);
-        double HMC_core_debug(const int&, const double&, gsl_rng*);
-        double HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*);
-        double HMC(const int&, const double&, const int&, gsl_rng*);
-        double HMC(const int&, const double&, const double&, const int&, gsl_rng*);
+        double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*, void integrator(const int&, const double&));
+        void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&, void integrator(const int&, const double&));
+        double HMC_core(const int&, const double&, gsl_rng*, double*, double*, void integrator(const int&, const double&));
+        double HMC_core_debug(const int&, const double&, gsl_rng*, void integrator(const int&, const double&));
+        double HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*, void integrator(const int&, const double&));
+        double HMC(const int&, const double&, const int&, gsl_rng*, void integrator(const int&, const double&));
+        double HMC(const int&, const double&, const double&, const int&, gsl_rng*, void integrator(const int&, const double&));
         // ============== HAMILTONIAN METHODS
         
         // ============== METROPOLIS METHODS
