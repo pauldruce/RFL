@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 3.7...3.23)
 
-if(${CMAKE_VERSION} VERSION_LESS 3.23 )
+if (${CMAKE_VERSION} VERSION_LESS 3.23)
     cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-else()
-        cmake_policy(VERSION 3.23)
-endif()
+else ()
+    cmake_policy(VERSION 3.23)
+endif ()
 
 project(RFL
         VERSION 1.0
@@ -12,15 +12,21 @@ project(RFL
         "RFL - A library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative geometries."
         LANGUAGES CXX)
 
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     set(CMAKE_CXX_STANDARD 17)
     set(CMAKE_CXX_STANDARD_REQUIRED ON)
     set(CMAKE_CXX_EXTENSIONS OFF)
     # Let's nicely support folders in IDEs
     set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-#     include(CTest)
-endif()
+    #     include(CTest)
+endif ()
+
+find_package(Armadillo REQUIRED)
+include_directories(${ARMADILLO_INCLUDE_DIRS})
+
+# GSL is included with Armadillo above, but we need more?
+find_package(GSL REQUIRED)
 
 # Get DOCTEST
 include(ExternalProject)
@@ -48,6 +54,6 @@ include_directories(DOCTEST_INCLUDE_DIR)
 set(INCLUDE_DIR ${RFL_SOURCE_DIR}/include)
 add_subdirectory(source)
 # Add tests if building tests.
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_subdirectory(tests)
-endif()
+endif ()

@@ -1,6 +1,3 @@
-find_package(Armadillo REQUIRED)
-include_directories(${ARMADILLO_INCLUDE_DIRS})
-
 set(INCLUDES
         ${INCLUDE_DIR}/clifford.hpp
         ${INCLUDE_DIR}/geometry.hpp)
@@ -8,7 +5,7 @@ set(INCLUDES
 add_library(RFL)
 
 target_sources(RFL
-PRIVATE
+        PRIVATE
         action.cpp
         clifford.cpp
         derivative.cpp
@@ -21,8 +18,8 @@ PRIVATE
         misc.cpp
         MMC.cpp
         MMC_core.cpp
-PUBLIC
+        PUBLIC
         ${INCLUDES})
 
 target_include_directories(RFL PUBLIC ${INCLUDE_DIR})
-target_link_libraries(RFL ${ARMADILLO_LIBRARIES})
+target_link_libraries(RFL ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
