@@ -1,5 +1,5 @@
 add_executable(RFLTests_GTest
-        action_tests.cpp compilation_tests.cpp)
+        action_tests.cpp compilation_tests.cpp delta_tests.cpp)
 
 target_include_directories(RFLTests_GTest PUBLIC
         ${INCLUDE_DIR})
