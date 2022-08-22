@@ -23,11 +23,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update -y
-        sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev curl
+        sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget
     
     - name: Get Armadillo and install
       run: |
-        curl http://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz
+        wget 'http://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz'
         tar -xf armadillo-11.2.3.tar.xz
         cd armadillo-11.2.3
         cmake . 
