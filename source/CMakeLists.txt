@@ -7,7 +7,6 @@ target_sources(
   PRIVATE action.cpp
           clifford.cpp
           derivative.cpp
-          geometry.cpp
           hamiltonian.cpp
           HMC.cpp
           HMC_core.cpp
