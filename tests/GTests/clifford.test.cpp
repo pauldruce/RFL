@@ -4,7 +4,6 @@
 #include <gtest/gtest.h>
 #include "clifford.hpp"
 
-
 TEST(CliffordTest,NoErrorWhenConstructing){
    typedef struct{
       int p;
