@@ -104,8 +104,8 @@ double Geom24::compute_A4(const int &i1, const int &i2, const int &i3, const int
          res += eps[i4] * tr4 * tr123;
 
          return -2 * cliff * res;
-         // NOTE: this minus here comes from the i in cliff
-         // and the i coming from 2i*imag
+         // NOTE: this minus here comes from the 'i' in cliff
+         // and the 'i' coming from 2i*imag
       }
       else
       {

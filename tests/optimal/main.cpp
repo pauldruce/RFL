@@ -13,7 +13,7 @@ using namespace arma;
 int main()
 {
     gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
-    gsl_rng_set(engine, time(NULL));
+    gsl_rng_set(engine, time(nullptr));
 
 
     // create geometry

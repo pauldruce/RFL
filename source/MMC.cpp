@@ -1,10 +1,7 @@
-#include <iostream>
 #include <cmath>
 #include <vector>
 #include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include "geometry.hpp"
-#include "clifford.hpp"
 
 using namespace std;
 using namespace arma;
@@ -13,8 +10,8 @@ using namespace arma;
 void Geom24::MMC_duav(double& scale, const int& iter, gsl_rng* engine, const double& target)
 {
     // initial (_i) and final (_f) action2 and action4 
-    double* s_i = new double [2];
-    double* s_f = new double [2];
+    auto* s_i = new double [2];
+    auto* s_f = new double [2];
 
     // calculate length of a sweep in terms of dofs
     int Nsw = nHL*dim*dim-nL;
@@ -67,8 +64,8 @@ void Geom24::MMC_duav(double& scale, const int& iter, gsl_rng* engine, const dou
 double Geom24::MMC(const double& scale, const int& iter, gsl_rng* engine)
 {
     // initial (_i) and final (_f) action2 and action4 
-    double* s_i = new double [2];
-    double* s_f = new double [2];
+    auto* s_i = new double [2];
+    auto* s_f = new double [2];
 
     // calculate length of a sweep in terms of dofs
     int Nsw = nHL*dim*dim-nL;

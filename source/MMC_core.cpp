@@ -1,8 +1,5 @@
-#include <iostream>
 #include <cmath>
-#include <vector>
 #include <gsl/gsl_rng.h>
-#include <gsl/gsl_randist.h>
 #include "geometry.hpp"
 #include "clifford.hpp"
 

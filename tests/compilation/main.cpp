@@ -1,11 +1,10 @@
 #include <iostream>
-#include <armadillo>
 #include "geometry.hpp"
 
 using namespace std;
 using namespace arma;
 
-int main(int argc, char** argv)
+int main()
 {
     int p, q, dim;
     double g2;
