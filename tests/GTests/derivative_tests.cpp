@@ -20,10 +20,10 @@ namespace DerivativeTests
          int q;
          int dim;
          double g2;
-      };
+      }DerivativeParams;
 
       gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
-      gsl_rng_set(engine, time(NULL));
+      gsl_rng_set(engine, time(nullptr));
 
       // Create (p,q) combo's upto n = p+q=5.
       std::pair<int, int> pq_pairs[] = {
@@ -51,6 +51,8 @@ namespace DerivativeTests
             }
          }
       }
+
+      free(engine);
    }
 
 

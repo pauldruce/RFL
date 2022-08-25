@@ -47,7 +47,7 @@ static void CompareDeltaToDifference(int p, int q, int dim, double g2)
         G.set_mat(x, m);
 
         double Sf = G.calculate_S();
-        CHECK_MESSAGE(fabs((Sf - Si) - dS) < 1e-8,
+        CHECK_MESSAGE(fabs((Sf - Si) - dS) < 1e-7,
                       "     Sf-Si =", Sf - Si, ", dS = ", dS, " and |(Sf-Si) - dS| = ", fabs(Sf - Si - dS));
     }
 }
