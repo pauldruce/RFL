@@ -52,7 +52,7 @@ namespace DerivativeTests
          }
       }
 
-      free(engine);
+      gsl_rng_free(engine);
    }
 
 
