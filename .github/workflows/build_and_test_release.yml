@@ -31,14 +31,14 @@ jobs:
         sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget
     
     - name: Download Armadillo from SourceForge
-      run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{ARMA_VERSION}}.tar.xz/download
+      run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
 
     - name: Unzip Armadillo tarball
       run: cd armadillo && tar -xf ./armadillo.tar.xz
 
     - name: Install Armadillo
       run: |
-        cd armadillo/armadillo-${{ARMA_VERSION}} 
+        cd armadillo/armadillo-${{matrix.ARMA_VERSION}} 
         mkdir build 
         cd build && cmake .. 
         cmake --build . --target all -j 2  
