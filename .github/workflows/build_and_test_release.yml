@@ -36,7 +36,7 @@ jobs:
       run: ls && cd armadillo && ls && tar -xf ./armadillo.tar.xz
 
     - name: Install Armadillo
-      run: ls && cd armadillo/armadillo-11.2.3 && mkdir build && cd build && cmake .. && cmake --build . --target all -j 2  && ls
+      run: ls && cd armadillo/armadillo-11.2.3 && mkdir build && cd build && cmake .. && cmake --build . --target all -j 2  && cmake --install .
 
     - name: Add Armadillo to path
       run: echo "$HOME/armadillo/armadillo-11.2.3/build:$HOME/armadillo/armadillo-11.2.3/include" >> $GITHUB_PATH
