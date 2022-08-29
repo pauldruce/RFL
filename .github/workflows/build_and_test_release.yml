@@ -33,13 +33,15 @@ jobs:
       run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz/download
 
     - name: Unzip Armadillo tarball
-      run: ls && cd armadillo && ls && tar -xf ./armadillo.tar.xz
+      run: cd armadillo && tar -xf ./armadillo.tar.xz
 
     - name: Install Armadillo
-      run: ls && cd armadillo/armadillo-11.2.3 && mkdir build && cd build && cmake .. && cmake --build . --target all -j 2  && sudo make install
-
-    - name: Add Armadillo to path
-      run: echo "$HOME/armadillo/armadillo-11.2.3/build:$HOME/armadillo/armadillo-11.2.3/include" >> $GITHUB_PATH
+      run: |
+        cd armadillo/armadillo-11.2.3 
+        mkdir build 
+        cd build && cmake .. 
+        cmake --build . --target all -j 2  
+        sudo cmake --install . 
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
