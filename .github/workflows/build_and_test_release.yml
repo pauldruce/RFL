@@ -32,11 +32,8 @@ jobs:
     - name: Download Armadillo from SourceForge
       run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz/download
 
-    - name: Unzip Armadillo tarball
-      run: ls && sudo tar -zxvf ./armadillo.tar.xz
-
     - name: Install Armadillo
-      run: cd armadillo-11.2.3 && cmake .
+      run: cmake .
 
     - name: Add Armadillo to path
       run: export PATH:="~/armadillo/lib/x86_64-linux-gnu:~/armadillo/include:PATH"
