@@ -14,6 +14,7 @@ jobs:
       matrix:
         BUILD_TYPE: [Release, Debug]
         os: [ubuntu-22.04, ubuntu-20.04, ubuntu-18.04]
+        ARMA_VERSION: [10.8.2, 11.2.3]
 
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
@@ -30,14 +31,14 @@ jobs:
         sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget
     
     - name: Download Armadillo from SourceForge
-      run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz/download
+      run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{ARMA_VERSION}}.tar.xz/download
 
     - name: Unzip Armadillo tarball
       run: cd armadillo && tar -xf ./armadillo.tar.xz
 
     - name: Install Armadillo
       run: |
-        cd armadillo/armadillo-11.2.3 
+        cd armadillo/armadillo-${{ARMA_VERSION}} 
         mkdir build 
         cd build && cmake .. 
         cmake --build . --target all -j 2  
