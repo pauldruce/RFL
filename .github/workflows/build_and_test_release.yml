@@ -33,7 +33,7 @@ jobs:
       run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz/download
 
     - name: Unzip Armadillo tarball
-      run: tar -zxvf ./armadillo.tar.xz
+      run: sudo tar -zxvf ./armadillo.tar.xz
 
     - name: Install Armadillo
       run: cd armadillo-11.2.3 && cmake .
