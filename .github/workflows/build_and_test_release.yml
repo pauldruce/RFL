@@ -5,7 +5,7 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
-    
+
 jobs:
   linux_build_and_test:
 
@@ -29,9 +29,15 @@ jobs:
         sudo apt-get update -y
         sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget
     
-    - name: Get Armadillo and install
-      run: sudo apt-get install -y libarmadillo-dev
-      
+    - name: Download Armadillo from SourceForge
+      run: mkdir armadillo && cd armadillo && wget https://sourceforge.net/projects/arma/files/armadillo-11.2.3.tar.xz/download -O - | tar -xz
+
+    - name: Install Armadillo
+      run: cd armadillo-11.2.3 && cmake .
+
+    - name: Add Armadillo to path
+      run: export PATH:="~/armadillo/lib/x86_64-linux-gnu:~/armadillo/include:PATH"
+
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
