@@ -39,7 +39,7 @@ jobs:
       run: ls && cd armadillo/armadillo-11.2.3 && mkdir build && cd build && cmake .. && cmake --build . --target all -j 2  && ls
 
     - name: Add Armadillo to path
-      run: export PATH:="armadillo/armadillo-11.2.3/build:armadillo/armadillo-11.2.3/include:PATH"
+      run: echo "$HOME/armadillo/armadillo-11.2.3/build:$HOME/armadillo/armadillo-11.2.3/include" >> $GITHUB_PATH
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
