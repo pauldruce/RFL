@@ -48,7 +48,7 @@ jobs:
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
 
       - name: Unzip Armadillo tarball and create build directory
-       working-directory: armadillo
+        working-directory: armadillo
         run: |
           tar -xf ./armadillo.tar.xz
           cd armadillo-${{matrix.ARMA_VERSION}}
