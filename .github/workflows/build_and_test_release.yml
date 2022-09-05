@@ -48,8 +48,8 @@ jobs:
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
 
       - name: Unzip Armadillo tarball
+        working-directory: armadillo
         run: |
-          cd armadillo
           tar -xf ./armadillo.tar.xz
           cd armadillo/armadillo-${{matrix.ARMA_VERSION}}
           mkdir build
@@ -57,15 +57,17 @@ jobs:
 
       - name: Configure CMake for Armadillo macOS
         if: startsWith(matrix.OS,'macos')
-        run: |
-          cmake -DALLOW_OPENBLAS_MACOS=ON ..
+        working-directory: ~/armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
+        run: cmake -DALLOW_OPENBLAS_MACOS=ON ..
 
       - name: Configure CMake for Armadillo Linux
+        working-directory: ~/armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
         if: startsWith(matrix.OS,'ubuntu')
-        run: |
-          cmake ..
+        run: cmake ..
 
-      - name: Build CMake
+      - name: Build and Install Armadillo
+        working-directory: ~/armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
+        run: |
           cmake --build . --target all -j 2
           sudo cmake --install .
 
