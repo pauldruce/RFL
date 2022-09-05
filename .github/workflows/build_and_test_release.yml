@@ -41,7 +41,7 @@ jobs:
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
-          brew update -y
+          brew update 
           brew install cmake arpack hdf5 libaec openblas superlu pkg-config
 
       - name: Download Armadillo from SourceForge
