@@ -33,13 +33,13 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Install Linux dependencies
-        if: ${{startsWith(matrix.OS,'ubuntu')}
+        if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
           sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget
 
       - name: Install macOS dependencies
-        if: ${{startsWith(matrix.OS,'macos')}}
+        if: startsWith(matrix.OS,'macos')
         run: |
           brew update -y
           brew install cmake arpack hdf5 libaec openblas superlu pkg-config
