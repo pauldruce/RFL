@@ -41,20 +41,31 @@ jobs:
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
-          brew update 
-          brew install cmake arpack hdf5 libaec openblas superlu pkg-config
+          brew update
+          brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget
 
       - name: Download Armadillo from SourceForge
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
 
       - name: Unzip Armadillo tarball
-        run: cd armadillo && tar -xf ./armadillo.tar.xz
-
-      - name: Install Armadillo
         run: |
+          cd armadillo
+          tar -xf ./armadillo.tar.xz
           cd armadillo/armadillo-${{matrix.ARMA_VERSION}}
           mkdir build
-          cd build && cmake ..
+          cd build
+
+      - name: Configure CMake for Armadillo macOS
+        if: startsWith(matrix.OS,'macos')
+        run: |
+          cmake -DALLOW_OPENBLAS_MACOS=ON ..
+
+      - name: Configure CMake for Armadillo Linux
+        if: startsWith(matrix.OS,'ubuntu')
+        run: |
+          cmake ..
+
+      - name: Build CMake
           cmake --build . --target all -j 2
           sudo cmake --install .
 
