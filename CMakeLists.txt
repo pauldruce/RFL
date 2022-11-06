@@ -53,11 +53,12 @@ set(gtest_force_shared_crt
 FetchContent_MakeAvailable(googletest)
 
 # Build RFL library
-set(INCLUDE_DIR ${RFL_SOURCE_DIR}/include)
-add_subdirectory(source)
+set(RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/RFL_source")
+set(RFL_INCLUDE_DIR ${RFL_SOURCE_DIR}/include)
+add_subdirectory(${RFL_SOURCE_DIR}/source)
 
 # Add tests if building tests.
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   enable_testing()
-  add_subdirectory(tests)
+  add_subdirectory(${RFL_SOURCE_DIR}/tests)
 endif()
