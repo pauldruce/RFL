@@ -12,7 +12,7 @@ Random Finite NCGs are at the forefront of academic research into Finite NCGs, a
 Some relevant academic papers can be found here:
 
 1. John W. Barrett and Lisa Glaser. (2016). Monte Carlo simulations of random non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 49, 24: 245001. https://doi.org/10.1088/1751-8113/49/24/245001
-2. Lisa Glaser. (2017). Scaling behavior in random non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 50, 27: 275201. https://doi.org/10.1088/1751-8121/aa7424
+2. Lisa Glaser. (2017). Scaling behaviour in random non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 50, 27: 275201. https://doi.org/10.1088/1751-8121/aa7424
 3. John W Barrett, Paul Druce, and Lisa Glaser. (2019). Spectral estimators for finite non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 52, 27: 275203. https://doi.org/10.1088/1751-8121/ab22f8
 4. Lisa Glaser and Abel Stern. (2020). Understanding truncated non-commutative geometries through computer simulations. Journal of Mathematical Physics 61, 3: 033507. https://doi.org/10.1063/1.5131864
 5. Lisa Glaser and Abel B. Stern. (2021). Reconstructing manifolds from truncations of spectral triples. Journal of Geometry and Physics. https://doi.org/10.1016/j.geomphys.2020.103921
@@ -34,11 +34,11 @@ On macOS you should be okay using Homebrew, i.e. `brew install gsl` and `brew in
 
 On Ubuntu, I imagine `apt-get install libgsl-dev` and `apt-get install libarmadillo-dev` should suffice.
 
-For Windows and other Linux distros you will have to follow the installation instruction on the website above. Good luck :)
+For Windows and other Linux distros, you will have to follow the installation instruction on the website above. Good luck :)
 
 ## Building the library
 
-Once you have installed the required dependencies, building RFL library can be done in various ways, but the simplest
+Once you have installed the required dependencies, building the RFL library can be done in various ways, but the simplest
 is to use CMake.
 To install CMake, please follow the instructions on the website: [https://cmake.org]()
 
@@ -68,17 +68,17 @@ Most C/C++ IDEs will have CMake capabilities. However, to build this project man
    cmake -B ./build .
    ```
 
-3. Build the project. This can be done by manually calling `make` or it's equivalent in the `build` directory. Or CMake has a handy command which is platform independent:
+3. Build the project. This can be done by manually calling `make` or its equivalent in the `build` directory. Or CMake has a handy command which is platform-independent:
    ```bash
    cmake --build . --target all
    ```
-   This build process can be multi-threaded with the CMake command by adding `-j #threads` to the above command. For instance
+   This build process can be multi-threaded with the CMake command by adding `-j #threads` to the above command. For instance,
    ```bash
    cmake --build . --target all -j 4
    ```
    will run the build process on 4 threads, and should be a fair bit quicker. :)
 4. Run CTest to check everything works correctly. This is done simply by calling `ctest` from the build directory. Like the `cmake --build` command above,
-   the tests can be ran on multiple threads with the `-j` command. For instance, to run the tests on 4 threads, just type:
+   the tests can be run on multiple threads with the `-j` command. For instance, to run the tests on 4 threads, just type:
    ```bash
    ctest -j 4
    ```
