@@ -5,64 +5,58 @@
 #include <ctime>
 #include <armadillo>
 #include <gsl/gsl_rng.h>
-#include "geometry.hpp"
+#include "Geom24.hpp"
 
 using namespace std;
 using namespace arma;
 
 #define N 1000
 
-int main()
-{
-    gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
-    gsl_rng_set(engine, time(NULL));
+int main() {
+  gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  gsl_rng_set(engine, time(NULL));
 
 
-    // create geometry
-    cout << "insert p, q, dim, g2" << endl;
-    Geom24 G(cin);
-    
-    for(int i=0; i<N; ++i)
-    {
-        if(!(i%100))
-            cout << "iteration " << i << endl;
+  // create geometry
+  cout << "insert p, q, dim, g2" << endl;
+  Geom24 G(cin);
 
-        G.shuffle(engine);
-        double Si = G.calculate_S();
-        
-        // random entry
-        int x = G.get_nHL()*gsl_rng_uniform(engine);
-        int I = G.get_dim()*gsl_rng_uniform(engine);
-        int J = G.get_dim()*gsl_rng_uniform(engine);
-        double re = 0;
-        double im = 0;
-        cx_double z;
-        if(I != J)
-        {
-            re = 0.5*(-1.+2.*gsl_rng_uniform(engine));
-            im = 0.5*(-1.+2.*gsl_rng_uniform(engine));
-            z = cx_double(re, im);
-        }
-        else
-        {
-            re = 0.5*(-1.+2.*gsl_rng_uniform(engine));
-            z = cx_double(re, 0);
-        }
+  for (int i = 0; i < N; ++i) {
+	if (!(i % 100))
+	  cout << "iteration " << i << endl;
 
-        double dS = G.delta24(x, I, J, z);
+	G.shuffle(engine);
+	double Si = G.calculate_S();
 
-        cx_mat m = G.get_mat(x);
-        m(I,J) += z;
-        m(J,I) += conj(z);
-        G.set_mat(x, m);
+	// random entry
+	int x = G.get_nHL() * gsl_rng_uniform(engine);
+	int I = G.get_dim() * gsl_rng_uniform(engine);
+	int J = G.get_dim() * gsl_rng_uniform(engine);
+	double re = 0;
+	double im = 0;
+	cx_double z;
+	if (I != J) {
+	  re = 0.5 * (-1. + 2. * gsl_rng_uniform(engine));
+	  im = 0.5 * (-1. + 2. * gsl_rng_uniform(engine));
+	  z = cx_double(re, im);
+	} else {
+	  re = 0.5 * (-1. + 2. * gsl_rng_uniform(engine));
+	  z = cx_double(re, 0);
+	}
 
-        double Sf = G.calculate_S();
+	double dS = G.delta24(x, I, J, z);
 
-        cout.precision(16);
-        if(fabs(Sf-Si-dS) > 1e-8)
-            cout << Sf-Si << " " << dS << " " << Sf-Si-dS << endl;
-    }
+	cx_mat m = G.get_mat(x);
+	m(I, J) += z;
+	m(J, I) += conj(z);
+	G.set_mat(x, m);
 
+	double Sf = G.calculate_S();
 
-    return 0;
+	cout.precision(16);
+	if (fabs(Sf - Si - dS) > 1e-8)
+	  cout << Sf - Si << " " << dS << " " << Sf - Si - dS << endl;
+  }
+
+  return 0;
 }

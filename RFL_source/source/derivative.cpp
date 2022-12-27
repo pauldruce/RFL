@@ -3,6 +3,9 @@
 using namespace std;
 using namespace arma;
 
+
+// PD: All methods moved into the DiracOperator class. 
+
 cx_mat Geom24::der_dirac24(const int& k, const bool& herm) const
 {
     return g2*der_dirac2(k) + der_dirac4(k, herm);
