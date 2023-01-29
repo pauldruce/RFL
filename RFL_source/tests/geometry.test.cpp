@@ -106,7 +106,7 @@ TEST(GeometryTest, GetNumHLMatrices)
    {
       int p;
       int q;
-      int num_h_mat;
+      int num_hl_mat;
    } NumHLMat_data;
 
    std::vector<NumHLMat_data> data = {
@@ -118,6 +118,6 @@ TEST(GeometryTest, GetNumHLMatrices)
    for (auto &d : data)
    {
       Geom24 geom(d.p, d.q, 5, -2.7);
-      EXPECT_EQ(d.num_h_mat, geom.get_nHL()) << "(p,q) = (" << d.p << "," << d.q << ")";
+      EXPECT_EQ(d.num_hl_mat, geom.get_nHL()) << "(p,q) = (" << d.p << "," << d.q << ")";
    }
 }

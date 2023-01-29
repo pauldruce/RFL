@@ -25,30 +25,65 @@ TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
   }
 }
 
-TEST(DiracOperatorTests,GetMoms){
-  DiracOperator D(1,1,5);
-  arma::cx_mat identityMatrix(5,5);
-  auto* moms = D.get_moms();
-  identityMatrix.eye();
+TEST(DiracOperatorTests,NumH_IsCorrectlySet){
+  typedef struct
+  {
+	int p;
+	int q;
+	int num_h_mat;
+  } NumHMat_data;
 
-  for(int i = 0; i<D.nHL; i++) {
-	ASSERT_TRUE(
-		arma::approx_equal(moms[i], identityMatrix, "absdiff", 1e-10)
-	);
+  std::vector<NumHMat_data> data = {
+	  {1, 1, 1},
+	  {1, 2, 1},
+	  {2, 1, 3},
+	  {3, 3, 16}};
+
+  for (auto &d : data)
+  {
+	DiracOperator D(d.p, d.q, 5);
+	EXPECT_EQ(d.num_h_mat, D.nH) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
-
 }
 
-//TEST(DiracOperatorTests, BuildDiracHasCorrectDims) {
-//  std::vector<DiracOpData> data = {
-//	  {1, 0, 5},
-//	  {0, 1, 5},
-//	  {1, 3, 6},
-//	  {3, 1, 7},
-//	  {2, 2, 10}
-//  };
-//
-//  for (auto &d : data) {
-//
-//  }
-//}
+TEST(DiracOperatorTests,NumL_IsCorrectlySet){
+  typedef struct
+  {
+	int p;
+	int q;
+	int num_h_mat;
+  } NumLMat_data;
+
+  std::vector<NumLMat_data> data = {
+	  {1, 1, 1},
+	  {1, 2, 3},
+	  {2, 1, 1},
+	  {3, 3, 16}};
+
+  for (auto &d : data)
+  {
+	DiracOperator D(d.p, d.q, 5);
+	EXPECT_EQ(d.num_h_mat, D.nL) << "(p,q) = (" << d.p << "," << d.q << ")";
+  }
+}
+
+TEST(DiracOperatorTests,NumHL_IsCorrectlySet){
+  typedef struct
+  {
+	int p;
+	int q;
+	int num_hl_mat;
+  } NumHLMat_data;
+
+  std::vector<NumHLMat_data> data = {
+	  {1, 1, 2},
+	  {1, 2, 4},
+	  {2, 1, 4},
+	  {3, 3, 32}};
+
+  for (auto &d : data)
+  {
+	DiracOperator D(d.p, d.q, 5);
+	EXPECT_EQ(d.num_hl_mat, D.nHL) << "(p,q) = (" << d.p << "," << d.q << ")";
+  }
+}
