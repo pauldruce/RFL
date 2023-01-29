@@ -6,7 +6,7 @@
 using namespace std;
 using namespace arma;
 // PD: All functions moved into Metropolis
-double Geom24::MMC_duav_core(const double &scale, gsl_rng *engine, double *s_i, double *s_f) {
+double Geom24::MMC_duav_core(const double &scale, gsl_rng *engine, const double *s_i, double *s_f) {
   // acceptance probability
   double e;
 
@@ -69,7 +69,7 @@ double Geom24::MMC_duav_core(const double &scale, gsl_rng *engine, double *s_i, 
   return e;
 }
 
-double Geom24::MMC_core(const double &scale, gsl_rng *engine, double *s_i, double *s_f) {
+double Geom24::MMC_core(const double &scale, gsl_rng *engine, const double *s_i, double *s_f) {
   // acceptance probability
   double ret = 0;
 

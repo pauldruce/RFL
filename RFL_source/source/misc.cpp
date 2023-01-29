@@ -250,7 +250,7 @@ void Geom24::reverse_mom() {
 	mom[i] *= -1;
 }
 
-// TODO: PD - Find home in refactored library
+// PD - Moved into DiracOperator as method Randomise
 void Geom24::shuffle(gsl_rng *engine) {
   for (int i = 0; i < nHL; ++i) {
 	// loop on indices

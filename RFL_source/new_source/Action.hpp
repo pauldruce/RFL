@@ -13,6 +13,7 @@ class Action {
  public:
   // CONSTRUCTORS AND DESTRUCTORS
   Action(double g2, double g4);
+  explicit Action(double g2);
   Action() : g2(0.0), g4(0.0) {};
   ~Action() = default;
 

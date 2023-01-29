@@ -11,15 +11,8 @@
 class Simulation {
  public:
   Simulation() = delete;
-  Simulation(const DiracOperator &D, const Action &A, const Metropolis &M) :
-	  m_D(D), m_A(A), m_M(M) {
-	// Initialize the random number generator
-	engine = gsl_rng_alloc(gsl_rng_ranlxd1);
-	gsl_rng_set(engine, time(NULL));
-  }
-  void run(const double scale, const int stepSize) const {
-	m_M.MMC(m_D, m_A, scale, stepSize, engine);
-  };
+  Simulation(const DiracOperator &D, const Action &A, const Metropolis &M);
+  void run(const double scale, const int stepSize) const;
 
  private:
   const DiracOperator &m_D;

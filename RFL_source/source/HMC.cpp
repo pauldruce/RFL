@@ -14,8 +14,8 @@ void Geom24::HMC_duav(const int &Nt,
 					  const double &target,
 					  const string &integrator) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
-  double *en_i = new double[4];
-  double *en_f = new double[4];
+  auto *en_i = new double[4];
+  auto *en_f = new double[4];
 
   // dual averaging variables for dt
   const double shr = 0.05;
@@ -58,8 +58,8 @@ void Geom24::HMC_duav(const int &Nt,
 // HMC routine that doesn't perform dual averaging
 double Geom24::HMC(const int &Nt, const double &dt, const int &iter, gsl_rng *engine, const string &integrator) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
-  double *en_i = new double[4];
-  double *en_f = new double[4];
+  auto *en_i = new double[4];
+  auto *en_f = new double[4];
 
   // return statistic
   double Stat = 0;
@@ -94,8 +94,8 @@ double Geom24::HMC(const int &Nt,
 				   gsl_rng *engine,
 				   const string &integrator) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
-  double *en_i = new double[4];
-  double *en_f = new double[4];
+  auto *en_i = new double[4];
+  auto *en_f = new double[4];
 
   // return statistic
   double Stat = 0;

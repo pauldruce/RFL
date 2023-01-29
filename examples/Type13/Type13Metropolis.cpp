@@ -15,7 +15,7 @@ int main() {
 
   const int stepSize = 100;
   const double scale = 0.05;
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 10; i++) {
 	Sim.run(scale, stepSize);
 	A.print_S(D, std::cout);
   }

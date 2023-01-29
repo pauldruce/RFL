@@ -7,6 +7,8 @@
 
 #include <armadillo>
 #include "Clifford.hpp"
+#include <gsl/gsl_rng.h>
+#include <gsl/gsl_randist.h>
 
 class DiracOperator {
  public:
@@ -33,9 +35,9 @@ class DiracOperator {
   arma::cx_mat der_dirac4(const int &k, const bool &herm) const;
 
   arma::cx_double *get_omega_table_4() const { return omega_table_4; }
-//  void print_omega_table_4() const;
+  void print_omega_table_4() const;
 
-
+  void randomise(gsl_rng *engine);
 
  private:
   // MATRICES

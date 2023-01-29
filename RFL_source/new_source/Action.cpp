@@ -5,6 +5,8 @@
 
 using namespace std;
 using namespace arma;
+Action::Action(double g2_) :
+	g2(g2_), g4(1.0) {}
 
 Action::Action(double g2_, double g4_)
 	: g2(g2_), g4(g4_) {}
@@ -67,23 +69,23 @@ double Action::compute_A4(const DiracOperator &D, const int &i1, const int &i2, 
   auto *omega_table_4 = D.get_omega_table_4();
   auto *mat = D.get_mats();
 
-  int e = eps[i1] * eps[i2] * eps[i3] * eps[i4];
+  const int e = eps[i1] * eps[i2] * eps[i3] * eps[i4];
 
   // if e=-1, then [1+*e] becomes 2i*imag
   // and the clifford part is guaranteed to
   // be pure imaginary
   if (e < 0) {
 	// clifford product
-	double cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].imag();
+	const double cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].imag();
 
 	if (fabs(cliff) > 1e-10) {
 	  // base matrix products
-	  cx_mat M1M2 = mat[i1] * mat[i2];
-	  cx_mat M1M3 = mat[i1] * mat[i3];
-	  cx_mat M1M4 = mat[i1] * mat[i4];
-	  cx_mat M2M3 = mat[i2] * mat[i3];
-	  cx_mat M2M4 = mat[i2] * mat[i4];
-	  cx_mat M3M4 = mat[i3] * mat[i4];
+	  const cx_mat M1M2 = mat[i1] * mat[i2];
+	  const cx_mat M1M3 = mat[i1] * mat[i3];
+	  const cx_mat M1M4 = mat[i1] * mat[i4];
+	  const cx_mat M2M3 = mat[i2] * mat[i3];
+	  const cx_mat M2M4 = mat[i2] * mat[i4];
+	  const cx_mat M3M4 = mat[i3] * mat[i4];
 
 	  // traces
 	  double tr1234 = trace(M1M2 * M3M4).imag();
@@ -111,7 +113,7 @@ double Action::compute_A4(const DiracOperator &D, const int &i1, const int &i2, 
 	}
   } else {
 	// clifford product
-	double cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].real();
+	const double cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].real();
 
 	if (fabs(cliff) > 1e-10) {
 	  // base matrix products
@@ -148,7 +150,7 @@ double Action::compute_A4(const DiracOperator &D, const int &i1, const int &i2, 
 	  res += eps[i1] * eps[i3] * tr13 * tr24;
 	  res += eps[i1] * eps[i4] * tr14 * tr23;
 
-	  cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].real();
+//	  cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].real();
 
 	  return 2 * cliff * res;
 	} else {
@@ -229,6 +231,7 @@ void Action::set_params(double g2_, double g4_) {
 }
 void Action::set_g4(double value) { this->g4 = value; }
 void Action::set_g2(double value) { this->g2 = value; }
+
 
 
 

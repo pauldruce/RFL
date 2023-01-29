@@ -5,13 +5,12 @@
 #include <iostream>
 #include <gsl/gsl_rng.h>
 #include <ctime>
-#include <armadillo>
 #include "Geom24.hpp"
 
 int main() {
   // Initialize the random number generator
   gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
-  gsl_rng_set(engine, time(NULL));
+  gsl_rng_set(engine, time(nullptr));
   // Clifford module parameters
   int p = 2;
   int q = 0;

@@ -25,6 +25,8 @@ target_link_libraries(new_RFL ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
 
 install(
         TARGETS new_RFL
-        DESTINATION ${CMAKE_SOURCE_DIR}/lib/new_RFL/bin
+        DESTINATION ${CMAKE_SOURCE_DIR}/lib/${CMAKE_CONFIG}/new_RFL/bin
         PUBLIC_HEADER DESTINATION ${CMAKE_SOURCE_DIR}/lib/new_RFL/include
 )
+
+add_subdirectory(tests)

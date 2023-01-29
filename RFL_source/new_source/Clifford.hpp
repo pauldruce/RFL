@@ -26,8 +26,8 @@ class Clifford {
   int get_p() const { return p; }
   int get_q() const { return q; }
   int get_dim_gamma() const { return dim_gamma; }
-  arma::cx_mat get_gamma(int i) const { return gamma.at(i); }
-  std::vector<arma::cx_mat> get_gamma() const { return gamma; }
+  std::vector<arma::cx_mat> get_gammas() const { return gammas; }
+  arma::cx_mat get_gamma(int i) const { return gammas.at(i); }
   arma::cx_mat get_chiral() const { return chiral; }
   // ============== GET METHODS
 
@@ -40,7 +40,7 @@ class Clifford {
   int p;
   int q;
   int dim_gamma;
-  std::vector<arma::cx_mat> gamma;
+  std::vector<arma::cx_mat> gammas;
   arma::cx_mat chiral;
   void init_gamma();
 

@@ -15,7 +15,7 @@ Clifford::Clifford(int mode) {
 	q = 0;
 	dim_gamma = 1;
 
-	gamma.emplace_back(cx_mat(1, 1, fill::eye));
+	gammas.emplace_back(1, 1, fill::eye);
 	chiral = cx_mat(1, 1, fill::eye);
   }
 	//(0,1)
@@ -27,7 +27,7 @@ Clifford::Clifford(int mode) {
 	cx_double z(0., -1.);
 	cx_mat tmp = cx_mat(1, 1);
 	tmp(0, 0) = z;
-	gamma.push_back(tmp);
+	gammas.push_back(tmp);
 	chiral = cx_mat(1, 1, fill::eye);
   }
 	//(2,0)
@@ -41,12 +41,12 @@ Clifford::Clifford(int mode) {
 	cx_mat tmp1 = cx_mat(2, 2, fill::zeros);
 	tmp1(0, 0) = 1.;
 	tmp1(1, 1) = -1.;
-	gamma.push_back(tmp1);
+	gammas.push_back(tmp1);
 
 	cx_mat tmp2 = cx_mat(2, 2, fill::zeros);
 	tmp2(0, 1) = 1.;
 	tmp2(1, 0) = 1.;
-	gamma.push_back(tmp2);
+	gammas.push_back(tmp2);
 
 	chiral = cx_mat(2, 2, fill::zeros);
 	chiral(0, 1) = z;
@@ -61,12 +61,12 @@ Clifford::Clifford(int mode) {
 	cx_mat tmp1 = cx_mat(2, 2, fill::zeros);
 	tmp1(0, 0) = 1.;
 	tmp1(1, 1) = -1.;
-	gamma.push_back(tmp1);
+	gammas.push_back(tmp1);
 
 	cx_mat tmp2 = cx_mat(2, 2, fill::zeros);
 	tmp2(0, 1) = 1.;
 	tmp2(1, 0) = -1.;
-	gamma.push_back(tmp2);
+	gammas.push_back(tmp2);
 
 	chiral = cx_mat(2, 2, fill::zeros);
 	chiral(0, 1) = 1;
@@ -83,21 +83,24 @@ Clifford::Clifford(int mode) {
 	cx_mat tmp1 = cx_mat(2, 2, fill::zeros);
 	tmp1(0, 0) = z;
 	tmp1(1, 1) = -z;
-	gamma.push_back(tmp1);
+	gammas.push_back(tmp1);
 
 	cx_mat tmp2 = cx_mat(2, 2, fill::zeros);
 	tmp2(0, 1) = 1.;
 	tmp2(1, 0) = -1.;
-	gamma.push_back(tmp2);
+	gammas.push_back(tmp2);
 
 	chiral = cx_mat(2, 2, fill::zeros);
 	chiral(0, 1) = 1.;
 	chiral(1, 0) = 1.;
+  } else {
+	std::string error_message = "Invalid Clifford mode entered: mode = " + std::to_string(mode);
+	throw std::runtime_error(error_message);
   }
 }
 
 Clifford::Clifford(int p_, int q_)
-	: p(p_), q(q_) {
+	: p(p_), q(q_), dim_gamma(0) {
   //(1,0)
   if (p == 1 && q == 0) {
 	(*this) = Clifford(3);
@@ -134,7 +137,7 @@ Clifford::Clifford(const Clifford &C) {
 
   // copy matrices
   for (int i = 0; i < p + q; i++)
-	gamma.push_back(C.get_gamma(i));
+	gammas.push_back(C.get_gamma(i));
 
   chiral = C.get_chiral();
 }
@@ -146,16 +149,26 @@ Clifford &Clifford::operator=(const Clifford &C) {
   dim_gamma = C.get_dim_gamma();
 
   // delete, reallocate and copy matrices
-  gamma.clear();
+  gammas.clear();
   for (int i = 0; i < p + q; i++)
-	gamma.push_back(C.get_gamma(i));
+	gammas.push_back(C.get_gamma(i));
 
   chiral = C.get_chiral();
 
   return *this;
 }
 
+/**
+ * A method to split (p,q) into a combination of the base modes.
+ *
+ * e.g. (5,3) = (2,0) + (2,0) + (0,2) + (1,1)
+ * or   (7,2) = (2,0) + (2,0) + (2,0) + (1,0)
+ * @param p
+ * @param q
+ * @param dec
+ */
 void decomp(int p, int q, int *dec) {
+  int n_20, n_02, n_11, n10, n01;
   if (p) {
 	if (!(p % 2)) {
 	  dec[0] = p / 2;
@@ -193,27 +206,30 @@ void decomp(int p, int q, int *dec) {
 
 // init_gamma gets called only if p+q > 2
 void Clifford::init_gamma() {
+
+  // Decompose the (p,q) into products of the base 5 types (1,0), (0,1),
+  // (2,0), (1,1) and (0,2)
   int dec[5];
   decomp(p, q, dec);
 
   vector<Clifford> vec;
   for (int i = 0; i < 5; ++i) {
-	for (int j = 0; j < dec[i]; ++j)
-	  vec.emplace_back(Clifford(i));
+	for (int j = 0; j < dec[i]; ++j) {
+	  vec.emplace_back(i);
+	}
   }
 
   auto begin = vec.begin();
   auto end = vec.end();
-
   Clifford C1 = (*begin);
-
-  for (auto iter = begin + 1; iter != end; ++iter)
+  for (auto iter = begin + 1; iter != end; ++iter) {
 	C1 *= (*iter);
-
+  }
   (*this) = C1;
 
 }
 
+// TODO: Go through this and make sure it agrees with Lawson+Michelson
 Clifford &Clifford::operator*=(const Clifford &C2) {
   // store C2 frequently used variables
   int p2, q2, dim2;
@@ -236,14 +252,15 @@ Clifford &Clifford::operator*=(const Clifford &C2) {
 
   gamma_.reserve(p + q);
   for (int i = 0; i < p + q; ++i)
-	gamma_.emplace_back(kron(gamma[i], id2));
+	gamma_.emplace_back(kron(gammas[i], id2));
   for (int i = 0; i < p2 + q2; ++i)
 	gamma_.emplace_back(kron(chiral, C2.get_gamma(i)));
 
 
   // compute chirality
   int s2 = (q2 - p2 + 8 * p2) % 8;  // +8*p2 is necessary becase % does not mean modulo for negative numbers
-  if ((s2 % 8) % 2) {
+  bool s2_even = (s2 % 8) % 2 == 0;
+  if (!s2_even) {
 	int s = (q - p + 8 * p) % 8;
 	cx_mat id1(dim_gamma, dim_gamma, fill::eye);
 	if ((s == 2) || (s == 6)) {
@@ -259,11 +276,10 @@ Clifford &Clifford::operator*=(const Clifford &C2) {
   p = p_;
   q = q_;
   dim_gamma = dim_gamma_;
-  gamma.clear();
-//   for (auto iter = gamma_.begin(); iter != gamma_.end(); ++iter)
-//      gamma.push_back((*iter));
+  gammas.clear();
+
   for (const auto &v : gamma_)
-	gamma.push_back(v);
+	gammas.push_back(v);
 
   return (*this);
 }
@@ -279,6 +295,6 @@ bool hermiticity(const cx_mat &M1, const cx_mat &M2) {
 }
 
 void Clifford::sort_gamma() {
-  sort(gamma.begin(), gamma.end(), hermiticity);
+  sort(gammas.begin(), gammas.end(), hermiticity);
 }
 

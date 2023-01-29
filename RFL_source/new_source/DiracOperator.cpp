@@ -13,7 +13,7 @@ DiracOperator::DiracOperator(int p, int q, int dim_) : dim(dim_) {
 
   // create a type (p, q) clifford module
   Clifford C(p, q);
-  vector<cx_mat> gamma = C.get_gamma();
+  vector<cx_mat> gamma = C.get_gammas();
   this->dim_omega = C.get_dim_gamma();
 
   vector<cx_mat> herm;
@@ -147,27 +147,27 @@ cx_mat DiracOperator::build_dirac() const {
   return dirac;
 }
 
-//void DiracOperator::print_omega_table_4() const {
-//  const int n = (int)pow(nHL, 4);
-//
-//  for (int i = 0; i < n; ++i) {
-//	cx_double z = omega_table_4[i];
-//	if (z != cx_double(0., 0.)) {
-//	  int e = 1;
-//	  vector<int> prod = base_conversion(i, nHL, 4);
-//	  //            vector<int>::const_iterator end(prod.end());
-//	  //            for (vector<int>::const_iterator iter = prod.begin(); iter != end; ++iter) {
-//	  //                cout << (*iter) << " ";
-//	  //                e *= eps[(*iter)];
-//	  //            }
-//	  for (const auto &p : prod) {
-//		cout << p << " ";
-//		e *= eps[p];
-//	  }
-//	  cout << " " << omega_table_4[i] << e << endl;
-//	}
-//  }
-//}
+void DiracOperator::print_omega_table_4() const {
+  const int n = (int)pow(nHL, 4);
+
+  for (int i = 0; i < n; ++i) {
+	cx_double z = omega_table_4[i];
+	if (z != cx_double(0., 0.)) {
+	  int e = 1;
+	  vector<int> prod = base_conversion(i, nHL, 4);
+	  //            vector<int>::const_iterator end(prod.end());
+	  //            for (vector<int>::const_iterator iter = prod.begin(); iter != end; ++iter) {
+	  //                cout << (*iter) << " ";
+	  //                e *= eps[(*iter)];
+	  //            }
+	  for (const auto &p : prod) {
+		cout << p << " ";
+		e *= eps[p];
+	  }
+	  cout << " " << omega_table_4[i] << e << endl;
+	}
+  }
+}
 
 void DiracOperator::init_omega_table_4() {
   this->omega_table_4 = new cx_double[nHL * nHL * nHL * nHL];
@@ -366,5 +366,41 @@ cx_mat DiracOperator::compute_B(const int &k) const {
   res += 3 * eps[k] * tr1 * M2;
 
   return 2 * dim_omega * res;
+}
+
+void DiracOperator::randomise(gsl_rng *engine) {
+  for (int i = 0; i < nHL; ++i) {
+	// loop on indices
+	for (int j = 0; j < dim; ++j) {
+	  double x;
+	  x = gsl_ran_gaussian(engine, 1.);
+	  mat[i](j, j) = cx_double(x, 0.);
+
+	  for (int k = j + 1; k < dim; ++k) {
+		double a, b;
+		a = gsl_ran_gaussian(engine, 1.);
+		b = gsl_ran_gaussian(engine, 1.);
+		mat[i](j, k) = cx_double(a, b) / sqrt(2.);
+		mat[i](k, j) = cx_double(a, -b) / sqrt(2.);
+	  }
+	}
+  }
+
+  for (int i = 0; i < nHL; ++i) {
+	// loop on indices
+	for (int j = 0; j < dim; ++j) {
+	  double x;
+	  x = gsl_ran_gaussian(engine, 1.);
+	  mom[i](j, j) = cx_double(x, 0.);
+
+	  for (int k = j + 1; k < dim; ++k) {
+		double a, b;
+		a = gsl_ran_gaussian(engine, 1.);
+		b = gsl_ran_gaussian(engine, 1.);
+		mom[i](j, k) = cx_double(a, b) / sqrt(2.);
+		mom[i](k, j) = cx_double(a, -b) / sqrt(2.);
+	  }
+	}
+  }
 }
 

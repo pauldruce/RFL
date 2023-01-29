@@ -13,18 +13,15 @@ class Metropolis {
  public:
   Metropolis() = default;
 
-  double delta24(const DiracOperator &D,
-				 const Action &A,
-				 const int &x,
-				 const int &I,
-				 const int &J,
-				 const arma::cx_double &z) const;
 // MMC routine that doesn't perform dual averaging
   double MMC(const DiracOperator &D,
 			 const Action &A,
 			 const double &scale,
 			 const int &iter,
 			 gsl_rng *engine) const;
+
+
+ private:
   // MMC routine that performs dual averaging
   void MMC_duav(const DiracOperator &D,
 				const Action &A,
@@ -33,7 +30,13 @@ class Metropolis {
 				gsl_rng *engine,
 				const double &target) const;
 
- private:
+  double delta24(const DiracOperator &D,
+				 const Action &A,
+				 const int &x,
+				 const int &I,
+				 const int &J,
+				 const arma::cx_double &z) const;
+
   double delta2(const DiracOperator &D,
 				const Action &A,
 				const int &x,
