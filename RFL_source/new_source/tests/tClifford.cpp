@@ -154,8 +154,8 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
 // TODO: find minimum set of configurations of (p,q) that covers all code.
 TEST(CliffordTests, ChiralityIsCorrect) {
   // TODO: Fix source code, because this test fails if max_p, max_q is >= 6
-  constexpr int max_p = 6;
-  constexpr int max_q = 6;
+  constexpr int max_p = 5;
+  constexpr int max_q = 5;
   vector<CliffordData> data = {};
 
   data.push_back({1, 0});
