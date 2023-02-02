@@ -2,9 +2,7 @@
 // Created by Paul Druce on 09/12/2022.
 //
 #include <iostream>
-#include <fstream>
 #include <ctime>
-#include <armadillo>
 #include <gsl/gsl_rng.h>
 #include "Geom24.hpp"
 
