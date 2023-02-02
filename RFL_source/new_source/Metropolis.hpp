@@ -6,22 +6,35 @@
 #define RFL_RFL_SOURCE_NEW_SOURCE_METROPOLIS_HPP_
 
 #include <armadillo>
-#include "DiracOperator.hpp"
-#include "Action.hpp"
+#include "IAlgorithm.hpp"
 
-class Metropolis {
+class Metropolis : public IAlgorithm {
  public:
   Metropolis() = default;
 
-// MMC routine that doesn't perform dual averaging
+  void setParams(const double scale, const int iter, gsl_rng *engine){
+	this->scale = scale;
+	this->iter = iter;
+	this->engine = engine;
+  }
+
+  double updateDirac(const DiracOperator &D, const Action &A) const override {
+	return this->MMC(D,A,this->scale, this->iter, this->engine);
+  }
+
+ private:
+  double value;
+  double scale;
+  int iter;
+  gsl_rng *engine;
+
+  // MMC routine that doesn't perform dual averaging
   double MMC(const DiracOperator &D,
 			 const Action &A,
 			 const double &scale,
 			 const int &iter,
 			 gsl_rng *engine) const;
 
-
- private:
   // MMC routine that performs dual averaging
   void MMC_duav(const DiracOperator &D,
 				const Action &A,

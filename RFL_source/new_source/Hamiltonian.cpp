@@ -10,7 +10,7 @@ using namespace std;
 using namespace arma;
 
 void Hamiltonian::sample_mom(const DiracOperator &D,
-							 gsl_rng *engine) {
+							 gsl_rng *engine) const {
   auto *mom = D.get_moms();
   for (int i = 0; i < D.nHL; ++i) {
 	// loop on indices
@@ -30,7 +30,7 @@ void Hamiltonian::sample_mom(const DiracOperator &D,
   }
 }
 
-double Hamiltonian::calculate_K(const DiracOperator &D) {
+double Hamiltonian::calculate_K(const DiracOperator &D) const {
   double res = 0;
   auto *mom = D.get_moms();
 
@@ -40,11 +40,11 @@ double Hamiltonian::calculate_K(const DiracOperator &D) {
   return res / 2;
 }
 
-double Hamiltonian::calculate_H(const DiracOperator &D, const Action &A) {
+double Hamiltonian::calculate_H(const DiracOperator &D, const Action &A) const {
   return A.calculate_S(D) + calculate_K(D);
 }
 
-void Hamiltonian::leapfrog(const DiracOperator &D, const int &Nt, const double &dt, const double g2) {
+void Hamiltonian::leapfrog(const DiracOperator &D, const int &Nt, const double &dt, const double g2) const {
   auto *mat = D.get_mats();
   auto *mom = D.get_moms();
 
@@ -61,7 +61,7 @@ void Hamiltonian::leapfrog(const DiracOperator &D, const int &Nt, const double &
   }
 }
 
-void Hamiltonian::omelyan(const DiracOperator &D, const int &Nt, const double &dt, const double g2) {
+void Hamiltonian::omelyan(const DiracOperator &D, const int &Nt, const double &dt, const double g2) const {
   double xi = 0.1931833;
 
   auto *mat = D.get_mats();
@@ -91,7 +91,7 @@ void Hamiltonian::run_HMC_duav(const DiracOperator &D,
 							   const int &iter,
 							   gsl_rng *engine,
 							   const double &target,
-							   const string &integrator) {
+							   const string &integrator) const{
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto *en_i = new double[4];
   auto *en_f = new double[4];
@@ -140,7 +140,7 @@ double Hamiltonian::run_HMC(const DiracOperator &D,
 							const double &dt,
 							const int &iter,
 							gsl_rng *engine,
-							const string &integrator) {
+							const string &integrator) const {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto *en_i = new double[4];
   auto *en_f = new double[4];
@@ -177,7 +177,7 @@ double Hamiltonian::run_HMC(const DiracOperator &D,
 							const double &dt_max,
 							const int &iter,
 							gsl_rng *engine,
-							const string &integrator) {
+							const string &integrator) const {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto *en_i = new double[4];
   auto *en_f = new double[4];
@@ -215,7 +215,7 @@ double Hamiltonian::run_HMC_duav_core(const DiracOperator &D,
 									  gsl_rng *engine,
 									  double *en_i,
 									  double *en_f,
-									  const string &integrator) {
+									  const string &integrator) const {
   // acceptance probability (return value)
   double e = 1;
 
@@ -289,7 +289,7 @@ double Hamiltonian::run_HMC_core(const DiracOperator &D,
 								 gsl_rng *engine,
 								 double *en_i,
 								 double *en_f,
-								 const string &integrator) {
+								 const string &integrator) const  {
   // acceptance probability (return value)
   double e = 1;
 
@@ -347,7 +347,7 @@ double Hamiltonian::run_HMC_core_debug(const DiracOperator &D,
 									   const int &Nt,
 									   const double &dt,
 									   gsl_rng *engine,
-									   const string &integrator) {
+									   const string &integrator) const {
   // exp(-dH) (return value)
   double e;
 
@@ -404,7 +404,7 @@ double Hamiltonian::run_HMC_core(const DiracOperator &D,
 								 gsl_rng *engine,
 								 double *en_i,
 								 double *en_f,
-								 const string &integrator) {
+								 const string &integrator) const {
   // acceptance probability (return value)
   double e = 1;
 
@@ -459,3 +459,8 @@ double Hamiltonian::run_HMC_core(const DiracOperator &D,
 
   return e;
 }
+
+void Hamiltonian::setStepSize(double dt_) {this-> dt = dt_;}
+void Hamiltonian::setIntegrator(Integrator integrator_) {this->integrator = integrator_;}
+void Hamiltonian::setEngine(gsl_rng *engine_) { this->engine = engine_;}
+

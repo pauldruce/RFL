@@ -80,7 +80,9 @@ Most C/C++ IDEs will have CMake capabilities. However, to build this project man
    cmake ..
 
    # Another handy version of the cmake command is:
+   # Run from the root directory. 
    cmake -B ./build .
+   
    ```
 
 3. Build the project. This can be done by manually calling `make` or its equivalent in the `build` directory. Or CMake

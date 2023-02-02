@@ -1,4 +1,4 @@
-add_library(new_RFL STATIC)
+add_library(new_RFL STATIC IAlgorithm.hpp)
 
 set(new_RFL_HEADERS
         Action.hpp

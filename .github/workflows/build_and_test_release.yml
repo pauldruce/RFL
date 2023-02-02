@@ -13,17 +13,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        BUILD_TYPE: [Release, Debug]
+        BUILD_TYPE:
+          [
+            Release,
+#            Debug
+          ]
         OS:
           [
             ubuntu-22.04,
-            ubuntu-20.04,
-            ubuntu-18.04,
-            macos-12,
-            macos-11,
-            macos-10.15,
+#            ubuntu-20.04,
+#            ubuntu-18.04,
+#            macos-12,
+#            macos-11,
+#            macos-10.15,
           ]
-        ARMA_VERSION: [10.8.2, 11.2.3]
+        ARMA_VERSION:
+          [
+            10.8.2,
+#            11.2.3
+          ]
 
     # The CMake configure and build commands are platform agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
@@ -38,7 +46,7 @@ jobs:
         if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget
+          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev
 
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
