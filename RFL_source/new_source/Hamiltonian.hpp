@@ -16,12 +16,12 @@ enum Integrator {
 
 class Hamiltonian : public IAlgorithm {
  public:
-  Hamiltonian(Integrator integrator, gsl_rng* engine, double step_size);
+  Hamiltonian(Integrator integrator, const gsl_rng* engine, double step_size);
 
-  double updateDirac(const DiracOperator &D, const Action &A) const override;;
+  double updateDirac(const DiracOperator &D, const Action &A) const override;
 
-  void setEngine(gsl_rng *engine);
-  gsl_rng* getEngine() const { return this->engine; };
+  void setEngine(const gsl_rng *engine);
+  const gsl_rng* getEngine() const { return this->engine; };
 
   void setIntegrator(Integrator integrator);
   Integrator getIntegrator() const { return this->integrator; };
@@ -31,7 +31,7 @@ class Hamiltonian : public IAlgorithm {
 
  private:
   Integrator integrator = Integrator::leapfrog;
-  gsl_rng *engine;
+  const gsl_rng *engine;
   double dt;
 
   // This method seems to be the initialiser for the mom variables in DiracOperator

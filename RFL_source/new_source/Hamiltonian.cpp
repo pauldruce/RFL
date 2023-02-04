@@ -448,11 +448,11 @@ void Hamiltonian::setStepSize(double dt_) {
   this-> dt = dt_;
 }
 void Hamiltonian::setIntegrator(Integrator integrator_) {this->integrator = integrator_;}
-void Hamiltonian::setEngine(gsl_rng *engine_) {
+void Hamiltonian::setEngine(const gsl_rng *engine_) {
   this->engine = engine_;
 }
 
-Hamiltonian::Hamiltonian(Integrator integrator, gsl_rng* engine, double step_size)
+Hamiltonian::Hamiltonian(Integrator integrator, const gsl_rng* engine, double step_size)
 : integrator(integrator), engine(engine), dt(step_size){
 
 }
