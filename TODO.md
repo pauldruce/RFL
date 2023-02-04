@@ -1,1 +1,6 @@
-- [ ] Create some demo apps to showcase how to create and run a simple simulation with
+- [ ] Create some demo apps to showcase how to create and run a simple simulation with the new library
+- [ ] Unit tests for:
+  - [ ] Hamiltonian Class
+  - [ ] Metropolis Class
+  - [ ] Simulation -> likely an end-to-end test of some description.
+    - Look into how we should test the random-ness. How do we set a seed for this in a way that we can use in testing. 
