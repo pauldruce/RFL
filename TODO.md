@@ -4,4 +4,5 @@
   - [ ] Metropolis Class
   - [ ] Simulation -> likely an end-to-end test of some description.
     - Look into how we should test the random-ness. How do we set a seed for this in a way that we can use in testing.
-- [ ]  Create an interface for the random number generator and wrapp the gsl methods we use in a class.
+- [ ]  Create an interface for the random number generator and wrap the gsl methods we use in a class.
+- [ ] Transfer methods that can be made static in Action to more appropriate place

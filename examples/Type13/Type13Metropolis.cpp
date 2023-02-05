@@ -15,7 +15,7 @@ int main() {
 
   for (int i = 0; i < 10; i++) {
     Sim.run();
-    A.print_S(D, std::cout);
+    A.printS(D, std::cout);
   }
   return 0;
 }

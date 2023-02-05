@@ -13,7 +13,7 @@ double Metropolis::delta24(const DiracOperator& D,
                            const int& I,
                            const int& J,
                            const cx_double& z) const {
-  return A.get_g2() * delta2(D, x, I, J, z) + delta4(D, x, I, J, z);
+  return A.getG2() * delta2(D, x, I, J, z) + delta4(D, x, I, J, z);
 }
 
 double Metropolis::delta2(const DiracOperator& D,
@@ -383,7 +383,7 @@ double Metropolis::MMC_duav_core(const DiracOperator& D,
 
   double dS2 = delta2(D, x, I, J, z);
   double dS4 = delta4(D, x, I, J, z);
-  double dS = A.get_g2() * dS2 + dS4;
+  double dS = A.getG2() * dS2 + dS4;
 
   auto* mat = D.get_mats();
   // metropolis test
@@ -454,7 +454,7 @@ double Metropolis::MMC_core(const DiracOperator& D,
 
   double dS2 = delta2(D, x, I, J, z);
   double dS4 = delta4(D, x, I, J, z);
-  double dS = A.get_g2() * dS2 + dS4;
+  double dS = A.getG2() * dS2 + dS4;
 
   auto* mat = D.get_mats();
   // metropolis test

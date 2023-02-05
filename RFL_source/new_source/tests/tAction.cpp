@@ -15,9 +15,9 @@ static void CompareActions(int p, int q, int dim, double g2) {
     D.randomise(engine);
     double d2 = D.dim * D.dim;
 
-    auto S1 = A.calculate_S(D) / d2;
+    auto S1 = A.calculateS(D) / d2;
 
-    auto S2 = A.calculate_S_from_dirac(D) / d2;
+    auto S2 = A.calculateSFromDirac(D) / d2;
 
     EXPECT_TRUE(fabs(S1 - S2) < 1e-8) << "Methods differ more then 1e-8";
   }
@@ -47,42 +47,42 @@ TEST(ActionTests, ActionMethodsDontDiffer) {
 TEST(ActionTests, Set_g2) {
   const double initial_g2 = 1.1;
   Action A(initial_g2);
-  EXPECT_EQ(A.get_g2(), initial_g2);
+  EXPECT_EQ(A.getG2(), initial_g2);
 
   const double new_g2 = -3.4;
-  A.set_g2(new_g2);
-  EXPECT_EQ(A.get_g2(), new_g2);
+  A.setG2(new_g2);
+  EXPECT_EQ(A.getG2(), new_g2);
 }
 
 TEST(ActionTests, Set_g4) {
   const double initial_g4 = 1.1;
   Action A(1.0, initial_g4);
-  EXPECT_EQ(A.get_g4(), initial_g4);
+  EXPECT_EQ(A.getG4(), initial_g4);
 
   const double new_g4 = -3.4;
-  A.set_g4(new_g4);
-  EXPECT_EQ(A.get_g4(), new_g4);
+  A.setG4(new_g4);
+  EXPECT_EQ(A.getG4(), new_g4);
 }
 
 TEST(ActionTests, SetParameters) {
   const double initial_g2 = 1.1, initial_g4 = 2.2;
   Action A(initial_g2, initial_g4);
 
-  EXPECT_EQ(A.get_g2(), initial_g2);
-  EXPECT_EQ(A.get_g4(), initial_g4);
+  EXPECT_EQ(A.getG2(), initial_g2);
+  EXPECT_EQ(A.getG4(), initial_g4);
 
   const double new_g2 = -5.0, new_g4 = 7.2;
-  A.set_params(new_g2, new_g4);
+  A.setParams(new_g2, new_g4);
 
-  EXPECT_EQ(A.get_g2(), new_g2);
-  EXPECT_EQ(A.get_g4(), new_g4);
+  EXPECT_EQ(A.getG2(), new_g2);
+  EXPECT_EQ(A.getG4(), new_g4);
 }
 
 TEST(ActionTests, CreateWithNoParams) {
   EXPECT_NO_THROW(
       Action A;
-      EXPECT_EQ(A.get_g2(), 0);
-      EXPECT_EQ(A.get_g4(), 0););
+      EXPECT_EQ(A.getG2(), 0);
+      EXPECT_EQ(A.getG4(), 0););
 }
 
 TEST(ActionTests, PrintAction) {
@@ -90,7 +90,7 @@ TEST(ActionTests, PrintAction) {
   Action A(2.0, 4.0);
 
   std::stringstream capturedStream;
-  A.print_S(D, capturedStream);
+  A.printS(D, capturedStream);
 
   EXPECT_EQ(capturedStream.str(), "200 800\n");
 }

@@ -40,7 +40,7 @@ double Hamiltonian::calculateK(const DiracOperator& dirac) const {
 }
 
 double Hamiltonian::calculateH(const DiracOperator& dirac, const Action& action) const {
-  return action.calculate_S(dirac) + calculateK(dirac);
+  return action.calculateS(dirac) + calculateK(dirac);
 }
 
 void Hamiltonian::leapfrog(const DiracOperator& dirac,
@@ -221,20 +221,20 @@ double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
 
   // calculate initial hamiltonian
   en_i[2] = calculateK(dirac);
-  en_i[3] = action.get_g2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = action.getG2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.get_g2());
+    leapfrog(dirac, nt, action.getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.get_g2());
+    omelyan(dirac, nt, action.getG2());
   }
 
   // calculate final hamiltonian
   en_f[0] = action.dirac2(dirac);
   en_f[1] = action.dirac4(dirac);
   en_f[2] = calculateK(dirac);
-  en_f[3] = action.get_g2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
 
@@ -291,20 +291,20 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
 
   // calculate initial hamiltonian
   en_i[2] = calculateK(dirac);
-  en_i[3] = action.get_g2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = action.getG2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.get_g2());
+    leapfrog(dirac, nt, action.getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.get_g2());
+    omelyan(dirac, nt, action.getG2());
   }
 
   // calculate final hamiltonian
   en_f[0] = action.dirac2(dirac);
   en_f[1] = action.dirac4(dirac);
   en_f[2] = calculateK(dirac);
-  en_f[3] = action.get_g2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
@@ -344,19 +344,19 @@ double Hamiltonian::runHmcCoreDebug(const DiracOperator& dirac,
   }
 
   // calculate initial hamiltonian
-  double initial_S = action.calculate_S(dirac);
+  double initial_S = action.calculateS(dirac);
   double initial_K = calculateK(dirac);
   double initial_hamiltonian = initial_S + initial_K;
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.get_g2());
+    leapfrog(dirac, nt, action.getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.get_g2());
+    omelyan(dirac, nt, action.getG2());
   }
 
   // calculate final hamiltonian
-  double final_S = action.calculate_S(dirac);
+  double final_S = action.calculateS(dirac);
   double final_K = calculateK(dirac);
   double final_hamiltonian = final_S + final_K;
 
@@ -403,20 +403,20 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
 
   // calculate initial hamiltonian
   en_i[2] = calculateK(dirac);
-  en_i[3] = action.get_g2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = action.getG2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.get_g2());
+    leapfrog(dirac, nt, action.getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.get_g2());
+    omelyan(dirac, nt, action.getG2());
   }
 
   // calculate final hamiltonian
   en_f[0] = action.dirac2(dirac);
   en_f[1] = action.dirac4(dirac);
   en_f[2] = calculateK(dirac);
-  en_f[3] = action.get_g2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
