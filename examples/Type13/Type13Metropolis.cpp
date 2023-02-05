@@ -14,8 +14,8 @@ int main() {
   Simulation Sim(D, A, M);
 
   for (int i = 0; i < 10; i++) {
-	Sim.run();
-	A.print_S(D, std::cout);
+    Sim.run();
+    A.print_S(D, std::cout);
   }
   return 0;
 }
