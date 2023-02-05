@@ -1,8 +1,8 @@
-#include <iostream>
-#include <ctime>
-#include <armadillo>
-#include <gsl/gsl_rng.h>
 #include "Geom24.hpp"
+#include <armadillo>
+#include <ctime>
+#include <gsl/gsl_rng.h>
+#include <iostream>
 
 using namespace std;
 using namespace arma;
@@ -10,9 +10,8 @@ using namespace arma;
 #define N 100
 
 int main() {
-  gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
   gsl_rng_set(engine, time(nullptr));
-
 
   // create geometry
   cout << "insert p, q, dim, g2" << endl;
@@ -34,8 +33,8 @@ int main() {
   cout << "initial potential|kinetic|energy: " << Si << "|" << Ki << "|" << Si + Ki << endl;
   cout << "final   potential|kinetic|energy: " << Sf << "|" << Kf << "|" << Sf + Kf << endl;
   for (int i = 0; i < G.get_nHL(); ++i) {
-	cout << "mat[" + to_string(i) + "]: " << approx_equal(G_old.get_mat(i), G.get_mat(i), "absdiff", 0.001) << endl;
-	cout << "mom[" + to_string(i) + "]: " << approx_equal(G_old.get_mom(i), G.get_mom(i), "absdiff", 0.001) << endl;
+    cout << "mat[" + to_string(i) + "]: " << approx_equal(G_old.get_mat(i), G.get_mat(i), "absdiff", 0.001) << endl;
+    cout << "mom[" + to_string(i) + "]: " << approx_equal(G_old.get_mom(i), G.get_mom(i), "absdiff", 0.001) << endl;
   }
 
   return 0;

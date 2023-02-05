@@ -1,5 +1,5 @@
-#include <iostream>
 #include "Geom24.hpp"
+#include <iostream>
 
 using namespace std;
 

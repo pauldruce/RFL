@@ -1,11 +1,11 @@
-#include <iostream>
-#include <fstream>
-#include <iomanip>
+#include "Geom24.hpp"
+#include <armadillo>
 #include <cstdlib>
 #include <ctime>
-#include <armadillo>
+#include <fstream>
 #include <gsl/gsl_rng.h>
-#include "Geom24.hpp"
+#include <iomanip>
+#include <iostream>
 
 using namespace std;
 using namespace arma;
@@ -14,7 +14,7 @@ using namespace arma;
 #define M 5
 
 int main() {
-  gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
   gsl_rng_set(engine, time(NULL));
 
   // create geometry
@@ -34,9 +34,9 @@ int main() {
 
   vec O(N);
   for (int j = 0; j < N; ++j) {
-	double o = G.HMC_core_debug(10, dt, engine);
+    double o = G.HMC_core_debug(10, dt, engine);
 
-	O(j) = o;
+    O(j) = o;
   }
   cout << "avg exp(-dH): " << mean(O) << endl;
 

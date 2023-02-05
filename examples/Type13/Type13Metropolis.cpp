@@ -13,10 +13,8 @@ int main() {
   Metropolis M;
   Simulation Sim(D, A, M);
 
-  const int stepSize = 100;
-  const double scale = 0.05;
   for (int i = 0; i < 10; i++) {
-	Sim.run(scale, stepSize);
+	Sim.run();
 	A.print_S(D, std::cout);
   }
   return 0;

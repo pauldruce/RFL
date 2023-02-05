@@ -5,30 +5,27 @@
 #include <vector>
 
 class Cliff {
- public:
-
+public:
   // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
   explicit Cliff(int mode);
 
   Cliff(int p, int q);
 
-  Cliff(const Cliff &C);
+  Cliff(const Cliff& C);
 
-  Cliff &operator=(const Cliff &C);
+  Cliff& operator=(const Cliff& C);
 
-  ~Cliff() = default;;
+  ~Cliff() = default;
   // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
 
-
   // ============== OPERATORS
-  Cliff &operator*=(const Cliff &C);
+  Cliff& operator*=(const Cliff& C);
 
-  friend Cliff operator*(Cliff C1, const Cliff &C2) {
-	C1 *= C2;
-	return C1;
+  friend Cliff operator*(Cliff C1, const Cliff& C2) {
+    C1 *= C2;
+    return C1;
   }
   // ============== OPERATORS
-
 
   // ============== GET METHODS
   int get_p() const { return p; }
@@ -44,15 +41,11 @@ class Cliff {
   arma::cx_mat get_chiral() const { return chiral; }
   // ============== GET METHODS
 
-
   // ============== OTHER METHODS
   void sort_gamma();
   // ============== OTHER METHODS
 
-
-
- private:
-
+private:
   int p;
   int q;
 
@@ -62,14 +55,12 @@ class Cliff {
   arma::cx_mat chiral;
 
   void init_gamma();
-
 };
 
-std::ostream &operator<<(std::ostream &out, const Cliff &C);
+std::ostream& operator<<(std::ostream& out, const Cliff& C);
 
 //void decomp(int p, int q, int &dec);
 
-bool hermiticity(const arma::cx_mat &M1, const arma::cx_mat &M2);
+bool hermiticity(const arma::cx_mat& M1, const arma::cx_mat& M2);
 
 #endif
-

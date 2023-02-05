@@ -1,19 +1,18 @@
-#include <iostream>
-#include <fstream>
-#include <iomanip>
+#include "Geom24.hpp"
+#include <armadillo>
 #include <cstdlib>
 #include <ctime>
-#include <armadillo>
+#include <fstream>
 #include <gsl/gsl_rng.h>
-#include "Geom24.hpp"
+#include <iomanip>
+#include <iostream>
 
 using namespace std;
 using namespace arma;
 
 int main() {
-  gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
   gsl_rng_set(engine, time(NULL));
-
 
   // create geometry
   cout << "insert p, q, dim, g2" << endl;
