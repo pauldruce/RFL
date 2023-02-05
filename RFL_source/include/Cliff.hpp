@@ -1,5 +1,5 @@
-#ifndef CLIFFORD_HPP
-#define CLIFFORD_HPP
+#ifndef RFL_CLIFFORD_HPP
+#define RFL_CLIFFORD_HPP
 
 #include <armadillo>
 #include <vector>
@@ -61,6 +61,6 @@ std::ostream& operator<<(std::ostream& out, const Cliff& C);
 
 //void decomp(int p, int q, int &dec);
 
-bool hermiticity(const arma::cx_mat& M1, const arma::cx_mat& M2);
+bool areHermitian(const arma::cx_mat& m_1, const arma::cx_mat& m_2);
 
 #endif

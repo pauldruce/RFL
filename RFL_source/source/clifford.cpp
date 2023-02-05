@@ -269,10 +269,10 @@ ostream& operator<<(ostream& out, const Cliff& C) {
   return out;
 }
 
-bool hermiticity(const cx_mat& M1, const cx_mat& M2) {
+bool areHermitian(const cx_mat& M1, const cx_mat& M2) {
   return (!(M2.is_hermitian()) && M1.is_hermitian());
 }
 
 void Cliff::sort_gamma() {
-  sort(gamma.begin(), gamma.end(), hermiticity);
+  sort(gamma.begin(), gamma.end(), areHermitian);
 }

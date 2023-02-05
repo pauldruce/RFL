@@ -1,5 +1,5 @@
-#ifndef CLIFFORD_HPP
-#define CLIFFORD_HPP
+#ifndef RFL_CLIFFORD_HPP
+#define RFL_CLIFFORD_HPP
 
 #include <armadillo>
 #include <vector>
@@ -9,43 +9,42 @@ public:
   // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
   explicit Clifford(int mode);
   Clifford(int p, int q);
-  Clifford(const Clifford& C);
-  Clifford& operator=(const Clifford& C);
+  Clifford(const Clifford& clifford_to_copy);
+  Clifford& operator=(const Clifford& clifford_to_copy);
   ~Clifford() = default;
   // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
 
   // ============== OPERATORS
-  Clifford& operator*=(const Clifford& C);
-  friend Clifford operator*(Clifford C1, const Clifford& C2) {
-    C1 *= C2;
-    return C1;
+  Clifford& operator*=(const Clifford& clifford_2);
+  friend Clifford operator*(Clifford c_1, const Clifford& c_2) {
+    c_1 *= c_2;
+    return c_1;
   }
   // ============== OPERATORS
 
   // ============== GET METHODS
-  int get_p() const { return p; }
-  int get_q() const { return q; }
-  int get_dim_gamma() const { return dim_gamma; }
-  std::vector<arma::cx_mat> get_gammas() const { return gammas; }
-  arma::cx_mat get_gamma(int i) const { return gammas.at(i); }
-  arma::cx_mat get_chiral() const { return chiral; }
+  int getP() const { return m_p; }
+  int getQ() const { return m_q; }
+  int getGammaDimension() const { return m_dim_gamma; }
+  std::vector<arma::cx_mat> getGammaMatrices() const { return m_gammas; }
+  arma::cx_mat getGammaAtIndex(int i) const { return m_gammas.at(i); }
+  arma::cx_mat getChiral() const { return m_chiral; }
   // ============== GET METHODS
 
   // ============== OTHER METHODS
-  void sort_gamma();
+  void sortGammas();
   // ============== OTHER METHODS
 
 private:
-  int p;
-  int q;
-  int dim_gamma;
-  std::vector<arma::cx_mat> gammas;
-  arma::cx_mat chiral;
-  void init_gamma();
+  int m_p;
+  int m_q;
+  int m_dim_gamma;
+  std::vector<arma::cx_mat> m_gammas;
+  arma::cx_mat m_chiral;
+  void initGammas();
 };
 
-std::ostream& operator<<(std::ostream& out, const Clifford& C);
-//void decomp(int p, int q, int &dec);
-bool hermiticity(const arma::cx_mat& M1, const arma::cx_mat& M2);
+std::ostream& operator<<(std::ostream& out, const Clifford& clifford);
+bool areHermitian(const arma::cx_mat& m_1, const arma::cx_mat& m_2);
 
 #endif

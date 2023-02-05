@@ -36,14 +36,14 @@ TEST(CliffordTests, GetP) {
   for (int p = 1; p < 8; p++) {
     Clifford C(p, 1);
 
-    EXPECT_EQ(p, C.get_p());
+    EXPECT_EQ(p, C.getP());
   }
 }
 
 TEST(CliffordTests, GetQ) {
   for (int q = 1; q < 8; q++) {
     Clifford C(1, q);
-    EXPECT_EQ(q, C.get_q());
+    EXPECT_EQ(q, C.getQ());
   }
 }
 
@@ -65,7 +65,7 @@ TEST(CliffordTests, GetDimGamma) {
       {3, 3, 8}};
   for (auto& d : data) {
     Clifford cliff(d.p, d.q);
-    EXPECT_EQ(d.dim_gamma, cliff.get_dim_gamma()) << "(p,q) = (" << d.p << "," << d.q << ")";
+    EXPECT_EQ(d.dim_gamma, cliff.getGammaDimension()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
 
@@ -87,7 +87,7 @@ TEST(CliffordTests, GetGammas) {
 
   for (auto& d : data) {
     Clifford cliff(d.p, d.q);
-    EXPECT_EQ(d.num_gammas, cliff.get_gammas().size()) << "(p,q) = (" << d.p << "," << d.q << ")";
+    EXPECT_EQ(d.num_gammas, cliff.getGammaMatrices().size()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
 
@@ -104,7 +104,7 @@ TEST(CliffordTests, GammasHaveCorrectHermiticity) {
   for (const auto& d : data) {
     Clifford C(d.p, d.q);
 
-    auto gammas = C.get_gammas();
+    auto gammas = C.getGammaMatrices();
     std::vector<arma::cx_mat> herm_gammas(gammas.begin(), gammas.begin() + d.p);
     std::vector<arma::cx_mat> anti_herm_gammas(gammas.begin() + d.p, gammas.end());
 
@@ -138,10 +138,10 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
     int expect_dim = 1 << exponent;
 
     // Easy check
-    EXPECT_EQ(expect_dim, C.get_dim_gamma());
+    EXPECT_EQ(expect_dim, C.getGammaDimension());
 
     // Explicit check for all gammas
-    auto gammas = C.get_gammas();
+    auto gammas = C.getGammaMatrices();
     for (auto& g : gammas) {
       ASSERT_EQ(g.n_rows, g.n_cols)
                   << "Gamma matrices not squarefailed for (p,q) = (" << d.p << "," << d.q << ")";
@@ -168,8 +168,8 @@ TEST(CliffordTests, ChiralityIsCorrect) {
   for (auto& d : data) {
     Clifford C(d.p, d.q);
     int s = (d.q - d.p + 8 * d.p) % 8;// Need to add 8*p because % does behave for negative values.
-    auto gammas = C.get_gammas();
-    auto chirality = C.get_chiral();
+    auto gammas = C.getGammaMatrices();
+    auto chirality = C.getChiral();
 
     int exponent = (int)s * (s + 1) / 2;
     arma::cx_mat gammas_producted = arma::eye<arma::cx_mat>(gammas[0].n_rows, gammas[0].n_cols);
@@ -195,8 +195,8 @@ TEST(CliffordTests, CliffordModuleInlineMultiplication) {
 
   C1 *= C2;
 
-  EXPECT_EQ(C1.get_p(), 3);
-  EXPECT_EQ(C1.get_q(), 3);
+  EXPECT_EQ(C1.getP(), 3);
+  EXPECT_EQ(C1.getQ(), 3);
 }
 
 TEST(CliffordTests, CliffordModuleMultiplication) {
@@ -206,14 +206,14 @@ TEST(CliffordTests, CliffordModuleMultiplication) {
   auto C3 = C1 * C2;
 
   // New Clifford module has correct dimensions
-  EXPECT_EQ(C3.get_p(), 3);
-  EXPECT_EQ(C3.get_q(), 3);
+  EXPECT_EQ(C3.getP(), 3);
+  EXPECT_EQ(C3.getQ(), 3);
 
   // Originals are not modified
-  EXPECT_EQ(C1.get_p(), 1);
-  EXPECT_EQ(C1.get_q(), 2);
+  EXPECT_EQ(C1.getP(), 1);
+  EXPECT_EQ(C1.getQ(), 2);
 
-  EXPECT_EQ(C2.get_p(), 2);
-  EXPECT_EQ(C2.get_q(), 1);
+  EXPECT_EQ(C2.getP(), 2);
+  EXPECT_EQ(C2.getQ(), 1);
 }
 // TODO: Write a test to check the first few types have correct gammas

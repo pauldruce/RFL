@@ -11,148 +11,148 @@ using namespace arma;
 Clifford::Clifford(int mode) {
   //(1,0)
   if (mode == 3) {
-    p = 1;
-    q = 0;
-    dim_gamma = 1;
+    m_p = 1;
+    m_q = 0;
+    m_dim_gamma = 1;
 
-    gammas.emplace_back(1, 1, fill::eye);
-    chiral = cx_mat(1, 1, fill::eye);
+    m_gammas.emplace_back(1, 1, fill::eye);
+    m_chiral = cx_mat(1, 1, fill::eye);
   }
     //(0,1)
   else if (mode == 4) {
-    p = 0;
-    q = 1;
-    dim_gamma = 1;
+    m_p = 0;
+    m_q = 1;
+    m_dim_gamma = 1;
 
     cx_double z(0., -1.);
     cx_mat tmp = cx_mat(1, 1);
     tmp(0, 0) = z;
-    gammas.push_back(tmp);
-    chiral = cx_mat(1, 1, fill::eye);
+    m_gammas.push_back(tmp);
+    m_chiral = cx_mat(1, 1, fill::eye);
   }
     //(2,0)
   else if (mode == 0) {
-    p = 2;
-    q = 0;
-    dim_gamma = 2;
+    m_p = 2;
+    m_q = 0;
+    m_dim_gamma = 2;
 
     cx_double z(0., 1.);
 
-    cx_mat tmp1 = cx_mat(2, 2, fill::zeros);
-    tmp1(0, 0) = 1.;
-    tmp1(1, 1) = -1.;
-    gammas.push_back(tmp1);
+    cx_mat tmp_1 = cx_mat(2, 2, fill::zeros);
+    tmp_1(0, 0) = 1.;
+    tmp_1(1, 1) = -1.;
+    m_gammas.push_back(tmp_1);
 
-    cx_mat tmp2 = cx_mat(2, 2, fill::zeros);
-    tmp2(0, 1) = 1.;
-    tmp2(1, 0) = 1.;
-    gammas.push_back(tmp2);
+    cx_mat tmp_2 = cx_mat(2, 2, fill::zeros);
+    tmp_2(0, 1) = 1.;
+    tmp_2(1, 0) = 1.;
+    m_gammas.push_back(tmp_2);
 
-    chiral = cx_mat(2, 2, fill::zeros);
-    chiral(0, 1) = z;
-    chiral(1, 0) = -z;
+    m_chiral = cx_mat(2, 2, fill::zeros);
+    m_chiral(0, 1) = z;
+    m_chiral(1, 0) = -z;
   }
     //(1,1)
   else if (mode == 2) {
-    p = 1;
-    q = 1;
-    dim_gamma = 2;
+    m_p = 1;
+    m_q = 1;
+    m_dim_gamma = 2;
 
-    cx_mat tmp1 = cx_mat(2, 2, fill::zeros);
-    tmp1(0, 0) = 1.;
-    tmp1(1, 1) = -1.;
-    gammas.push_back(tmp1);
+    cx_mat tmp_1 = cx_mat(2, 2, fill::zeros);
+    tmp_1(0, 0) = 1.;
+    tmp_1(1, 1) = -1.;
+    m_gammas.push_back(tmp_1);
 
-    cx_mat tmp2 = cx_mat(2, 2, fill::zeros);
-    tmp2(0, 1) = 1.;
-    tmp2(1, 0) = -1.;
-    gammas.push_back(tmp2);
+    cx_mat tmp_2 = cx_mat(2, 2, fill::zeros);
+    tmp_2(0, 1) = 1.;
+    tmp_2(1, 0) = -1.;
+    m_gammas.push_back(tmp_2);
 
-    chiral = cx_mat(2, 2, fill::zeros);
-    chiral(0, 1) = 1;
-    chiral(1, 0) = 1;
+    m_chiral = cx_mat(2, 2, fill::zeros);
+    m_chiral(0, 1) = 1;
+    m_chiral(1, 0) = 1;
   }
     //(0,2)
   else if (mode == 1) {
-    p = 0;
-    q = 2;
-    dim_gamma = 2;
+    m_p = 0;
+    m_q = 2;
+    m_dim_gamma = 2;
 
     cx_double z(0., 1.);
 
-    cx_mat tmp1 = cx_mat(2, 2, fill::zeros);
-    tmp1(0, 0) = z;
-    tmp1(1, 1) = -z;
-    gammas.push_back(tmp1);
+    cx_mat tmp_1 = cx_mat(2, 2, fill::zeros);
+    tmp_1(0, 0) = z;
+    tmp_1(1, 1) = -z;
+    m_gammas.push_back(tmp_1);
 
-    cx_mat tmp2 = cx_mat(2, 2, fill::zeros);
-    tmp2(0, 1) = 1.;
-    tmp2(1, 0) = -1.;
-    gammas.push_back(tmp2);
+    cx_mat tmp_2 = cx_mat(2, 2, fill::zeros);
+    tmp_2(0, 1) = 1.;
+    tmp_2(1, 0) = -1.;
+    m_gammas.push_back(tmp_2);
 
-    chiral = cx_mat(2, 2, fill::zeros);
-    chiral(0, 1) = 1.;
-    chiral(1, 0) = 1.;
+    m_chiral = cx_mat(2, 2, fill::zeros);
+    m_chiral(0, 1) = 1.;
+    m_chiral(1, 0) = 1.;
   } else {
     std::string error_message = "Invalid Clifford mode entered: mode = " + std::to_string(mode);
     throw std::runtime_error(error_message);
   }
 }
 
-Clifford::Clifford(int p_, int q_)
-    : p(p_), q(q_), dim_gamma(0) {
+Clifford::Clifford(int p, int q)
+    : m_p(p), m_q(q), m_dim_gamma(0) {
   //(1,0)
-  if (p == 1 && q == 0) {
+  if (m_p == 1 && m_q == 0) {
     (*this) = Clifford(3);
   }
   //(0,1)
-  if (p == 0 && q == 1) {
+  if (m_p == 0 && m_q == 1) {
     (*this) = Clifford(4);
   }
   //(2,0)
-  if (p == 2 && q == 0) {
+  if (m_p == 2 && m_q == 0) {
     (*this) = Clifford(0);
   }
   //(1,1)
-  if (p == 1 && q == 1) {
+  if (m_p == 1 && m_q == 1) {
     (*this) = Clifford(2);
   }
   //(0,2)
-  if (p == 0 && q == 2) {
+  if (m_p == 0 && m_q == 2) {
     (*this) = Clifford(1);
     //any other case
   } else {
-    init_gamma();
-    sort_gamma();
+    initGammas();
+    sortGammas();
   }
 }
 
 // Copy constructor
-Clifford::Clifford(const Clifford& C) {
+Clifford::Clifford(const Clifford& clifford_to_copy) {
   // copy parameters
-  p = C.get_p();
-  q = C.get_q();
-  dim_gamma = C.get_dim_gamma();
+  m_p = clifford_to_copy.getP();
+  m_q = clifford_to_copy.getQ();
+  m_dim_gamma = clifford_to_copy.getGammaDimension();
 
   // copy matrices
-  for (int i = 0; i < p + q; i++)
-    gammas.push_back(C.get_gamma(i));
+  for (int i = 0; i < m_p + m_q; i++)
+    m_gammas.push_back(clifford_to_copy.getGammaAtIndex(i));
 
-  chiral = C.get_chiral();
+  m_chiral = clifford_to_copy.getChiral();
 }
 
 // Operator =
-Clifford& Clifford::operator=(const Clifford& C) {
-  p = C.get_p();
-  q = C.get_q();
-  dim_gamma = C.get_dim_gamma();
+Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
+  m_p = clifford_to_copy.getP();
+  m_q = clifford_to_copy.getQ();
+  m_dim_gamma = clifford_to_copy.getGammaDimension();
 
   // delete, reallocate and copy matrices
-  gammas.clear();
-  for (int i = 0; i < p + q; i++)
-    gammas.push_back(C.get_gamma(i));
+  m_gammas.clear();
+  for (int i = 0; i < m_p + m_q; i++)
+    m_gammas.push_back(clifford_to_copy.getGammaAtIndex(i));
 
-  chiral = C.get_chiral();
+  m_chiral = clifford_to_copy.getChiral();
 
   return *this;
 }
@@ -203,12 +203,12 @@ void decomp(int p, int q, int* dec) {
 }
 
 // init_gamma gets called only if p+q > 2
-void Clifford::init_gamma() {
+void Clifford::initGammas() {
 
   // Decompose the (p,q) into products of the base 5 types (1,0), (0,1),
   // (2,0), (1,1) and (0,2)
   int dec[5];
-  decomp(p, q, dec);
+  decomp(m_p, m_q, dec);
 
   vector<Clifford> vec;
   for (int i = 0; i < 5; ++i) {
@@ -219,75 +219,75 @@ void Clifford::init_gamma() {
 
   auto begin = vec.begin();
   auto end = vec.end();
-  Clifford C1 = (*begin);
+  Clifford c_1 = (*begin);
   for (auto iter = begin + 1; iter != end; ++iter) {
-    C1 *= (*iter);
+    c_1 *= (*iter);
   }
-  (*this) = C1;
+  (*this) = c_1;
 }
 
 // TODO: Go through this and make sure it agrees with Lawson+Michelson
-Clifford& Clifford::operator*=(const Clifford& C2) {
+Clifford& Clifford::operator*=(const Clifford& clifford_2) {
   // store C2 frequently used variables
-  int p2, q2, dim2;
-  p2 = C2.get_p();
-  q2 = C2.get_q();
-  dim2 = C2.get_dim_gamma();
+  int p_2, q_2, dim_2;
+  p_2 = clifford_2.getP();
+  q_2 = clifford_2.getQ();
+  dim_2 = clifford_2.getGammaDimension();
 
   // temporary variables to avoid overwriting on (*this)
-  int p_, q_, dim_gamma_;
-  vector<cx_mat> gamma_;
+  int p, q, dim_gamma;
+  vector<cx_mat> gamma;
 
-  p_ = p + p2;
-  q_ = q + q2;
-  dim_gamma_ = dim_gamma * dim2;
+  p = m_p + p_2;
+  q = m_q + q_2;
+  dim_gamma = m_dim_gamma * dim_2;
 
   // start computing product
-  cx_mat id2(dim2, dim2, fill::eye);
+  cx_mat id_2(dim_2, dim_2, fill::eye);
 
-  gamma_.reserve(p + q);
-  for (int i = 0; i < p + q; ++i)
-    gamma_.emplace_back(kron(gammas[i], id2));
-  for (int i = 0; i < p2 + q2; ++i)
-    gamma_.emplace_back(kron(chiral, C2.get_gamma(i)));
+  gamma.reserve(m_p + m_q);
+  for (int i = 0; i < m_p + m_q; ++i)
+    gamma.emplace_back(kron(m_gammas[i], id_2));
+  for (int i = 0; i < p_2 + q_2; ++i)
+    gamma.emplace_back(kron(m_chiral, clifford_2.getGammaAtIndex(i)));
 
   // compute chirality
-  int s2 = (q2 - p2 + 8 * p2) % 8; // +8*p2 is necessary becase % does not mean modulo for negative numbers
-  bool s2_even = (s2 % 8) % 2 == 0;
-  if (!s2_even) {
-    int s = (q - p + 8 * p) % 8;
-    cx_mat id1(dim_gamma, dim_gamma, fill::eye);
+  int s_2 = (q_2 - p_2 + 8 * p_2) % 8; // +8*p2 is necessary becase % does not mean modulo for negative numbers
+  bool s_2_even = (s_2 % 8) % 2 == 0;
+  if (!s_2_even) {
+    int s = (m_q - m_p + 8 * m_p) % 8;
+    cx_mat id_1(m_dim_gamma, m_dim_gamma, fill::eye);
     if ((s == 2) || (s == 6)) {
-      chiral = kron(-1 * id1, C2.get_chiral());
+      m_chiral = kron(-1 * id_1, clifford_2.getChiral());
     } else {
-      chiral = kron(id1, C2.get_chiral());
+      m_chiral = kron(id_1, clifford_2.getChiral());
     }
   } else {
-    chiral = kron(chiral, C2.get_chiral());
+    m_chiral = kron(m_chiral, clifford_2.getChiral());
   }
 
   // overwrite on (*this)
-  p = p_;
-  q = q_;
-  dim_gamma = dim_gamma_;
-  gammas.clear();
+  m_p = p;
+  m_q = q;
+  m_dim_gamma = dim_gamma;
+  m_gammas.clear();
 
-  for (const auto& v : gamma_)
-    gammas.push_back(v);
+  for (const auto& v : gamma)
+    m_gammas.push_back(v);
 
   return (*this);
 }
 
-ostream& operator<<(ostream& out, const Clifford& C) {
-  out << "Clifford (p, q) = (" << C.get_p() << ", " << C.get_q() << ") ";
+ostream& operator<<(ostream& out, const Clifford& clifford) {
+  out << "Clifford (p, q) = (" << clifford.getP() << ", " << clifford.getQ() << ") ";
 
   return out;
 }
 
-bool hermiticity(const cx_mat& M1, const cx_mat& M2) {
-  return (!(M2.is_hermitian()) && M1.is_hermitian());
+bool areHermitian(const cx_mat& m_1, const cx_mat& m_2) {
+  return (!(m_2.is_hermitian()) && m_1.is_hermitian());
 }
 
-void Clifford::sort_gamma() {
-  sort(gammas.begin(), gammas.end(), hermiticity);
+void Clifford::sortGammas() {
+  sort(m_gammas.begin(), m_gammas.end(), areHermitian);
 }

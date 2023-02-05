@@ -14,8 +14,8 @@ DiracOperator::DiracOperator(int p, int q, int dim_)
 
   // create a type (p, q) clifford module
   Clifford C(p, q);
-  vector<cx_mat> gamma = C.get_gammas();
-  this->dim_omega = C.get_dim_gamma();
+  vector<cx_mat> gamma = C.getGammaMatrices();
+  this->dim_omega = C.getGammaDimension();
 
   vector<cx_mat> herm;
   herm.reserve(p);
