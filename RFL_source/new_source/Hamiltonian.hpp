@@ -2,8 +2,8 @@
 // Created by Paul Druce on 12/11/2022.
 //
 
-#ifndef RFL_RFL_SOURCE_NEW_SOURCE_HAMILTONIAN_HPP_
-#define RFL_RFL_SOURCE_NEW_SOURCE_HAMILTONIAN_HPP_
+#ifndef RFL_HAMILTONIAN_HPP
+#define RFL_HAMILTONIAN_HPP
 #include "IAlgorithm.hpp"
 #include <cmath>
 #include <gsl/gsl_randist.h>
@@ -18,78 +18,78 @@ class Hamiltonian : public IAlgorithm {
 public:
   Hamiltonian(Integrator integrator, const gsl_rng* engine, double step_size);
 
-  double updateDirac(const DiracOperator& D, const Action& A) const override;
+  double updateDirac(const DiracOperator& dirac, const Action& action) const override;
 
   void setEngine(const gsl_rng* engine);
-  const gsl_rng* getEngine() const { return this->engine; };
+  const gsl_rng* getEngine() const { return this->m_engine; };
 
   void setIntegrator(Integrator integrator);
-  Integrator getIntegrator() const { return this->integrator; };
+  Integrator getIntegrator() const { return this->m_integrator; };
 
-  void setStepSize(double step_size);
-  double getStepSize() const { return this->dt; };
+  void setStepSize(double dt);
+  double getStepSize() const { return this->m_dt; };
 
 private:
-  Integrator integrator = Integrator::LEAPFROG;
-  const gsl_rng* engine;
-  double dt;
+  Integrator m_integrator = Integrator::LEAPFROG;
+  const gsl_rng* m_engine;
+  double m_dt;
 
   // This method seems to be the initialiser for the mom variables in DiracOperator
-  void sample_mom(const DiracOperator& D) const;
-  double calculate_K(const DiracOperator& D) const;
-  double calculate_H(const DiracOperator& D, const Action& A) const;
+  void sampleMoments(const DiracOperator& dirac) const;
+  double calculateK(const DiracOperator& dirac) const;
+  double calculateH(const DiracOperator& dirac, const Action& action) const;
 
-  double run_HMC(const DiracOperator& D,
-                 const Action& A,
-                 const int& Nt,
-                 const int& iter) const;
+  double runHmc(const DiracOperator& dirac,
+                const Action& action,
+                const int& num_iterations,
+                const int& iter) const;
 
-  double run_HMC_duav_core(const DiracOperator& D,
-                           const Action& A,
-                           const int& Nt,
-                           double* en_i,
-                           double* en_f) const;
+  double runHmcDuavCore(const DiracOperator& dirac,
+                        const Action& action,
+                        const int& nt,
+                        double* en_i,
+                        double* en_f) const;
 
-  double run_HMC_core(const DiracOperator& D,
-                      const Action& A,
-                      const int& Nt,
-                      double* en_i,
-                      double* en_f) const;
+  double runHmcCore(const DiracOperator& dirac,
+                    const Action& action,
+                    const int& nt,
+                    double* en_i,
+                    double* en_f) const;
 
-  double run_HMC_core_debug(const DiracOperator& D,
-                            const Action& A,
-                            const int& Nt) const;
+  double runHmcCoreDebug(const DiracOperator& dirac,
+                         const Action& action,
+                         const int& nt) const;
 
   // The methods below modify the step size "this->dt".
-  void run_HMC_duav(const DiracOperator& D,
-                    const Action& A,
-                    const int& Nt,
-                    const int& iter,
-                    const double& target);
+  void runHmcDuav(const DiracOperator& dirac,
+                  const Action& action,
+                  const int& nt,
+                  const int& iter,
+                  const double& target);
 
-  double run_HMC(const DiracOperator& D,
-                 const Action& A,
-                 const int& Nt,
-                 const double& dt_min,
-                 const double& dt_max,
-                 const int& iter);
+  double runHmc(const DiracOperator& dirac,
+                const Action& action,
+                const int& nt,
+                const double& dt_min,
+                const double& dt_max,
+                const int& iter);
 
-  double run_HMC_core(const DiracOperator& D,
-                      const Action& A,
-                      const int& Nt,
-                      const double& dt_min,
-                      const double& dt_max,
-                      double* en_i,
-                      double* en_f);
+  double runHmcCore(const DiracOperator& dirac,
+                    const Action& action,
+                    const int& nt,
+                    const double& dt_min,
+                    const double& dt_max,
+                    double* en_i,
+                    double* en_f);
 
   // INTEGRATORS
-  void leapfrog(const DiracOperator& D,
-                const int& Nt,
-                double g2) const;
+  void leapfrog(const DiracOperator& dirac,
+                const int& nt,
+                double g_2) const;
 
-  void omelyan(const DiracOperator& D,
-               const int& Nt,
-               double g2) const;
+  void omelyan(const DiracOperator& dirac,
+               const int& nt,
+               double g_2) const;
 };
 
-#endif//RFL_RFL_SOURCE_NEW_SOURCE_HAMILTONIAN_HPP_
+#endif//RFL_HAMILTONIAN_HPP

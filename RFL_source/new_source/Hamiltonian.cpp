@@ -9,19 +9,19 @@
 using namespace std;
 using namespace arma;
 
-void Hamiltonian::sample_mom(const DiracOperator& D) const {
-  auto* mom = D.get_moms();
-  for (int i = 0; i < D.nHL; ++i) {
+void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
+  auto* mom = dirac.get_moms();
+  for (int i = 0; i < dirac.nHL; ++i) {
     // loop on indices
-    for (int j = 0; j < D.dim; ++j) {
+    for (int j = 0; j < dirac.dim; ++j) {
       double x;
-      x = gsl_ran_gaussian(engine, 1.);
+      x = gsl_ran_gaussian(m_engine, 1.);
       mom[i](j, j) = cx_double(x, 0.);
 
-      for (int k = j + 1; k < D.dim; ++k) {
+      for (int k = j + 1; k < dirac.dim; ++k) {
         double a, b;
-        a = gsl_ran_gaussian(engine, 1.);
-        b = gsl_ran_gaussian(engine, 1.);
+        a = gsl_ran_gaussian(m_engine, 1.);
+        b = gsl_ran_gaussian(m_engine, 1.);
         mom[i](j, k) = cx_double(a, b) / sqrt(2.);
         mom[i](k, j) = cx_double(a, -b) / sqrt(2.);
       }
@@ -29,69 +29,69 @@ void Hamiltonian::sample_mom(const DiracOperator& D) const {
   }
 }
 
-double Hamiltonian::calculate_K(const DiracOperator& D) const {
+double Hamiltonian::calculateK(const DiracOperator& dirac) const {
   double res = 0;
-  auto* mom = D.get_moms();
+  auto* mom = dirac.get_moms();
 
-  for (int i = 0; i < D.nHL; ++i)
+  for (int i = 0; i < dirac.nHL; ++i)
     res += trace(mom[i] * mom[i]).real();
 
   return res / 2;
 }
 
-double Hamiltonian::calculate_H(const DiracOperator& D, const Action& A) const {
-  return A.calculate_S(D) + calculate_K(D);
+double Hamiltonian::calculateH(const DiracOperator& dirac, const Action& action) const {
+  return action.calculate_S(dirac) + calculateK(dirac);
 }
 
-void Hamiltonian::leapfrog(const DiracOperator& D,
-                           const int& Nt,
-                           double g2) const {
-  auto* mat = D.get_mats();
-  auto* mom = D.get_moms();
+void Hamiltonian::leapfrog(const DiracOperator& dirac,
+                           const int& nt,
+                           double g_2) const {
+  auto* mat = dirac.get_mats();
+  auto* mom = dirac.get_moms();
 
-  for (int i = 0; i < D.nHL; ++i) {
-    mat[i] += (dt / 2.) * mom[i];
+  for (int i = 0; i < dirac.nHL; ++i) {
+    mat[i] += (m_dt / 2.) * mom[i];
 
-    for (int j = 0; j < Nt - 1; ++j) {
-      mom[i] += -dt * D.der_dirac24(i, true, g2);
-      mat[i] += dt * mom[i];
+    for (int j = 0; j < nt - 1; ++j) {
+      mom[i] += -m_dt * dirac.der_dirac24(i, true, g_2);
+      mat[i] += m_dt * mom[i];
     }
 
-    mom[i] += -dt * D.der_dirac24(i, true, g2);
-    mat[i] += (dt / 2.) * mom[i];
+    mom[i] += -m_dt * dirac.der_dirac24(i, true, g_2);
+    mat[i] += (m_dt / 2.) * mom[i];
   }
 }
 
-void Hamiltonian::omelyan(const DiracOperator& D,
-                          const int& Nt,
-                          double g2) const {
+void Hamiltonian::omelyan(const DiracOperator& dirac,
+                          const int& nt,
+                          double g_2) const {
   double xi = 0.1931833;
 
-  auto* mat = D.get_mats();
-  auto* mom = D.get_moms();
+  auto* mat = dirac.get_mats();
+  auto* mom = dirac.get_moms();
 
-  for (int i = 0; i < D.nHL; ++i) {
-    mat[i] += xi * dt * mom[i];
+  for (int i = 0; i < dirac.nHL; ++i) {
+    mat[i] += xi * m_dt * mom[i];
 
-    for (int j = 0; j < Nt - 1; ++j) {
-      mom[i] += -(dt / 2.) * D.der_dirac24(i, true, g2);
-      mat[i] += (1 - 2 * xi) * dt * mom[i];
-      mom[i] += -(dt / 2.) * D.der_dirac24(i, true, g2);
-      mat[i] += 2 * xi * dt * mom[i];
+    for (int j = 0; j < nt - 1; ++j) {
+      mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+      mat[i] += (1 - 2 * xi) * m_dt * mom[i];
+      mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+      mat[i] += 2 * xi * m_dt * mom[i];
     }
 
-    mom[i] += -(dt / 2.) * D.der_dirac24(i, true, g2);
-    mat[i] += (1 - 2 * xi) * dt * mom[i];
-    mom[i] += -(dt / 2.) * D.der_dirac24(i, true, g2);
-    mat[i] += xi * dt * mom[i];
+    mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+    mat[i] += (1 - 2 * xi) * m_dt * mom[i];
+    mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+    mat[i] += xi * m_dt * mom[i];
   }
 }
 
-void Hamiltonian::run_HMC_duav(const DiracOperator& D,
-                               const Action& A,
-                               const int& Nt,
-                               const int& iter,
-                               const double& target) {
+void Hamiltonian::runHmcDuav(const DiracOperator& dirac,
+                             const Action& action,
+                             const int& nt,
+                             const int& iter,
+                             const double& target) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto* en_i = new double[4];
   auto* en_f = new double[4];
@@ -99,142 +99,142 @@ void Hamiltonian::run_HMC_duav(const DiracOperator& D,
   // dual averaging variables for dt
   const double shr = 0.05;
   const double kappa = 0.75;
-  const int i0 = 10;
-  double Stat = 0;
-  double mu = log(10 * dt);
-  double log_dt_avg = log(dt);
+  const int i_0 = 10;
+  double stat = 0;
+  double mu = log(10 * m_dt);
+  double log_dt_avg = log(m_dt);
 
   // iter repetitions of leapfrog
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first interation set potential to
+    // if it's not the first iteration set potential to
     // previous final value, otherwise compute it
     if (i) {
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
     } else {
-      en_i[0] = A.dirac2(D);
-      en_i[1] = A.dirac4(D);
+      en_i[0] = action.dirac2(dirac);
+      en_i[1] = action.dirac4(dirac);
     }
 
     // core part of HMC
-    Stat += target - run_HMC_duav_core(D, A, Nt, en_i, en_f);
+    stat += target - runHmcDuavCore(dirac, action, nt, en_i, en_f);
 
     // perform dual averaging on dt
-    double log_dt = mu - Stat * sqrt(i + 1) / (shr * (i + 1 + i0));
-    dt = exp(log_dt);
+    double log_dt = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
+    m_dt = exp(log_dt);
     double eta = pow(i + 1, -kappa);
     log_dt_avg = eta * log_dt + (1 - eta) * log_dt_avg;
   }
 
   // set dt on its final dual averaged value
-  dt = exp(log_dt_avg);
+  m_dt = exp(log_dt_avg);
 
   delete[] en_i;
   delete[] en_f;
 }
 
-double Hamiltonian::run_HMC(const DiracOperator& D,
-                            const Action& A,
-                            const int& Nt,
-                            const int& iter) const {
+double Hamiltonian::runHmc(const DiracOperator& dirac,
+                           const Action& action,
+                           const int& num_iterations,
+                           const int& iter) const {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto* en_i = new double[4];
   auto* en_f = new double[4];
 
   // return statistic
-  double Stat = 0;
+  double stat = 0;
 
   // iter repetitions of leapfrog
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first interation set potential to
+    // if it's not the first iteration set potential to
     // previous final value, otherwise compute it
     if (i) {
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
     } else {
-      en_i[0] = A.dirac2(D);
-      en_i[1] = A.dirac4(D);
+      en_i[0] = action.dirac2(dirac);
+      en_i[1] = action.dirac4(dirac);
     }
 
     // core part of HMC
-    Stat += run_HMC_core(D, A, Nt, en_i, en_f);
+    stat += runHmcCore(dirac, action, num_iterations, en_i, en_f);
   }
 
   delete[] en_i;
   delete[] en_f;
 
-  return (Stat / iter);
+  return (stat / iter);
 }
 
-double Hamiltonian::run_HMC(const DiracOperator& D,
-                            const Action& A,
-                            const int& Nt,
-                            const double& dt_min,
-                            const double& dt_max,
-                            const int& iter) {
+double Hamiltonian::runHmc(const DiracOperator& dirac,
+                           const Action& action,
+                           const int& nt,
+                           const double& dt_min,
+                           const double& dt_max,
+                           const int& iter) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto* en_i = new double[4];
   auto* en_f = new double[4];
 
   // return statistic
-  double Stat = 0;
+  double stat = 0;
 
   // iter repetitions of leapfrog
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first interation set potential to
+    // if it's not the first iteration set potential to
     // previous final value, otherwise compute it
     if (i) {
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
     } else {
-      en_i[0] = A.dirac2(D);
-      en_i[1] = A.dirac4(D);
+      en_i[0] = action.dirac2(dirac);
+      en_i[1] = action.dirac4(dirac);
     }
 
     // core part of HMC
-    Stat += run_HMC_core(D, A, Nt, dt_min, dt_max, en_i, en_f);
+    stat += runHmcCore(dirac, action, nt, dt_min, dt_max, en_i, en_f);
   }
 
   delete[] en_i;
   delete[] en_f;
 
-  return (Stat / iter);
+  return (stat / iter);
 }
 
-double Hamiltonian::run_HMC_duav_core(const DiracOperator& D,
-                                      const Action& A,
-                                      const int& Nt,
-                                      double* en_i,
-                                      double* en_f) const {
+double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
+                                   const Action& action,
+                                   const int& nt,
+                                   double* en_i,
+                                   double* en_f) const {
   // acceptance probability (return value)
   double e = 1;
 
   // resample momentum
-  sample_mom(D);
+  sampleMoments(dirac);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[D.nHL];
-  auto* mat = D.get_mats();
-  for (int j = 0; j < D.nHL; j++) {
+  auto* mat_bk = new cx_mat[dirac.nHL];
+  auto* mat = dirac.get_mats();
+  for (int j = 0; j < dirac.nHL; j++) {
     mat_bk[j] = mat[j];
   }
 
   // calculate initial hamiltonian
-  en_i[2] = calculate_K(D);
-  en_i[3] = A.get_g2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[2] = calculateK(dirac);
+  en_i[3] = action.get_g2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
-  if (integrator == Integrator::LEAPFROG) {
-    leapfrog(D, Nt, A.get_g2());
-  } else if (integrator == Integrator::OMELYAN) {
-    omelyan(D, Nt, A.get_g2());
+  if (m_integrator == Integrator::LEAPFROG) {
+    leapfrog(dirac, nt, action.get_g2());
+  } else if (m_integrator == Integrator::OMELYAN) {
+    omelyan(dirac, nt, action.get_g2());
   }
 
   // calculate final hamiltonian
-  en_f[0] = A.dirac2(D);
-  en_f[1] = A.dirac4(D);
-  en_f[2] = calculate_K(D);
-  en_f[3] = A.get_g2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[0] = action.dirac2(dirac);
+  en_f[1] = action.dirac4(dirac);
+  en_f[2] = calculateK(dirac);
+  en_f[3] = action.get_g2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
 
@@ -243,7 +243,7 @@ double Hamiltonian::run_HMC_duav_core(const DiracOperator& D,
   if (std::isnan(en_f[3])) {
     e = 0;
     // restore old configuration
-    for (int j = 0; j < D.nHL; ++j)
+    for (int j = 0; j < dirac.nHL; ++j)
       mat[j] = mat_bk[j];
     en_f[0] = en_i[0];
     en_f[1] = en_i[1];
@@ -252,12 +252,12 @@ double Hamiltonian::run_HMC_duav_core(const DiracOperator& D,
   }
     // now do the standard metropolis test
   else if (en_f[3] > en_i[3]) {
-    double r = gsl_rng_uniform(engine);
+    double r = gsl_rng_uniform(m_engine);
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < D.nHL; ++j)
+      for (int j = 0; j < dirac.nHL; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
       en_f[1] = en_i[1];
@@ -271,49 +271,49 @@ double Hamiltonian::run_HMC_duav_core(const DiracOperator& D,
   return e;
 }
 
-double Hamiltonian::run_HMC_core(const DiracOperator& D,
-                                 const Action& A,
-                                 const int& Nt,
-                                 double* en_i,
-                                 double* en_f) const {
+double Hamiltonian::runHmcCore(const DiracOperator& dirac,
+                               const Action& action,
+                               const int& nt,
+                               double* en_i,
+                               double* en_f) const {
   // acceptance probability (return value)
   double e = 1;
 
   // resample momentum
-  sample_mom(D);
+  sampleMoments(dirac);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[D.nHL];
-  auto* mat = D.get_mats();
-  for (int j = 0; j < D.nHL; j++) {
+  auto* mat_bk = new cx_mat[dirac.nHL];
+  auto* mat = dirac.get_mats();
+  for (int j = 0; j < dirac.nHL; j++) {
     mat_bk[j] = mat[j];
   }
 
   // calculate initial hamiltonian
-  en_i[2] = calculate_K(D);
-  en_i[3] = A.get_g2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[2] = calculateK(dirac);
+  en_i[3] = action.get_g2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
-  if (integrator == Integrator::LEAPFROG) {
-    leapfrog(D, Nt, A.get_g2());
-  } else if (integrator == Integrator::OMELYAN) {
-    omelyan(D, Nt, A.get_g2());
+  if (m_integrator == Integrator::LEAPFROG) {
+    leapfrog(dirac, nt, action.get_g2());
+  } else if (m_integrator == Integrator::OMELYAN) {
+    omelyan(dirac, nt, action.get_g2());
   }
 
   // calculate final hamiltonian
-  en_f[0] = A.dirac2(D);
-  en_f[1] = A.dirac4(D);
-  en_f[2] = calculate_K(D);
-  en_f[3] = A.get_g2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[0] = action.dirac2(dirac);
+  en_f[1] = action.dirac4(dirac);
+  en_f[2] = calculateK(dirac);
+  en_f[3] = action.get_g2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
-    double r = gsl_rng_uniform(engine);
+    double r = gsl_rng_uniform(m_engine);
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < D.nHL; ++j)
+      for (int j = 0; j < dirac.nHL; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
       en_f[1] = en_i[1];
@@ -327,48 +327,48 @@ double Hamiltonian::run_HMC_core(const DiracOperator& D,
   return e;
 }
 
-double Hamiltonian::run_HMC_core_debug(const DiracOperator& D,
-                                       const Action& A,
-                                       const int& Nt) const {
+double Hamiltonian::runHmcCoreDebug(const DiracOperator& dirac,
+                                    const Action& action,
+                                    const int& nt) const {
   // exp(-dH) (return value)
   double e;
 
   // resample momentum
-  sample_mom(D);
+  sampleMoments(dirac);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[D.nHL];
-  auto* mat = D.get_mats();
-  for (int j = 0; j < D.nHL; j++) {
+  auto* mat_bk = new cx_mat[dirac.nHL];
+  auto* mat = dirac.get_mats();
+  for (int j = 0; j < dirac.nHL; j++) {
     mat_bk[j] = mat[j];
   }
 
   // calculate initial hamiltonian
-  double Si = A.calculate_S(D);
-  double Ki = calculate_K(D);
-  double Hi = Si + Ki;
+  double initial_S = action.calculate_S(dirac);
+  double initial_K = calculateK(dirac);
+  double initial_hamiltonian = initial_S + initial_K;
 
   // integration
-  if (integrator == Integrator::LEAPFROG) {
-    leapfrog(D, Nt, A.get_g2());
-  } else if (integrator == Integrator::OMELYAN) {
-    omelyan(D, Nt, A.get_g2());
+  if (m_integrator == Integrator::LEAPFROG) {
+    leapfrog(dirac, nt, action.get_g2());
+  } else if (m_integrator == Integrator::OMELYAN) {
+    omelyan(dirac, nt, action.get_g2());
   }
 
   // calculate final hamiltonian
-  double Sf = A.calculate_S(D);
-  double Kf = calculate_K(D);
-  double Hf = Sf + Kf;
+  double final_S = action.calculate_S(dirac);
+  double final_K = calculateK(dirac);
+  double final_hamiltonian = final_S + final_K;
 
-  e = exp(Hi - Hf);
+  e = exp(initial_hamiltonian - final_hamiltonian);
 
   // metropolis test
-  if (Hf > Hi) {
-    double r = gsl_rng_uniform(engine);
+  if (final_hamiltonian > initial_hamiltonian) {
+    double r = gsl_rng_uniform(m_engine);
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < D.nHL; ++j)
+      for (int j = 0; j < dirac.nHL; ++j)
         mat[j] = mat_bk[j];
     }
   }
@@ -378,54 +378,54 @@ double Hamiltonian::run_HMC_core_debug(const DiracOperator& D,
   return e;
 }
 
-double Hamiltonian::run_HMC_core(const DiracOperator& D,
-                                 const Action& A,
-                                 const int& Nt,
-                                 const double& dt_min,
-                                 const double& dt_max,
-                                 double* en_i,
-                                 double* en_f) {
+double Hamiltonian::runHmcCore(const DiracOperator& dirac,
+                               const Action& action,
+                               const int& nt,
+                               const double& dt_min,
+                               const double& dt_max,
+                               double* en_i,
+                               double* en_f) {
   // acceptance probability (return value)
   double e = 1;
 
   // resample momentum
-  sample_mom(D);
+  sampleMoments(dirac);
 
   // choose uniformly from [dt_min, dt_max)
-  this->dt = dt_min + (dt_max - dt_min) * gsl_rng_uniform(engine);
+  this->m_dt = dt_min + (dt_max - dt_min) * gsl_rng_uniform(m_engine);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[D.nHL];
-  auto* mat = D.get_mats();
-  for (int j = 0; j < D.nHL; j++) {
+  auto* mat_bk = new cx_mat[dirac.nHL];
+  auto* mat = dirac.get_mats();
+  for (int j = 0; j < dirac.nHL; j++) {
     mat_bk[j] = mat[j];
   }
 
   // calculate initial hamiltonian
-  en_i[2] = calculate_K(D);
-  en_i[3] = A.get_g2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[2] = calculateK(dirac);
+  en_i[3] = action.get_g2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
-  if (integrator == Integrator::LEAPFROG) {
-    leapfrog(D, Nt, A.get_g2());
-  } else if (integrator == Integrator::OMELYAN) {
-    omelyan(D, Nt, A.get_g2());
+  if (m_integrator == Integrator::LEAPFROG) {
+    leapfrog(dirac, nt, action.get_g2());
+  } else if (m_integrator == Integrator::OMELYAN) {
+    omelyan(dirac, nt, action.get_g2());
   }
 
   // calculate final hamiltonian
-  en_f[0] = A.dirac2(D);
-  en_f[1] = A.dirac4(D);
-  en_f[2] = calculate_K(D);
-  en_f[3] = A.get_g2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[0] = action.dirac2(dirac);
+  en_f[1] = action.dirac4(dirac);
+  en_f[2] = calculateK(dirac);
+  en_f[3] = action.get_g2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
-    double r = gsl_rng_uniform(engine);
+    double r = gsl_rng_uniform(m_engine);
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < D.nHL; ++j)
+      for (int j = 0; j < dirac.nHL; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
       en_f[1] = en_i[1];
@@ -439,20 +439,20 @@ double Hamiltonian::run_HMC_core(const DiracOperator& D,
   return e;
 }
 
-void Hamiltonian::setStepSize(double dt_) {
-  this->dt = dt_;
+void Hamiltonian::setStepSize(double dt) {
+  this->m_dt = dt;
 }
-void Hamiltonian::setIntegrator(Integrator integrator_) { this->integrator = integrator_; }
-void Hamiltonian::setEngine(const gsl_rng* engine_) {
-  this->engine = engine_;
+void Hamiltonian::setIntegrator(Integrator integrator) { this->m_integrator = integrator; }
+void Hamiltonian::setEngine(const gsl_rng* engine) {
+  this->m_engine = engine;
 }
 
 Hamiltonian::Hamiltonian(Integrator integrator, const gsl_rng* engine, double step_size)
-    : integrator(integrator), engine(engine), dt(step_size) {
+    : m_integrator(integrator), m_engine(engine), m_dt(step_size) {
 }
-double Hamiltonian::updateDirac(const DiracOperator& D, const Action& A) const {
-  const double acceptance_val_per_iter = this->run_HMC(
-      D, A,
+double Hamiltonian::updateDirac(const DiracOperator& dirac, const Action& action) const {
+  const double acceptance_val_per_iter = this->runHmc(
+      dirac, action,
       10,
       1000);
   return acceptance_val_per_iter;
