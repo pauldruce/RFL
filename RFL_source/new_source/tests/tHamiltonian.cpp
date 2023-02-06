@@ -5,35 +5,49 @@
 #include "Hamiltonian.hpp"
 #include <gtest/gtest.h>
 
+class Engine {
+public:
+  Engine(){
+    rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+  }
+  ~Engine(){
+    if(rng) {
+      gsl_rng_free(rng);
+    }
+  }
+  gsl_rng* rng;
+};
+
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  const Engine engine;
   double step_size = 0.1;
   ASSERT_NO_THROW(
-      const Hamiltonian hamiltonian(integrator, engine, step_size););
+      const Hamiltonian hamiltonian(integrator, engine.rng, step_size););
 }
 
 TEST(HamiltonianTests, CanChangeEngine) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  const Engine engine;
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, engine, step_size);
+  Hamiltonian hamiltonian(integrator, engine.rng, step_size);
 
-  ASSERT_EQ(hamiltonian.getEngine(), engine);
+  ASSERT_EQ(hamiltonian.getEngine(), engine.rng);
 
-  const gsl_rng* new_engine = gsl_rng_alloc(gsl_rng_default);
-  hamiltonian.setEngine(new_engine);
-  ASSERT_EQ(hamiltonian.getEngine(), new_engine);
+  const Engine new_engine;
+  hamiltonian.setEngine(new_engine.rng);
+  ASSERT_EQ(hamiltonian.getEngine(), new_engine.rng);
 }
 
 TEST(HamiltonianTests, CanChangeIntegrator) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  const Engine engine;
+
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, engine, step_size);
+  Hamiltonian hamiltonian(integrator, engine.rng, step_size);
 
   ASSERT_EQ(hamiltonian.getIntegrator(), integrator);
 
@@ -45,9 +59,9 @@ TEST(HamiltonianTests, CanChangeIntegrator) {
 TEST(HamiltonianTests, CanChangeStepSize) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  const Engine engine;
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, engine, step_size);
+  Hamiltonian hamiltonian(integrator, engine.rng, step_size);
 
   ASSERT_EQ(hamiltonian.getStepSize(), step_size);
 
@@ -57,7 +71,9 @@ TEST(HamiltonianTests, CanChangeStepSize) {
 }
 
 TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
-  Hamiltonian hamiltonian(Integrator::LEAPFROG, gsl_rng_alloc(gsl_rng_ranlxd1), 0.2);
+  const Engine engine;
+
+  Hamiltonian hamiltonian(Integrator::LEAPFROG, engine.rng, 0.2);
   auto dirac = DiracOperator(1, 1, 5);
   auto old_dirac_matrix = dirac.getDiracMatrix();
   auto action = Action(-2.7);
