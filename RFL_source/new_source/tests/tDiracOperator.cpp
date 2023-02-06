@@ -5,11 +5,6 @@
 #include "DiracOperator.hpp"
 #include <gtest/gtest.h>
 
-typedef struct {
-  int p;
-  int q;
-  int dim;
-} DiracOpData;
 
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
   for (int p = 0; p < 5; p++) {
@@ -18,65 +13,65 @@ TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
         if (p + q > 5 || (p == 0 && q == 0)) {
           continue;
         }
-        EXPECT_NO_THROW(DiracOperator D(p, q, dim)) << "(p,q,dim) = (" << p << "," << q << "," << dim << ")";
+        EXPECT_NO_THROW(DiracOperator dirac(p, q, dim)) << "(p,q,dim) = (" << p << "," << q << "," << dim << ")";
       }
     }
   }
 }
 
-TEST(DiracOperatorTests, NumH_IsCorrectlySet) {
+TEST(DiracOperatorTests, NumHermitianMatricesIsCorrectlySet) {
   typedef struct {
     int p;
     int q;
     int num_h_mat;
-  } NumHMat_data;
+  } NumHMatData;
 
-  std::vector<NumHMat_data> data = {
+  std::vector<NumHMatData> data = {
       {1, 1, 1},
       {1, 2, 1},
       {2, 1, 3},
       {3, 3, 16}};
 
   for (auto& d : data) {
-    DiracOperator D(d.p, d.q, 5);
-    EXPECT_EQ(d.num_h_mat, D.getNumHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
+    DiracOperator dirac(d.p, d.q, 5);
+    EXPECT_EQ(d.num_h_mat, dirac.getNumHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
 
-TEST(DiracOperatorTests, NumL_IsCorrectlySet) {
+TEST(DiracOperatorTests, NumAntiHermitianMatricesIsCorrectlySet) {
   typedef struct {
     int p;
     int q;
     int num_h_mat;
-  } NumLMat_data;
+  } NumLMatData;
 
-  std::vector<NumLMat_data> data = {
+  std::vector<NumLMatData> data = {
       {1, 1, 1},
       {1, 2, 3},
       {2, 1, 1},
       {3, 3, 16}};
 
   for (auto& d : data) {
-    DiracOperator D(d.p, d.q, 5);
-    EXPECT_EQ(d.num_h_mat, D.getNumAntiHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
+    DiracOperator dirac(d.p, d.q, 5);
+    EXPECT_EQ(d.num_h_mat, dirac.getNumAntiHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
 
-TEST(DiracOperatorTests, NumHL_IsCorrectlySet) {
+TEST(DiracOperatorTests, TotalNumMatricesIsSetCorrectly) {
   typedef struct {
     int p;
     int q;
     int num_hl_mat;
-  } NumHLMat_data;
+  } NumTotalMatricesData;
 
-  std::vector<NumHLMat_data> data = {
+  std::vector<NumTotalMatricesData> data = {
       {1, 1, 2},
       {1, 2, 4},
       {2, 1, 4},
       {3, 3, 32}};
 
   for (auto& d : data) {
-    DiracOperator D(d.p, d.q, 5);
-    EXPECT_EQ(d.num_hl_mat, D.getNumMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
+    DiracOperator dirac(d.p, d.q, 5);
+    EXPECT_EQ(d.num_hl_mat, dirac.getNumMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }

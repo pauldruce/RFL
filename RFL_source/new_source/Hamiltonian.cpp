@@ -93,11 +93,11 @@ void Hamiltonian::omelyan(const DiracOperator& dirac,
   }
 }
 
-void Hamiltonian::runHmcDuav(const DiracOperator& dirac,
-                             const Action& action,
-                             const int& nt,
-                             const int& iter,
-                             const double& target) {
+void Hamiltonian::runDualAverage(const DiracOperator& dirac,
+                                 const Action& action,
+                                 const int& nt,
+                                 const int& iter,
+                                 const double& target) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto* en_i = new double[4];
   auto* en_f = new double[4];
@@ -123,7 +123,7 @@ void Hamiltonian::runHmcDuav(const DiracOperator& dirac,
     }
 
     // core part of HMC
-    stat += target - runHmcDuavCore(dirac, action, nt, en_i, en_f);
+    stat += target - runDualAveragingCore(dirac, action, nt, en_i, en_f);
 
     // perform dual averaging on dt
     double log_dt = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
@@ -139,10 +139,10 @@ void Hamiltonian::runHmcDuav(const DiracOperator& dirac,
   delete[] en_f;
 }
 
-double Hamiltonian::runHmc(const DiracOperator& dirac,
-                           const Action& action,
-                           const int& num_iterations,
-                           const int& iter) const {
+double Hamiltonian::run(const DiracOperator& dirac,
+                        const Action& action,
+                        const int& num_iterations,
+                        const int& iter) const {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto* en_i = new double[4];
   auto* en_f = new double[4];
@@ -163,7 +163,7 @@ double Hamiltonian::runHmc(const DiracOperator& dirac,
     }
 
     // core part of HMC
-    stat += runHmcCore(dirac, action, num_iterations, en_i, en_f);
+    stat += runCore(dirac, action, num_iterations, en_i, en_f);
   }
 
   delete[] en_i;
@@ -172,12 +172,12 @@ double Hamiltonian::runHmc(const DiracOperator& dirac,
   return (stat / iter);
 }
 
-double Hamiltonian::runHmc(const DiracOperator& dirac,
-                           const Action& action,
-                           const int& nt,
-                           const double& dt_min,
-                           const double& dt_max,
-                           const int& iter) {
+double Hamiltonian::run(const DiracOperator& dirac,
+                        const Action& action,
+                        const int& nt,
+                        const double& dt_min,
+                        const double& dt_max,
+                        const int& iter) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
   auto* en_i = new double[4];
   auto* en_f = new double[4];
@@ -198,7 +198,7 @@ double Hamiltonian::runHmc(const DiracOperator& dirac,
     }
 
     // core part of HMC
-    stat += runHmcCore(dirac, action, nt, dt_min, dt_max, en_i, en_f);
+    stat += runCore(dirac, action, nt, dt_min, dt_max, en_i, en_f);
   }
 
   delete[] en_i;
@@ -207,11 +207,11 @@ double Hamiltonian::runHmc(const DiracOperator& dirac,
   return (stat / iter);
 }
 
-double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
-                                   const Action& action,
-                                   const int& nt,
-                                   double* en_i,
-                                   double* en_f) const {
+double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
+                                         const Action& action,
+                                         const int& nt,
+                                         double* en_i,
+                                         double* en_f) const {
   // acceptance probability (return value)
   double e = 1;
 
@@ -278,11 +278,11 @@ double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
   return e;
 }
 
-double Hamiltonian::runHmcCore(const DiracOperator& dirac,
-                               const Action& action,
-                               const int& nt,
-                               double* en_i,
-                               double* en_f) const {
+double Hamiltonian::runCore(const DiracOperator& dirac,
+                            const Action& action,
+                            const int& nt,
+                            double* en_i,
+                            double* en_f) const {
   // acceptance probability (return value)
   double e = 1;
 
@@ -335,9 +335,9 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
   return e;
 }
 
-double Hamiltonian::runHmcCoreDebug(const DiracOperator& dirac,
-                                    const Action& action,
-                                    const int& nt) const {
+double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
+                                 const Action& action,
+                                 const int& nt) const {
   // exp(-dH) (return value)
   double e;
 
@@ -387,13 +387,13 @@ double Hamiltonian::runHmcCoreDebug(const DiracOperator& dirac,
   return e;
 }
 
-double Hamiltonian::runHmcCore(const DiracOperator& dirac,
-                               const Action& action,
-                               const int& nt,
-                               const double& dt_min,
-                               const double& dt_max,
-                               double* en_i,
-                               double* en_f) {
+double Hamiltonian::runCore(const DiracOperator& dirac,
+                            const Action& action,
+                            const int& nt,
+                            const double& dt_min,
+                            const double& dt_max,
+                            double* en_i,
+                            double* en_f) {
   // acceptance probability (return value)
   double e = 1;
 
@@ -461,7 +461,7 @@ Hamiltonian::Hamiltonian(Integrator integrator, const gsl_rng* engine, double st
     : m_integrator(integrator), m_engine(engine), m_dt(step_size) {
 }
 double Hamiltonian::updateDirac(const DiracOperator& dirac, const Action& action) const {
-  const double acceptance_val_per_iter = this->runHmc(
+  const double acceptance_val_per_iter = this->run(
       dirac, action,
       10,
       1000);

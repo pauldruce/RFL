@@ -34,16 +34,16 @@ TEST(CliffordTests, NoErrorWhenConstructing) {
 
 TEST(CliffordTests, GetP) {
   for (int p = 1; p < 8; p++) {
-    Clifford C(p, 1);
+    Clifford clifford(p, 1);
 
-    EXPECT_EQ(p, C.getP());
+    EXPECT_EQ(p, clifford.getP());
   }
 }
 
 TEST(CliffordTests, GetQ) {
   for (int q = 1; q < 8; q++) {
-    Clifford C(1, q);
-    EXPECT_EQ(q, C.getQ());
+    Clifford clifford(1, q);
+    EXPECT_EQ(q, clifford.getQ());
   }
 }
 

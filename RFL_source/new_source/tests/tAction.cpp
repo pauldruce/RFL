@@ -4,22 +4,35 @@
 #include "Action.hpp"
 #include <gtest/gtest.h>
 
-static auto engine = gsl_rng_alloc(gsl_rng_ranlxd1);
 
-static void CompareActions(int p, int q, int dim, double g2) {
-  constexpr int numOfTestRepeats = 100;
-  Action A(g2);
-  DiracOperator D(p, q, dim);
+class Engine {
+public:
+  Engine(){
+    rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+  }
+  ~Engine(){
+    if(rng) {
+      gsl_rng_free(rng);
+    }
+  }
+  gsl_rng* rng;
+};
 
-  for (int i = 0; i < numOfTestRepeats; ++i) {
-    D.randomiseMatrices(engine);
-    double d2 = D.getMatrixDimension() * D.getMatrixDimension();
+static void CompareActions(int p, int q, int dim, double g_2) {
+  constexpr int num_of_test_repeats = 100;
+  Action action(g_2);
+  DiracOperator dirac(p, q, dim);
+  Engine engine;
 
-    auto S1 = A.calculateS(D) / d2;
+  for (int i = 0; i < num_of_test_repeats; ++i) {
+    dirac.randomiseMatrices(engine.rng);
+    double d_2 = dirac.getMatrixDimension() * dirac.getMatrixDimension();
 
-    auto S2 = A.calculateSFromDirac(D) / d2;
+    auto s_1 = action.calculateS(dirac) / d_2;
 
-    EXPECT_TRUE(fabs(S1 - S2) < 1e-8) << "Methods differ more then 1e-8";
+    auto s_2 = action.calculateSFromDirac(dirac) / d_2;
+
+    EXPECT_TRUE(fabs(s_1 - s_2) < 1e-8) << "Methods differ more then 1e-8";
   }
 }
 
@@ -28,7 +41,7 @@ TEST(ActionTests, ActionMethodsDontDiffer) {
     int p;
     int q;
     int dim;
-    double g2;
+    double g_2;
   } ActionParameters;
 
   const ActionParameters testing_params[] =
@@ -40,57 +53,57 @@ TEST(ActionTests, ActionMethodsDontDiffer) {
           {0, 5, 4, -2.8}};
 
   for (auto& d : testing_params) {
-    CompareActions(d.p, d.q, d.dim, d.g2);
+    CompareActions(d.p, d.q, d.dim, d.g_2);
   }
 }
 
 TEST(ActionTests, Set_g2) {
-  const double initial_g2 = 1.1;
-  Action A(initial_g2);
-  EXPECT_EQ(A.getG2(), initial_g2);
+  const double initial_g_2 = 1.1;
+  Action action(initial_g_2);
+  EXPECT_EQ(action.getG2(), initial_g_2);
 
-  const double new_g2 = -3.4;
-  A.setG2(new_g2);
-  EXPECT_EQ(A.getG2(), new_g2);
+  const double new_g_2 = -3.4;
+  action.setG2(new_g_2);
+  EXPECT_EQ(action.getG2(), new_g_2);
 }
 
 TEST(ActionTests, Set_g4) {
-  const double initial_g4 = 1.1;
-  Action A(1.0, initial_g4);
-  EXPECT_EQ(A.getG4(), initial_g4);
+  const double initial_g_4 = 1.1;
+  Action action(1.0, initial_g_4);
+  EXPECT_EQ(action.getG4(), initial_g_4);
 
-  const double new_g4 = -3.4;
-  A.setG4(new_g4);
-  EXPECT_EQ(A.getG4(), new_g4);
+  const double new_g_4 = -3.4;
+  action.setG4(new_g_4);
+  EXPECT_EQ(action.getG4(), new_g_4);
 }
 
 TEST(ActionTests, SetParameters) {
-  const double initial_g2 = 1.1, initial_g4 = 2.2;
-  Action A(initial_g2, initial_g4);
+  const double initial_g_2 = 1.1, initial_g_4 = 2.2;
+  Action action(initial_g_2, initial_g_4);
 
-  EXPECT_EQ(A.getG2(), initial_g2);
-  EXPECT_EQ(A.getG4(), initial_g4);
+  EXPECT_EQ(action.getG2(), initial_g_2);
+  EXPECT_EQ(action.getG4(), initial_g_4);
 
-  const double new_g2 = -5.0, new_g4 = 7.2;
-  A.setParams(new_g2, new_g4);
+  const double new_g_2 = -5.0, new_g_4 = 7.2;
+  action.setParams(new_g_2, new_g_4);
 
-  EXPECT_EQ(A.getG2(), new_g2);
-  EXPECT_EQ(A.getG4(), new_g4);
+  EXPECT_EQ(action.getG2(), new_g_2);
+  EXPECT_EQ(action.getG4(), new_g_4);
 }
 
 TEST(ActionTests, CreateWithNoParams) {
   EXPECT_NO_THROW(
-      Action A;
-      EXPECT_EQ(A.getG2(), 0);
-      EXPECT_EQ(A.getG4(), 0););
+      Action action;
+      EXPECT_EQ(action.getG2(), 0);
+      EXPECT_EQ(action.getG4(), 0););
 }
 
 TEST(ActionTests, PrintAction) {
-  DiracOperator D(1, 1, 5);
-  Action A(2.0, 4.0);
+  DiracOperator dirac(1, 1, 5);
+  Action action(2.0, 4.0);
 
-  std::stringstream capturedStream;
-  A.printS(D, capturedStream);
+  std::stringstream captured_stream;
+  action.printS(dirac, captured_stream);
 
-  EXPECT_EQ(capturedStream.str(), "200 800\n");
+  EXPECT_EQ(captured_stream.str(), "200 800\n");
 }

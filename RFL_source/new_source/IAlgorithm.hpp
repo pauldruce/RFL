@@ -7,15 +7,15 @@
  *
  */
 
-#ifndef RFL_RFL_SOURCE_NEW_SOURCE_IALGORITHM_HPP_
-#define RFL_RFL_SOURCE_NEW_SOURCE_IALGORITHM_HPP_
+#ifndef RFL_IALGORITHM_HPP
+#define RFL_IALGORITHM_HPP
 
 #include "Action.hpp"
 #include "DiracOperator.hpp"
 
 class IAlgorithm {
 public:
-  virtual double updateDirac(const DiracOperator& D, const Action& A) const = 0;
+  virtual double updateDirac(const DiracOperator& dirac, const Action& action) const = 0;
 };
 
-#endif//RFL_RFL_SOURCE_NEW_SOURCE_IALGORITHM_HPP_
+#endif//RFL_IALGORITHM_HPP

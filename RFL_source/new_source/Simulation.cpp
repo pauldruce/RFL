@@ -4,5 +4,5 @@
 
 #include "Simulation.hpp"
 
-Simulation::Simulation(const DiracOperator& D, const Action& A, IAlgorithm& M)
-    : m_D(D), m_A(A), m_M(M) { };
+Simulation::Simulation(const DiracOperator& dirac, const Action& action, IAlgorithm& monte_carlo_algorithm)
+    : m_dirac(dirac), m_action(action), m_algorithm(monte_carlo_algorithm) { };

@@ -11,15 +11,15 @@
 class Simulation {
 public:
   Simulation() = delete;
-  Simulation(const DiracOperator& D, const Action& A, IAlgorithm& M);
+  Simulation(const DiracOperator& dirac, const Action& action, IAlgorithm& monte_carlo_algorithm);
   void run() {
-    this->m_M.updateDirac(m_D, m_A);
+    this->m_algorithm.updateDirac(m_dirac, m_action);
   }
 
 private:
-  const DiracOperator& m_D;
-  const Action& m_A;
-  IAlgorithm& m_M;
+  const DiracOperator& m_dirac;
+  const Action& m_action;
+  IAlgorithm& m_algorithm;
 };
 
 #endif//RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_

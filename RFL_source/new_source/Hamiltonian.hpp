@@ -39,48 +39,48 @@ private:
   double calculateK(const DiracOperator& dirac) const;
   double calculateH(const DiracOperator& dirac, const Action& action) const;
 
-  double runHmc(const DiracOperator& dirac,
-                const Action& action,
-                const int& num_iterations,
-                const int& iter) const;
+  double run(const DiracOperator& dirac,
+             const Action& action,
+             const int& num_iterations,
+             const int& iter) const;
 
-  double runHmcDuavCore(const DiracOperator& dirac,
-                        const Action& action,
-                        const int& nt,
-                        double* en_i,
-                        double* en_f) const;
+  double runDualAveragingCore(const DiracOperator& dirac,
+                              const Action& action,
+                              const int& nt,
+                              double* en_i,
+                              double* en_f) const;
 
-  double runHmcCore(const DiracOperator& dirac,
-                    const Action& action,
-                    const int& nt,
-                    double* en_i,
-                    double* en_f) const;
+  double runCore(const DiracOperator& dirac,
+                 const Action& action,
+                 const int& nt,
+                 double* en_i,
+                 double* en_f) const;
 
-  double runHmcCoreDebug(const DiracOperator& dirac,
-                         const Action& action,
-                         const int& nt) const;
+  double runCoreDebug(const DiracOperator& dirac,
+                      const Action& action,
+                      const int& nt) const;
 
   // The methods below modify the step size "this->dt".
-  void runHmcDuav(const DiracOperator& dirac,
-                  const Action& action,
-                  const int& nt,
-                  const int& iter,
-                  const double& target);
+  void runDualAverage(const DiracOperator& dirac,
+                      const Action& action,
+                      const int& nt,
+                      const int& iter,
+                      const double& target);
 
-  double runHmc(const DiracOperator& dirac,
-                const Action& action,
-                const int& nt,
-                const double& dt_min,
-                const double& dt_max,
-                const int& iter);
+  double run(const DiracOperator& dirac,
+             const Action& action,
+             const int& nt,
+             const double& dt_min,
+             const double& dt_max,
+             const int& iter);
 
-  double runHmcCore(const DiracOperator& dirac,
-                    const Action& action,
-                    const int& nt,
-                    const double& dt_min,
-                    const double& dt_max,
-                    double* en_i,
-                    double* en_f);
+  double runCore(const DiracOperator& dirac,
+                 const Action& action,
+                 const int& nt,
+                 const double& dt_min,
+                 const double& dt_max,
+                 double* en_i,
+                 double* en_f);
 
   // INTEGRATORS
   void leapfrog(const DiracOperator& dirac,
