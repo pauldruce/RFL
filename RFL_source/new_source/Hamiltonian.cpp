@@ -10,15 +10,18 @@ using namespace std;
 using namespace arma;
 
 void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
-  auto* mom = dirac.get_moms();
-  for (int i = 0; i < dirac.nHL; ++i) {
+  auto* mom = dirac.getMomenta();
+  auto num_matrices = dirac.getNumMatrices();
+  auto mat_dim = dirac.getMatrixDimension();
+
+  for (int i = 0; i < num_matrices; ++i) {
     // loop on indices
-    for (int j = 0; j < dirac.dim; ++j) {
+    for (int j = 0; j < mat_dim; ++j) {
       double x;
       x = gsl_ran_gaussian(m_engine, 1.);
       mom[i](j, j) = cx_double(x, 0.);
 
-      for (int k = j + 1; k < dirac.dim; ++k) {
+      for (int k = j + 1; k < mat_dim; ++k) {
         double a, b;
         a = gsl_ran_gaussian(m_engine, 1.);
         b = gsl_ran_gaussian(m_engine, 1.);
@@ -31,9 +34,10 @@ void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
 
 double Hamiltonian::calculateK(const DiracOperator& dirac) const {
   double res = 0;
-  auto* mom = dirac.get_moms();
+  auto* mom = dirac.getMomenta();
+  auto num_matrices = dirac.getNumMatrices();
 
-  for (int i = 0; i < dirac.nHL; ++i)
+  for (int i = 0; i < num_matrices; ++i)
     res += trace(mom[i] * mom[i]).real();
 
   return res / 2;
@@ -46,18 +50,19 @@ double Hamiltonian::calculateH(const DiracOperator& dirac, const Action& action)
 void Hamiltonian::leapfrog(const DiracOperator& dirac,
                            const int& nt,
                            double g_2) const {
-  auto* mat = dirac.get_mats();
-  auto* mom = dirac.get_moms();
+  auto* mat = dirac.getMatrices();
+  auto* mom = dirac.getMomenta();
+  auto num_matrices = dirac.getNumMatrices();
 
-  for (int i = 0; i < dirac.nHL; ++i) {
+  for (int i = 0; i < num_matrices; ++i) {
     mat[i] += (m_dt / 2.) * mom[i];
 
     for (int j = 0; j < nt - 1; ++j) {
-      mom[i] += -m_dt * dirac.der_dirac24(i, true, g_2);
+      mom[i] += -m_dt * dirac.derDirac24(i, true, g_2);
       mat[i] += m_dt * mom[i];
     }
 
-    mom[i] += -m_dt * dirac.der_dirac24(i, true, g_2);
+    mom[i] += -m_dt * dirac.derDirac24(i, true, g_2);
     mat[i] += (m_dt / 2.) * mom[i];
   }
 }
@@ -67,22 +72,23 @@ void Hamiltonian::omelyan(const DiracOperator& dirac,
                           double g_2) const {
   double xi = 0.1931833;
 
-  auto* mat = dirac.get_mats();
-  auto* mom = dirac.get_moms();
+  auto* mat = dirac.getMatrices();
+  auto* mom = dirac.getMomenta();
+  auto num_matrices = dirac.getNumMatrices();
 
-  for (int i = 0; i < dirac.nHL; ++i) {
+  for (int i = 0; i < num_matrices; ++i) {
     mat[i] += xi * m_dt * mom[i];
 
     for (int j = 0; j < nt - 1; ++j) {
-      mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+      mom[i] += -(m_dt / 2.) * dirac.derDirac24(i, true, g_2);
       mat[i] += (1 - 2 * xi) * m_dt * mom[i];
-      mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+      mom[i] += -(m_dt / 2.) * dirac.derDirac24(i, true, g_2);
       mat[i] += 2 * xi * m_dt * mom[i];
     }
 
-    mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+    mom[i] += -(m_dt / 2.) * dirac.derDirac24(i, true, g_2);
     mat[i] += (1 - 2 * xi) * m_dt * mom[i];
-    mom[i] += -(m_dt / 2.) * dirac.der_dirac24(i, true, g_2);
+    mom[i] += -(m_dt / 2.) * dirac.derDirac24(i, true, g_2);
     mat[i] += xi * m_dt * mom[i];
   }
 }
@@ -213,9 +219,10 @@ double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
   sampleMoments(dirac);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[dirac.nHL];
-  auto* mat = dirac.get_mats();
-  for (int j = 0; j < dirac.nHL; j++) {
+  auto num_matrices = dirac.getNumMatrices();
+  auto* mat_bk = new cx_mat[num_matrices];
+  auto* mat = dirac.getMatrices();
+  for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
 
@@ -243,7 +250,7 @@ double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
   if (std::isnan(en_f[3])) {
     e = 0;
     // restore old configuration
-    for (int j = 0; j < dirac.nHL; ++j)
+    for (int j = 0; j < num_matrices; ++j)
       mat[j] = mat_bk[j];
     en_f[0] = en_i[0];
     en_f[1] = en_i[1];
@@ -257,7 +264,7 @@ double Hamiltonian::runHmcDuavCore(const DiracOperator& dirac,
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < dirac.nHL; ++j)
+      for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
       en_f[1] = en_i[1];
@@ -283,9 +290,10 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
   sampleMoments(dirac);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[dirac.nHL];
-  auto* mat = dirac.get_mats();
-  for (int j = 0; j < dirac.nHL; j++) {
+  auto num_matrices = dirac.getNumMatrices();
+  auto* mat_bk = new cx_mat[num_matrices];
+  auto* mat = dirac.getMatrices();
+  for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
 
@@ -313,7 +321,7 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < dirac.nHL; ++j)
+      for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
       en_f[1] = en_i[1];
@@ -337,9 +345,10 @@ double Hamiltonian::runHmcCoreDebug(const DiracOperator& dirac,
   sampleMoments(dirac);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[dirac.nHL];
-  auto* mat = dirac.get_mats();
-  for (int j = 0; j < dirac.nHL; j++) {
+  auto num_matrices = dirac.getNumMatrices();
+  auto* mat_bk = new cx_mat[num_matrices];
+  auto* mat = dirac.getMatrices();
+  for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
 
@@ -368,7 +377,7 @@ double Hamiltonian::runHmcCoreDebug(const DiracOperator& dirac,
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < dirac.nHL; ++j)
+      for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
     }
   }
@@ -395,9 +404,10 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
   this->m_dt = dt_min + (dt_max - dt_min) * gsl_rng_uniform(m_engine);
 
   // store previous configuration
-  auto* mat_bk = new cx_mat[dirac.nHL];
-  auto* mat = dirac.get_mats();
-  for (int j = 0; j < dirac.nHL; j++) {
+  auto num_matrices = dirac.getNumMatrices();
+  auto* mat_bk = new cx_mat[num_matrices];
+  auto* mat = dirac.getMatrices();
+  for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
 
@@ -425,7 +435,7 @@ double Hamiltonian::runHmcCore(const DiracOperator& dirac,
 
     if (r > e) {
       // restore old configuration
-      for (int j = 0; j < dirac.nHL; ++j)
+      for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
       en_f[1] = en_i[1];

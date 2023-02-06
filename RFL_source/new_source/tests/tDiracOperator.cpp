@@ -39,7 +39,7 @@ TEST(DiracOperatorTests, NumH_IsCorrectlySet) {
 
   for (auto& d : data) {
     DiracOperator D(d.p, d.q, 5);
-    EXPECT_EQ(d.num_h_mat, D.nH) << "(p,q) = (" << d.p << "," << d.q << ")";
+    EXPECT_EQ(d.num_h_mat, D.getNumHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
 
@@ -58,7 +58,7 @@ TEST(DiracOperatorTests, NumL_IsCorrectlySet) {
 
   for (auto& d : data) {
     DiracOperator D(d.p, d.q, 5);
-    EXPECT_EQ(d.num_h_mat, D.nL) << "(p,q) = (" << d.p << "," << d.q << ")";
+    EXPECT_EQ(d.num_h_mat, D.getNumAntiHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
 
@@ -77,6 +77,6 @@ TEST(DiracOperatorTests, NumHL_IsCorrectlySet) {
 
   for (auto& d : data) {
     DiracOperator D(d.p, d.q, 5);
-    EXPECT_EQ(d.num_hl_mat, D.nHL) << "(p,q) = (" << d.p << "," << d.q << ")";
+    EXPECT_EQ(d.num_hl_mat, D.getNumMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }

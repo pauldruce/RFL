@@ -59,11 +59,11 @@ TEST(HamiltonianTests, CanChangeStepSize) {
 TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
   Hamiltonian H(Integrator::LEAPFROG, gsl_rng_alloc(gsl_rng_ranlxd1), 0.2);
   auto D = DiracOperator(1, 1, 5);
-  auto old_D_mat = D.build_dirac();
+  auto old_D_mat = D.getDiracMatrix();
   auto A = Action(-2.7);
   H.updateDirac(D, A);
 
-  auto new_D_mat = D.build_dirac();
+  auto new_D_mat = D.getDiracMatrix();
 
   const auto diracsAreEqual = arma::approx_equal(new_D_mat, old_D_mat, "absdiff", 1e-6);
 

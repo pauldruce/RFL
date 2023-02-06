@@ -12,8 +12,8 @@ static void CompareActions(int p, int q, int dim, double g2) {
   DiracOperator D(p, q, dim);
 
   for (int i = 0; i < numOfTestRepeats; ++i) {
-    D.randomise(engine);
-    double d2 = D.dim * D.dim;
+    D.randomiseMatrices(engine);
+    double d2 = D.getMatrixDimension() * D.getMatrixDimension();
 
     auto S1 = A.calculateS(D) / d2;
 

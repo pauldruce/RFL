@@ -43,7 +43,7 @@ TEST(DerivativeTests, DerivativesAreWhatExactly) {
           EXPECT_TRUE(G.get_mat(i).is_diagmat()) << "Matrix is not diagonal i=" << i << ", " << G.get_mat(i);
         }
 
-        EXPECT_TRUE(G.der_dirac4(0, true).is_diagmat()) << "G.der_dirac4(0,true) matrix is not diagonal";
+        EXPECT_TRUE(G.der_dirac4(0, true).is_diagmat()) << "G.derDirac4(0,true) matrix is not diagonal";
       }
     }
   }

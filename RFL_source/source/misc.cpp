@@ -328,7 +328,7 @@ void Geom24::init_omega_table_4() {
 }
 
 // PD: In DiracOperator as static method
-vector<int> base_conversion(int dec, const int& base, const int& max) {
+vector<int> baseConversion(int dec, const int& base, const int& max) {
   vector<int> rem;
 
   while (dec) {
@@ -352,7 +352,7 @@ void Geom24::print_omega_table_4() const {
     cx_double z = omega_table_4[i];
     if (z != cx_double(0., 0.)) {
       int e = 1;
-      vector<int> prod = base_conversion(i, nHL, 4);
+      vector<int> prod = baseConversion(i, nHL, 4);
       //            vector<int>::const_iterator end(prod.end());
       //            for (vector<int>::const_iterator iter = prod.begin(); iter != end; ++iter) {
       //                cout << (*iter) << " ";

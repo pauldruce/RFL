@@ -21,14 +21,16 @@ double Metropolis::delta2(const DiracOperator& D,
                           const int& I,
                           const int& J,
                           const cx_double& z) const {
-  auto* mat = D.get_mats();
-  auto* eps = D.get_eps();
+  auto* mat = D.getMatrices();
+  auto* eps = D.getEpsilons();
+  auto mat_dim = D.getMatrixDimension();
+  auto gamma_dim = D.getGammaDimension();
 
   if (I != J) {
-    return 4. * D.dim_omega * D.dim * (2. * (z * mat[x](J, I)).real() + norm(z));
+    return 4. * gamma_dim * mat_dim * (2. * (z * mat[x](J, I)).real() + norm(z));
   } else {
     double trM = trace(mat[x]).real();
-    return 8. * D.dim_omega * z.real() * (D.dim * (mat[x](I, I).real() + z.real()) + eps[x] * (trM + z.real()));
+    return 8. * gamma_dim * z.real() * (mat_dim * (mat[x](I, I).real() + z.real()) + eps[x] * (trM + z.real()));
   }
 }
 
@@ -39,15 +41,18 @@ double Metropolis::delta4(const DiracOperator& D,
                           const cx_double& z) const {
   double res = 0.;
 
-  auto* omega_table_4 = D.get_omega_table_4();
-  auto* mat = D.get_mats();
-  auto* eps = D.get_eps();
+  auto* omega_table_4 = D.getOmegaTable4();
+  auto* mat = D.getMatrices();
+  auto* eps = D.getEpsilons();
+  auto mat_dim = D.getMatrixDimension();
+  auto gamma_dim = D.getGammaDimension();
+  auto num_matrices = D.getNumMatrices();
 
   // D^3 dD part
-  for (int i3 = 0; i3 < D.nHL; ++i3) {
-    for (int i2 = 0; i2 < D.nHL; ++i2) {
+  for (int i3 = 0; i3 < num_matrices; ++i3) {
+    for (int i2 = 0; i2 < num_matrices; ++i2) {
       for (int i1 = 0; i1 <= i3; ++i1) {
-        cx_double cliff = omega_table_4[x + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))];
+        cx_double cliff = omega_table_4[x + num_matrices * (i3 + num_matrices * (i2 + num_matrices * i1))];
 
         if (fabs(cliff.real()) > 1e-10 || fabs(cliff.imag()) > 1e-10) {
           // compute necessary matrix products
@@ -72,7 +77,7 @@ double Metropolis::delta4(const DiracOperator& D,
             // _______________________________________________________________________________________
             cx_double T1 = M1M2M3(J, I) * z + M1M2M3(I, J) * conj(z);
             T1 = T1 + conj(T1) * (double)(eps[i1] * eps[i2] * eps[i3] * eps[x]);
-            T1 *= (double)D.dim;
+            T1 *= (double)mat_dim;
 
             cx_double T2 = M1M2(J, I) * z + M1M2(I, J) * conj(z);
             T2 = T2 * (double)(eps[i3]) + conj(T2) * (double)(eps[i1] * eps[i2] * eps[x]);
@@ -117,7 +122,7 @@ double Metropolis::delta4(const DiracOperator& D,
             // _______________________________________________________________________________________
             cx_double T1 = M1M2M3(I, I);
             T1 = T1 + conj(T1) * (double)(eps[i1] * eps[i2] * eps[i3] * eps[x]);
-            T1 = T1 * (double)D.dim;
+            T1 = T1 * (double)mat_dim;
 
             cx_double T2 = M1M2(I, I);
             T2 = T2 * (double)(eps[i3]) + conj(T2) * (double)(eps[i1] * eps[i2] * eps[x]);
@@ -167,8 +172,8 @@ double Metropolis::delta4(const DiracOperator& D,
 
   // D^2 dD^2 and D dD D dD term
   double temp = 0;
-  for (int i = 0; i < D.nHL; ++i) {
-    double cliff = omega_table_4[x + D.nHL * (i + D.nHL * (x + D.nHL * i))].real();
+  for (int i = 0; i < num_matrices; ++i) {
+    double cliff = omega_table_4[x + num_matrices * (i + num_matrices * (x + num_matrices * i))].real();
 
     // compute necessary matrix products
     cx_mat M1M1 = mat[i] * mat[i];
@@ -181,7 +186,7 @@ double Metropolis::delta4(const DiracOperator& D,
     if (I != J) {
       // compute terms D^2 dD^2
       // _______________________________________________________________________________________
-      double T11 = 2 * D.dim * (M1M1(I, I).real() + M1M1(J, J).real());
+      double T11 = 2 * mat_dim * (M1M1(I, I).real() + M1M1(J, J).real());
       double T21 = 4 * eps[i] * trM1 * (mat[i](I, I).real() + mat[i](J, J).real());
       double T31 = (z * mat[i](J, I)).real();
       T31 *= T31 * 16 * eps[i] * eps[x];
@@ -192,7 +197,7 @@ double Metropolis::delta4(const DiracOperator& D,
 
       double T12 = (mat[i](J, I) * mat[i](J, I) * z * z).real();
       T12 += mat[i](I, I).real() * mat[i](J, J).real() * norm(z);
-      T12 *= 4 * D.dim;
+      T12 *= 4 * mat_dim;
 
       double T22 = 4 * eps[i] * trM1 * (mat[i](I, I).real() + mat[i](J, J).real());
       double T32 = (mat[i](J, I) * z).real();
@@ -200,7 +205,7 @@ double Metropolis::delta4(const DiracOperator& D,
       //________________________________________________________________________________________
 
       // add to total
-      temp += 2. * D.dim_omega * (norm(z) * (T11 + T21 + 4. * trM1M1) + T31);
+      temp += 2. * gamma_dim * (norm(z) * (T11 + T21 + 4. * trM1M1) + T31);
       temp += cliff * (T12 + norm(z) * (T22 + 4. * trM1M1) + T32);
     }
 
@@ -208,7 +213,7 @@ double Metropolis::delta4(const DiracOperator& D,
     else {
       // compute terms D^2 dD^2
       // _______________________________________________________________________________________
-      double T11 = 2. * D.dim * M1M1(I, I).real();
+      double T11 = 2. * mat_dim * M1M1(I, I).real();
       double T21 = 4. * eps[x] * M1M1(I, I).real();
       double T31 = 4. * eps[i] * trM1 * mat[i](I, I).real();
       double T41 = mat[i](I, I).real();
@@ -218,7 +223,7 @@ double Metropolis::delta4(const DiracOperator& D,
       // compute terms D dD D dD
       // _______________________________________________________________________________________
       double T12 = mat[i](I, I).real();
-      T12 *= T12 * 2. * D.dim;
+      T12 *= T12 * 2. * mat_dim;
       double T22 = 4. * eps[x] * M1M1(I, I).real();
       double T32 = 4. * eps[i] * trM1 * mat[i](I, I).real();
       double T42 = mat[i](I, I).real();
@@ -226,7 +231,7 @@ double Metropolis::delta4(const DiracOperator& D,
       //________________________________________________________________________________________
 
       // add to total
-      temp += 8. * z.real() * z.real() * D.dim_omega * (T11 + T21 + T31 + T41 + 2. * trM1M1);
+      temp += 8. * z.real() * z.real() * gamma_dim * (T11 + T21 + T31 + T41 + 2. * trM1M1);
       temp += 4. * z.real() * z.real() * cliff * (T12 + T22 + T32 + T42 + 2. * trM1M1);
     }
   }
@@ -237,7 +242,7 @@ double Metropolis::delta4(const DiracOperator& D,
 
   // off-diagonal update
   if (I != J) {
-    temp = 4. * D.dim_omega * (D.dim + 6) * norm(z) * (mat[x](J, I) * z).real();
+    temp = 4. * gamma_dim * (mat_dim + 6) * norm(z) * (mat[x](J, I) * z).real();
     res += 4. * temp;
   }
 
@@ -245,7 +250,7 @@ double Metropolis::delta4(const DiracOperator& D,
   else {
     double trMx = trace(mat[x]).real();
     double rez = 2. * z.real();
-    temp = 2. * rez * rez * rez * D.dim_omega * (mat[x](I, I).real() * (D.dim + 3. * eps[x] + 3.) + eps[x] * trMx);
+    temp = 2. * rez * rez * rez * gamma_dim * (mat[x](I, I).real() * (mat_dim + 3. * eps[x] + 3.) + eps[x] * trMx);
     res += 4. * temp;
   }
 
@@ -253,14 +258,14 @@ double Metropolis::delta4(const DiracOperator& D,
 
   // off-diagonal update
   if (I != J) {
-    temp = D.dim_omega * 4. * norm(z) * norm(z) * (D.dim + 6.);
+    temp = gamma_dim * 4. * norm(z) * norm(z) * (mat_dim + 6.);
     res += temp;
   }
 
     // diagonal update
   else {
     double rez = z.real();
-    temp = D.dim_omega * 32. * (D.dim + 3. + 4 * eps[x]) * rez * rez * rez * rez;
+    temp = gamma_dim * 32. * (mat_dim + 3. + 4 * eps[x]) * rez * rez * rez * rez;
     res += temp;
   }
 
@@ -276,9 +281,9 @@ void Metropolis::MMC_duav(const DiracOperator& D,
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
-
+  auto mat_dim = D.getMatrixDimension();
   // calculate length of a sweep in terms of dofs
-  int Nsw = D.nHL * D.dim * D.dim - D.nL;
+  int Nsw = D.getNumMatrices() * mat_dim * mat_dim - D.getNumAntiHermitianMatrices();
 
   // dual averaging variables
   const double shr = 0.05;
@@ -326,9 +331,9 @@ double Metropolis::MMC(const DiracOperator& D,
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
-
+  auto mat_dim = D.getMatrixDimension();
   // calculate length of a sweep in terms of dofs
-  int Nsw = D.nHL * D.dim * D.dim - D.nL;
+  int Nsw = D.getNumMatrices() * mat_dim * mat_dim - D.getNumAntiHermitianMatrices();
 
   // return statistic
   double Stat = 0;
@@ -364,11 +369,14 @@ double Metropolis::MMC_duav_core(const DiracOperator& D,
                                  double* s_f) const {
   // acceptance probability
   double e;
+  auto num_matrices = D.getNumMatrices();
+  auto mat_dim = D.getMatrixDimension();
 
   // metropolis
-  int x = D.nHL * gsl_rng_uniform(engine);
-  int I = D.dim * gsl_rng_uniform(engine);
-  int J = D.dim * gsl_rng_uniform(engine);
+  int x = (int)(num_matrices * gsl_rng_uniform(engine));
+  int I = (int)(mat_dim * gsl_rng_uniform(engine));
+  int J = (int)(mat_dim * gsl_rng_uniform(engine));
+
   double re = 0;
   double im = 0;
   cx_double z;
@@ -385,7 +393,7 @@ double Metropolis::MMC_duav_core(const DiracOperator& D,
   double dS4 = delta4(D, x, I, J, z);
   double dS = A.getG2() * dS2 + dS4;
 
-  auto* mat = D.get_mats();
+  auto* mat = D.getMatrices();
   // metropolis test
   if (dS < 0) {
     // update matrix element
@@ -436,10 +444,13 @@ double Metropolis::MMC_core(const DiracOperator& D,
   // acceptance probability
   double ret = 0;
 
+  auto num_matrices = D.getNumMatrices();
+  auto mat_dim = D.getMatrixDimension();
+
   // metropolis
-  int x = D.nHL * gsl_rng_uniform(engine);
-  int I = D.dim * gsl_rng_uniform(engine);
-  int J = D.dim * gsl_rng_uniform(engine);
+  int x = (int)(num_matrices * gsl_rng_uniform(engine));
+  int I = (int)(mat_dim * gsl_rng_uniform(engine));
+  int J = (int)(mat_dim * gsl_rng_uniform(engine));
   double re = 0;
   double im = 0;
   cx_double z;
@@ -456,7 +467,7 @@ double Metropolis::MMC_core(const DiracOperator& D,
   double dS4 = delta4(D, x, I, J, z);
   double dS = A.getG2() * dS2 + dS4;
 
-  auto* mat = D.get_mats();
+  auto* mat = D.getMatrices();
   // metropolis test
   if (dS < 0) {
     // update matrix element
