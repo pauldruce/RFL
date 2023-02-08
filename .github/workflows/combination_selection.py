@@ -1,35 +1,14 @@
+import sys
 import itertools
 import random
+import json
 
-default_config = {}
-
-build_type = ["Release", "Debug"]
-os_versions = [
-    "ubuntu-22.04",
-    "ubuntu-20.04",
-    "ubuntu-18.04",
-    "macos-12",
-    "macos-11",
-    "macos-10.15",
-]
-armadillo_version = ["10.8.2", "11.2.3"]
-
-list_of_lists = [build_type, os_versions, armadillo_version]
-
-combinations = [p for p in itertools.product(*list_of_lists)]
-
-# print(combinations)
-# print(len(combinations))
-
-
-def create_combination_selection():
-    random.seed(1)
-    return random.sample(combinations, 3)
+def create_combination_selection(combinations, random_seed, num_selected):
+    random.seed(random_seed)
+    return random.sample(combinations, num_selected)
 
 
 def create_new_matrix(subset):
-    import json
-
     json_versions = []
     for version in subset:
         json_version = {
@@ -41,10 +20,47 @@ def create_new_matrix(subset):
 
     return json.dumps(json_versions, separators=(",", ":"))
 
+def main(random_seed, num_selected):
+    build_type = ["Release", "Debug"]
+    os_versions = [
+        "ubuntu-22.04",
+        "ubuntu-20.04",
+        "ubuntu-18.04",
+        "macos-12",
+        "macos-11",
+        "macos-10.15",
+    ]
+    armadillo_version = ["10.8.2", "11.2.3"]
 
-subset = create_combination_selection()
-matrix = create_new_matrix(subset)
-print(matrix)
+    list_of_lists = [build_type, os_versions, armadillo_version]
+
+    combinations = [p for p in itertools.product(*list_of_lists)]
+
+    subset = create_combination_selection(combinations, random_seed, num_selected)
+    matrix = create_new_matrix(subset)
+    print(matrix)
+    return 0
+
+if __name__=="__main__":
+    command_line_arguments = sys.argv
+    if len(command_line_arguments)>3:
+        sys.exit(""""
+        Too many arguments passed in. 
+        Valid arguments are a positive integer representing the seed for random selection,
+        followed by another positive integer representing the number of elements to select.
+        I.e. "python -u combination_selection.py 1234 5" would seed the random selection
+        using the value 1234 and would select 5 extra combinations.
+                 """)
+
+    random_seed = None
+    num_selected = 3
+    if len(command_line_arguments)==2:
+        random_seed = command_line_arguments[1]
+    if(len(command_line_arguments) == 3):
+        random_seed = int(command_line_arguments[1])
+        num_selected = int(command_line_arguments[2])
+
+    sys.exit(main(random_seed, num_selected))
 
 
 # Proving that we can recreate the combinations by setting the random.seed

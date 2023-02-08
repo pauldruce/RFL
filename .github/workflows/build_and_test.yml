@@ -19,7 +19,8 @@ jobs:
       - id: set-matrix
         shell: bash
         run: |
-          includes=$(python3 -u .github/workflows/combination_selection.py)
+          echo "Seed for random selection is = ${{github.run_number}}"
+          includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}})
           echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
 
   check-matrix:
