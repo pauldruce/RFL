@@ -13,14 +13,14 @@ jobs:
     name: Generate test matrix
     runs-on: ubuntu-latest
     outputs:
-      matrix_json: ${{steps.set-matrix.outputs.matrix}}
+      matrix_includes: ${{steps.set-matrix.outputs.matrix_includes}}
     steps:
       - uses: actions/checkout@v3
       - id: set-matrix
         shell: bash
         run: |
-          matrix=$(python3 -u .github/workflows/combination_selection.py)
-          echo "::set-output name=matrix::$matrix"
+          includes=$(python3 -u .github/workflows/combination_selection.py)
+          echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
 
   check-matrix:
     runs-on: ubuntu-latest
@@ -28,10 +28,11 @@ jobs:
     steps:
       - name: Check matrix definition
         run: |
-          matrix='${{ needs.generate_matrix.outputs.matrix_json }}'
-          echo Json should be = $matrix
-          matrix_json='${{fromJson(needs.generate_matrix.outputs.matrix_json)}}'
-          echo Yaml should be = $matrix_json
+          includes='${{ needs.generate_matrix.outputs.matrix_includes }}'
+          echo "Json received is = $includes"
+          echo "Check that the json can be converted using GitHubs fromJSON() without error"
+          matrix_json='${{fromJson(needs.generate_matrix.outputs.matrix_includes)}}'
+
 
   build_and_test:
     needs: [generate_matrix, check-matrix]
@@ -41,13 +42,13 @@ jobs:
         BUILD_TYPE: [ Release ]
         OS: [ubuntu-22.04]
         ARMA_VERSION: [11.2.3]
-        include: ${{fromJson(needs.generate-matrix.outputs.matrix_json)}}
+        include: ${{fromJSON(needs.generate_matrix.outputs.matrix_includes)}}
 
     # The CMake configure and build commands are platform-agnostic and should work equally well on Windows or Mac.
     # You can convert this to a matrix build if you need cross-platform coverage.
     # See: https://docs.github.com/en/free-pro-team@latest/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
 
-    name: "Build and test in ${{matrix.BUILD_TYPE}} mode, on ${{matrix.OS}}, with Armadillo version ${{matrix.ARMA_VERSION}}."
+    name: "in ${{matrix.BUILD_TYPE}} mode, on ${{matrix.OS}}, with Armadillo version ${{matrix.ARMA_VERSION}}."
     runs-on: ${{matrix.OS}}
     if: ${{ !contains(github.event.head_commit.message, '#docs') }} # Skip this action if the commit is just for docs.
 

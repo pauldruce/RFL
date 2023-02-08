@@ -18,14 +18,8 @@ list_of_lists = [build_type, os_versions, armadillo_version]
 
 combinations = [p for p in itertools.product(*list_of_lists)]
 
-
 # print(combinations)
 # print(len(combinations))
-
-# Proving that we can recreate the combinations by setting the random.seed
-# for i in range(10):
-#     random.seed(1)
-#     print(random.sample(combinations, 3))
 
 
 def create_combination_selection():
@@ -41,13 +35,19 @@ def create_new_matrix(subset):
         json_version = {
             "BUILD_TYPE": version[0],
             "OS": version[1],
-            "ARMA_VERISON": version[2],
+            "ARMA_VERSION": version[2],
         }
         json_versions.append(json_version)
 
-    return json.dumps(json_versions)
+    return json.dumps(json_versions, separators=(",", ":"))
 
 
 subset = create_combination_selection()
 matrix = create_new_matrix(subset)
 print(matrix)
+
+
+# Proving that we can recreate the combinations by setting the random.seed
+# for i in range(10):
+#     random.seed(1)
+#     print(random.sample(combinations, 3))
