@@ -20,7 +20,7 @@ def create_new_matrix(subset):
 
     return json.dumps(json_versions, separators=(",", ":"))
 
-def main(random_seed, num_selected):
+def main(random_seed, num_selected, select_all):
     build_type = ["Release", "Debug"]
     os_versions = [
         "ubuntu-22.04",
@@ -36,7 +36,11 @@ def main(random_seed, num_selected):
 
     combinations = [p for p in itertools.product(*list_of_lists)]
 
-    subset = create_combination_selection(combinations, random_seed, num_selected)
+    if select_all == False:
+        subset = create_combination_selection(combinations, random_seed, num_selected)
+    else:
+        subset = combinations
+
     matrix = create_new_matrix(subset)
     print(matrix)
     return 0
@@ -52,15 +56,21 @@ if __name__=="__main__":
         using the value 1234 and would select 5 extra combinations.
                  """)
 
+    select_all = False
     random_seed = None
     num_selected = 3
+
     if len(command_line_arguments)==2:
-        random_seed = command_line_arguments[1]
+        if command_line_arguments[1]=="all":
+            select_all = True
+        else:
+            random_seed = int(command_line_arguments[1])
+
     if(len(command_line_arguments) == 3):
         random_seed = int(command_line_arguments[1])
         num_selected = int(command_line_arguments[2])
 
-    sys.exit(main(random_seed, num_selected))
+    sys.exit(main(random_seed, num_selected, select_all))
 
 
 # Proving that we can recreate the combinations by setting the random.seed
