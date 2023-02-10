@@ -1,9 +1,10 @@
-add_library(new_RFL STATIC IAlgorithm.hpp)
+add_library(new_RFL STATIC IAlgorithm.hpp IRng.hpp)
 
 set(new_RFL_HEADERS
         Action.hpp
         Clifford.hpp
         DiracOperator.hpp
+        GslRng.hpp
         Hamiltonian.hpp
         Metropolis.hpp
         Simulation.hpp)
@@ -12,8 +13,8 @@ target_sources(
         new_RFL
         PRIVATE
         Action.cpp
-        DiracOperator.cpp
         Clifford.cpp
+        DiracOperator.cpp
         Hamiltonian.cpp
         Metropolis.cpp
         Simulation.cpp
