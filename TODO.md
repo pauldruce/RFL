@@ -1,9 +1,3 @@
-- [x] Create some demo apps to showcase how to create and run a simple simulation with the new library
-- [ ] Create an interface for the random number generator and wrap the gsl methods we use in a class.
-  - [x] Interface made
-  - [x] GSL class created
-  - [x] Refactor code to make use of interface rather than GSL directly
-
 - [ ] Unit tests for:
   - [x] Hamiltonian Class
   - [ ] Metropolis Class
@@ -13,3 +7,11 @@
 - [ ] Transfer methods that can be made static in Action to more appropriate place
 - [ ] Add a clang-format step to GitHub actions
   - [ ] Can we add it as a step in CMake build?
+
+
+## Completed
+- [x] Create some demo apps to showcase how to create and run a simple simulation with the new library
+- [x] Create an interface for the random number generator and wrap the gsl methods we use in a class.
+  - [x] Interface made
+  - [x] GSL class created
+  - [x] Refactor code to make use of interface rather than GSL directly

@@ -454,9 +454,6 @@ void Hamiltonian::setStepSize(double dt) {
   this->m_dt = dt;
 }
 void Hamiltonian::setIntegrator(Integrator integrator) { this->m_integrator = integrator; }
-void Hamiltonian::setEngine(IRng& rng) {
-  this->m_rng = rng;
-}
 
 Hamiltonian::Hamiltonian(Integrator integrator, IRng& rng, double step_size)
     : m_integrator(integrator), m_rng(rng), m_dt(step_size) {

@@ -15,12 +15,10 @@ enum Integrator {
 
 class Hamiltonian : public IAlgorithm {
 public:
+  Hamiltonian() = delete;
   Hamiltonian(Integrator integrator, IRng& rng, double step_size);
 
   double updateDirac(const DiracOperator& dirac, const Action& action) const override;
-
-  void setEngine(IRng& rng);
-  IRng& getEngine() const { return this->m_rng; };
 
   void setIntegrator(Integrator integrator);
   Integrator getIntegrator() const { return this->m_integrator; };
