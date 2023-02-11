@@ -30,7 +30,7 @@ public:
   }
 
   double getGaussian(double sigma) const override {
-    return gsl_ran_gaussian(m_rng, 1.);
+    return gsl_ran_gaussian(m_rng, sigma);
   }
   double getUniform() const override {
     return gsl_rng_uniform(m_rng);

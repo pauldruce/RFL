@@ -370,18 +370,19 @@ cx_mat DiracOperator::computeB(const int& k) const {
   return 2 * m_gamma_dim * res;
 }
 
-void DiracOperator::randomiseMatrices(gsl_rng* engine) {
+// TODO: Refactor this method, to reuse the randomisation process. Can just pass in the matrix or array of matrices to assign
+void DiracOperator::randomiseMatrices(const IRng& rng) {
   for (int i = 0; i < m_num_matrices; ++i) {
     // loop on indices
     for (int j = 0; j < m_dim; ++j) {
       double x;
-      x = gsl_ran_gaussian(engine, 1.);
+      x = rng.getGaussian(1.0);
       m_matrices[i](j, j) = cx_double(x, 0.);
 
       for (int k = j + 1; k < m_dim; ++k) {
         double a, b;
-        a = gsl_ran_gaussian(engine, 1.);
-        b = gsl_ran_gaussian(engine, 1.);
+        a = rng.getGaussian(1.0);
+        b = rng.getGaussian(1.0);
         m_matrices[i](j, k) = cx_double(a, b) / sqrt(2.);
         m_matrices[i](k, j) = cx_double(a, -b) / sqrt(2.);
       }
@@ -392,13 +393,13 @@ void DiracOperator::randomiseMatrices(gsl_rng* engine) {
     // loop on indices
     for (int j = 0; j < m_dim; ++j) {
       double x;
-      x = gsl_ran_gaussian(engine, 1.);
+      x = rng.getGaussian(1.0);
       m_momenta[i](j, j) = cx_double(x, 0.);
 
       for (int k = j + 1; k < m_dim; ++k) {
         double a, b;
-        a = gsl_ran_gaussian(engine, 1.);
-        b = gsl_ran_gaussian(engine, 1.);
+        a = rng.getGaussian(1.0);
+        b = rng.getGaussian(1.0);
         m_momenta[i](j, k) = cx_double(a, b) / sqrt(2.);
         m_momenta[i](k, j) = cx_double(a, -b) / sqrt(2.);
       }

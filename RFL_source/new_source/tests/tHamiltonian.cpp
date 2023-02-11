@@ -3,51 +3,42 @@
 //
 
 #include "Hamiltonian.hpp"
+#include "GslRng.hpp"
 #include <gtest/gtest.h>
 
-class Engine {
-public:
-  Engine(){
-    rng = gsl_rng_alloc(gsl_rng_ranlxd1);
-  }
-  ~Engine(){
-    if(rng) {
-      gsl_rng_free(rng);
-    }
-  }
-  gsl_rng* rng;
-};
 
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const Engine engine;
+  GslRng rng;
   double step_size = 0.1;
   ASSERT_NO_THROW(
-      const Hamiltonian hamiltonian(integrator, engine.rng, step_size););
+      const Hamiltonian hamiltonian(integrator, rng, step_size););
 }
 
 TEST(HamiltonianTests, CanChangeEngine) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const Engine engine;
+  GslRng rng;
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, engine.rng, step_size);
+  Hamiltonian hamiltonian(integrator, rng, step_size);
 
-  ASSERT_EQ(hamiltonian.getEngine(), engine.rng);
+  // Compare the memory address that the references point to, to ensure
+  // that the correct RNG is being returned.
+  ASSERT_EQ(&hamiltonian.getEngine(), &rng);
 
-  const Engine new_engine;
-  hamiltonian.setEngine(new_engine.rng);
-  ASSERT_EQ(hamiltonian.getEngine(), new_engine.rng);
+  GslRng new_rng;
+  hamiltonian.setEngine(new_rng);
+  ASSERT_EQ(&hamiltonian.getEngine(), &new_rng);
 }
 
 TEST(HamiltonianTests, CanChangeIntegrator) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const Engine engine;
+  GslRng rng;
 
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, engine.rng, step_size);
+  Hamiltonian hamiltonian(integrator, rng, step_size);
 
   ASSERT_EQ(hamiltonian.getIntegrator(), integrator);
 
@@ -59,9 +50,9 @@ TEST(HamiltonianTests, CanChangeIntegrator) {
 TEST(HamiltonianTests, CanChangeStepSize) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  const Engine engine;
+  GslRng rng;
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, engine.rng, step_size);
+  Hamiltonian hamiltonian(integrator, rng, step_size);
 
   ASSERT_EQ(hamiltonian.getStepSize(), step_size);
 
@@ -71,9 +62,9 @@ TEST(HamiltonianTests, CanChangeStepSize) {
 }
 
 TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
-  const Engine engine;
+  GslRng rng;
 
-  Hamiltonian hamiltonian(Integrator::LEAPFROG, engine.rng, 0.2);
+  Hamiltonian hamiltonian(Integrator::LEAPFROG, rng, 0.2);
   auto dirac = DiracOperator(1, 1, 5);
   auto old_dirac_matrix = dirac.getDiracMatrix();
   auto action = Action(-2.7);

@@ -3,29 +3,16 @@
 //
 #include "Action.hpp"
 #include <gtest/gtest.h>
-
-
-class Engine {
-public:
-  Engine(){
-    rng = gsl_rng_alloc(gsl_rng_ranlxd1);
-  }
-  ~Engine(){
-    if(rng) {
-      gsl_rng_free(rng);
-    }
-  }
-  gsl_rng* rng;
-};
+#include "GslRng.hpp"
 
 static void CompareActions(int p, int q, int dim, double g_2) {
   constexpr int num_of_test_repeats = 100;
   Action action(g_2);
   DiracOperator dirac(p, q, dim);
-  Engine engine;
+  GslRng rng;
 
   for (int i = 0; i < num_of_test_repeats; ++i) {
-    dirac.randomiseMatrices(engine.rng);
+    dirac.randomiseMatrices(rng);
     double d_2 = dirac.getMatrixDimension() * dirac.getMatrixDimension();
 
     auto s_1 = action.calculateS(dirac) / d_2;

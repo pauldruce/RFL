@@ -1,4 +1,4 @@
-add_library(new_RFL STATIC IAlgorithm.hpp IRng.hpp)
+add_library(new_RFL)
 
 set(new_RFL_HEADERS
         Action.hpp
@@ -6,6 +6,8 @@ set(new_RFL_HEADERS
         DiracOperator.hpp
         GslRng.hpp
         Hamiltonian.hpp
+        IAlgorithm.hpp
+        IRng.hpp
         Metropolis.hpp
         Simulation.hpp)
 

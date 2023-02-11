@@ -274,10 +274,7 @@ double Metropolis::delta4(const DiracOperator& dirac,
 
 void Metropolis::runDualAverage(const DiracOperator& dirac,
                                 const Action& action,
-                                double& scale,
-                                const int& iter,
-                                gsl_rng* engine,
-                                const double& target) const {
+                                const double& target) {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -290,11 +287,11 @@ void Metropolis::runDualAverage(const DiracOperator& dirac,
   const double kappa = 0.75;
   const int i_0 = 10;
   double stat = 0;
-  double mu = log(10 * scale);
-  double log_scale_avg = log(scale);
+  double mu = log(10 * m_scale);
+  double log_scale_avg = log(m_scale);
 
   // iter sweeps of metropolis
-  for (int i = 0; i < iter; ++i) {
+  for (int i = 0; i < m_iter; ++i) {
     for (int j = 0; j < nsw; ++j) {
       // set action to previous final value,
       // unless it's the first iteration
@@ -306,28 +303,25 @@ void Metropolis::runDualAverage(const DiracOperator& dirac,
         s_i[1] = action.dirac4(dirac);
       }
 
-      stat += target - runDualAverageCore(dirac, action, scale, engine, s_i, s_f);
+      stat += target - runDualAverageCore(dirac, action, s_i, s_f);
 
       // perform dual averaging
       double log_scale = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
-      scale = exp(log_scale);
+      m_scale = exp(log_scale);
       double eta = pow(i + 1, -kappa);
       log_scale_avg = eta * log_scale + (1 - eta) * log_scale_avg;
     }
   }
 
   // set scale on its final dual averaged value
-  scale = exp(log_scale_avg);
+  m_scale = exp(log_scale_avg);
 
   delete[] s_i;
   delete[] s_f;
 }
 
 double Metropolis::run(const DiracOperator& dirac,
-                       const Action& action,
-                       const double& scale,
-                       const int& iter,
-                       gsl_rng* engine) const {
+                       const Action& action) const {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -339,7 +333,7 @@ double Metropolis::run(const DiracOperator& dirac,
   double stat = 0;
 
   // iter sweeps of metropolis
-  for (int i = 0; i < iter; ++i) {
+  for (int i = 0; i < m_iter; ++i) {
     for (int j = 0; j < nsw; ++j) {
       // set action to previous final value,
       // unless it's the first iteration
@@ -351,20 +345,18 @@ double Metropolis::run(const DiracOperator& dirac,
         s_i[1] = action.dirac4(dirac);
       }
 
-      stat += runCore(dirac, action, scale, engine, s_i, s_f);
+      stat += runCore(dirac, action, s_i, s_f);
     }
   }
 
   delete[] s_i;
   delete[] s_f;
 
-  return (stat / (iter * nsw));
+  return (stat / (m_iter * nsw));
 }
 
 double Metropolis::runDualAverageCore(const DiracOperator& dirac,
                                       const Action& action,
-                                      const double& scale,
-                                      gsl_rng* engine,
                                       const double* s_i,
                                       double* s_f) const {
   // acceptance probability
@@ -373,19 +365,19 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
   auto mat_dim = dirac.getMatrixDimension();
 
   // metropolis
-  int x = (int)(num_matrices * gsl_rng_uniform(engine));
-  int row_index = (int)(mat_dim * gsl_rng_uniform(engine));
-  int column_index = (int)(mat_dim * gsl_rng_uniform(engine));
+  int x = (int)(num_matrices * m_rng.getUniform());
+  int row_index = (int)(mat_dim * m_rng.getUniform());
+  int column_index = (int)(mat_dim * m_rng.getUniform());
 
   double re = 0;
   double im = 0;
   cx_double z;
   if (row_index != column_index) {
-    re = scale * (-1. + 2. * gsl_rng_uniform(engine));
-    im = scale * (-1. + 2. * gsl_rng_uniform(engine));
+    re = m_scale * (-1. + 2. * m_rng.getUniform());
+    im = m_scale * (-1. + 2. * m_rng.getUniform());
     z = cx_double(re, im);
   } else {
-    re = scale * (-1. + 2. * gsl_rng_uniform(engine));
+    re = m_scale * (-1. + 2. * m_rng.getUniform());
     z = cx_double(re, 0);
   }
 
@@ -412,7 +404,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
     e = 1;
   } else {
     e = exp(-action_delta);
-    double p = gsl_rng_uniform(engine);
+    double p = m_rng.getUniform();
 
     if (e > p) {
       // update matrix element
@@ -437,8 +429,6 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
 
 double Metropolis::runCore(const DiracOperator& dirac,
                            const Action& action,
-                           const double& scale,
-                           gsl_rng* engine,
                            const double* s_i,
                            double* s_f) const {
   // acceptance probability
@@ -448,18 +438,18 @@ double Metropolis::runCore(const DiracOperator& dirac,
   auto mat_dim = dirac.getMatrixDimension();
 
   // metropolis
-  int x = (int)(num_matrices * gsl_rng_uniform(engine));
-  int row_index = (int)(mat_dim * gsl_rng_uniform(engine));
-  int column_index = (int)(mat_dim * gsl_rng_uniform(engine));
+  int x = (int)(num_matrices * m_rng.getUniform());
+  int row_index = (int)(mat_dim * m_rng.getUniform());
+  int column_index = (int)(mat_dim * m_rng.getUniform());
   double re = 0;
   double im = 0;
   cx_double z;
   if (row_index != column_index) {
-    re = scale * (-1. + 2. * gsl_rng_uniform(engine));
-    im = scale * (-1. + 2. * gsl_rng_uniform(engine));
+    re = m_scale * (-1. + 2. * m_rng.getUniform());
+    im = m_scale * (-1. + 2. * m_rng.getUniform());
     z = cx_double(re, im);
   } else {
-    re = scale * (-1. + 2. * gsl_rng_uniform(engine));
+    re = m_scale * (-1. + 2. * m_rng.getUniform());
     z = cx_double(re, 0);
   }
 
@@ -486,7 +476,7 @@ double Metropolis::runCore(const DiracOperator& dirac,
     ret = 1;
   } else {
     double e = exp(-action_delta);
-    double p = gsl_rng_uniform(engine);
+    double p = m_rng.getUniform();
 
     if (e > p) {
       // update matrix element

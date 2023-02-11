@@ -6,9 +6,8 @@
 #define RFL_DIRACOPERATOR_HPP
 
 #include "Clifford.hpp"
+#include "IRng.hpp"
 #include <armadillo>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_rng.h>
 
 class DiracOperator {
 public:
@@ -38,7 +37,7 @@ public:
   arma::cx_double* getOmegaTable4() const { return m_omega_table_4; }
   void printOmegaTable4() const;
 
-  void randomiseMatrices(gsl_rng* engine);
+  void randomiseMatrices(const IRng& rng_engine);
 
 private:
   // CONSTANTS

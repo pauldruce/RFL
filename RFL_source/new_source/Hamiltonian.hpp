@@ -5,9 +5,8 @@
 #ifndef RFL_HAMILTONIAN_HPP
 #define RFL_HAMILTONIAN_HPP
 #include "IAlgorithm.hpp"
+#include "IRng.hpp"
 #include <cmath>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_rng.h>
 
 enum Integrator {
   LEAPFROG,
@@ -16,12 +15,12 @@ enum Integrator {
 
 class Hamiltonian : public IAlgorithm {
 public:
-  Hamiltonian(Integrator integrator, const gsl_rng* engine, double step_size);
+  Hamiltonian(Integrator integrator, IRng& rng, double step_size);
 
   double updateDirac(const DiracOperator& dirac, const Action& action) const override;
 
-  void setEngine(const gsl_rng* engine);
-  const gsl_rng* getEngine() const { return this->m_engine; };
+  void setEngine(IRng& rng);
+  IRng& getEngine() const { return this->m_rng; };
 
   void setIntegrator(Integrator integrator);
   Integrator getIntegrator() const { return this->m_integrator; };
@@ -31,7 +30,7 @@ public:
 
 private:
   Integrator m_integrator = Integrator::LEAPFROG;
-  const gsl_rng* m_engine;
+  IRng& m_rng;
   double m_dt;
 
   // This method seems to be the initialiser for the mom variables in DiracOperator

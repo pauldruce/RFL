@@ -18,13 +18,13 @@ void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
     // loop on indices
     for (int j = 0; j < mat_dim; ++j) {
       double x;
-      x = gsl_ran_gaussian(m_engine, 1.);
+      x = m_rng.getGaussian(1.0);
       mom[i](j, j) = cx_double(x, 0.);
 
       for (int k = j + 1; k < mat_dim; ++k) {
         double a, b;
-        a = gsl_ran_gaussian(m_engine, 1.);
-        b = gsl_ran_gaussian(m_engine, 1.);
+        a = m_rng.getGaussian(1.0);
+        b = m_rng.getGaussian(1.0);
         mom[i](j, k) = cx_double(a, b) / sqrt(2.);
         mom[i](k, j) = cx_double(a, -b) / sqrt(2.);
       }
@@ -259,7 +259,8 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
   }
     // now do the standard metropolis test
   else if (en_f[3] > en_i[3]) {
-    double r = gsl_rng_uniform(m_engine);
+//    double r = gsl_rng_uniform(m_engine);
+    double r = m_rng.getUniform();
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
@@ -316,7 +317,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
-    double r = gsl_rng_uniform(m_engine);
+    double r = m_rng.getUniform();
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
@@ -373,7 +374,7 @@ double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
 
   // metropolis test
   if (final_hamiltonian > initial_hamiltonian) {
-    double r = gsl_rng_uniform(m_engine);
+    double r = m_rng.getUniform();
 
     if (r > e) {
       // restore old configuration
@@ -401,7 +402,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
   sampleMoments(dirac);
 
   // choose uniformly from [dt_min, dt_max)
-  this->m_dt = dt_min + (dt_max - dt_min) * gsl_rng_uniform(m_engine);
+  this->m_dt = dt_min + (dt_max - dt_min) * m_rng.getUniform();
 
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
@@ -430,7 +431,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
-    double r = gsl_rng_uniform(m_engine);
+    double r = m_rng.getUniform();
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
@@ -453,12 +454,12 @@ void Hamiltonian::setStepSize(double dt) {
   this->m_dt = dt;
 }
 void Hamiltonian::setIntegrator(Integrator integrator) { this->m_integrator = integrator; }
-void Hamiltonian::setEngine(const gsl_rng* engine) {
-  this->m_engine = engine;
+void Hamiltonian::setEngine(IRng& rng) {
+  this->m_rng = rng;
 }
 
-Hamiltonian::Hamiltonian(Integrator integrator, const gsl_rng* engine, double step_size)
-    : m_integrator(integrator), m_engine(engine), m_dt(step_size) {
+Hamiltonian::Hamiltonian(Integrator integrator, IRng& rng, double step_size)
+    : m_integrator(integrator), m_rng(rng), m_dt(step_size) {
 }
 double Hamiltonian::updateDirac(const DiracOperator& dirac, const Action& action) const {
   const double acceptance_val_per_iter = this->run(

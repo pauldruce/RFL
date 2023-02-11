@@ -6,43 +6,38 @@
 #define RFL_METROPOLIS_HPP
 
 #include "IAlgorithm.hpp"
+#include "IRng.hpp"
 #include <armadillo>
 
 class Metropolis : public IAlgorithm {
 public:
   Metropolis() = delete;
-  Metropolis(double scale, int iter, gsl_rng* engine)
-  : m_scale(scale), m_iter(iter), m_engine(engine){};
+  Metropolis(double scale, int iter, IRng& rng)
+  : m_scale(scale), m_iter(iter), m_rng(rng){};
 
-  void setParams(const double scale, const int iter, gsl_rng* engine) {
+  void setParams(const double scale, const int iter, IRng& rng) {
     this->m_scale = scale;
     this->m_iter = iter;
-    this->m_engine = engine;
+    this->m_rng = rng;
   }
 
   double updateDirac(const DiracOperator& dirac, const Action& action) const override {
-    return this->run(dirac, action, this->m_scale, this->m_iter, this->m_engine);
+    return this->run(dirac, action);
   }
 
 private:
   double m_scale;
   int m_iter;
-  gsl_rng* m_engine;
+  IRng& m_rng;
 
   // MMC routine that doesn't perform dual averaging
   double run(const DiracOperator& dirac,
-             const Action& action,
-             const double& scale,
-             const int& iter,
-             gsl_rng* engine) const;
+             const Action& action) const;
 
   // MMC routine that performs dual averaging
   void runDualAverage(const DiracOperator& dirac,
                       const Action& action,
-                      double& scale,
-                      const int& iter,
-                      gsl_rng* engine,
-                      const double& target) const;
+                      const double& target);
 
   double delta24(const DiracOperator& dirac,
                  const Action& action,
@@ -65,15 +60,11 @@ private:
 
   double runDualAverageCore(const DiracOperator& dirac,
                             const Action& action,
-                            const double& scale,
-                            gsl_rng* engine,
                             const double* s_i,
                             double* s_f) const;
 
   double runCore(const DiracOperator& dirac,
                  const Action& action,
-                 const double& scale,
-                 gsl_rng* engine,
                  const double* s_i,
                  double* s_f) const;
 };
