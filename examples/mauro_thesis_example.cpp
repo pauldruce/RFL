@@ -29,4 +29,6 @@ int main() {
     // Print the value of the action
     G.print_S(std::cout);
   }
+
+  gsl_rng_free(engine);
 }

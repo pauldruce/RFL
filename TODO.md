@@ -7,6 +7,9 @@
 - [ ] Transfer methods that can be made static in Action to more appropriate place
 - [ ] Add a clang-format step to GitHub actions
   - [ ] Can we add it as a step in CMake build?
+- [ ] Investigate the use of multithreading to improve performance. 
+  - Potentially can just use Armadillo here, rather than do the multithreading myself.
+- [ ] Modify the benchmark examples to average over a few runs. 
 
 
 ## Completed
