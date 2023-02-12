@@ -16,7 +16,7 @@ enum Integrator {
 class Hamiltonian : public IAlgorithm {
 public:
   Hamiltonian() = delete;
-  Hamiltonian(Integrator integrator, IRng& rng, double step_size);
+  Hamiltonian(Integrator integrator, std::unique_ptr<IRng> &&rng, double step_size);
 
   double updateDirac(const DiracOperator& dirac, const Action& action) const override;
 
@@ -28,7 +28,7 @@ public:
 
 private:
   Integrator m_integrator = Integrator::LEAPFROG;
-  IRng& m_rng;
+  std::unique_ptr<IRng> m_rng;
   double m_dt;
 
   // This method seems to be the initialiser for the mom variables in DiracOperator

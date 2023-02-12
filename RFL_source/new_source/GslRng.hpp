@@ -6,6 +6,7 @@
 #define RFL_GSLRNG_HPP
 
 #include "IRng.hpp"
+#include <ctime>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
@@ -21,8 +22,16 @@
 class GslRng : public IRng {
 public:
   GslRng() {
+    gsl_rng_env_setup();
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+    gsl_rng_set(m_rng,time(nullptr));
   }
+
+  explicit GslRng(unsigned long seed) {
+    m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
+    gsl_rng_set(m_rng,seed);
+  }
+
   ~GslRng() {
     if (m_rng) {
       gsl_rng_free(m_rng);

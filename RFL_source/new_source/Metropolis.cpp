@@ -365,19 +365,19 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
   auto mat_dim = dirac.getMatrixDimension();
 
   // metropolis
-  int x = (int)(num_matrices * m_rng.getUniform());
-  int row_index = (int)(mat_dim * m_rng.getUniform());
-  int column_index = (int)(mat_dim * m_rng.getUniform());
+  int x = (int)(num_matrices * m_rng->getUniform());
+  int row_index = (int)(mat_dim * m_rng->getUniform());
+  int column_index = (int)(mat_dim * m_rng->getUniform());
 
   double re = 0;
   double im = 0;
   cx_double z;
   if (row_index != column_index) {
-    re = m_scale * (-1. + 2. * m_rng.getUniform());
-    im = m_scale * (-1. + 2. * m_rng.getUniform());
+    re = m_scale * (-1. + 2. * m_rng->getUniform());
+    im = m_scale * (-1. + 2. * m_rng->getUniform());
     z = cx_double(re, im);
   } else {
-    re = m_scale * (-1. + 2. * m_rng.getUniform());
+    re = m_scale * (-1. + 2. * m_rng->getUniform());
     z = cx_double(re, 0);
   }
 
@@ -404,7 +404,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
     e = 1;
   } else {
     e = exp(-action_delta);
-    double p = m_rng.getUniform();
+    double p = m_rng->getUniform();
 
     if (e > p) {
       // update matrix element
@@ -438,18 +438,18 @@ double Metropolis::runCore(const DiracOperator& dirac,
   auto mat_dim = dirac.getMatrixDimension();
 
   // metropolis
-  int x = (int)(num_matrices * m_rng.getUniform());
-  int row_index = (int)(mat_dim * m_rng.getUniform());
-  int column_index = (int)(mat_dim * m_rng.getUniform());
+  int x = (int)(num_matrices * m_rng->getUniform());
+  int row_index = (int)(mat_dim * m_rng->getUniform());
+  int column_index = (int)(mat_dim * m_rng->getUniform());
   double re = 0;
   double im = 0;
   cx_double z;
   if (row_index != column_index) {
-    re = m_scale * (-1. + 2. * m_rng.getUniform());
-    im = m_scale * (-1. + 2. * m_rng.getUniform());
+    re = m_scale * (-1. + 2. * m_rng->getUniform());
+    im = m_scale * (-1. + 2. * m_rng->getUniform());
     z = cx_double(re, im);
   } else {
-    re = m_scale * (-1. + 2. * m_rng.getUniform());
+    re = m_scale * (-1. + 2. * m_rng->getUniform());
     z = cx_double(re, 0);
   }
 
@@ -476,7 +476,7 @@ double Metropolis::runCore(const DiracOperator& dirac,
     ret = 1;
   } else {
     double e = exp(-action_delta);
-    double p = m_rng.getUniform();
+    double p = m_rng->getUniform();
 
     if (e > p) {
       // update matrix element

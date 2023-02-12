@@ -22,6 +22,7 @@ public:
    */
   virtual double getUniform() const = 0;
 
+  virtual ~IRng() = default;
 };
 
 #endif //RFL_IRNG_HPP

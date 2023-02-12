@@ -16,6 +16,7 @@
 class IAlgorithm {
 public:
   virtual double updateDirac(const DiracOperator& dirac, const Action& action) const = 0;
+  virtual ~IAlgorithm() = default;
 };
 
 #endif//RFL_IALGORITHM_HPP
