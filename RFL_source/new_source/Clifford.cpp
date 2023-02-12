@@ -166,7 +166,7 @@ Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
  * @param q
  * @param dec
  */
-void decomp(int p, int q, int* dec) {
+static void decomp(int p, int q, int* dec) {
   if (p) {
     if (!(p % 2)) {
       dec[0] = p / 2;

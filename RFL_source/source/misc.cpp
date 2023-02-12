@@ -328,7 +328,7 @@ void Geom24::init_omega_table_4() {
 }
 
 // PD: In DiracOperator as static method
-vector<int> baseConversion(int dec, const int& base, const int& max) {
+static vector<int> baseConversion(int dec, const int& base, const int& max) {
   vector<int> rem;
 
   while (dec) {

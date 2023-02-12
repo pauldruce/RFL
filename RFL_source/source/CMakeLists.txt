@@ -4,7 +4,7 @@ set(RFL_INCLUDES ${RFL_INCLUDE_DIR}/Cliff.hpp ${RFL_INCLUDE_DIR}/Geom24.hpp)
 target_sources(
         RFL
         PRIVATE action.cpp
-        clifford.cpp
+        cliff.cpp
         derivative.cpp
         hamiltonian.cpp
         HMC.cpp

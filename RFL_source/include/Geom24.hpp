@@ -193,7 +193,7 @@ protected:
   // ============== DERIVED PARAMETERS
 };
 
-std::vector<int> baseConversion(int dec, const int& base, const int& max);
+//std::vector<int> baseConversion(int dec, const int& base, const int& max);
 
 std::ostream& operator<<(std::ostream& out, const Geom24& C);
 

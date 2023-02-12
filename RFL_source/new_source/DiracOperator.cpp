@@ -117,7 +117,7 @@ DiracOperator::~DiracOperator() {
  * @param max
  * @return vector<int>
  */
-vector<int> baseConversion(int dec, const int& base, const int& max) {
+static vector<int> baseConversion(int dec, const int& base, const int& max) {
   vector<int> rem;
 
   while (dec) {

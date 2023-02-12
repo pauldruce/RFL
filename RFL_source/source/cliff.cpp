@@ -154,7 +154,7 @@ Cliff& Cliff::operator=(const Cliff& C) {
   return *this;
 }
 
-void decomp(int p, int q, int* dec) {
+static void decomp(int p, int q, int* dec) {
   if (p) {
     if (!(p % 2)) {
       dec[0] = p / 2;
@@ -269,7 +269,7 @@ ostream& operator<<(ostream& out, const Cliff& C) {
   return out;
 }
 
-bool areHermitian(const cx_mat& M1, const cx_mat& M2) {
+static bool areHermitian(const cx_mat& M1, const cx_mat& M2) {
   return (!(M2.is_hermitian()) && M1.is_hermitian());
 }
 

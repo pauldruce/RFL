@@ -61,6 +61,6 @@ std::ostream& operator<<(std::ostream& out, const Cliff& C);
 
 //void decomp(int p, int q, int &dec);
 
-bool areHermitian(const arma::cx_mat& m_1, const arma::cx_mat& m_2);
+//static bool areHermitian(const arma::cx_mat& m_1, const arma::cx_mat& m_2);
 
 #endif
