@@ -7,6 +7,7 @@
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
 #include <cmath>
+#include <memory>
 
 enum Integrator {
   LEAPFROG,

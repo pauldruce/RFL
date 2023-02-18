@@ -7,6 +7,7 @@
 #include "Action.hpp"
 #include "DiracOperator.hpp"
 #include "IAlgorithm.hpp"
+#include <memory>
 
 class Simulation {
 public:

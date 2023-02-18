@@ -8,6 +8,7 @@
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
 #include <armadillo>
+#include <memory>
 
 class Metropolis : public IAlgorithm {
 public:
