@@ -272,9 +272,9 @@ double Metropolis::delta4(const DiracOperator& dirac,
   return res;
 }
 
-void Metropolis::runDualAverage(const DiracOperator& dirac,
+double Metropolis::runDualAverage(const DiracOperator& dirac,
                                 const Action& action,
-                                const double& target) {
+                                const double target) {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -291,7 +291,7 @@ void Metropolis::runDualAverage(const DiracOperator& dirac,
   double log_scale_avg = log(m_scale);
 
   // iter sweeps of metropolis
-  for (int i = 0; i < m_iter; ++i) {
+  for (int i = 0; i < m_num_steps; ++i) {
     for (int j = 0; j < nsw; ++j) {
       // set action to previous final value,
       // unless it's the first iteration
@@ -318,6 +318,7 @@ void Metropolis::runDualAverage(const DiracOperator& dirac,
 
   delete[] s_i;
   delete[] s_f;
+  return (stat / (m_num_steps * nsw));
 }
 
 double Metropolis::run(const DiracOperator& dirac,
@@ -333,7 +334,7 @@ double Metropolis::run(const DiracOperator& dirac,
   double stat = 0;
 
   // iter sweeps of metropolis
-  for (int i = 0; i < m_iter; ++i) {
+  for (int i = 0; i < m_num_steps; ++i) {
     for (int j = 0; j < nsw; ++j) {
       // set action to previous final value,
       // unless it's the first iteration
@@ -352,7 +353,7 @@ double Metropolis::run(const DiracOperator& dirac,
   delete[] s_i;
   delete[] s_f;
 
-  return (stat / (m_iter * nsw));
+  return (stat / (m_num_steps * nsw));
 }
 
 double Metropolis::runDualAverageCore(const DiracOperator& dirac,

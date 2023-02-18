@@ -12,13 +12,13 @@
 class Metropolis : public IAlgorithm {
 public:
   Metropolis() = delete;
-  Metropolis(double scale, int iter, std::unique_ptr<IRng>&& rng)
-  : m_scale(scale), m_iter(iter), m_rng(std::move(rng)){};
+  Metropolis(double scale, int num_steps, std::unique_ptr<IRng>&& rng)
+  : m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
 
 
   void setParams(const double scale, const int iter, std::unique_ptr<IRng>&& rng) {
     this->m_scale = scale;
-    this->m_iter = iter;
+    this->m_num_steps = iter;
     this->m_rng = std::move(rng);
   }
 
@@ -26,19 +26,22 @@ public:
     return this->run(dirac, action);
   }
 
-private:
-  double m_scale;
-  int m_iter;
-  std::unique_ptr<IRng> m_rng;
+  // MMC routine that performs dual averaging
+  double runDualAverage(const DiracOperator& dirac,
+                        const Action& action,
+                        const double target);
 
+protected:
   // MMC routine that doesn't perform dual averaging
   double run(const DiracOperator& dirac,
              const Action& action) const;
 
-  // MMC routine that performs dual averaging
-  void runDualAverage(const DiracOperator& dirac,
-                      const Action& action,
-                      const double& target);
+
+private:
+  double m_scale;
+  int m_num_steps;
+  std::unique_ptr<IRng> m_rng;
+
 
   double delta24(const DiracOperator& dirac,
                  const Action& action,

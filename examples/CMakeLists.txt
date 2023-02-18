@@ -1,4 +1,5 @@
 add_subdirectory(Type13)
+add_subdirectory(Benchmark)
 
 add_executable(mauro_mmc_example
         mauro_thesis_example.cpp)
