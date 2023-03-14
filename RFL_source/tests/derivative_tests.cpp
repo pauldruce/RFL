@@ -1,62 +1,57 @@
 //
 // Created by Paul Druce on 01/07/2022.
 //
-#include <gtest/gtest.h>
-#include <iostream>
+#include "Geom24.hpp"
 #include <ctime>
 #include <gsl/gsl_rng.h>
-#include "Geom24.hpp"
+#include <gtest/gtest.h>
+#include <iostream>
 
-namespace DerivativeTests
-{
-   using namespace std;
-   using namespace arma;
+namespace DerivativeTests {
+using namespace std;
+using namespace arma;
 
-   TEST(DerivativeTests, DerivativesAreWhatExactly)
-   {
-      typedef struct DerivativeParams
-      {
-         int p;
-         int q;
-         int dim;
-         double g2;
-      }DerivativeParams;
+TEST(DerivativeTests, DerivativesAreWhatExactly) {
+  typedef struct DerivativeParams {
+    int p;
+    int q;
+    int dim;
+    double g2;
+  } DerivativeParams;
 
-      gsl_rng *engine = gsl_rng_alloc(gsl_rng_ranlxd1);
-      gsl_rng_set(engine, time(nullptr));
+  gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
+  gsl_rng_set(engine, time(nullptr));
 
-      // Create (p,q) combo's upto n = p+q=5.
-      std::pair<int, int> pq_pairs[] = {
-            {1, 0},{0, 1},
-            {2, 0},{1, 1},{0, 2}
-      };
+  // Create (p,q) combo's upto n = p+q=5.
+  std::pair<int, int> pq_pairs[] = {
+      {1, 0},
+      {0, 1},
+      {2, 0},
+      {1, 1},
+      {0, 2}
+  };
 
-      for (auto pair: pq_pairs)
-      {
-         for (int dim = 2; dim < 8; dim++)
-         {
-            for (double g2 = -5.0; g2 < 0.0; g2 += 1.0)
-            {
-               DerivativeParams params = {pair.first, pair.second, dim, g2};
+  for (auto pair : pq_pairs) {
+    for (int dim = 2; dim < 8; dim++) {
+      for (double g2 = -5.0; g2 < 0.0; g2 += 1.0) {
+        DerivativeParams params = {pair.first, pair.second, dim, g2};
 
-               Geom24 G(params.p, params.q, params.dim, params.g2);
-               ifstream in("derivative_date.txt");
-               G.read_mat(in);
-               for (int i = 0; i < G.get_nHL(); ++i)
-               {
-                  EXPECT_TRUE(G.get_mat(i).is_diagmat())<< "Matrix is not diagonal i="<< i<<", "<< G.get_mat(i);
-               }
+        Geom24 G(params.p, params.q, params.dim, params.g2);
+        ifstream in("derivative_date.txt");
+        G.read_mat(in);
+        for (int i = 0; i < G.get_nHL(); ++i) {
+          EXPECT_TRUE(G.get_mat(i).is_diagmat()) << "Matrix is not diagonal i=" << i << ", " << G.get_mat(i);
+        }
 
-               EXPECT_TRUE(G.der_dirac4(0,true).is_diagmat())<< "G.der_dirac4(0,true) matrix is not diagonal";
-            }
-         }
+        EXPECT_TRUE(G.der_dirac4(0, true).is_diagmat()) << "G.derDirac4(0,true) matrix is not diagonal";
       }
+    }
+  }
 
-      gsl_rng_free(engine);
-   }
-
-
+  gsl_rng_free(engine);
 }
+
+}// namespace DerivativeTests
 //
 //   struct DerivativeParams{
 //      int p;

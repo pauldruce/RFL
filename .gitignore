@@ -1,4 +1,7 @@
-.idea/*
-cmake-*
-build/*
-clion/*
+/.idea/
+/cmake-*/
+/build/
+/lib/
+/clion/
+coverage
+lcov*

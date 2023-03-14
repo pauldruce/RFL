@@ -2,218 +2,201 @@
 #define GEOMETRY_HPP
 
 #include <armadillo>
-#include <string>
 #include <gsl/gsl_rng.h>
+#include <string>
 
 #define MAT(i) get_mat(i)
 #define EPS(i) get_eps(i)
 #define OMEGA(i) get_omega(i)
 
-class Geom24
-{
-   public:
+class Geom24 {
+public:
+  // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
+  Geom24(int p, int q, int dim, double g2);
 
+  Geom24(std::istream& in);
 
-   // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
-   Geom24(int p, int q, int dim, double g2);
+  Geom24(const Geom24& G);
 
-   Geom24(std::istream &in);
+  Geom24& operator=(const Geom24& G);
 
-   Geom24(const Geom24 &G);
+  ~Geom24();
+  // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
 
-   Geom24 &operator=(const Geom24 &G);
+  // ============== GET METHODS
+  int get_p() const { return p; }
 
-   ~Geom24();
-   // ============== CONSTRUCTORS, ASSIGNMENT, DESTRUCTOR
+  int get_q() const { return q; }
 
+  int get_dim() const { return dim; }
 
+  int get_nH() const { return nH; }
 
-   // ============== GET METHODS
-   int get_p() const { return p; }
+  int get_nL() const { return nL; }
 
-   int get_q() const { return q; }
+  int get_nHL() const { return nHL; }
 
-   int get_dim() const { return dim; }
+  int get_dim_omega() const { return dim_omega; }
 
-   int get_nH() const { return nH; }
+  int get_eps(const int& i) const { return eps[i]; }
 
-   int get_nL() const { return nL; }
+  double get_g2() const { return g2; }
 
-   int get_nHL() const { return nHL; }
+  arma::cx_mat get_mat(const int& i) const { return mat[i]; }
 
-   int get_dim_omega() const { return dim_omega; }
+  arma::cx_mat get_mom(const int& i) const { return mom[i]; }
 
-   int get_eps(const int &i) const { return eps[i]; }
+  arma::cx_mat get_omega(const int& i) const { return omega[i]; }
 
-   double get_g2() const { return g2; }
+  arma::cx_double get_omega_table_4(const int& i) const { return omega_table_4[i]; }
+  // ============== GET METHODS
 
-   arma::cx_mat get_mat(const int &i) const { return mat[i]; }
+  // ============== SET METHODS
+  void mult_mat(const int& i, const double& d) { mat[i] *= d; }
 
-   arma::cx_mat get_mom(const int &i) const { return mom[i]; }
+  void set_mat(const int& i, const arma::cx_mat& m) { mat[i] = m; }
 
-   arma::cx_mat get_omega(const int &i) const { return omega[i]; }
+  void set_mom(const int& i, const arma::cx_mat& m) { mom[i] = m; }
+  // ============== SET METHODS
 
-   arma::cx_double get_omega_table_4(const int &i) const { return omega_table_4[i]; }
-   // ============== GET METHODS
+  // ============== ACTION METHODS
+  arma::cx_mat build_dirac() const;
 
-   // ============== SET METHODS
-   void mult_mat(const int &i, const double &d) { mat[i] *= d; }
+  double calculate_S_from_dirac() const;// using whole Dirac operator
+  double calculate_S() const;           // using H and L decomposition
+  double dirac2() const;
 
-   void set_mat(const int &i, const arma::cx_mat &m) { mat[i] = m; }
+  double dirac4() const;
 
-   void set_mom(const int &i, const arma::cx_mat &m) { mom[i] = m; }
-   // ============== SET METHODS
+  double compute_A4(const int&, const int&, const int&, const int&) const;
 
+  double compute_A2(const int&, const int&) const;
 
+  double compute_A(const int&) const;
+  // ============== ACTION METHODS
 
-   // ============== ACTION METHODS
-   arma::cx_mat build_dirac() const;
+  // ============== DERIVATIVE METHODS
+  arma::cx_mat der_dirac24(const int&, const bool&) const;
 
-   double calculate_S_from_dirac() const; // using whole Dirac operator
-   double calculate_S() const; // using H and L decomposition
-   double dirac2() const;
+  arma::cx_mat der_dirac2(const int&) const;
 
-   double dirac4() const;
+  arma::cx_mat der_dirac4(const int&, const bool&) const;
 
-   double compute_A4(const int &, const int &, const int &, const int &) const;
+  arma::cx_mat compute_B4(const int&, const int&, const int&, const int&, const double&, const bool&) const;
 
-   double compute_A2(const int &, const int &) const;
+  arma::cx_mat compute_B2(const int&, const int&) const;
 
-   double compute_A(const int &) const;
-   // ============== ACTION METHODS
+  arma::cx_mat compute_B(const int&) const;
+  // ============== DERIVATIVE METHODS
 
+  // ============== HAMILTONIAN METHODS
+  void sample_mom(gsl_rng*);
 
-   // ============== DERIVATIVE METHODS
-   arma::cx_mat der_dirac24(const int &, const bool &) const;
+  double calculate_K() const;
 
-   arma::cx_mat der_dirac2(const int &) const;
+  double calculate_H() const;
 
-   arma::cx_mat der_dirac4(const int &, const bool &) const;
+  void leapfrog(const int&, const double&);
 
-   arma::cx_mat compute_B4(const int &, const int &, const int &, const int &, const double &, const bool &) const;
+  void omelyan(const int&, const double&);
 
-   arma::cx_mat compute_B2(const int &, const int &) const;
+  double HMC_duav_core(const int&, const double&, gsl_rng*, double*, double*, const std::string& integrator);
 
-   arma::cx_mat compute_B(const int &) const;
-   // ============== DERIVATIVE METHODS
+  void HMC_duav(const int&, double&, const int&, gsl_rng*, const double&, const std::string& integrator);
 
-   // ============== HAMILTONIAN METHODS
-   void sample_mom(gsl_rng *);
+  double HMC_core(const int&, const double&, gsl_rng*, double*, double*, const std::string& integrator);
 
-   double calculate_K() const;
+  double HMC_core_debug(const int&, const double&, gsl_rng*, const std::string& integrator);
 
-   double calculate_H() const;
+  double
+  HMC_core(const int&, const double&, const double&, gsl_rng*, double*, double*, const std::string& integrator);
 
-   void leapfrog(const int &, const double &);
+  double HMC(const int&, const double&, const int&, gsl_rng*, const std::string& integrator);
 
-   void omelyan(const int &, const double &);
+  double HMC(const int&, const double&, const double&, const int&, gsl_rng*, const std::string& integrator);
+  // ============== HAMILTONIAN METHODS
 
-   double HMC_duav_core(const int &, const double &, gsl_rng *, double *, double *, const std::string &integrator);
+  // ============== METROPOLIS METHODS
+  double delta2(const int&, const int&, const int&, const arma::cx_double&);
 
-   void HMC_duav(const int &, double &, const int &, gsl_rng *, const double &, const std::string &integrator);
+  double delta4(const int&, const int&, const int&, const arma::cx_double&);
 
-   double HMC_core(const int &, const double &, gsl_rng *, double *, double *, const std::string &integrator);
+  double delta24(const int&, const int&, const int&, const arma::cx_double&);
 
-   double HMC_core_debug(const int &, const double &, gsl_rng *, const std::string &integrator);
+  double MMC_duav_core(const double&, gsl_rng*, const double*, double*);
 
-   double
-   HMC_core(const int &, const double &, const double &, gsl_rng *, double *, double *, const std::string &integrator);
+  void MMC_duav(double&, const int&, gsl_rng* engine, const double&);
 
-   double HMC(const int &, const double &, const int &, gsl_rng *, const std::string &integrator);
+  double MMC_core(const double&, gsl_rng*, const double*, double*);
 
-   double HMC(const int &, const double &, const double &, const int &, gsl_rng *, const std::string &integrator);
-   // ============== HAMILTONIAN METHODS
+  double MMC(const double&, const int&, gsl_rng* engine);
+  // ============== METROPOLIS METHODS
 
-   // ============== METROPOLIS METHODS
-   double delta2(const int &, const int &, const int &, const arma::cx_double &);
+  void derived_parameters();
 
-   double delta4(const int &, const int &, const int &, const arma::cx_double &);
+  void shuffle(gsl_rng*);
 
-   double delta24(const int &, const int &, const int &, const arma::cx_double &);
+  std::istream& read_mat(std::istream&);
 
-   double MMC_duav_core(const double &, gsl_rng *, double *, double *);
+  void reverse_mom();
 
-   void MMC_duav(double &, const int &, gsl_rng *engine, const double &);
+  void init_omega_table_4();
 
-   double MMC_core(const double &, gsl_rng *, double *, double *);
+  void print_omega_table_4() const;
 
-   double MMC(const double &, const int &, gsl_rng *engine);
-   // ============== METROPOLIS METHODS
+  void print_S(std::ostream&) const;
 
-   void derived_parameters();
+  void print_HL(std::ostream&) const;
 
-   void shuffle(gsl_rng *);
+  void adjust();
 
-   std::istream &read_mat(std::istream &);
+  std::istream& read_parameters(std::istream&);
 
-   void reverse_mom();
+protected:
+  // ============== MATRICES
+  // H and L matrices (all hermitian)
+  arma::cx_mat* mat;
 
-   void init_omega_table_4();
+  // conjugate momenta
+  arma::cx_mat* mom;
 
-   void print_omega_table_4() const;
+  // epsilon: +1 for H, -1 for L
+  int* eps;
+  // ============== MATRICES
 
-   void print_S(std::ostream &) const;
+  // ============== BASE PARAMETERS
+  // (p,q) numbers
+  int p;
+  int q;
 
-   void print_HL(std::ostream &) const;
+  // size of H and L matrices
+  int dim;
 
-   void adjust();
+  // coupling constant
+  double g2;
+  // ============== BASE PARAMETERS
 
-   std::istream &read_parameters(std::istream &);
+  // ============== DERIVED PARAMETERS
+  // number of H and L matrices (nH and nL) and total number of matrices (nHL)
+  int nH{};
+  int nL{};
+  int nHL{};
 
+  // size of gamma matrices
+  int dim_omega{};
 
-   protected:
+  // omega matrices (all hermitian)
+  arma::cx_mat* omega{};
 
-   // ============== MATRICES
-   // H and L matrices (all hermitian)
-   arma::cx_mat *mat;
-
-   // conjugate momenta
-   arma::cx_mat *mom;
-
-   // epsilon: +1 for H, -1 for L
-   int *eps;
-   // ============== MATRICES
-
-
-
-
-   // ============== BASE PARAMETERS
-   // (p,q) numbers
-   int p;
-   int q;
-
-   // size of H and L matrices
-   int dim;
-
-   // coupling constant
-   double g2;
-   // ============== BASE PARAMETERS
-
-
-
-
-   // ============== DERIVED PARAMETERS
-   // number of H and L matrices (nH and nL) and total number of matrices (nHL)
-   int nH{};
-   int nL{};
-   int nHL{};
-
-   // size of gamma matrices
-   int dim_omega{};
-
-   // omega matrices (all hermitian)
-   arma::cx_mat *omega{};
-
-   // omega 4-product table
-   arma::cx_double *omega_table_4{};
-   // ============== DERIVED PARAMETERS
-
+  // omega 4-product table
+  arma::cx_double* omega_table_4{};
+  // ============== DERIVED PARAMETERS
 };
 
-std::vector<int> base_conversion(int dec, const int &base, const int &max);
+//std::vector<int> baseConversion(int dec, const int& base, const int& max);
 
-std::ostream &operator<<(std::ostream &out, const Geom24 &C);
+std::ostream& operator<<(std::ostream& out, const Geom24& C);
 
-arma::cx_mat herm_der(const arma::cx_mat &);
+arma::cx_mat herm_der(const arma::cx_mat&);
 
 #endif
