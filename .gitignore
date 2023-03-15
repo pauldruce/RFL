@@ -5,3 +5,6 @@
 /clion/
 coverage
 lcov*
+
+/RFL_docs/
+/RFL_docs_sphinx/
