@@ -7,9 +7,15 @@
 
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
+#include "Action.hpp"
 #include <armadillo>
 #include <memory>
 
+/**
+ * Metropolis is a class that encapsulates the implementation of the Metropolis-Hasting
+ * for random NCGs.
+ *
+ */
 class Metropolis : public IAlgorithm {
 public:
   Metropolis() = delete;
@@ -24,7 +30,7 @@ public:
   }
 
   double updateDirac(const DiracOperator& dirac, const Action& action) const override {
-    return this->run(dirac, action);
+    return this->run(dirac, (const Action&)action);
   }
 
   // MMC routine that performs dual averaging

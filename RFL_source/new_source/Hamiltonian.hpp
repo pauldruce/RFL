@@ -6,6 +6,7 @@
 #define RFL_HAMILTONIAN_HPP
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
+#include "Action.hpp"
 #include <cmath>
 #include <memory>
 

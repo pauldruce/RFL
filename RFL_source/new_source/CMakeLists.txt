@@ -1,4 +1,4 @@
-add_library(new_RFL)
+add_library(new_RFL )
 
 set(new_RFL_HEADERS
         Action.hpp
@@ -6,6 +6,7 @@ set(new_RFL_HEADERS
         DiracOperator.hpp
         GslRng.hpp
         Hamiltonian.hpp
+        IAction.hpp
         IAlgorithm.hpp
         IRng.hpp
         Metropolis.hpp

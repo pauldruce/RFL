@@ -118,8 +118,8 @@ void Hamiltonian::runDualAverage(const DiracOperator& dirac,
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
     } else {
-      en_i[0] = action.dirac2(dirac);
-      en_i[1] = action.dirac4(dirac);
+      en_i[0] = dirac.traceOfDiracSquared();
+      en_i[1] = dirac.traceOfDirac4();
     }
 
     // core part of HMC
@@ -158,8 +158,8 @@ double Hamiltonian::run(const DiracOperator& dirac,
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
     } else {
-      en_i[0] = action.dirac2(dirac);
-      en_i[1] = action.dirac4(dirac);
+      en_i[0] = dirac.traceOfDiracSquared();
+      en_i[1] = dirac.traceOfDirac4();
     }
 
     // core part of HMC
@@ -193,8 +193,8 @@ double Hamiltonian::run(const DiracOperator& dirac,
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
     } else {
-      en_i[0] = action.dirac2(dirac);
-      en_i[1] = action.dirac4(dirac);
+      en_i[0] = dirac.traceOfDiracSquared();
+      en_i[1] = dirac.traceOfDirac4();
     }
 
     // core part of HMC
@@ -238,8 +238,8 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
   }
 
   // calculate final hamiltonian
-  en_f[0] = action.dirac2(dirac);
-  en_f[1] = action.dirac4(dirac);
+  en_f[0] = dirac.traceOfDiracSquared();
+  en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
   en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
 
@@ -310,8 +310,8 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
   }
 
   // calculate final hamiltonian
-  en_f[0] = action.dirac2(dirac);
-  en_f[1] = action.dirac4(dirac);
+  en_f[0] = dirac.traceOfDiracSquared();
+  en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
   en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
 
@@ -424,8 +424,8 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
   }
 
   // calculate final hamiltonian
-  en_f[0] = action.dirac2(dirac);
-  en_f[1] = action.dirac4(dirac);
+  en_f[0] = dirac.traceOfDiracSquared();
+  en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
   en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
 

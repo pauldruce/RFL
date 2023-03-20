@@ -28,6 +28,19 @@ public:
   int* getEpsilons() const { return m_epsilons; }           //
   arma::cx_mat* getMomenta() const { return m_momenta; } // Conjugate momenta for use with Hamiltonian method
 
+
+  /**
+   * Returns the value of \f$\text{Tr}(D^2)\f$
+   */
+  double traceOfDiracSquared() const;
+
+  /**
+   * Returns the value of \f$\text{Tr}(D^4)\f$
+   * @return
+   */
+  double traceOfDirac4() const;
+
+
   arma::cx_mat getDiracMatrix() const;
 
   arma::cx_mat derDirac24(const int& k, const bool& herm, double g_2) const;
@@ -55,14 +68,18 @@ private:
 
   void initOmegaTable4();
 
+  double computeA4(const int& i_1, const int& i_2, const int& i_3, const int& i_4) const;
+  double computeA2( const int& i_1, const int& i_2) const;
+  double computeA(const int& i) const;
+
   arma::cx_mat computeB4(const int& k,
                          const int& i_2,
                          const int& i_3,
                          const int& i_4,
                          const double& cliff,
                          const bool& neg) const;
-
   arma::cx_mat computeB2(const int& k, const int& i) const;
   arma::cx_mat computeB(const int& k) const;
+
 };
 #endif // RFL_DIRACOPERATOR_HPP

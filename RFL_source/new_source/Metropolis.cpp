@@ -299,8 +299,8 @@ double Metropolis::runDualAverage(const DiracOperator& dirac,
         s_i[0] = s_f[0];
         s_i[1] = s_f[1];
       } else {
-        s_i[0] = action.dirac2(dirac);
-        s_i[1] = action.dirac4(dirac);
+        s_i[0] = dirac.traceOfDiracSquared();
+        s_i[1] = dirac.traceOfDirac4();
       }
 
       stat += target - runDualAverageCore(dirac, action, s_i, s_f);
@@ -342,8 +342,8 @@ double Metropolis::run(const DiracOperator& dirac,
         s_i[0] = s_f[0];
         s_i[1] = s_f[1];
       } else {
-        s_i[0] = action.dirac2(dirac);
-        s_i[1] = action.dirac4(dirac);
+        s_i[0] = dirac.traceOfDiracSquared();
+        s_i[1] = dirac.traceOfDirac4();
       }
 
       stat += runCore(dirac, action, s_i, s_f);
