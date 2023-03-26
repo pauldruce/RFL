@@ -59,13 +59,13 @@ jobs:
         if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev
+          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev graphviz
 
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
-          brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget
+          brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget graphviz
 
       - name: Download Armadillo from SourceForge
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
