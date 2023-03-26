@@ -7,6 +7,7 @@
 
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
+#include "IAction.hpp"
 #include "Action.hpp"
 #include <armadillo>
 #include <memory>
@@ -29,19 +30,19 @@ public:
     this->m_rng = std::move(rng);
   }
 
-  double updateDirac(const DiracOperator& dirac, const Action& action) const override {
-    return this->run(dirac, (const Action&)action);
+  double updateDirac(const DiracOperator& dirac, const IAction& action) const override {
+    return this->run(dirac, action);
   }
 
   // MMC routine that performs dual averaging
   double runDualAverage(const DiracOperator& dirac,
-                        const Action& action,
-                        const double target);
+                        const IAction& action,
+                        double target);
 
 protected:
   // MMC routine that doesn't perform dual averaging
   double run(const DiracOperator& dirac,
-             const Action& action) const;
+             const IAction& action) const;
 
 
 private:
@@ -50,8 +51,9 @@ private:
   std::unique_ptr<IRng> m_rng;
 
 
+  // TODO: This method requires the use of the Action class, not IAction. Refactor this and fix.
   double delta24(const DiracOperator& dirac,
-                 const Action& action,
+                 const IAction& action,
                  const int& x,
                  const int& row_index,
                  const int& column_index,
@@ -70,12 +72,12 @@ private:
                 const arma::cx_double& z) const;
 
   double runDualAverageCore(const DiracOperator& dirac,
-                            const Action& action,
+                            const IAction& action,
                             const double* s_i,
                             double* s_f) const;
 
   double runCore(const DiracOperator& dirac,
-                 const Action& action,
+                 const IAction& action,
                  const double* s_i,
                  double* s_f) const;
 };

@@ -5,9 +5,9 @@
 #ifndef RFL_IALGORITHM_HPP
 #define RFL_IALGORITHM_HPP
 
-//#include "IAction.hpp"
-#include "Action.hpp"
+#include "IAction.hpp"
 #include "DiracOperator.hpp"
+
 
 /**
  * This is an Abstract Class/Interface for the various Monte Carlo
@@ -24,7 +24,7 @@ public:
    * @param action is the Action that the algorithm uses in the MCMC process.
    * @return the acceptance rate of the process.
    */
-  virtual double updateDirac(const DiracOperator& dirac, const Action& action) const = 0;
+  virtual double updateDirac(const DiracOperator& dirac, const IAction& action) const = 0;
 
   virtual ~IAlgorithm() = default;
 };

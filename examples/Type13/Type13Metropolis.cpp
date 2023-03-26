@@ -13,14 +13,20 @@ int main() {
   int iter = 10;
   auto rng = std::make_unique<GslRng>();
 
-  DiracOperator dirac(1, 3, 10);
-  Action action(-2.7, 1.0);
+  //  DiracOperator dirac(1, 3, 10);
+  auto dirac = std::make_unique<DiracOperator>(1,3,10);
+
+  //  Action action(-2.7, 1.0);
+  auto action = std::make_unique<Action>(-2.7,1.0);
+
+//  Metropolis metropolis(metropolis_scale,iter,std::move(rng));
   auto metropolis = std::make_unique<Metropolis>(metropolis_scale, iter, std::move(rng));
-  auto simulation = Simulation(dirac,action,std::move(metropolis));
+
+  auto simulation = Simulation(std::move(dirac),std::move(action),std::move(metropolis));
 
   for (int i = 0; i < 10; i++) {
     simulation.run();
-    action.printS(dirac, std::cout);
+//    action.printS(dirac, std::cout);
   }
 
   return 0;

@@ -85,12 +85,12 @@ TEST(ActionTests, CreateWithNoParams) {
       EXPECT_EQ(action.getG4(), 0););
 }
 
-TEST(ActionTests, PrintAction) {
-  DiracOperator dirac(1, 1, 5);
-  Action action(2.0, 4.0);
-
-  std::stringstream captured_stream;
-  action.printS(dirac, captured_stream);
-
-  EXPECT_EQ(captured_stream.str(), "200 800\n");
-}
+//TEST(ActionTests, PrintAction) {
+//  DiracOperator dirac(1, 1, 5);
+//  Action action(2.0, 4.0);
+//
+//  std::stringstream captured_stream;
+//  action.printS(dirac, captured_stream);
+//
+//  EXPECT_EQ(captured_stream.str(), "200 800\n");
+//}

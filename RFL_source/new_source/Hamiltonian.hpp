@@ -20,7 +20,23 @@ public:
   Hamiltonian() = delete;
   Hamiltonian(Integrator integrator, std::unique_ptr<IRng> &&rng, double step_size);
 
-  double updateDirac(const DiracOperator& dirac, const Action& action) const override;
+  /**
+   * The updateDirac method for Hamiltonian is not implemented for all classes that satisfy the
+   * IAction interface. This is only currently implemented for the class Action.
+   *
+   * TODO: Generalise the hamiltonian method to accept other options.
+   *
+   * @param dirac a reference to the DiracOperator to be updated.
+   * @param action a reference to the IAction-derived class.
+   * @return
+   */
+  double updateDirac(const DiracOperator& dirac, const IAction& action) const override {
+      this->updateDirac(
+          dirac,
+          dynamic_cast<const Action&>(action)
+      );
+  }
+  double updateDirac(const DiracOperator& dirac, const Action& action) const;
 
   void setIntegrator(Integrator integrator);
   Integrator getIntegrator() const { return this->m_integrator; };

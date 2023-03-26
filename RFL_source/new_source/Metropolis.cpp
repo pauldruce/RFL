@@ -8,12 +8,12 @@ using namespace std;
 using namespace arma;
 
 double Metropolis::delta24(const DiracOperator& dirac,
-                           const Action& action,
+                           const IAction& action,
                            const int& x,
                            const int& row_index,
                            const int& column_index,
                            const cx_double& z) const {
-  return action.getG2() * delta2(dirac, x, row_index, column_index, z) + delta4(dirac, x, row_index, column_index, z);
+  return dynamic_cast<const Action&>(action).getG2() * delta2(dirac, x, row_index, column_index, z) + delta4(dirac, x, row_index, column_index, z);
 }
 
 double Metropolis::delta2(const DiracOperator& dirac,
@@ -273,7 +273,7 @@ double Metropolis::delta4(const DiracOperator& dirac,
 }
 
 double Metropolis::runDualAverage(const DiracOperator& dirac,
-                                const Action& action,
+                                const IAction& action,
                                 const double target) {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
@@ -322,7 +322,7 @@ double Metropolis::runDualAverage(const DiracOperator& dirac,
 }
 
 double Metropolis::run(const DiracOperator& dirac,
-                       const Action& action) const {
+                       const IAction& action) const {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -357,7 +357,7 @@ double Metropolis::run(const DiracOperator& dirac,
 }
 
 double Metropolis::runDualAverageCore(const DiracOperator& dirac,
-                                      const Action& action,
+                                      const IAction& action,
                                       const double* s_i,
                                       double* s_f) const {
   // acceptance probability
@@ -384,7 +384,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = action.getG2() * delta_2 + delta_4;
+  double action_delta = delta24(dirac, action,x,row_index,column_index,z);
 
   auto* mat = dirac.getMatrices();
   // metropolis test
@@ -429,7 +429,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
 }
 
 double Metropolis::runCore(const DiracOperator& dirac,
-                           const Action& action,
+                           const IAction& action,
                            const double* s_i,
                            double* s_f) const {
   // acceptance probability
@@ -456,7 +456,7 @@ double Metropolis::runCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = action.getG2() * delta_2 + delta_4;
+  double action_delta = delta24(dirac,action,x,row_index,column_index,z);
 
   auto* mat = dirac.getMatrices();
   // metropolis test

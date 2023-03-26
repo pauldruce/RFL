@@ -30,10 +30,20 @@ constexpr int NUM_ITERATIONS = 20;
 void NewMethod(){
   auto rng = std::make_unique<GslRng>();
 
-  DiracOperator dirac(P, Q,MATRIX_DIM);
-  Action action(G_2, 1.0);
+//  DiracOperator dirac(P, Q,MATRIX_DIM);
+  auto dirac = std::make_unique<DiracOperator>(P,Q,MATRIX_DIM);
+
+//  Action action(G_2, 1.0);
+  auto action = std::make_unique<Action>(G_2, 1.0);
+
   auto metropolis = std::make_unique<Metropolis>(SCALE, NUM_STEPS, std::move(rng));
-  auto simulation = Simulation(dirac,action,std::move(metropolis));
+
+
+  auto simulation = Simulation(
+      std::move(dirac),
+      std::move(action),
+      std::move(metropolis)
+  );
 
   for (int i = 0; i < NUM_ITERATIONS; i++) {
     simulation.run();

@@ -53,9 +53,10 @@ set(DOXYGEN_MAX_DOT_GRAPH_DEPTH  0)
 set(DOXYGEN_DOT_TRANSPARENT      YES)
 set(DOXYGEN_INTERACTIVE_SVG  YES)
 set(DOXYGEN_USE_MATHJAX YES)
+set(DOXYGEN_EXCLUDE_PATTERNS */tests/*)
 
 doxygen_add_docs(doxygen
-        ${PROJECT_SOURCE_DIR}/README.md ${PROJECT_SOURCE_DIR}/RFL_source ${PROJECT_SOURCE_DIR}/examples
+        ${PROJECT_SOURCE_DIR}/README.md ${PROJECT_SOURCE_DIR}/RFL_source/new_source ${PROJECT_SOURCE_DIR}/examples
         COMMENT "Generate documentation for entire project"
         )
 
@@ -72,3 +73,7 @@ add_subdirectory(examples)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
+
+
+# AN EXPERIMENT
+add_subdirectory(playground)
