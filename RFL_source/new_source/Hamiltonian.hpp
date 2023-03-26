@@ -31,11 +31,12 @@ public:
    * @return
    */
   double updateDirac(const DiracOperator& dirac, const IAction& action) const override {
-      this->updateDirac(
+      return this->updateDirac(
           dirac,
           dynamic_cast<const Action&>(action)
       );
   }
+
   double updateDirac(const DiracOperator& dirac, const Action& action) const;
 
   void setIntegrator(Integrator integrator);
