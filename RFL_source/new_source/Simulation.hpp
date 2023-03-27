@@ -13,7 +13,7 @@
 class Simulation {
 public:
   Simulation() = delete;
-  Simulation(std::unique_ptr<DiracOperator> &&dirac, std::unique_ptr<IAction> &&action, std::unique_ptr<IAlgorithm> &&monte_carlo_algorithm);
+  Simulation(std::unique_ptr<DiracOperator>&& dirac, std::unique_ptr<IAction>&& action, std::unique_ptr<IAlgorithm>&& monte_carlo_algorithm);
   void run() {
     this->m_algorithm->updateDirac(*m_dirac, *m_action);
   }

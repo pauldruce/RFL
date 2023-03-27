@@ -5,10 +5,9 @@
 // Created by Paul Druce on 04/02/2023.
 //
 
-#include "Metropolis.hpp"
 #include "GslRng.hpp"
+#include "Metropolis.hpp"
 #include <gtest/gtest.h>
-
 
 TEST(MetropolisTests, ConstructorDoesNotThrow) {
   // TODO: How do we test random stuff? -> find out
@@ -17,8 +16,7 @@ TEST(MetropolisTests, ConstructorDoesNotThrow) {
   constexpr int num_steps = 20;
 
   ASSERT_NO_THROW(
-      Metropolis metropolis(scale, num_steps, std::move(rng));
-  );
+      Metropolis metropolis(scale, num_steps, std::move(rng)););
 }
 
 TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
@@ -26,7 +24,7 @@ TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
   constexpr double scale = 0.2;
   constexpr int num_steps = 20;
 
-  Metropolis metropolis(scale, num_steps,std::move(rng));
+  Metropolis metropolis(scale, num_steps, std::move(rng));
 
   auto dirac = DiracOperator(1, 1, 5);
   auto old_dirac_matrix = dirac.getDiracMatrix();

@@ -257,9 +257,9 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
     en_f[2] = en_i[2];
     en_f[3] = en_i[3];
   }
-    // now do the standard metropolis test
+  // now do the standard metropolis test
   else if (en_f[3] > en_i[3]) {
-//    double r = gsl_rng_uniform(m_engine);
+    //    double r = gsl_rng_uniform(m_engine);
     double r = m_rng->getUniform();
     e = exp(en_i[3] - en_f[3]);
 
@@ -455,7 +455,7 @@ void Hamiltonian::setStepSize(double dt) {
 }
 void Hamiltonian::setIntegrator(Integrator integrator) { this->m_integrator = integrator; }
 
-Hamiltonian::Hamiltonian(Integrator integrator, std::unique_ptr<IRng> &&rng, double step_size)
+Hamiltonian::Hamiltonian(Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size)
     : m_integrator(integrator), m_rng(std::move(rng)), m_dt(step_size) {
 }
 double Hamiltonian::updateDirac(const DiracOperator& dirac, const Action& action) const {

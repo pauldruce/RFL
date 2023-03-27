@@ -4,9 +4,9 @@
 
 #ifndef RFL_HAMILTONIAN_HPP
 #define RFL_HAMILTONIAN_HPP
+#include "Action.hpp"
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
-#include "Action.hpp"
 #include <cmath>
 #include <memory>
 
@@ -18,7 +18,7 @@ enum Integrator {
 class Hamiltonian : public IAlgorithm {
 public:
   Hamiltonian() = delete;
-  Hamiltonian(Integrator integrator, std::unique_ptr<IRng> &&rng, double step_size);
+  Hamiltonian(Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size);
 
   /**
    * The updateDirac method for Hamiltonian is not implemented for all classes that satisfy the
@@ -31,10 +31,9 @@ public:
    * @return
    */
   double updateDirac(const DiracOperator& dirac, const IAction& action) const override {
-      return this->updateDirac(
-          dirac,
-          dynamic_cast<const Action&>(action)
-      );
+    return this->updateDirac(
+        dirac,
+        dynamic_cast<const Action&>(action));
   }
 
   double updateDirac(const DiracOperator& dirac, const Action& action) const;

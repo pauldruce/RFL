@@ -5,7 +5,6 @@
 #include "DiracOperator.hpp"
 #include <gtest/gtest.h>
 
-
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
   for (int p = 0; p < 5; p++) {
     for (int q = 0; q < 5; q++) {

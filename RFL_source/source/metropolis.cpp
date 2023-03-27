@@ -89,7 +89,7 @@ double Geom24::delta4(const int& x, const int& I, const int& J, const cx_double&
             }
           }
 
-            // diagonal update
+          // diagonal update
           else {
 
             // compute terms
@@ -183,7 +183,7 @@ double Geom24::delta4(const int& x, const int& I, const int& J, const cx_double&
       temp += cliff * (T12 + norm(z) * (T22 + 4. * trM1M1) + T32);
     }
 
-      // diagonal update
+    // diagonal update
     else {
       // compute terms D^2 dD^2
       // _______________________________________________________________________________________
@@ -220,7 +220,7 @@ double Geom24::delta4(const int& x, const int& I, const int& J, const cx_double&
     res += 4. * temp;
   }
 
-    // diagonal update
+  // diagonal update
   else {
     double trMx = trace(mat[x]).real();
     double rez = 2. * z.real();
@@ -236,7 +236,7 @@ double Geom24::delta4(const int& x, const int& I, const int& J, const cx_double&
     res += temp;
   }
 
-    // diagonal update
+  // diagonal update
   else {
     double rez = z.real();
     temp = dim_omega * 32. * (dim + 3. + 4 * eps[x]) * rez * rez * rez * rez;

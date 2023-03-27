@@ -5,7 +5,6 @@
 #include <iostream>
 #include <memory>
 
-
 class Action {
 public:
   virtual ~Action() = default;
@@ -24,22 +23,17 @@ class barrettGlaserAction : public Action {
   }
 };
 
-
 class ActionManager {
 public:
-  explicit ActionManager(std::unique_ptr<Action>  &&input_action = {})
-  : m_action(std::move(input_action))
-  {
+  explicit ActionManager(std::unique_ptr<Action>&& input_action = {})
+      : m_action(std::move(input_action)) {
   }
 
-  void SetAction(std::unique_ptr<Action> &&new_action)
-  {
+  void SetAction(std::unique_ptr<Action>&& new_action) {
     m_action = std::move(new_action);
   }
 
-
-
-  void Print(){
+  void Print() {
     auto action_val = m_action->calculate();
     std::cout << action_val << std::endl;
   }
@@ -48,7 +42,7 @@ private:
   std::unique_ptr<Action> m_action;
 };
 
-int main(){
+int main() {
   ActionManager AM(std::make_unique<quadraticAction>());
   AM.Print();
 

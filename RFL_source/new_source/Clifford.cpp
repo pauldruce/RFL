@@ -18,7 +18,7 @@ Clifford::Clifford(int mode) {
     m_gammas.emplace_back(1, 1, fill::eye);
     m_chiral = cx_mat(1, 1, fill::eye);
   }
-    //(0,1)
+  //(0,1)
   else if (mode == 4) {
     m_p = 0;
     m_q = 1;
@@ -30,7 +30,7 @@ Clifford::Clifford(int mode) {
     m_gammas.push_back(tmp);
     m_chiral = cx_mat(1, 1, fill::eye);
   }
-    //(2,0)
+  //(2,0)
   else if (mode == 0) {
     m_p = 2;
     m_q = 0;
@@ -52,7 +52,7 @@ Clifford::Clifford(int mode) {
     m_chiral(0, 1) = z;
     m_chiral(1, 0) = -z;
   }
-    //(1,1)
+  //(1,1)
   else if (mode == 2) {
     m_p = 1;
     m_q = 1;
@@ -72,7 +72,7 @@ Clifford::Clifford(int mode) {
     m_chiral(0, 1) = 1;
     m_chiral(1, 0) = 1;
   }
-    //(0,2)
+  //(0,2)
   else if (mode == 1) {
     m_p = 0;
     m_q = 2;
@@ -252,7 +252,7 @@ Clifford& Clifford::operator*=(const Clifford& clifford_2) {
     gamma.emplace_back(kron(m_chiral, clifford_2.getGammaAtIndex(i)));
 
   // compute chirality
-  int s_2 = (q_2 - p_2 + 8 * p_2) % 8; // +8*p2 is necessary becase % does not mean modulo for negative numbers
+  int s_2 = (q_2 - p_2 + 8 * p_2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
   bool s_2_even = (s_2 % 8) % 2 == 0;
   if (!s_2_even) {
     int s = (m_q - m_p + 8 * m_p) % 8;

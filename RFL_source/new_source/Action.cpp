@@ -6,9 +6,9 @@
 using namespace std;
 using namespace arma;
 
-Action::Action(double g_2) : m_g_2(g_2), m_g_4(1.0) { }
+Action::Action(double g_2) : m_g_2(g_2), m_g_4(1.0) {}
 
-Action::Action(double g_2, double g_4) : m_g_2(g_2), m_g_4(g_4) { }
+Action::Action(double g_2, double g_4) : m_g_2(g_2), m_g_4(g_4) {}
 
 double Action::calculateSFromDirac(const DiracOperator& dirac) const {
   cx_mat dirac_mat = dirac.getDiracMatrix();

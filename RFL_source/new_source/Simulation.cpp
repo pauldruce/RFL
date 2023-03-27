@@ -4,5 +4,5 @@
 
 #include "Simulation.hpp"
 
-Simulation::Simulation(std::unique_ptr<DiracOperator> &&dirac,  std::unique_ptr<IAction> &&action, std::unique_ptr<IAlgorithm> &&monte_carlo_algorithm)
-    : m_dirac(std::move(dirac)), m_action(std::move(action)), m_algorithm(std::move(monte_carlo_algorithm)) { };
+Simulation::Simulation(std::unique_ptr<DiracOperator>&& dirac, std::unique_ptr<IAction>&& action, std::unique_ptr<IAlgorithm>&& monte_carlo_algorithm)
+    : m_dirac(std::move(dirac)), m_action(std::move(action)), m_algorithm(std::move(monte_carlo_algorithm)){};

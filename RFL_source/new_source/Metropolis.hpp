@@ -5,10 +5,10 @@
 #ifndef RFL_METROPOLIS_HPP
 #define RFL_METROPOLIS_HPP
 
+#include "Action.hpp"
+#include "IAction.hpp"
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
-#include "IAction.hpp"
-#include "Action.hpp"
 #include <armadillo>
 #include <memory>
 
@@ -21,8 +21,7 @@ class Metropolis : public IAlgorithm {
 public:
   Metropolis() = delete;
   Metropolis(double scale, int num_steps, std::unique_ptr<IRng>&& rng)
-  : m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
-
+      : m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
 
   void setParams(const double scale, const int iter, std::unique_ptr<IRng>&& rng) {
     this->m_scale = scale;
@@ -44,12 +43,10 @@ protected:
   double run(const DiracOperator& dirac,
              const IAction& action) const;
 
-
 private:
   double m_scale;
   int m_num_steps;
   std::unique_ptr<IRng> m_rng;
-
 
   // TODO: This method requires the use of the Action class, not IAction. Refactor this and fix.
   double delta24(const DiracOperator& dirac,

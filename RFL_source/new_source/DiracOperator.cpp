@@ -421,7 +421,6 @@ double DiracOperator::traceOfDiracSquared() const {
   return 2. * this->getGammaDimension() * res;
 }
 
-
 double DiracOperator::traceOfDirac4() const {
   double res = 0.;
 
@@ -432,7 +431,7 @@ double DiracOperator::traceOfDirac4() const {
     for (int j = i + 1; j < num_matrices; ++j) {
       for (int k = j + 1; k < num_matrices; ++k) {
         for (int l = k + 1; l < num_matrices; ++l)
-          res += 8 * (computeA4( i, j, k, l) + computeA4( i, j, l, k) + computeA4( i, k, j, l));
+          res += 8 * (computeA4(i, j, k, l) + computeA4(i, j, l, k) + computeA4(i, k, j, l));
       }
     }
   }
@@ -440,12 +439,12 @@ double DiracOperator::traceOfDirac4() const {
   // two distinct pairs of equal indices
   for (int i = 0; i < num_matrices; ++i) {
     for (int j = i + 1; j < num_matrices; ++j)
-      res += 2 * computeA2( i, j);
+      res += 2 * computeA2(i, j);
   }
 
   // all indices equal
   for (int i = 0; i < num_matrices; ++i)
-    res += computeA( i);
+    res += computeA(i);
 
   return res;
 }

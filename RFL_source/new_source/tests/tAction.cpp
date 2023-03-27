@@ -2,8 +2,8 @@
 // Created by Paul Druce on 27/12/2022.
 //
 #include "Action.hpp"
-#include <gtest/gtest.h>
 #include "GslRng.hpp"
+#include <gtest/gtest.h>
 
 static void CompareActions(int p, int q, int dim, double g_2) {
   constexpr int num_of_test_repeats = 100;

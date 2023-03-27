@@ -7,8 +7,8 @@
 
 #include "IRng.hpp"
 #include <ctime>
-#include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
+#include <gsl/gsl_rng.h>
 
 /**
  * This class is a thin wrap around the GSL random number generators to be used
@@ -24,12 +24,12 @@ public:
   GslRng() {
     gsl_rng_env_setup();
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
-    gsl_rng_set(m_rng,time(nullptr));
+    gsl_rng_set(m_rng, time(nullptr));
   }
 
   explicit GslRng(unsigned long seed) {
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
-    gsl_rng_set(m_rng,seed);
+    gsl_rng_set(m_rng, seed);
   }
 
   ~GslRng() {
@@ -49,4 +49,4 @@ private:
   gsl_rng* m_rng;
 };
 
-#endif //RFL_GSLRNG_HPP
+#endif//RFL_GSLRNG_HPP

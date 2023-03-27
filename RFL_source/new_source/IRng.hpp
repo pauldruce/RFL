@@ -11,7 +11,7 @@
  */
 class IRng {
 public:
- /**
+  /**
   * getGaussian is a pure virtual method that needs to be implemented by a derived class.
   *
   * Any implementation should return a random double precision floating point number selected from a Gaussian distribution
@@ -20,7 +20,6 @@ public:
   * @param sigma The standard deviation of the Gaussian distribution to select a number from.
   */
   virtual double getGaussian(double sigma) const = 0;
-
 
   /**
    * getUniform is a pure virtual method that needs to be implemented by a dervied class.
@@ -33,4 +32,4 @@ public:
   virtual ~IRng() = default;
 };
 
-#endif //RFL_IRNG_HPP
+#endif//RFL_IRNG_HPP

@@ -2,10 +2,10 @@
 // Created by Paul Druce on 09/12/2022.
 //
 
-#include <iostream>
-#include <gsl/gsl_rng.h>
-#include <ctime>
 #include "Geom24.hpp"
+#include <ctime>
+#include <gsl/gsl_rng.h>
+#include <iostream>
 
 int main() {
   // Initialize the random number generator

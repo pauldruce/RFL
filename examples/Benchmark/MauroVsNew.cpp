@@ -3,14 +3,14 @@
 //
 
 // For Mauro's implementation
-#include <iostream>
-#include <gsl/gsl_rng.h>
-#include <ctime>
 #include "Geom24.hpp"
+#include <ctime>
+#include <gsl/gsl_rng.h>
+#include <iostream>
 
 // For the new implementation
-#include "DiracOperator.hpp"
 #include "Action.hpp"
+#include "DiracOperator.hpp"
 #include "GslRng.hpp"
 #include "Metropolis.hpp"
 #include "Simulation.hpp"
@@ -26,32 +26,28 @@ constexpr double SCALE = -3;
 constexpr int NUM_STEPS = 10;
 constexpr int NUM_ITERATIONS = 20;
 
-
-void NewMethod(){
+void NewMethod() {
   auto rng = std::make_unique<GslRng>();
 
-//  DiracOperator dirac(P, Q,MATRIX_DIM);
-  auto dirac = std::make_unique<DiracOperator>(P,Q,MATRIX_DIM);
+  //  DiracOperator dirac(P, Q,MATRIX_DIM);
+  auto dirac = std::make_unique<DiracOperator>(P, Q, MATRIX_DIM);
 
-//  Action action(G_2, 1.0);
+  //  Action action(G_2, 1.0);
   auto action = std::make_unique<Action>(G_2, 1.0);
 
   auto metropolis = std::make_unique<Metropolis>(SCALE, NUM_STEPS, std::move(rng));
 
-
   auto simulation = Simulation(
       std::move(dirac),
       std::move(action),
-      std::move(metropolis)
-  );
+      std::move(metropolis));
 
   for (int i = 0; i < NUM_ITERATIONS; i++) {
     simulation.run();
   }
 }
 
-
-void MauroMethod(){
+void MauroMethod() {
   // Initialize the random number generator
   gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
   gsl_rng_set(engine, time(nullptr));
@@ -64,10 +60,10 @@ void MauroMethod(){
   }
 }
 
-int main(){
-  using std::chrono::high_resolution_clock;
-  using std::chrono::duration_cast;
+int main() {
   using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using std::chrono::high_resolution_clock;
   using std::chrono::milliseconds;
 
   auto mauro_start = high_resolution_clock::now();
@@ -84,7 +80,7 @@ int main(){
   NewMethod();
   auto new_stop = high_resolution_clock::now();
 
-  auto new_ms_int = duration_cast<milliseconds>(new_stop-new_start);
+  auto new_ms_int = duration_cast<milliseconds>(new_stop - new_start);
   std::cout << "New implementation:\n";
   std::cout << new_ms_int.count() << "ms\n";
 

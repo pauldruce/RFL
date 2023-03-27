@@ -18,7 +18,7 @@ Cliff::Cliff(int mode) {
     gamma.emplace_back(1, 1, fill::eye);
     chiral = cx_mat(1, 1, fill::eye);
   }
-    //(0,1)
+  //(0,1)
   else if (mode == 4) {
     p = 0;
     q = 1;
@@ -30,7 +30,7 @@ Cliff::Cliff(int mode) {
     gamma.push_back(tmp);
     chiral = cx_mat(1, 1, fill::eye);
   }
-    //(2,0)
+  //(2,0)
   else if (mode == 0) {
     p = 2;
     q = 0;
@@ -52,7 +52,7 @@ Cliff::Cliff(int mode) {
     chiral(0, 1) = z;
     chiral(1, 0) = -z;
   }
-    //(1,1)
+  //(1,1)
   else if (mode == 2) {
     p = 1;
     q = 1;
@@ -72,7 +72,7 @@ Cliff::Cliff(int mode) {
     chiral(0, 1) = 1;
     chiral(1, 0) = 1;
   }
-    //(0,2)
+  //(0,2)
   else if (mode == 1) {
     p = 0;
     q = 2;

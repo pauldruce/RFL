@@ -115,7 +115,7 @@ double Metropolis::delta4(const DiracOperator& dirac,
             }
           }
 
-            // diagonal update
+          // diagonal update
           else {
 
             // compute terms
@@ -209,7 +209,7 @@ double Metropolis::delta4(const DiracOperator& dirac,
       temp += cliff * (t_12 + norm(z) * (t_22 + 4. * tr_m_1_m_1) + t_32);
     }
 
-      // diagonal update
+    // diagonal update
     else {
       // compute terms D^2 dD^2
       // _______________________________________________________________________________________
@@ -246,7 +246,7 @@ double Metropolis::delta4(const DiracOperator& dirac,
     res += 4. * temp;
   }
 
-    // diagonal update
+  // diagonal update
   else {
     double tr_mx = trace(mat[x]).real();
     double rez = 2. * z.real();
@@ -262,7 +262,7 @@ double Metropolis::delta4(const DiracOperator& dirac,
     res += temp;
   }
 
-    // diagonal update
+  // diagonal update
   else {
     double rez = z.real();
     temp = gamma_dim * 32. * (mat_dim + 3. + 4 * eps[x]) * rez * rez * rez * rez;
@@ -273,8 +273,8 @@ double Metropolis::delta4(const DiracOperator& dirac,
 }
 
 double Metropolis::runDualAverage(const DiracOperator& dirac,
-                                const IAction& action,
-                                const double target) {
+                                  const IAction& action,
+                                  const double target) {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -384,7 +384,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = delta24(dirac, action,x,row_index,column_index,z);
+  double action_delta = delta24(dirac, action, x, row_index, column_index, z);
 
   auto* mat = dirac.getMatrices();
   // metropolis test
@@ -456,7 +456,7 @@ double Metropolis::runCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = delta24(dirac,action,x,row_index,column_index,z);
+  double action_delta = delta24(dirac, action, x, row_index, column_index, z);
 
   auto* mat = dirac.getMatrices();
   // metropolis test

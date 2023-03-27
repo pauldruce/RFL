@@ -2,10 +2,9 @@
 // Created by Paul Druce on 04/02/2023.
 //
 
-#include "Hamiltonian.hpp"
 #include "GslRng.hpp"
+#include "Hamiltonian.hpp"
 #include <gtest/gtest.h>
-
 
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   const Integrator integrator = LEAPFROG;
@@ -18,7 +17,7 @@ TEST(HamiltonianTests, ConstructorDoesNotThrow) {
 TEST(HamiltonianTests, CanChangeIntegrator) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-//  GslRng rng;
+  //  GslRng rng;
 
   double step_size = 0.1;
   Hamiltonian hamiltonian(integrator, std::make_unique<GslRng>(), step_size);

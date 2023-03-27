@@ -1,10 +1,10 @@
 //
 // Created by Paul Druce on 09/12/2022.
 //
-#include <iostream>
+#include "Geom24.hpp"
 #include <ctime>
 #include <gsl/gsl_rng.h>
-#include "Geom24.hpp"
+#include <iostream>
 
 using namespace std;
 using namespace arma;
@@ -22,7 +22,7 @@ int main() {
 
   // Tuning with dual averaging
   double tgt = 0.8; // Target acceptance rate
-  double dt = 0.001; // Initial guess for dt
+  double dt = 0.001;// Initial guess for dt
   G.HMC_duav(10, dt, 10000, engine, tgt, "leapfrog");
   cout << "dual averaging complete" << endl;
   cout << "dual averaged dt: " << dt << endl;

@@ -144,7 +144,7 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
     auto gammas = C.getGammaMatrices();
     for (auto& g : gammas) {
       ASSERT_EQ(g.n_rows, g.n_cols)
-                  << "Gamma matrices not squarefailed for (p,q) = (" << d.p << "," << d.q << ")";
+          << "Gamma matrices not squarefailed for (p,q) = (" << d.p << "," << d.q << ")";
       EXPECT_EQ(expect_dim, g.n_rows) << "Gamma dim not correct for (p,q) = (" << d.p << "," << d.q << ")";
     }
   }
@@ -178,14 +178,14 @@ TEST(CliffordTests, ChiralityIsCorrect) {
     }
     arma::cx_mat
         expect_chirality =
-        gammas_producted * (std::complex<double>)std::pow(std::complex<double>(0, 1), exponent);
+            gammas_producted * (std::complex<double>)std::pow(std::complex<double>(0, 1), exponent);
     expect_chirality.clean(1e-10);
     EXPECT_TRUE(arma::approx_equal(expect_chirality, chirality, "absdiff", 1e-4))
-            << "Chirality Operator not correct for " << C
-            << "\nExpected Chirality:\n"
-            << expect_chirality
-            << "\nRetrieved Chirality:\n"
-            << chirality;
+        << "Chirality Operator not correct for " << C
+        << "\nExpected Chirality:\n"
+        << expect_chirality
+        << "\nRetrieved Chirality:\n"
+        << chirality;
   }
 }
 

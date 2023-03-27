@@ -5,9 +5,8 @@
 #ifndef RFL_IALGORITHM_HPP
 #define RFL_IALGORITHM_HPP
 
-#include "IAction.hpp"
 #include "DiracOperator.hpp"
-
+#include "IAction.hpp"
 
 /**
  * This is an Abstract Class/Interface for the various Monte Carlo
@@ -15,7 +14,6 @@
  */
 class IAlgorithm {
 public:
-
   /**
    * updateDirac is the only method that an algorithm needs to implement to be used with the RFL
    * library.
