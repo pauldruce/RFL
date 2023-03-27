@@ -1,0 +1,48 @@
+name: C++ Linter
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  clang-format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - 'RFL_source'
+          - 'examples'
+          - 'playground'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Run clang-format style check for ${{matrix.path }}.
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: '16'
+          check-path: ${{ matrix.path }}
+
+#      - name: Install clang-format
+#        shell: bash
+#        run: |
+#          sudo apt-get update -y
+#          sudo apt-get install -y clang-format
+#          clang-format --version
+#
+#      - name: Format RFL_source
+#        working-directory: RFL_source
+#        run: |
+#          clang-format **/*.hpp --dry-run
+#          clang-format **/*.cpp --dry-run
+#
+#      - name: Format examples
+#        working-directory: examples
+#        run: |
+#          clang-format **/*.cpp --dry-run
+#
+#      - name: Format playground
+#        run: |
+#          clang-format playground/**/*.cpp --dry-run
+          
+          
