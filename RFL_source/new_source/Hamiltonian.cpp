@@ -458,5 +458,3 @@ void Hamiltonian::setStepSize(double dt) {
   this->m_dt = dt;
 }
 void Hamiltonian::setIntegrator(Integrator integrator) { this->m_integrator = integrator; }
-
-

@@ -2,8 +2,8 @@
 
 This directory contains the source code for the RFL library.
 
-
 TODO: Enable mermaid rendering for Doxygen by following: https://github.com/tttapa/doxygen-mermaid
+
 ```mermaid
 classDiagram
     class Action{

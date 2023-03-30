@@ -10,16 +10,16 @@ TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
   double step_size = 0.1;
-  auto action = std::make_unique<Action>(1.0,1.0);
+  auto action = std::make_unique<Action>(1.0, 1.0);
   ASSERT_NO_THROW(
-      const Hamiltonian hamiltonian(std::move(action),integrator, std::make_unique<GslRng>(), step_size););
+      const Hamiltonian hamiltonian(std::move(action), integrator, std::make_unique<GslRng>(), step_size););
 }
 
 TEST(HamiltonianTests, CanChangeIntegrator) {
   const Integrator integrator = LEAPFROG;
   double step_size = 0.1;
-  auto action = std::make_unique<Action>(1.0,1.0);
-  Hamiltonian hamiltonian(std::move(action),integrator, std::make_unique<GslRng>(), step_size);
+  auto action = std::make_unique<Action>(1.0, 1.0);
+  Hamiltonian hamiltonian(std::move(action), integrator, std::make_unique<GslRng>(), step_size);
 
   ASSERT_EQ(hamiltonian.getIntegrator(), integrator);
 
@@ -31,8 +31,8 @@ TEST(HamiltonianTests, CanChangeIntegrator) {
 TEST(HamiltonianTests, CanChangeStepSize) {
   const Integrator integrator = LEAPFROG;
   double step_size = 0.1;
-  auto action = std::make_unique<Action>(1.0,1.0);
-  Hamiltonian hamiltonian(std::move(action),integrator, std::make_unique<GslRng>(), step_size);
+  auto action = std::make_unique<Action>(1.0, 1.0);
+  Hamiltonian hamiltonian(std::move(action), integrator, std::make_unique<GslRng>(), step_size);
 
   ASSERT_EQ(hamiltonian.getStepSize(), step_size);
 
