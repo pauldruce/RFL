@@ -1,4 +1,4 @@
-add_library(new_RFL )
+add_library(new_RFL)
 
 set(new_RFL_HEADERS
         Action.hpp
