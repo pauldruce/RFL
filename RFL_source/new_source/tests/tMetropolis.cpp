@@ -14,22 +14,23 @@ TEST(MetropolisTests, ConstructorDoesNotThrow) {
   auto rng = std::make_unique<GslRng>();
   constexpr double scale = 0.1;
   constexpr int num_steps = 20;
+  auto action = std::make_unique<Action>(1.0,1.0);
 
   ASSERT_NO_THROW(
-      Metropolis metropolis(scale, num_steps, std::move(rng)););
+      Metropolis metropolis(std::move(action),scale, num_steps, std::move(rng)););
 }
 
 TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
   auto rng = std::make_unique<GslRng>();
   constexpr double scale = 0.2;
   constexpr int num_steps = 20;
+  auto action = std::make_unique<Action>(1.0,1.0);
 
-  Metropolis metropolis(scale, num_steps, std::move(rng));
+  Metropolis metropolis(std::move(action),scale, num_steps, std::move(rng));
 
   auto dirac = DiracOperator(1, 1, 5);
   auto old_dirac_matrix = dirac.getDiracMatrix();
-  auto action = Action(-2.7);
-  metropolis.updateDirac(dirac, action);
+  metropolis.updateDirac(dirac);
   auto new_dirac_matrix = dirac.getDiracMatrix();
 
   const auto diracs_are_equal = arma::approx_equal(new_dirac_matrix, old_dirac_matrix, "absdiff", 1e-6);

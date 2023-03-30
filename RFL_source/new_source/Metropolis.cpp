@@ -8,12 +8,11 @@ using namespace std;
 using namespace arma;
 
 double Metropolis::delta24(const DiracOperator& dirac,
-                           const IAction& action,
                            const int& x,
                            const int& row_index,
                            const int& column_index,
                            const cx_double& z) const {
-  return dynamic_cast<const Action&>(action).getG2() * delta2(dirac, x, row_index, column_index, z) + delta4(dirac, x, row_index, column_index, z);
+  return m_action->getG2() * delta2(dirac, x, row_index, column_index, z) + delta4(dirac, x, row_index, column_index, z);
 }
 
 double Metropolis::delta2(const DiracOperator& dirac,
@@ -273,7 +272,6 @@ double Metropolis::delta4(const DiracOperator& dirac,
 }
 
 double Metropolis::runDualAverage(const DiracOperator& dirac,
-                                  const IAction& action,
                                   const double target) {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
@@ -303,7 +301,7 @@ double Metropolis::runDualAverage(const DiracOperator& dirac,
         s_i[1] = dirac.traceOfDirac4();
       }
 
-      stat += target - runDualAverageCore(dirac, action, s_i, s_f);
+      stat += target - runDualAverageCore(dirac, s_i, s_f);
 
       // perform dual averaging
       double log_scale = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
@@ -321,8 +319,7 @@ double Metropolis::runDualAverage(const DiracOperator& dirac,
   return (stat / (m_num_steps * nsw));
 }
 
-double Metropolis::run(const DiracOperator& dirac,
-                       const IAction& action) const {
+double Metropolis::run(const DiracOperator& dirac) const {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -346,7 +343,7 @@ double Metropolis::run(const DiracOperator& dirac,
         s_i[1] = dirac.traceOfDirac4();
       }
 
-      stat += runCore(dirac, action, s_i, s_f);
+      stat += runCore(dirac, s_i, s_f);
     }
   }
 
@@ -357,7 +354,6 @@ double Metropolis::run(const DiracOperator& dirac,
 }
 
 double Metropolis::runDualAverageCore(const DiracOperator& dirac,
-                                      const IAction& action,
                                       const double* s_i,
                                       double* s_f) const {
   // acceptance probability
@@ -384,7 +380,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = delta24(dirac, action, x, row_index, column_index, z);
+  double action_delta = delta24(dirac, x, row_index, column_index, z);
 
   auto* mat = dirac.getMatrices();
   // metropolis test
@@ -429,7 +425,6 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
 }
 
 double Metropolis::runCore(const DiracOperator& dirac,
-                           const IAction& action,
                            const double* s_i,
                            double* s_f) const {
   // acceptance probability
@@ -456,7 +451,7 @@ double Metropolis::runCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = delta24(dirac, action, x, row_index, column_index, z);
+  double action_delta = delta24(dirac, x, row_index, column_index, z);
 
   auto* mat = dirac.getMatrices();
   // metropolis test

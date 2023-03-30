@@ -10,17 +10,16 @@ TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   const Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
   double step_size = 0.1;
+  auto action = std::make_unique<Action>(1.0,1.0);
   ASSERT_NO_THROW(
-      const Hamiltonian hamiltonian(integrator, std::make_unique<GslRng>(), step_size););
+      const Hamiltonian hamiltonian(std::move(action),integrator, std::make_unique<GslRng>(), step_size););
 }
 
 TEST(HamiltonianTests, CanChangeIntegrator) {
   const Integrator integrator = LEAPFROG;
-  // TODO: How do we test random stuff? -> find out
-  //  GslRng rng;
-
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, std::make_unique<GslRng>(), step_size);
+  auto action = std::make_unique<Action>(1.0,1.0);
+  Hamiltonian hamiltonian(std::move(action),integrator, std::make_unique<GslRng>(), step_size);
 
   ASSERT_EQ(hamiltonian.getIntegrator(), integrator);
 
@@ -31,9 +30,9 @@ TEST(HamiltonianTests, CanChangeIntegrator) {
 
 TEST(HamiltonianTests, CanChangeStepSize) {
   const Integrator integrator = LEAPFROG;
-  // TODO: How do we test random stuff? -> find out
   double step_size = 0.1;
-  Hamiltonian hamiltonian(integrator, std::make_unique<GslRng>(), step_size);
+  auto action = std::make_unique<Action>(1.0,1.0);
+  Hamiltonian hamiltonian(std::move(action),integrator, std::make_unique<GslRng>(), step_size);
 
   ASSERT_EQ(hamiltonian.getStepSize(), step_size);
 
@@ -43,11 +42,10 @@ TEST(HamiltonianTests, CanChangeStepSize) {
 }
 
 TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
-  Hamiltonian hamiltonian(Integrator::LEAPFROG, std::make_unique<GslRng>(), 0.2);
+  Hamiltonian hamiltonian(std::make_unique<Action>(), Integrator::LEAPFROG, std::make_unique<GslRng>(), 0.2);
   auto dirac = DiracOperator(1, 1, 5);
   auto old_dirac_matrix = dirac.getDiracMatrix();
-  auto action = Action(-2.7);
-  hamiltonian.updateDirac(dirac, action);
+  hamiltonian.updateDirac(dirac);
 
   auto new_dirac_matrix = dirac.getDiracMatrix();
 

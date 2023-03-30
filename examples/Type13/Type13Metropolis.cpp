@@ -20,9 +20,9 @@ int main() {
   auto action = std::make_unique<Action>(-2.7, 1.0);
 
   //  Metropolis metropolis(metropolis_scale,iter,std::move(rng));
-  auto metropolis = std::make_unique<Metropolis>(metropolis_scale, iter, std::move(rng));
+  auto metropolis = std::make_unique<Metropolis>(std::move(action), metropolis_scale, iter, std::move(rng));
 
-  auto simulation = Simulation(std::move(dirac), std::move(action), std::move(metropolis));
+  auto simulation = Simulation(std::move(dirac),std::move(metropolis));
 
   for (int i = 0; i < 10; i++) {
     simulation.run();

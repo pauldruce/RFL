@@ -22,7 +22,7 @@ public:
    * @param action is the Action that the algorithm uses in the MCMC process.
    * @return the acceptance rate of the process.
    */
-  virtual double updateDirac(const DiracOperator& dirac, const IAction& action) const = 0;
+  virtual double updateDirac(const DiracOperator& dirac) const = 0;
 
   virtual ~IAlgorithm() = default;
 };

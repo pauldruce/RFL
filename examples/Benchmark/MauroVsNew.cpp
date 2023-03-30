@@ -35,11 +35,10 @@ void NewMethod() {
   //  Action action(G_2, 1.0);
   auto action = std::make_unique<Action>(G_2, 1.0);
 
-  auto metropolis = std::make_unique<Metropolis>(SCALE, NUM_STEPS, std::move(rng));
+  auto metropolis = std::make_unique<Metropolis>(std::move(action),SCALE, NUM_STEPS, std::move(rng));
 
   auto simulation = Simulation(
       std::move(dirac),
-      std::move(action),
       std::move(metropolis));
 
   for (int i = 0; i < NUM_ITERATIONS; i++) {

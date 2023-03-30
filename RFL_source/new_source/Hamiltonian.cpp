@@ -9,6 +9,17 @@
 using namespace std;
 using namespace arma;
 
+Hamiltonian::Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size)
+    : m_action(std::move(action)), m_integrator(integrator), m_rng(std::move(rng)), m_dt(step_size) {
+}
+double Hamiltonian::updateDirac(const DiracOperator& dirac) const {
+  const double acceptance_val_per_iter = this->run(
+      dirac,
+      10,
+      1000);
+  return acceptance_val_per_iter;
+}
+
 void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
   auto* mom = dirac.getMomenta();
   auto num_matrices = dirac.getNumMatrices();
@@ -43,8 +54,8 @@ double Hamiltonian::calculateK(const DiracOperator& dirac) const {
   return res / 2;
 }
 
-double Hamiltonian::calculateH(const DiracOperator& dirac, const Action& action) const {
-  return action.calculateS(dirac) + calculateK(dirac);
+double Hamiltonian::calculateH(const DiracOperator& dirac) const {
+  return m_action->calculateS(dirac) + calculateK(dirac);
 }
 
 void Hamiltonian::leapfrog(const DiracOperator& dirac,
@@ -94,7 +105,6 @@ void Hamiltonian::omelyan(const DiracOperator& dirac,
 }
 
 void Hamiltonian::runDualAverage(const DiracOperator& dirac,
-                                 const Action& action,
                                  const int& nt,
                                  const int& iter,
                                  const double& target) {
@@ -123,7 +133,7 @@ void Hamiltonian::runDualAverage(const DiracOperator& dirac,
     }
 
     // core part of HMC
-    stat += target - runDualAveragingCore(dirac, action, nt, en_i, en_f);
+    stat += target - runDualAveragingCore(dirac, nt, en_i, en_f);
 
     // perform dual averaging on dt
     double log_dt = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
@@ -140,7 +150,6 @@ void Hamiltonian::runDualAverage(const DiracOperator& dirac,
 }
 
 double Hamiltonian::run(const DiracOperator& dirac,
-                        const Action& action,
                         const int& num_iterations,
                         const int& iter) const {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
@@ -163,7 +172,7 @@ double Hamiltonian::run(const DiracOperator& dirac,
     }
 
     // core part of HMC
-    stat += runCore(dirac, action, num_iterations, en_i, en_f);
+    stat += runCore(dirac, num_iterations, en_i, en_f);
   }
 
   delete[] en_i;
@@ -173,7 +182,6 @@ double Hamiltonian::run(const DiracOperator& dirac,
 }
 
 double Hamiltonian::run(const DiracOperator& dirac,
-                        const Action& action,
                         const int& nt,
                         const double& dt_min,
                         const double& dt_max,
@@ -198,7 +206,7 @@ double Hamiltonian::run(const DiracOperator& dirac,
     }
 
     // core part of HMC
-    stat += runCore(dirac, action, nt, dt_min, dt_max, en_i, en_f);
+    stat += runCore(dirac, nt, dt_min, dt_max, en_i, en_f);
   }
 
   delete[] en_i;
@@ -208,7 +216,6 @@ double Hamiltonian::run(const DiracOperator& dirac,
 }
 
 double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
-                                         const Action& action,
                                          const int& nt,
                                          double* en_i,
                                          double* en_f) const {
@@ -228,20 +235,20 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
 
   // calculate initial hamiltonian
   en_i[2] = calculateK(dirac);
-  en_i[3] = action.getG2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.getG2());
+    leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.getG2());
+    omelyan(dirac, nt, m_action->getG2());
   }
 
   // calculate final hamiltonian
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
-  en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
 
@@ -280,7 +287,6 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
 }
 
 double Hamiltonian::runCore(const DiracOperator& dirac,
-                            const Action& action,
                             const int& nt,
                             double* en_i,
                             double* en_f) const {
@@ -300,20 +306,20 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 
   // calculate initial hamiltonian
   en_i[2] = calculateK(dirac);
-  en_i[3] = action.getG2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.getG2());
+    leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.getG2());
+    omelyan(dirac, nt, m_action->getG2());
   }
 
   // calculate final hamiltonian
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
-  en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
@@ -337,7 +343,6 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 }
 
 double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
-                                 const Action& action,
                                  const int& nt) const {
   // exp(-dH) (return value)
   double e;
@@ -354,19 +359,19 @@ double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
   }
 
   // calculate initial hamiltonian
-  double initial_S = action.calculateS(dirac);
+  double initial_S = m_action->calculateS(dirac);
   double initial_K = calculateK(dirac);
   double initial_hamiltonian = initial_S + initial_K;
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.getG2());
+    leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.getG2());
+    omelyan(dirac, nt, m_action->getG2());
   }
 
   // calculate final hamiltonian
-  double final_S = action.calculateS(dirac);
+  double final_S = m_action->calculateS(dirac);
   double final_K = calculateK(dirac);
   double final_hamiltonian = final_S + final_K;
 
@@ -389,7 +394,6 @@ double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
 }
 
 double Hamiltonian::runCore(const DiracOperator& dirac,
-                            const Action& action,
                             const int& nt,
                             const double& dt_min,
                             const double& dt_max,
@@ -414,20 +418,20 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 
   // calculate initial hamiltonian
   en_i[2] = calculateK(dirac);
-  en_i[3] = action.getG2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
 
   // integration
   if (m_integrator == Integrator::LEAPFROG) {
-    leapfrog(dirac, nt, action.getG2());
+    leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == Integrator::OMELYAN) {
-    omelyan(dirac, nt, action.getG2());
+    omelyan(dirac, nt, m_action->getG2());
   }
 
   // calculate final hamiltonian
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
-  en_f[3] = action.getG2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
 
   // metropolis test
   if (en_f[3] > en_i[3]) {
@@ -455,13 +459,4 @@ void Hamiltonian::setStepSize(double dt) {
 }
 void Hamiltonian::setIntegrator(Integrator integrator) { this->m_integrator = integrator; }
 
-Hamiltonian::Hamiltonian(Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size)
-    : m_integrator(integrator), m_rng(std::move(rng)), m_dt(step_size) {
-}
-double Hamiltonian::updateDirac(const DiracOperator& dirac, const Action& action) const {
-  const double acceptance_val_per_iter = this->run(
-      dirac, action,
-      10,
-      1000);
-  return acceptance_val_per_iter;
-}
+

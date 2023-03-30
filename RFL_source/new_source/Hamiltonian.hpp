@@ -18,25 +18,9 @@ enum Integrator {
 class Hamiltonian : public IAlgorithm {
 public:
   Hamiltonian() = delete;
-  Hamiltonian(Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size);
+  Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size);
 
-  /**
-   * The updateDirac method for Hamiltonian is not implemented for all classes that satisfy the
-   * IAction interface. This is only currently implemented for the class Action.
-   *
-   * TODO: Generalise the hamiltonian method to accept other options.
-   *
-   * @param dirac a reference to the DiracOperator to be updated.
-   * @param action a reference to the IAction-derived class.
-   * @return
-   */
-  double updateDirac(const DiracOperator& dirac, const IAction& action) const override {
-    return this->updateDirac(
-        dirac,
-        dynamic_cast<const Action&>(action));
-  }
-
-  double updateDirac(const DiracOperator& dirac, const Action& action) const;
+  double updateDirac(const DiracOperator& dirac) const override;
 
   void setIntegrator(Integrator integrator);
   Integrator getIntegrator() const { return this->m_integrator; };
@@ -45,6 +29,7 @@ public:
   double getStepSize() const { return this->m_dt; };
 
 private:
+  std::unique_ptr<Action> m_action;
   Integrator m_integrator = Integrator::LEAPFROG;
   std::unique_ptr<IRng> m_rng;
   double m_dt;
@@ -52,45 +37,38 @@ private:
   // This method seems to be the initialiser for the mom variables in DiracOperator
   void sampleMoments(const DiracOperator& dirac) const;
   double calculateK(const DiracOperator& dirac) const;
-  double calculateH(const DiracOperator& dirac, const Action& action) const;
+  double calculateH(const DiracOperator& dirac) const;
 
   double run(const DiracOperator& dirac,
-             const Action& action,
              const int& num_iterations,
              const int& iter) const;
 
   double runDualAveragingCore(const DiracOperator& dirac,
-                              const Action& action,
                               const int& nt,
                               double* en_i,
                               double* en_f) const;
 
   double runCore(const DiracOperator& dirac,
-                 const Action& action,
                  const int& nt,
                  double* en_i,
                  double* en_f) const;
 
   double runCoreDebug(const DiracOperator& dirac,
-                      const Action& action,
                       const int& nt) const;
 
   // The methods below modify the step size "this->dt".
   void runDualAverage(const DiracOperator& dirac,
-                      const Action& action,
                       const int& nt,
                       const int& iter,
                       const double& target);
 
   double run(const DiracOperator& dirac,
-             const Action& action,
              const int& nt,
              const double& dt_min,
              const double& dt_max,
              const int& iter);
 
   double runCore(const DiracOperator& dirac,
-                 const Action& action,
                  const int& nt,
                  const double& dt_min,
                  const double& dt_max,
