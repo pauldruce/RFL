@@ -66,6 +66,7 @@ find_package(GSL REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
 include_directories(${GSL_INCLUDE_DIRS})
 add_subdirectory(vendors)
+include(GoogleTest)
 
 add_subdirectory(RFL_source)
 add_subdirectory(examples)
