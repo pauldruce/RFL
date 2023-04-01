@@ -29,36 +29,11 @@ endif()
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(Doxygen)
-find_package(Doxygen
-        REQUIRED dot)
-set(DOXYGEN_GENERATE_HTML YES)
-set(DOXYGEN_HTML_OUTPUT
-        ${PROJECT_SOURCE_DIR}/RFL_docs)
-set(DOXYGEN_USE_MDFILE_AS_MAINPAGE
-        "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
-# Settings for Inheritance Diagram etc.
-set(DOXYGEN_EXTRACT_ALL YES)
-set(DOXYGEN_CLASS_DIAGRAMS YES)
-set(DOXYGEN_HIDE_UNDOC_RELATIONS NO)
-set(DOXYGEN_CALL_GRAPH YES)
-set(DOXYGEN_CALLER_GRAPH YES)
-set(DOXYGEN_HAVE_DOT             YES)
-set(DOXYGEN_CLASS_GRAPH          YES)
-set(DOXYGEN_COLLABORATION_GRAPH  NO)
-set(DOXYGEN_UML_LOOK             YES)
-set(DOXYGEN_UML_LIMIT_NUM_FIELDS 50)
-set(DOXYGEN_TEMPLATE_RELATIONS   YES)
-set(DOXYGEN_DOT_GRAPH_MAX_NODES  100)
-set(DOXYGEN_MAX_DOT_GRAPH_DEPTH  0)
-set(DOXYGEN_DOT_TRANSPARENT      YES)
-set(DOXYGEN_INTERACTIVE_SVG  YES)
-set(DOXYGEN_USE_MATHJAX YES)
-set(DOXYGEN_EXCLUDE_PATTERNS */tests/*)
-
 doxygen_add_docs(doxygen
-        ${PROJECT_SOURCE_DIR}/README.md ${PROJECT_SOURCE_DIR}/RFL_source/new_source ${PROJECT_SOURCE_DIR}/examples
-        COMMENT "Generate documentation for entire project"
-        )
+        ${PROJECT_SOURCE_DIR}/README.md
+        ${PROJECT_SOURCE_DIR}/RFL_source/new_source
+        ${PROJECT_SOURCE_DIR}/examples
+        COMMENT "Generate documentation for entire project")
 
 # GSL is included with Armadillo above, but we need more.
 find_package(Armadillo REQUIRED)
@@ -76,5 +51,5 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 
-# AN EXPERIMENT
+# AN DEMO/EXPERIMENT AREA
 add_subdirectory(playground)

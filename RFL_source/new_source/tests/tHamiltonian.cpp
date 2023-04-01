@@ -2,8 +2,8 @@
 // Created by Paul Druce on 04/02/2023.
 //
 
+#include "BarrettGlaser/Hamiltonian.hpp"
 #include "GslRng.hpp"
-#include "Hamiltonian.hpp"
 #include <gtest/gtest.h>
 
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {

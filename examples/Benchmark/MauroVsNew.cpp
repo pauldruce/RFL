@@ -9,10 +9,10 @@
 #include <iostream>
 
 // For the new implementation
-#include "Action.hpp"
+#include "BarrettGlaser/Action.hpp"
+#include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
 #include "GslRng.hpp"
-#include "Metropolis.hpp"
 #include "Simulation.hpp"
 
 // For benchmarking the two implementations

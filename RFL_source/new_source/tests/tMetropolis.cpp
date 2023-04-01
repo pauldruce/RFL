@@ -5,8 +5,8 @@
 // Created by Paul Druce on 04/02/2023.
 //
 
+#include "BarrettGlaser/Metropolis.hpp"
 #include "GslRng.hpp"
-#include "Metropolis.hpp"
 #include <gtest/gtest.h>
 
 TEST(MetropolisTests, ConstructorDoesNotThrow) {

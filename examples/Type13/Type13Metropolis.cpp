@@ -2,10 +2,10 @@
 // Created by Paul Druce on 10/12/2022.
 //
 
-#include "Action.hpp"
+#include "BarrettGlaser/Action.hpp"
+#include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
 #include "GslRng.hpp"
-#include "Metropolis.hpp"
 #include "Simulation.hpp"
 
 int main() {
@@ -20,7 +20,11 @@ int main() {
   auto action = std::make_unique<Action>(-2.7, 1.0);
 
   //  Metropolis metropolis(metropolis_scale,iter,std::move(rng));
-  auto metropolis = std::make_unique<Metropolis>(std::move(action), metropolis_scale, iter, std::move(rng));
+  auto metropolis = std::make_unique<Metropolis>(
+      std::move(action),
+      metropolis_scale,
+      iter,
+      std::move(rng));
 
   auto simulation = Simulation(std::move(dirac), std::move(metropolis));
 
