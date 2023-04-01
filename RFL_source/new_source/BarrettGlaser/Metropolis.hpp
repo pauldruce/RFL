@@ -6,7 +6,6 @@
 #define RFL_METROPOLIS_HPP
 
 #include "Action.hpp"
-#include "IAction.hpp"
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
 #include <armadillo>
@@ -33,19 +32,18 @@ public:
     return this->run(dirac);
   }
 
-  // MMC routine that performs dual averaging
-  double runDualAverage(const DiracOperator& dirac,
-                        double target);
-
-protected:
-  // MMC routine that doesn't perform dual averaging
-  double run(const DiracOperator& dirac) const;
-
 private:
   std::unique_ptr<Action> m_action;
   double m_scale;
   int m_num_steps;
   std::unique_ptr<IRng> m_rng;
+
+  // MMC routine that doesn't perform dual averaging
+  double run(const DiracOperator& dirac) const;
+
+  // MMC routine that performs dual averaging
+  double runDualAverage(const DiracOperator& dirac,
+                        double target);
 
   // TODO: This method requires the use of the Action class, not IAction. Refactor this and fix.
   double delta24(const DiracOperator& dirac,
@@ -54,12 +52,14 @@ private:
                  const int& column_index,
                  const arma::cx_double& z) const;
 
+  // TODO: These can be made static or members of DiracOperator
   double delta2(const DiracOperator& dirac,
                 const int& x,
                 const int& row_index,
                 const int& column_index,
                 const arma::cx_double& z) const;
 
+  // TODO: These can be made static or members of DiracOperator
   double delta4(const DiracOperator& dirac,
                 const int& x,
                 const int& row_index,

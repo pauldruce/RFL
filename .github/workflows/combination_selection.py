@@ -1,7 +1,8 @@
-import sys
 import itertools
-import random
 import json
+import random
+import sys
+
 
 def create_combination_selection(combinations, random_seed, num_selected):
     random.seed(random_seed)
@@ -20,12 +21,12 @@ def create_new_matrix(subset):
 
     return json.dumps(json_versions, separators=(",", ":"))
 
+
 def main(random_seed, num_selected, select_all):
     build_type = ["Release", "Debug"]
     os_versions = [
         "ubuntu-22.04",
         "ubuntu-20.04",
-        "ubuntu-18.04",
         "macos-12",
         "macos-11"
     ]
@@ -44,9 +45,10 @@ def main(random_seed, num_selected, select_all):
     print(matrix)
     return 0
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     command_line_arguments = sys.argv
-    if len(command_line_arguments)>3:
+    if len(command_line_arguments) > 3:
         sys.exit(""""
         Too many arguments passed in. 
         Valid arguments are a positive integer representing the seed for random selection,
@@ -59,18 +61,17 @@ if __name__=="__main__":
     random_seed = None
     num_selected = 3
 
-    if len(command_line_arguments)==2:
-        if command_line_arguments[1]=="all":
+    if len(command_line_arguments) == 2:
+        if command_line_arguments[1] == "all":
             select_all = True
         else:
             random_seed = int(command_line_arguments[1])
 
-    if(len(command_line_arguments) == 3):
+    if (len(command_line_arguments) == 3):
         random_seed = int(command_line_arguments[1])
         num_selected = int(command_line_arguments[2])
 
     sys.exit(main(random_seed, num_selected, select_all))
-
 
 # Proving that we can recreate the combinations by setting the random.seed
 # for i in range(10):

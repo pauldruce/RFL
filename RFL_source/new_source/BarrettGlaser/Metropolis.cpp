@@ -451,7 +451,8 @@ double Metropolis::runCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = delta24(dirac, x, row_index, column_index, z);
+  //  double action_delta = delta24(dirac, x, row_index, column_index, z);
+  double action_delta = m_action->getG2() * delta_2 + delta_4;
 
   auto* mat = dirac.getMatrices();
   // metropolis test

@@ -1,6 +1,11 @@
 //
+// Created by Paul Druce on 01/04/2023.
+//
+//
 // Created by Paul Druce on 12/02/2023.
 //
+
+#include <gtest/gtest.h>
 
 // For Mauro's implementation
 #include "Geom24.hpp"
@@ -24,7 +29,7 @@ constexpr int MATRIX_DIM = 25;
 constexpr double G_2 = -3;
 constexpr double SCALE = -3;
 constexpr int NUM_STEPS = 10;
-constexpr int NUM_ITERATIONS = 20;
+constexpr int NUM_ITERATIONS = 5;
 
 void NewMethod() {
   auto rng = std::make_unique<GslRng>();
@@ -59,7 +64,7 @@ void MauroMethod() {
   }
 }
 
-int main() {
+TEST(BenchmarkTests, NewImplementationIsNotSignificantlySlower) {
   using std::chrono::duration;
   using std::chrono::duration_cast;
   using std::chrono::high_resolution_clock;
@@ -83,5 +88,8 @@ int main() {
   std::cout << "New implementation:\n";
   std::cout << new_ms_int.count() << "ms\n";
 
-  return 0;
+  auto winner = new_ms_int.count() < mauro_ms_int.count() ? "the new implementation" : "Mauro's implementation";
+  std::cout << "The winner is: " << winner << std::endl;
+
+  ASSERT_TRUE(new_ms_int.count() < mauro_ms_int.count() * 1.05) << "New implementation is slower by more than 5%";
 }
