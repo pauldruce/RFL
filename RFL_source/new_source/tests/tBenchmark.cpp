@@ -1,9 +1,6 @@
 //
 // Created by Paul Druce on 01/04/2023.
 //
-//
-// Created by Paul Druce on 12/02/2023.
-//
 
 #include <gtest/gtest.h>
 
