@@ -62,6 +62,8 @@ void MauroMethod() {
     // Metropolis evolution for 100 steps
     geom.MMC(SCALE, NUM_STEPS, engine);
   }
+
+  gsl_rng_free(engine);
 }
 
 TEST(BenchmarkTests, NewImplementationIsNotSignificantlySlower) {
