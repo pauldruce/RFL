@@ -8,6 +8,7 @@
 #include "Clifford.hpp"
 #include "IRng.hpp"
 #include <armadillo>
+#include <memory>
 
 class DiracOperator {
 public:
@@ -24,9 +25,9 @@ public:
   int getNumAntiHermitianMatrices() const { return m_num_antiherm; };
 
   // METHODS
-  arma::cx_mat* getMatrices() const { return m_matrices; }// H and L matrices in the Dirac Operator
-  int* getEpsilons() const { return m_epsilons; }         //
-  arma::cx_mat* getMomenta() const { return m_momenta; }  // Conjugate momenta for use with Hamiltonian method
+  std::vector<arma::cx_mat>& getMatrices() const { return *m_matrices; }// H and L matrices in the Dirac Operator
+  std::vector<int>& getEpsilons() const { return *m_epsilons; }         //
+  std::vector<arma::cx_mat>& getMomenta() const { return *m_momenta; }  // Conjugate momenta for use with Hamiltonian method
 
   /**
    * Returns the value of \f$\text{Tr}(D^2)\f$
@@ -45,10 +46,10 @@ public:
   arma::cx_mat derDirac2(const int& k) const;
   arma::cx_mat derDirac4(const int& k, const bool& herm) const;
 
-  arma::cx_double* getOmegaTable4() const { return m_omega_table_4; }
+  std::vector<arma::cx_double>& getOmegaTable4() const { return *m_omega_table_4; }
   void printOmegaTable4() const;
 
-  void randomiseMatrices(const IRng& rng_engine);
+  void randomiseMatrices(const IRng& rng_engine) const;
 
 private:
   // CONSTANTS
@@ -57,12 +58,12 @@ private:
   int m_gamma_dim;                               // size of gamma matrices
 
   // MATRICES
-  arma::cx_mat* m_matrices;// H and L matrices (all hermitian)
-  arma::cx_mat* m_momenta; // conjugate momenta
-  arma::cx_mat* m_omegas;  // omega matrices (all hermitian)
+  std::unique_ptr<std::vector<arma::cx_mat>> m_matrices;// H and L matrices (all hermitian)
+  std::unique_ptr<std::vector<arma::cx_mat>> m_momenta; // conjugate momenta
+  std::unique_ptr<std::vector<arma::cx_mat>> m_omegas;  // omega matrices (all hermitian)
 
-  int* m_epsilons;                   // epsilon: +1 for H, -1 for L
-  arma::cx_double* m_omega_table_4{};// omega 4-product table
+  std::unique_ptr<std::vector<int>> m_epsilons;                   // epsilon: +1 for H, -1 for L
+  std::unique_ptr<std::vector<arma::cx_double>> m_omega_table_4{};// omega 4-product table
 
   void initOmegaTable4();
 

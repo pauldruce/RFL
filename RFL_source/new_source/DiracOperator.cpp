@@ -74,38 +74,33 @@ DiracOperator::DiracOperator(int p, int q, int dim)
   this->m_num_antiherm = (int)anti.size();
   this->m_num_matrices = m_num_herm + m_num_antiherm;
 
-  this->m_omegas = new cx_mat[m_num_matrices];
+  this->m_omegas = std::make_unique<std::vector<cx_mat>>(m_num_matrices);
   for (int i = 0; i < m_num_herm; ++i) {
-    m_omegas[i] = herm[i];
+    (*m_omegas)[i] = herm[i];
   }
   for (int i = 0; i < m_num_antiherm; ++i) {
-    m_omegas[m_num_herm + i] = anti[i];
+    (*m_omegas)[m_num_herm + i] = anti[i];
   }
 
   initOmegaTable4();
 
   // allocate and initialize H and L matrices to identity
-  m_matrices = new arma::cx_mat[m_num_matrices];
-  m_momenta = new arma::cx_mat[m_num_matrices];
-  m_epsilons = new int[m_num_matrices];
+  m_matrices = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
+  m_momenta = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
+  m_epsilons = std::make_unique<std::vector<int>>(m_num_matrices);
   for (int i = 0; i < m_num_matrices; i++) {
     if (i < m_num_herm) {
-      m_epsilons[i] = 1;
+      (*m_epsilons)[i] = 1;
     } else {
-      m_epsilons[i] = -1;
+      (*m_epsilons)[i] = -1;
     }
 
-    m_matrices[i].eye(m_dim, m_dim);
-    m_momenta[i].eye(m_dim, m_dim);
+    (*m_matrices)[i].eye(m_dim, m_dim);
+    (*m_momenta)[i].eye(m_dim, m_dim);
   }
 }
 
 DiracOperator::~DiracOperator() {
-  delete[] m_matrices;
-  delete[] m_momenta;
-  delete[] m_epsilons;
-  delete[] m_omegas;
-  delete[] m_omega_table_4;
 }
 
 // TODO: figure out what this function is for.
@@ -140,8 +135,8 @@ cx_mat DiracOperator::getDiracMatrix() const {
 
   cx_mat id(m_dim, m_dim, fill::eye);
   for (int i = 0; i < m_num_matrices; ++i) {
-    cx_mat bracket = kron(m_matrices[i], id) + m_epsilons[i] * kron(id, m_matrices[i].st());
-    dirac += kron(m_omegas[i], bracket);
+    cx_mat bracket = kron((*m_matrices)[i], id) + (*m_epsilons)[i] * kron(id, (*m_matrices)[i].st());
+    dirac += kron((*m_omegas)[i], bracket);
   }
 
   return dirac;
@@ -151,7 +146,7 @@ void DiracOperator::printOmegaTable4() const {
   const int n = (int)pow(m_num_matrices, 4);
 
   for (int i = 0; i < n; ++i) {
-    cx_double z = m_omega_table_4[i];
+    cx_double z = (*m_omega_table_4)[i];
     if (z != cx_double(0., 0.)) {
       int e = 1;
       vector<int> prod = baseConversion(i, m_num_matrices, 4);
@@ -162,22 +157,22 @@ void DiracOperator::printOmegaTable4() const {
       //            }
       for (const auto& p : prod) {
         cout << p << " ";
-        e *= m_epsilons[p];
+        e *= (*m_epsilons)[p];
       }
-      cout << " " << m_omega_table_4[i] << e << endl;
+      cout << " " << (*m_omega_table_4)[i] << e << endl;
     }
   }
 }
 
 void DiracOperator::initOmegaTable4() {
-  this->m_omega_table_4 = new cx_double[m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices];
+  this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices);
 
   for (int i = 0; i < m_num_matrices; ++i) {
     for (int j = 0; j < m_num_matrices; ++j) {
       for (int k = 0; k < m_num_matrices; ++k) {
         for (int l = 0; l < m_num_matrices; ++l)
-          m_omega_table_4[l + m_num_matrices * (k + m_num_matrices * (j + m_num_matrices * i))] = trace(
-              m_omegas[i] * m_omegas[j] * m_omegas[k] * m_omegas[l]);
+          (*m_omega_table_4)[l + m_num_matrices * (k + m_num_matrices * (j + m_num_matrices * i))] = trace(
+              (*m_omegas)[i] * (*m_omegas)[j] * (*m_omegas)[k] * (*m_omegas)[l]);
       }
     }
   }
@@ -190,14 +185,16 @@ cx_mat DiracOperator::derDirac24(const int& k, const bool& herm, const double g_
 cx_mat DiracOperator::derDirac2(const int& k) const {
   cx_mat res(m_dim, m_dim, fill::eye);
 
-  res *= m_epsilons[k] * trace(m_matrices[k]).real();
-  res += m_dim * m_matrices[k];
+  res *= (*m_epsilons)[k] * trace((*m_matrices)[k]).real();
+  res += m_dim * (*m_matrices)[k];
 
   return 4 * m_gamma_dim * res;
 }
 
 cx_mat DiracOperator::derDirac4(const int& k, const bool& herm) const {
   cx_mat res(m_dim, m_dim, fill::zeros);
+  auto& epsilons = this->getEpsilons();
+  auto& omega_table_4 = this->getOmegaTable4();
 
   // four distinct indices
   for (int i_1 = 0; i_1 < m_num_matrices; ++i_1) {
@@ -207,13 +204,13 @@ cx_mat DiracOperator::derDirac4(const int& k, const bool& herm) const {
           for (int i_3 = i_2 + 1; i_3 < m_num_matrices; ++i_3) {
             if (i_3 != k) {
               // epsilon factor
-              double e = m_epsilons[k] * m_epsilons[i_1] * m_epsilons[i_2] * m_epsilons[i_3];
+              double e = epsilons[k] * epsilons[i_1] * epsilons[i_2] * epsilons[i_3];
 
               if (e < 0) {
                 // clifford product
-                double cliff_1 = m_omega_table_4[i_3 + m_num_matrices * (i_2 + m_num_matrices * (i_1 + m_num_matrices * k))].imag();
-                double cliff_2 = m_omega_table_4[i_2 + m_num_matrices * (i_3 + m_num_matrices * (i_1 + m_num_matrices * k))].imag();
-                double cliff_3 = m_omega_table_4[i_3 + m_num_matrices * (i_1 + m_num_matrices * (i_2 + m_num_matrices * k))].imag();
+                double cliff_1 = omega_table_4[i_3 + m_num_matrices * (i_2 + m_num_matrices * (i_1 + m_num_matrices * k))].imag();
+                double cliff_2 = omega_table_4[i_2 + m_num_matrices * (i_3 + m_num_matrices * (i_1 + m_num_matrices * k))].imag();
+                double cliff_3 = omega_table_4[i_3 + m_num_matrices * (i_1 + m_num_matrices * (i_2 + m_num_matrices * k))].imag();
 
                 if (fabs(cliff_1) > 1e-10) {
                   res += computeB4(k, i_1, i_2, i_3, cliff_1, true);
@@ -222,9 +219,9 @@ cx_mat DiracOperator::derDirac4(const int& k, const bool& herm) const {
                 }
               } else {
                 // clifford product
-                double cliff_1 = m_omega_table_4[i_3 + m_num_matrices * (i_2 + m_num_matrices * (i_1 + m_num_matrices * k))].real();
-                double cliff_2 = m_omega_table_4[i_2 + m_num_matrices * (i_3 + m_num_matrices * (i_1 + m_num_matrices * k))].real();
-                double cliff_3 = m_omega_table_4[i_3 + m_num_matrices * (i_1 + m_num_matrices * (i_2 + m_num_matrices * k))].real();
+                double cliff_1 = omega_table_4[i_3 + m_num_matrices * (i_2 + m_num_matrices * (i_1 + m_num_matrices * k))].real();
+                double cliff_2 = omega_table_4[i_2 + m_num_matrices * (i_3 + m_num_matrices * (i_1 + m_num_matrices * k))].real();
+                double cliff_3 = omega_table_4[i_3 + m_num_matrices * (i_1 + m_num_matrices * (i_2 + m_num_matrices * k))].real();
 
                 if (fabs(cliff_1) > 1e-10) {
                   res += computeB4(k, i_1, i_2, i_3, cliff_1, false);
@@ -263,11 +260,14 @@ cx_mat DiracOperator::computeB4(const int& k,
                                 const int& i_4,
                                 const double& cliff,
                                 const bool& neg) const {
+  auto& matrices = this->getMatrices();
+  auto& epsilons = this->getEpsilons();
+
   // base matrix products
-  cx_mat m_2_m_3 = m_matrices[i_2] * m_matrices[i_3];
-  cx_mat m_2_m_4 = m_matrices[i_2] * m_matrices[i_4];
-  cx_mat m_3_m_4 = m_matrices[i_3] * m_matrices[i_4];
-  cx_mat m_2_m_3_m_4 = m_2_m_3 * m_matrices[i_4];
+  cx_mat m_2_m_3 = matrices[i_2] * matrices[i_3];
+  cx_mat m_2_m_4 = matrices[i_2] * matrices[i_4];
+  cx_mat m_3_m_4 = matrices[i_3] * matrices[i_4];
+  cx_mat m_2_m_3_m_4 = m_2_m_3 * matrices[i_4];
 
   // return value
   cx_mat res(m_dim, m_dim, fill::eye);
@@ -276,115 +276,125 @@ cx_mat DiracOperator::computeB4(const int& k,
 
     // traces
     double tr_234 = trace(m_2_m_3_m_4).imag();
-    double tr_2 = trace(m_matrices[i_2]).real();
-    double tr_3 = trace(m_matrices[i_3]).real();
-    double tr_4 = trace(m_matrices[i_4]).real();
+    double tr_2 = trace(matrices[i_2]).real();
+    double tr_3 = trace(matrices[i_3]).real();
+    double tr_4 = trace(matrices[i_4]).real();
 
     // compute sum
-    res *= -2 * m_epsilons[k] * tr_234;
+    res *= -2 * epsilons[k] * tr_234;
     res += cx_double(0., m_dim) * (m_2_m_3_m_4 - m_2_m_3_m_4.t());
-    res += cx_double(0., m_epsilons[i_2] * tr_2) * (m_3_m_4 - m_3_m_4.t());
-    res += cx_double(0., m_epsilons[i_3] * tr_3) * (m_2_m_4 - m_2_m_4.t());
-    res += cx_double(0., m_epsilons[i_4] * tr_4) * (m_2_m_3 - m_2_m_3.t());
+    res += cx_double(0., epsilons[i_2] * tr_2) * (m_3_m_4 - m_3_m_4.t());
+    res += cx_double(0., epsilons[i_3] * tr_3) * (m_2_m_4 - m_2_m_4.t());
+    res += cx_double(0., epsilons[i_4] * tr_4) * (m_2_m_3 - m_2_m_3.t());
   } else {
     // traces
     double tr_234 = trace(m_2_m_3_m_4).real();
     double tr_23 = trace(m_2_m_3).real();
     double tr_24 = trace(m_2_m_4).real();
     double tr_34 = trace(m_3_m_4).real();
-    double tr_2 = trace(m_matrices[i_2]).real();
-    double tr_3 = trace(m_matrices[i_3]).real();
-    double tr_4 = trace(m_matrices[i_4]).real();
+    double tr_2 = trace(matrices[i_2]).real();
+    double tr_3 = trace(matrices[i_3]).real();
+    double tr_4 = trace(matrices[i_4]).real();
 
     // compute sum
-    res *= 2 * m_epsilons[k] * tr_234;
+    res *= 2 * epsilons[k] * tr_234;
     res += m_dim * (m_2_m_3_m_4 + m_2_m_3_m_4.t());
-    res += m_epsilons[i_2] * tr_2 * (m_3_m_4 + m_3_m_4.t());
-    res += m_epsilons[i_3] * tr_3 * (m_2_m_4 + m_2_m_4.t());
-    res += m_epsilons[i_4] * tr_4 * (m_2_m_3 + m_2_m_3.t());
-    res += 2 * m_epsilons[k] * m_epsilons[i_2] * tr_34 * m_matrices[i_2];
-    res += 2 * m_epsilons[k] * m_epsilons[i_3] * tr_24 * m_matrices[i_3];
-    res += 2 * m_epsilons[k] * m_epsilons[i_4] * tr_23 * m_matrices[i_4];
+    res += epsilons[i_2] * tr_2 * (m_3_m_4 + m_3_m_4.t());
+    res += epsilons[i_3] * tr_3 * (m_2_m_4 + m_2_m_4.t());
+    res += epsilons[i_4] * tr_4 * (m_2_m_3 + m_2_m_3.t());
+    res += 2 * epsilons[k] * epsilons[i_2] * tr_34 * matrices[i_2];
+    res += 2 * epsilons[k] * epsilons[i_3] * tr_24 * matrices[i_3];
+    res += 2 * epsilons[k] * epsilons[i_4] * tr_23 * matrices[i_4];
   }
 
   return cliff * res;
 }
 
 cx_mat DiracOperator::computeB2(const int& k, const int& i) const {
+  auto& omega_table_4 = this->getOmegaTable4();
+  auto& matrices = this->getMatrices();
+  auto& epsilons = this->getEpsilons();
+
   // clifford product
-  double cliff = m_omega_table_4[i + m_num_matrices * (k + m_num_matrices * (i + m_num_matrices * k))].real();
+  double cliff = omega_table_4[i + m_num_matrices * (k + m_num_matrices * (i + m_num_matrices * k))].real();
 
   // base matrix products
-  cx_mat mi_mk = m_matrices[i] * m_matrices[k];
-  cx_mat mi_mi = m_matrices[i] * m_matrices[i];
-  cx_mat mi_mi_mk = m_matrices[i] * mi_mk;
-  cx_mat mi_mk_mi = mi_mk * m_matrices[i];
+  cx_mat mi_mk = matrices[i] * matrices[k];
+  cx_mat mi_mi = matrices[i] * matrices[i];
+  cx_mat mi_mi_mk = matrices[i] * mi_mk;
+  cx_mat mi_mk_mi = mi_mk * matrices[i];
 
   // traces
   double triki = trace(mi_mk_mi).real();
   double trik = trace(mi_mk).real();
   double trii = trace(mi_mi).real();
-  double tri = trace(m_matrices[i]).real();
-  double trk = trace(m_matrices[k]).real();
+  double tri = trace(matrices[i]).real();
+  double trk = trace(matrices[k]).real();
 
   // return value
   cx_mat res(m_dim, m_dim, fill::eye);
 
   if (cliff < 0) {
     // compute sum
-    res *= m_epsilons[k] * triki;
+    res *= epsilons[k] * triki;
     res += m_dim * (mi_mi_mk + mi_mi_mk.t() - mi_mk_mi);
-    res += m_epsilons[i] * tri * (mi_mk + mi_mk.t());
-    res += 2 * m_epsilons[k] * m_epsilons[i] * trik * m_matrices[i];
-    res += m_epsilons[k] * trk * mi_mi;
-    res += trii * m_matrices[k];
+    res += epsilons[i] * tri * (mi_mk + mi_mk.t());
+    res += 2 * epsilons[k] * epsilons[i] * trik * matrices[i];
+    res += epsilons[k] * trk * mi_mi;
+    res += trii * matrices[k];
   } else {
     // compute sum
-    res *= 3 * m_epsilons[k] * triki;
+    res *= 3 * epsilons[k] * triki;
     res += m_dim * (mi_mi_mk + mi_mi_mk.t() + mi_mk_mi);
-    res += 3 * m_epsilons[i] * tri * (mi_mk + mi_mk.t());
-    res += 6 * m_epsilons[k] * m_epsilons[i] * trik * m_matrices[i];
-    res += 3 * m_epsilons[k] * trk * mi_mi;
-    res += 3 * trii * m_matrices[k];
+    res += 3 * epsilons[i] * tri * (mi_mk + mi_mk.t());
+    res += 6 * epsilons[k] * epsilons[i] * trik * matrices[i];
+    res += 3 * epsilons[k] * trk * mi_mi;
+    res += 3 * trii * matrices[k];
   }
 
   return 2 * m_gamma_dim * res;
 }
 
 cx_mat DiracOperator::computeB(const int& k) const {
+  auto& matrices = this->getMatrices();
+  auto& epsilons = this->getEpsilons();
+
   // base matrix products
-  cx_mat m_2 = m_matrices[k] * m_matrices[k];
-  cx_mat m_3 = m_matrices[k] * m_2;
+  cx_mat m_2 = matrices[k] * matrices[k];
+  cx_mat m_3 = matrices[k] * m_2;
 
   // traces
   double tr_3 = trace(m_3).real();
   double tr_2 = trace(m_2).real();
-  double tr_1 = trace(m_matrices[k]).real();
+  double tr_1 = trace(matrices[k]).real();
 
   cx_mat res(m_dim, m_dim, fill::eye);
-  res *= m_epsilons[k] * tr_3;
+  res *= epsilons[k] * tr_3;
   res += m_dim * m_3;
-  res += 3 * tr_2 * m_matrices[k];
-  res += 3 * m_epsilons[k] * tr_1 * m_2;
+  res += 3 * tr_2 * matrices[k];
+  res += 3 * epsilons[k] * tr_1 * m_2;
 
   return 2 * m_gamma_dim * res;
 }
 
 // TODO: Refactor this method, to reuse the randomisation process. Can just pass in the matrix or array of matrices to assign
-void DiracOperator::randomiseMatrices(const IRng& rng) {
+void DiracOperator::randomiseMatrices(const IRng& rng) const {
+  auto& matrices = this->getMatrices();
+  auto& momenta = this->getMomenta();
+
   for (int i = 0; i < m_num_matrices; ++i) {
     // loop on indices
     for (int j = 0; j < m_dim; ++j) {
       double x;
       x = rng.getGaussian(1.0);
-      m_matrices[i](j, j) = cx_double(x, 0.);
+      matrices[i](j, j) = cx_double(x, 0.);
 
       for (int k = j + 1; k < m_dim; ++k) {
         double a, b;
         a = rng.getGaussian(1.0);
         b = rng.getGaussian(1.0);
-        m_matrices[i](j, k) = cx_double(a, b) / sqrt(2.);
-        m_matrices[i](k, j) = cx_double(a, -b) / sqrt(2.);
+        matrices[i](j, k) = cx_double(a, b) / sqrt(2.);
+        matrices[i](k, j) = cx_double(a, -b) / sqrt(2.);
       }
     }
   }
@@ -394,31 +404,32 @@ void DiracOperator::randomiseMatrices(const IRng& rng) {
     for (int j = 0; j < m_dim; ++j) {
       double x;
       x = rng.getGaussian(1.0);
-      m_momenta[i](j, j) = cx_double(x, 0.);
+      momenta[i](j, j) = cx_double(x, 0.);
 
       for (int k = j + 1; k < m_dim; ++k) {
         double a, b;
         a = rng.getGaussian(1.0);
         b = rng.getGaussian(1.0);
-        m_momenta[i](j, k) = cx_double(a, b) / sqrt(2.);
-        m_momenta[i](k, j) = cx_double(a, -b) / sqrt(2.);
+        momenta[i](j, k) = cx_double(a, b) / sqrt(2.);
+        momenta[i](k, j) = cx_double(a, -b) / sqrt(2.);
       }
     }
   }
 }
 
 double DiracOperator::traceOfDiracSquared() const {
-  auto* mat = this->getMatrices();
-  auto* eps = this->getEpsilons();
-  double res = 0.;
-  for (int i = 0; i < this->getNumMatrices(); ++i) {
-    double trace_squared = trace(mat[i] * mat[i]).real();
-    double trace_mat = trace(mat[i]).real();
+  auto& matrices = this->getMatrices();
+  auto& epsilons = this->getEpsilons();
 
-    res += (this->getMatrixDimension() * trace_squared + eps[i] * trace_mat * trace_mat);
+  double res = 0.;
+  for (int i = 0; i < m_num_matrices; ++i) {
+    double trace_squared = trace(matrices[i] * matrices[i]).real();
+    double trace_mat = trace(matrices[i]).real();
+
+    res += (m_dim * trace_squared + epsilons[i] * trace_mat * trace_mat);
   }
 
-  return 2. * this->getGammaDimension() * res;
+  return 2. * m_gamma_dim * res;
 }
 
 double DiracOperator::traceOfDirac4() const {
@@ -448,49 +459,47 @@ double DiracOperator::traceOfDirac4() const {
 
   return res;
 }
-double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, const int& i_4) const {
-  // epsilon factor
-  auto* eps = this->getEpsilons();
-  auto* omega_table_4 = this->getOmegaTable4();
-  auto* mat = this->getMatrices();
-  auto num_matrices = this->getNumMatrices();
-  auto mat_dim = this->getMatrixDimension();
 
-  const int e = eps[i_1] * eps[i_2] * eps[i_3] * eps[i_4];
+double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, const int& i_4) const {
+  auto& epsilons = this->getEpsilons();
+  auto& omega_table_4 = this->getOmegaTable4();
+  auto& matrices = this->getMatrices();
+
+  const int e = epsilons[i_1] * epsilons[i_2] * epsilons[i_3] * epsilons[i_4];
 
   // if e=-1, then [1+*e] becomes 2i*imag
   // and the clifford part is guaranteed to
   // be pure imaginary
   if (e < 0) {
     // clifford product
-    const double cliff = omega_table_4[i_4 + num_matrices * (i_3 + num_matrices * (i_2 + num_matrices * i_1))].imag();
+    const double cliff = omega_table_4[i_4 + m_num_matrices * (i_3 + m_num_matrices * (i_2 + m_num_matrices * i_1))].imag();
 
     if (fabs(cliff) > 1e-10) {
       // base matrix products
-      const cx_mat m_1_m_2 = mat[i_1] * mat[i_2];
-      const cx_mat m_1_m_3 = mat[i_1] * mat[i_3];
-      const cx_mat m_1_m_4 = mat[i_1] * mat[i_4];
-      const cx_mat m_2_m_3 = mat[i_2] * mat[i_3];
-      const cx_mat m_2_m_4 = mat[i_2] * mat[i_4];
-      const cx_mat m_3_m_4 = mat[i_3] * mat[i_4];
+      const cx_mat m_1_m_2 = matrices[i_1] * matrices[i_2];
+      const cx_mat m_1_m_3 = matrices[i_1] * matrices[i_3];
+      const cx_mat m_1_m_4 = matrices[i_1] * matrices[i_4];
+      const cx_mat m_2_m_3 = matrices[i_2] * matrices[i_3];
+      const cx_mat m_2_m_4 = matrices[i_2] * matrices[i_4];
+      const cx_mat m_3_m_4 = matrices[i_3] * matrices[i_4];
 
       // traces
       double tr_1234 = trace(m_1_m_2 * m_3_m_4).imag();
-      double tr_234 = trace(m_2_m_3 * mat[i_4]).imag();
-      double tr_134 = trace(m_1_m_3 * mat[i_4]).imag();
-      double tr_124 = trace(m_1_m_2 * mat[i_4]).imag();
-      double tr_123 = trace(m_1_m_2 * mat[i_3]).imag();
-      double tr_1 = trace(mat[i_1]).real();
-      double tr_2 = trace(mat[i_2]).real();
-      double tr_3 = trace(mat[i_3]).real();
-      double tr_4 = trace(mat[i_4]).real();
+      double tr_234 = trace(m_2_m_3 * matrices[i_4]).imag();
+      double tr_134 = trace(m_1_m_3 * matrices[i_4]).imag();
+      double tr_124 = trace(m_1_m_2 * matrices[i_4]).imag();
+      double tr_123 = trace(m_1_m_2 * matrices[i_3]).imag();
+      double tr_1 = trace(matrices[i_1]).real();
+      double tr_2 = trace(matrices[i_2]).real();
+      double tr_3 = trace(matrices[i_3]).real();
+      double tr_4 = trace(matrices[i_4]).real();
 
       // compute sum
-      double res = mat_dim * tr_1234;
-      res += eps[i_1] * tr_1 * tr_234;
-      res += eps[i_2] * tr_2 * tr_134;
-      res += eps[i_3] * tr_3 * tr_124;
-      res += eps[i_4] * tr_4 * tr_123;
+      double res = m_dim * tr_1234;
+      res += epsilons[i_1] * tr_1 * tr_234;
+      res += epsilons[i_2] * tr_2 * tr_134;
+      res += epsilons[i_3] * tr_3 * tr_124;
+      res += epsilons[i_4] * tr_4 * tr_123;
 
       return -2 * cliff * res;
       // NOTE: this minus here comes from the 'i' in cliff
@@ -500,42 +509,42 @@ double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, 
     }
   } else {
     // clifford product
-    const double cliff = omega_table_4[i_4 + num_matrices * (i_3 + num_matrices * (i_2 + num_matrices * i_1))].real();
+    const double cliff = omega_table_4[i_4 + m_num_matrices * (i_3 + m_num_matrices * (i_2 + m_num_matrices * i_1))].real();
 
     if (fabs(cliff) > 1e-10) {
       // base matrix products
-      cx_mat m_1_m_2 = mat[i_1] * mat[i_2];
-      cx_mat m_1_m_3 = mat[i_1] * mat[i_3];
-      cx_mat m_1_m_4 = mat[i_1] * mat[i_4];
-      cx_mat m_2_m_3 = mat[i_2] * mat[i_3];
-      cx_mat m_2_m_4 = mat[i_2] * mat[i_4];
-      cx_mat m_3_m_4 = mat[i_3] * mat[i_4];
+      cx_mat m_1_m_2 = matrices[i_1] * matrices[i_2];
+      cx_mat m_1_m_3 = matrices[i_1] * matrices[i_3];
+      cx_mat m_1_m_4 = matrices[i_1] * matrices[i_4];
+      cx_mat m_2_m_3 = matrices[i_2] * matrices[i_3];
+      cx_mat m_2_m_4 = matrices[i_2] * matrices[i_4];
+      cx_mat m_3_m_4 = matrices[i_3] * matrices[i_4];
 
       // traces
       double tr_1234 = trace(m_1_m_2 * m_3_m_4).real();
-      double tr_234 = trace(m_2_m_3 * mat[i_4]).real();
-      double tr_134 = trace(m_1_m_3 * mat[i_4]).real();
-      double tr_124 = trace(m_1_m_2 * mat[i_4]).real();
-      double tr_123 = trace(m_1_m_2 * mat[i_3]).real();
+      double tr_234 = trace(m_2_m_3 * matrices[i_4]).real();
+      double tr_134 = trace(m_1_m_3 * matrices[i_4]).real();
+      double tr_124 = trace(m_1_m_2 * matrices[i_4]).real();
+      double tr_123 = trace(m_1_m_2 * matrices[i_3]).real();
       double tr_12 = trace(m_1_m_2).real();
       double tr_34 = trace(m_3_m_4).real();
       double tr_13 = trace(m_1_m_3).real();
       double tr_24 = trace(m_2_m_4).real();
       double tr_14 = trace(m_1_m_4).real();
       double tr_23 = trace(m_2_m_3).real();
-      double tr_1 = trace(mat[i_1]).real();
-      double tr_2 = trace(mat[i_2]).real();
-      double tr_3 = trace(mat[i_3]).real();
-      double tr_4 = trace(mat[i_4]).real();
+      double tr_1 = trace(matrices[i_1]).real();
+      double tr_2 = trace(matrices[i_2]).real();
+      double tr_3 = trace(matrices[i_3]).real();
+      double tr_4 = trace(matrices[i_4]).real();
 
-      double res = mat_dim * tr_1234;
-      res += eps[i_1] * tr_1 * tr_234;
-      res += eps[i_2] * tr_2 * tr_134;
-      res += eps[i_3] * tr_3 * tr_124;
-      res += eps[i_4] * tr_4 * tr_123;
-      res += eps[i_1] * eps[i_2] * tr_12 * tr_34;
-      res += eps[i_1] * eps[i_3] * tr_13 * tr_24;
-      res += eps[i_1] * eps[i_4] * tr_14 * tr_23;
+      double res = m_dim * tr_1234;
+      res += epsilons[i_1] * tr_1 * tr_234;
+      res += epsilons[i_2] * tr_2 * tr_134;
+      res += epsilons[i_3] * tr_3 * tr_124;
+      res += epsilons[i_4] * tr_4 * tr_123;
+      res += epsilons[i_1] * epsilons[i_2] * tr_12 * tr_34;
+      res += epsilons[i_1] * epsilons[i_3] * tr_13 * tr_24;
+      res += epsilons[i_1] * epsilons[i_4] * tr_14 * tr_23;
 
       //	  cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].real();
 
@@ -547,72 +556,67 @@ double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, 
 }
 
 double DiracOperator::computeA2(const int& i_1, const int& i_2) const {
-  auto* omega_table_4 = this->getOmegaTable4();
-  auto* mat = this->getMatrices();
-  auto* eps = this->getEpsilons();
-  auto num_matrices = this->getNumMatrices();
-  auto mat_dim = this->getMatrixDimension();
-  auto gamma_dim = this->getGammaDimension();
+  auto& omega_table_4 = this->getOmegaTable4();
+  auto& matrices = this->getMatrices();
+  auto& epsilons = this->getEpsilons();
 
   // clifford product
-  double cliff = omega_table_4[i_2 + num_matrices * (i_1 + num_matrices * (i_2 + num_matrices * i_1))].real();
+  double cliff = omega_table_4[i_2 + m_num_matrices * (i_1 + m_num_matrices * (i_2 + m_num_matrices * i_1))].real();
 
   // base matrix products
-  cx_mat m_1_m_1 = mat[i_1] * mat[i_1];
-  cx_mat m_2_m_2 = mat[i_2] * mat[i_2];
-  cx_mat m_1_m_2 = mat[i_1] * mat[i_2];
+  cx_mat m_1_m_1 = matrices[i_1] * matrices[i_1];
+  cx_mat m_2_m_2 = matrices[i_2] * matrices[i_2];
+  cx_mat m_1_m_2 = matrices[i_1] * matrices[i_2];
 
   // traces
   double tr_1122 = trace(m_1_m_1 * m_2_m_2).real();
   double tr_1212 = trace(m_1_m_2 * m_1_m_2).real();
-  double tr_122 = trace(m_1_m_2 * mat[i_2]).real();
-  double tr_112 = trace(m_1_m_1 * mat[i_2]).real();
+  double tr_122 = trace(m_1_m_2 * matrices[i_2]).real();
+  double tr_112 = trace(m_1_m_1 * matrices[i_2]).real();
   double tr_11 = trace(m_1_m_1).real();
   double tr_22 = trace(m_2_m_2).real();
   double tr_12 = trace(m_1_m_2).real();
-  double tr_1 = trace(mat[i_1]).real();
-  double tr_2 = trace(mat[i_2]).real();
+  double tr_1 = trace(matrices[i_1]).real();
+  double tr_2 = trace(matrices[i_2]).real();
 
   if (cliff < 0) {
     // compute sum
-    double res = mat_dim * (2 * tr_1122 - tr_1212);
-    res += 2 * eps[i_1] * tr_1 * tr_122;
-    res += 2 * eps[i_2] * tr_2 * tr_112;
+    double res = m_dim * (2 * tr_1122 - tr_1212);
+    res += 2 * epsilons[i_1] * tr_1 * tr_122;
+    res += 2 * epsilons[i_2] * tr_2 * tr_112;
     res += tr_11 * tr_22;
-    res += 2 * eps[i_1] * eps[i_2] * tr_12 * tr_12;
+    res += 2 * epsilons[i_1] * epsilons[i_2] * tr_12 * tr_12;
 
-    return 2 * gamma_dim * res;
+    return 2 * m_gamma_dim * res;
   } else {
     // compute sum
-    double res = mat_dim * (2 * tr_1122 + tr_1212);
-    res += 6 * eps[i_1] * tr_1 * tr_122;
-    res += 6 * eps[i_2] * tr_2 * tr_112;
+    double res = m_dim * (2 * tr_1122 + tr_1212);
+    res += 6 * epsilons[i_1] * tr_1 * tr_122;
+    res += 6 * epsilons[i_2] * tr_2 * tr_112;
     res += 3 * tr_11 * tr_22;
-    res += 6 * eps[i_1] * eps[i_2] * tr_12 * tr_12;
+    res += 6 * epsilons[i_1] * epsilons[i_2] * tr_12 * tr_12;
 
-    return 2 * gamma_dim * res;
+    return 2 * m_gamma_dim * res;
   }
 }
 
 double DiracOperator::computeA(const int& i) const {
-  auto* mat = this->getMatrices();
-  auto* eps = this->getEpsilons();
-  auto mat_dim = this->getMatrixDimension();
-  auto gamma_dim = this->getGammaDimension();
+  auto& matrices = this->getMatrices();
+  auto& epsilons = this->getEpsilons();
 
   // base matrix products
-  cx_mat m_2 = mat[i] * mat[i];
-  cx_mat m_3 = m_2 * mat[i];
+  cx_mat m_2 = matrices[i] * matrices[i];
+  cx_mat m_3 = m_2 * matrices[i];
 
   // traces
-  double tr_1 = trace(mat[i]).real();
+  double tr_1 = trace(matrices[i]).real();
   double tr_2 = trace(m_2).real();
   double tr_3 = trace(m_3).real();
-  double tr_4 = trace(m_3 * mat[i]).real();
+  double tr_4 = trace(m_3 * matrices[i]).real();
 
-  double res = mat_dim * tr_4;
-  res += 4 * eps[i] * tr_1 * tr_3;
+  double res = m_dim * tr_4;
+  res += 4 * epsilons[i] * tr_1 * tr_3;
   res += 3 * tr_2 * tr_2;
 
-  return 2 * gamma_dim * res;
+  return 2 * m_gamma_dim * res;
 }

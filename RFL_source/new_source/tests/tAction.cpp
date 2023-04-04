@@ -19,7 +19,9 @@ static void CompareActions(int p, int q, int dim, double g_2) {
 
     auto s_2 = action.calculateSFromDirac(dirac) / d_2;
 
-    EXPECT_TRUE(fabs(s_1 - s_2) < 1e-8) << "Methods differ more then 1e-8";
+    EXPECT_TRUE(fabs(s_1 - s_2) < 1e-8) << "Methods differ more then 1e-8.\n"
+                                        << "Optimised calculation = " << s_1 << std::endl
+                                        << "Direct calculation = " << s_2 << std::endl;
   }
 }
 

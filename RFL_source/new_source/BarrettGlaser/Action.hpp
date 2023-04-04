@@ -37,19 +37,7 @@ public:
   double calculateS(const DiracOperator& dirac) const override;
   double calculateSFromDirac(const DiracOperator& dirac) const;
 
-  //  void printS(const DiracOperator& dirac, std::ostream& out) const {
-  //    out << dirac.traceOfDiracSquared() << " " << dirac.traceOfDirac4() << std::endl;
-  //  }
-
 private:
   double m_g_2, m_g_4;
-  //
-  //  double computeA4(const DiracOperator& dirac,
-  //                   const int& i_1,
-  //                   const int& i_2,
-  //                   const int& i_3,
-  //                   const int& i_4) const;
-  //  double computeA2(const DiracOperator& dirac, const int& i_1, const int& i_2) const;
-  //  double computeA(const DiracOperator& dirac, const int& i) const;
 };
 #endif// RFL_ACTION_HPP

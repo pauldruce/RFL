@@ -20,8 +20,8 @@ double Metropolis::delta2(const DiracOperator& dirac,
                           const int& row_index,
                           const int& column_index,
                           const cx_double& z) const {
-  auto* mat = dirac.getMatrices();
-  auto* eps = dirac.getEpsilons();
+  auto& mat = dirac.getMatrices();
+  auto& eps = dirac.getEpsilons();
   auto mat_dim = dirac.getMatrixDimension();
   auto gamma_dim = dirac.getGammaDimension();
 
@@ -40,9 +40,9 @@ double Metropolis::delta4(const DiracOperator& dirac,
                           const cx_double& z) const {
   double res = 0.;
 
-  auto* omega_table_4 = dirac.getOmegaTable4();
-  auto* mat = dirac.getMatrices();
-  auto* eps = dirac.getEpsilons();
+  auto& omega_table_4 = dirac.getOmegaTable4();
+  auto& mat = dirac.getMatrices();
+  auto& eps = dirac.getEpsilons();
   auto mat_dim = dirac.getMatrixDimension();
   auto gamma_dim = dirac.getGammaDimension();
   auto num_matrices = dirac.getNumMatrices();
@@ -382,7 +382,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
   double action_delta = delta24(dirac, x, row_index, column_index, z);
 
-  auto* mat = dirac.getMatrices();
+  auto& mat = dirac.getMatrices();
   // metropolis test
   if (action_delta < 0) {
     // update matrix element
@@ -451,10 +451,9 @@ double Metropolis::runCore(const DiracOperator& dirac,
 
   double delta_2 = delta2(dirac, x, row_index, column_index, z);
   double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  //  double action_delta = delta24(dirac, x, row_index, column_index, z);
   double action_delta = m_action->getG2() * delta_2 + delta_4;
 
-  auto* mat = dirac.getMatrices();
+  auto& mat = dirac.getMatrices();
   // metropolis test
   if (action_delta < 0) {
     // update matrix element

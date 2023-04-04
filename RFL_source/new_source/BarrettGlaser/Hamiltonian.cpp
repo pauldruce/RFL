@@ -21,7 +21,7 @@ double Hamiltonian::updateDirac(const DiracOperator& dirac) const {
 }
 
 void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
-  auto* mom = dirac.getMomenta();
+  auto& mom = dirac.getMomenta();
   auto num_matrices = dirac.getNumMatrices();
   auto mat_dim = dirac.getMatrixDimension();
 
@@ -45,7 +45,7 @@ void Hamiltonian::sampleMoments(const DiracOperator& dirac) const {
 
 double Hamiltonian::calculateK(const DiracOperator& dirac) const {
   double res = 0;
-  auto* mom = dirac.getMomenta();
+  auto& mom = dirac.getMomenta();
   auto num_matrices = dirac.getNumMatrices();
 
   for (int i = 0; i < num_matrices; ++i)
@@ -61,8 +61,8 @@ double Hamiltonian::calculateH(const DiracOperator& dirac) const {
 void Hamiltonian::leapfrog(const DiracOperator& dirac,
                            const int& nt,
                            double g_2) const {
-  auto* mat = dirac.getMatrices();
-  auto* mom = dirac.getMomenta();
+  auto& mat = dirac.getMatrices();
+  auto& mom = dirac.getMomenta();
   auto num_matrices = dirac.getNumMatrices();
 
   for (int i = 0; i < num_matrices; ++i) {
@@ -83,8 +83,8 @@ void Hamiltonian::omelyan(const DiracOperator& dirac,
                           double g_2) const {
   double xi = 0.1931833;
 
-  auto* mat = dirac.getMatrices();
-  auto* mom = dirac.getMomenta();
+  auto& mat = dirac.getMatrices();
+  auto& mom = dirac.getMomenta();
   auto num_matrices = dirac.getNumMatrices();
 
   for (int i = 0; i < num_matrices; ++i) {
@@ -227,8 +227,9 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
 
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
+  // TODO: Convert to smart pointer or vector/array
   auto* mat_bk = new cx_mat[num_matrices];
-  auto* mat = dirac.getMatrices();
+  auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
@@ -299,7 +300,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
   auto* mat_bk = new cx_mat[num_matrices];
-  auto* mat = dirac.getMatrices();
+  auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
@@ -353,7 +354,7 @@ double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
   auto* mat_bk = new cx_mat[num_matrices];
-  auto* mat = dirac.getMatrices();
+  auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
@@ -411,7 +412,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
   auto* mat_bk = new cx_mat[num_matrices];
-  auto* mat = dirac.getMatrices();
+  auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
   }
