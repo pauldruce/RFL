@@ -13,16 +13,30 @@
 
 /**
  * Metropolis is a class that encapsulates the implementation of the Metropolis-Hasting
- * for random NCGs.
- *
+ * algorithm for random non-commutative geometries that are following a simulation
+ * governed by the Barrett-Glaser action.
  */
 class Metropolis : public IAlgorithm {
 public:
+  /**
+   * The default constructor has been disabled, please use another constructor.
+   */
   Metropolis() = delete;
+
+  /**
+   * @param action is a unique_ptr to a Barrett-Glaser action class, Action.
+   * @param scale is a parameter to control to step size taken in the Metropolis algorithm
+   * @param num_steps is the number of steps to take for each call to the updateDirac method below.
+   * @param rng is a unique_ptr to an implementation of the abstract rng class IRng.
+   */
   Metropolis(std::unique_ptr<Action>&& action, double scale, int num_steps, std::unique_ptr<IRng>&& rng)
       : m_action(std::move(action)), m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
 
-  void setParams(const double scale, const int iter, std::unique_ptr<IRng>&& rng) {
+  /**
+   * setParams updates the scale, num_steps and rng parameters that are passed in as part of
+   * the constructor.
+   */
+  void setParams(double scale, int iter, std::unique_ptr<IRng>&& rng) {
     this->m_scale = scale;
     this->m_num_steps = iter;
     this->m_rng = std::move(rng);
@@ -45,7 +59,6 @@ private:
   double runDualAverage(const DiracOperator& dirac,
                         double target);
 
-  // TODO: This method requires the use of the Action class, not IAction. Refactor this and fix.
   double delta24(const DiracOperator& dirac,
                  const int& x,
                  const int& row_index,

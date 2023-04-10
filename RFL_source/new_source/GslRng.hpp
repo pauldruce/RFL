@@ -21,18 +21,26 @@
  */
 class GslRng : public IRng {
 public:
+  /**
+   * This default constructor creates a GSL random number generator that is
+   * seeded by the current time.
+   */
   GslRng() {
     gsl_rng_env_setup();
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
     gsl_rng_set(m_rng, time(nullptr));
   }
 
+  /**
+   * This constructor creates a GSL random number generator that is seeded by
+   * the provided parameter 'seed'.
+   */
   explicit GslRng(unsigned long seed) {
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
     gsl_rng_set(m_rng, seed);
   }
 
-  ~GslRng() {
+  ~GslRng() override {
     if (m_rng) {
       gsl_rng_free(m_rng);
     }

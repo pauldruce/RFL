@@ -9,8 +9,8 @@
 using namespace std;
 using namespace arma;
 
-Hamiltonian::Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size)
-    : m_action(std::move(action)), m_integrator(integrator), m_rng(std::move(rng)), m_dt(step_size) {
+Hamiltonian::Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng)
+    : m_action(std::move(action)), m_integrator(integrator), m_dt(step_size), m_rng(std::move(rng)) {
 }
 double Hamiltonian::updateDirac(const DiracOperator& dirac) const {
   const double acceptance_val_per_iter = this->run(

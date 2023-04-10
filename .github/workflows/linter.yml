@@ -22,27 +22,3 @@ jobs:
         with:
           clang-format-version: '16'
           check-path: ${{ matrix.path }}
-
-#      - name: Install clang-format
-#        shell: bash
-#        run: |
-#          sudo apt-get update -y
-#          sudo apt-get install -y clang-format
-#          clang-format --version
-#
-#      - name: Format RFL_source
-#        working-directory: RFL_source
-#        run: |
-#          clang-format **/*.hpp --dry-run
-#          clang-format **/*.cpp --dry-run
-#
-#      - name: Format examples
-#        working-directory: examples
-#        run: |
-#          clang-format **/*.cpp --dry-run
-#
-#      - name: Format playground
-#        run: |
-#          clang-format playground/**/*.cpp --dry-run
-          
-          

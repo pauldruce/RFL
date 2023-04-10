@@ -19,7 +19,6 @@ public:
    * library.
    *
    * @param dirac is the DiracOperator the algorithm will operate on.
-   * @param action is the Action that the algorithm uses in the MCMC process.
    * @return the acceptance rate of the process.
    */
   virtual double updateDirac(const DiracOperator& dirac) const = 0;

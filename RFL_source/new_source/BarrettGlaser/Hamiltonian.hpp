@@ -15,24 +15,43 @@ enum Integrator {
   OMELYAN
 };
 
+/**
+ * A class to represent the Hamiltonian Monte Carlo algorithm for random non-commutative
+ * geometries involved in a simulation governed by the Barrett-Glaser action.
+ */
 class Hamiltonian : public IAlgorithm {
 public:
+  /**
+   * The default constructor for this class has been disabled, please use another constructor.
+   */
   Hamiltonian() = delete;
-  Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, std::unique_ptr<IRng>&& rng, double step_size);
+
+  /**
+   * To construct this class, you need to pass in:
+   * @param action a unique_ptr to the Barrett-Glaser action, Action
+   * @param integrator an enum to indicate which Hamiltonian algorithm method you want to use.
+   * @param step_size is the number of steps to take for each call of the method updateDirac.
+   * @param rng a unique_ptr to a class that is derived from the abstract class IRng.
+   */
+  Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng);
 
   double updateDirac(const DiracOperator& dirac) const override;
 
+  // TODO: Document
   void setIntegrator(Integrator integrator);
+  // TODO: Document
   Integrator getIntegrator() const { return this->m_integrator; };
 
+  // TODO: Document
   void setStepSize(double dt);
+  // TODO: Document
   double getStepSize() const { return this->m_dt; };
 
 private:
   std::unique_ptr<Action> m_action;
   Integrator m_integrator = Integrator::LEAPFROG;
-  std::unique_ptr<IRng> m_rng;
   double m_dt;
+  std::unique_ptr<IRng> m_rng;
 
   // This method seems to be the initialiser for the mom variables in DiracOperator
   void sampleMoments(const DiracOperator& dirac) const;
