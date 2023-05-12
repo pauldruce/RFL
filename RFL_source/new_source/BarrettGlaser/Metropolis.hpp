@@ -33,12 +33,12 @@ public:
       : m_action(std::move(action)), m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
 
   /**
-   * setParams updates the scale, num_steps and rng parameters that are passed in as part of
+   * setParams updates the scale, number_of_steps and rng parameters that are passed in as part of
    * the constructor.
    */
-  void setParams(double scale, int iter, std::unique_ptr<IRng>&& rng) {
+  void setParams(double scale, int number_of_steps, std::unique_ptr<IRng>&& rng) {
     this->m_scale = scale;
-    this->m_num_steps = iter;
+    this->m_num_steps = number_of_steps;
     this->m_rng = std::move(rng);
   }
 

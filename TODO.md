@@ -1,22 +1,21 @@
 - [ ] Add documentation string for each class and public method
 - [ ] Add documentation generation to github actions
-- [ ] Unit tests for:
-  - [x] Hamiltonian Class
-  - [ ] Metropolis Class
-  - [ ] Simulation -> likely an end-to-end test of some description.
-    - Look into how we should test the random-ness. How do we set a seed for this in a way that we can use in testing.
-
 - [ ] Transfer methods that can be made static in Action to more appropriate place
 - [ ] Investigate the use of multithreading to improve performance.
   - Potentially can just use Armadillo here, rather than do the multithreading myself.
 - [ ] Replace raw pointer use to use smart pointers and references.
   - [x] DiracOperator
+  - [x] Action
   - [ ] Metropolis
   - [ ] Hamiltonian
-  - [ ] Action
+- [ ] Add readmes everywhere to guidance users through source code, tests and examples.
 
 ## Completed
 
+- [x] Unit tests for:
+  - [x] Hamiltonian Class
+  - [x] Metropolis Class
+  - [x] Simulation
 - [x] Create an Action interface/abstract class.
 - [x] Add a clang-format step to GitHub actions
 - [x] Create some demo apps to showcase how to create and run a simple simulation with the new library
