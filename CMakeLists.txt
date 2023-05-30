@@ -26,7 +26,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   add_link_options(-fsanitize=address )
 endif()
 
+# Incluude ccache to speed up rebuild times.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+include(Ccache)
 
 include(Doxygen)
 doxygen_add_docs(doxygen
