@@ -27,6 +27,7 @@ constexpr double G_2 = -3;
 constexpr double SCALE = -3;
 constexpr int NUM_STEPS = 10;
 constexpr int NUM_ITERATIONS = 5;
+constexpr double MAX_FRACTION_DIFF = 1.05;
 
 void NewMethod() {
   auto rng = std::make_unique<GslRng>();
@@ -90,5 +91,5 @@ TEST(BenchmarkTests, NewImplementationIsNotSignificantlySlower) {
   auto winner = new_ms_int.count() < mauro_ms_int.count() ? "the new implementation" : "Mauro's implementation";
   std::cout << "The winner is: " << winner << std::endl;
 
-  ASSERT_TRUE(new_ms_int.count() < mauro_ms_int.count() * 1.05) << "New implementation is slower by more than 5%";
+  ASSERT_TRUE(new_ms_int.count() < mauro_ms_int.count() * MAX_FRACTION_DIFF) << "New implementation is slower by more than 5%";
 }

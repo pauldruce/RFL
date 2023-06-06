@@ -26,9 +26,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   add_link_options(-fsanitize=address )
 endif()
 
-# Incluude ccache to speed up rebuild times.
+# Include ccache to speed up rebuild times.
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(Ccache)
+
+option(${PROJECT_NAME}_ENABLE_CODE_COVERAGE "Enable code coverage through GCC." ON)
+
 
 include(Doxygen)
 doxygen_add_docs(doxygen
@@ -47,6 +50,12 @@ include(GoogleTest)
 
 add_subdirectory(RFL_source)
 add_subdirectory(examples)
+
+# # Generate coverage using gcov
+# if (${CMAKE_PROJECT_NAME}_ENABLE_CODE_COVERAGE)
+#   target_compile_options(${CMAKE_PROJECT_NAME} PUBLIC -O0 -g -fprofile-arcs -ftest-coverage)
+#   target_link_options(${CMAKE_PROJECT_NAME} PUBLIC -fprofile-arcs -ftest-coverage)
+# endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

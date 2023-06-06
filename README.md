@@ -2,9 +2,85 @@
 
 ![Build and Test Status](https://github.com/pauldruce/RFL/actions/workflows/build_and_test.yml/badge.svg)
 
-This repository contains the source code for a C++ library to construct and run simulations of Finite Noncommutative Geometries (Finite NCGs).
+RFL is a C++ library to easily construct and run simulations of Finite Noncommutative Geometries (Finite NCGs). See §[Background](#background) below for more details on what a Finite NCG is.
+
+This library is written using C++17 and uses Armadillo and GSL for it's mathematical operations.
+The library is built using CMake and detailed instructions on how to generate the library files for your desired platform are list below in  §[Building the library](#building-the-library)
+
 Note that because this is a library and not an application, the reader must implement their application in C++ and include this project.
-Some demo applications are included to demonstrate how to do this.
+Some example applications are included in `/examples` to demonstrate how to do this.
+These examples can also be build using CMake and instructions on how to build them can be found in the README in `/examples`
+
+## Library Dependencies
+
+To build this project requires you to have the libraries GSL and Armadillo available and CMake installed.
+
+The installation processes for GSL and Armadillo are very platform dependent, and you should follow the installation instructions detailed by each project:
+
+- GSL: [https://www.gnu.org/software/gsl/](https://www.gnu.org/software/gsl/)
+- Armadillo: [http://arma.sourceforge.net](http://arma.sourceforge.net)
+
+Here are my recommended methods of installing these dependencies per platform:
+
+* On macOS you should be okay using Homebrew, i.e. `brew install gsl` and `brew install armadillo`
+* On Ubuntu, I imagine `apt-get install libgsl-dev` and `apt-get install libarmadillo-dev` should suffice.
+* For Windows and other Linux distros, you will have to follow the installation instruction on the website above.
+
+To install CMake, please follow the instructions on the website: [https://cmake.org](https://cmake.org)
+
+Here are my recommended methods of installing CMake per platform:
+
+- On macOS - you can use Homebrew - `brew install cmake`
+- On Ubuntu - you can use `apt-get install cmake` should work.
+- For Windows and other Linux distros, follow the instruction on the CMake webpage.
+
+
+## Building the library
+
+Once you have installed the required dependencies, building the RFL library can be done using CMake.
+
+Most C/C++ IDEs will have CMake capabilities, and CMake offers a GUI application to make this process easier.
+
+However, to build this project via a terminal, you use the following commands:
+
+1. Create a directory for your build files within the cloned RFL repo. Typical directory names are `build`, `build-debug`, `build-release` etc.
+   A typical set of shell commands for cloning this repo, and creating the build directory looks like this:
+   ```bash
+   git clone https://github.com/pauldruce/RFL.git
+   cd RFL
+   mkdir build
+   cd build
+   ```
+2. __Call CMake on the source files.__ This will create the build files for the project using whatever build system your operating system defaults to.
+   Note that it will produce the build files in the current working directory, so make sure to be in a build-only directory before calling Cmake.
+   There are two main ways to do this via the terminal:
+   * Using the command: `cmake ..` from the new `./build` directory created by step 1.
+     In general, the command should be `cmake /path/to/source/files` from within an empty build directory. We assumed the source files (importantly, the CMakeLists.txt) are in the parent directory to where we are running this command.
+   * Using the command: `cmake -B ./build .` from the root directory of this project - skipping step 1. This is a different but handy way to create the build files. This command will create a folder `./build` and generate the build files within it.
+
+
+3. __Build the project__ This can be done by manually calling `make` or its equivalent in the `build` directory. Or CMake has a handy command which is platform-independent:
+   ```bash
+   cmake --build . --target all
+   ```
+   This build process can be multi-threaded with the CMake command by adding `-j #threads` to the above command. For instance,
+   ```bash
+   cmake --build . --target all -j 4
+   ```
+   will run the build process on 4 threads, and should be a fair bit quicker.
+4. Run CTest to check everything works correctly. This is done simply by calling `ctest` from the build directory. Similar to the `cmake --build` command above,
+   the tests can be run on multiple threads with the `-j` command. For instance, to run the tests on 4 threads, just type:
+   ```bash
+   ctest -j 4
+   ```
+
+
+
+## Documentation
+
+Documentation for how this software is architected and implemented can be found in the READMEs in the
+directory `RFL_source` and its subdirectories.
+
 
 ## Background
 
@@ -20,74 +96,3 @@ Some relevant academic papers can be found here:
 For an introduction to the area of Non-commutative geometry and specifically finite non-commutative geometry, see:
 
 6. John W. Barrett, "Matrix geometries and fuzzy spaces as finite spectral triples", J. Math. Phys. 56, 082301 (2015) https://doi.org/10.1063/1.4927224
-
-## Dependencies
-
-This project requires you to have the libraries GSL and Armadillo available and CMake installed.
-
-The installation process for both of these projects is very platform dependent, you should follow the installation instructions detailed by each project
-
-- GSL: [https://www.gnu.org/software/gsl/](https://www.gnu.org/software/gsl/)
-- Armadillo: [http://arma.sourceforge.net](http://arma.sourceforge.net)
-
-On macOS you should be okay using Homebrew, i.e. `brew install gsl` and `brew install armadillo`
-
-On Ubuntu, I imagine `apt-get install libgsl-dev` and `apt-get install libarmadillo-dev` should suffice.
-
-For Windows and other Linux distros, you will have to follow the installation instruction on the website above. Good luck :)
-
-## Building the library
-
-Once you have installed the required dependencies, building the RFL library can be done in various ways, but the simplest
-is to use CMake.
-To install CMake, please follow the instructions on the website: [https://cmake.org](https://cmake.org)
-
-- On macOS - you can use Homebrew - `brew install cmake`
-- On Ubuntu - you can use `apt-get install cmake` should work.
-- For Windows and other Linux distros, follow the instruction on the CMake webpage.
-
-Most C/C++ IDEs will have CMake capabilities. However, to build this project manually, you need the following commands
-
-1. Create a directory for your build files within the cloned RFL repo. Typical directory names are `build`, `build-debug`, `build-release` etc.
-   A typical set of commands for cloning, and creating the build directory looks like this:
-   ```bash
-   git clone https://github.com/pauldruce/RFL.git
-   cd RFL
-   mkdir build
-   cd build
-   ```
-2. Call CMake on the source files. This will create the build files for the project using whatever build system your operating system defaults to.
-   Note that it will produce the build files in the current working directory, so make sure to be in a build-only directory before calling Cmake.
-
-   ```bash
-   # The command should be "cmake /path/to/source/files" from within an empty build directory
-   # In the command below, we are assuming the source files (importantly, the CMakeLists.txt) are
-   cmake ..
-
-   # Another handy version of the cmake command is:
-   # Run from the root directory.
-   cmake -B ./build .
-
-   ```
-
-3. Build the project. This can be done by manually calling `make` or its equivalent in the `build` directory. Or CMake has a handy command which is platform-independent:
-   ```bash
-   cmake --build . --target all
-   ```
-   This build process can be multi-threaded with the CMake command by adding `-j #threads` to the above command. For instance,
-   ```bash
-   cmake --build . --target all -j 4
-   ```
-   will run the build process on 4 threads, and should be a fair bit quicker. :)
-4. Run CTest to check everything works correctly. This is done simply by calling `ctest` from the build directory. Like the `cmake --build` command above,
-   the tests can be run on multiple threads with the `-j` command. For instance, to run the tests on 4 threads, just type:
-   ```bash
-   ctest -j 4
-   ```
-
-## Documentation
-
-Documentation for how this software is architected and implemented can be found in the READMEs in the
-directory `RFL_source` and its subdirectories.
-
-For the modern/refactored RFL documentation see [here](./RFL_source/newREADME.md)
