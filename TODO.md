@@ -1,5 +1,5 @@
 - [ ] Documentation
-  - [ ] Add readmes everywhere to guidance users through source code, tests and examples.
+  - [x] Add readmes everywhere to guidance users through source code, tests and examples.
   - [ ] Add documentation string for each class and public method
   - [ ] Add documentation generation to github actions
 - [ ] Transfer methods that can be made static in Action to more appropriate place

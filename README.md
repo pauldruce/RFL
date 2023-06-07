@@ -2,7 +2,7 @@
 
 ![Build and Test Status](https://github.com/pauldruce/RFL/actions/workflows/build_and_test.yml/badge.svg)
 
-RFL is a C++ library to easily construct and run simulations of Finite Noncommutative Geometries (Finite NCGs). See §[Background](#background) below for more details on what a Finite NCG is.
+RFL is a C++ library to easily construct and run simulations of Finite Non-commutative Geometries (Finite NCGs). See §[Background](#background) below for more details on what a Finite NCG is.
 
 This library is written using C++17 and uses Armadillo and GSL for it's mathematical operations.
 The library is built using CMake and detailed instructions on how to generate the library files for your desired platform are list below in  §[Building the library](#building-the-library)
@@ -24,7 +24,7 @@ Here are my recommended methods of installing these dependencies per platform:
 
 * On macOS you should be okay using Homebrew, i.e. `brew install gsl` and `brew install armadillo`
 * On Ubuntu, I imagine `apt-get install libgsl-dev` and `apt-get install libarmadillo-dev` should suffice.
-* For Windows and other Linux distros, you will have to follow the installation instruction on the website above.
+* For Windows and other Linux distributions, you will have to follow the installation instruction on the website above.
 
 To install CMake, please follow the instructions on the website: [https://cmake.org](https://cmake.org)
 
@@ -32,7 +32,7 @@ Here are my recommended methods of installing CMake per platform:
 
 - On macOS - you can use Homebrew - `brew install cmake`
 - On Ubuntu - you can use `apt-get install cmake` should work.
-- For Windows and other Linux distros, follow the instruction on the CMake webpage.
+- For Windows and other Linux distributions, follow the instruction on the CMake webpage.
 
 
 ## Building the library

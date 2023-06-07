@@ -16,15 +16,15 @@ The general way to specify a Clifford module is by specifying two positive integ
 
 The original RFL code inherently uses an action of the form:
 $$S(D) = g_2* Tr(D^2) + g_4*Tr(D^4) $$
-where $g_2$ and $g_4$ are real numbers. This is the origin of the name of the class `Geom24` as the action contains the quadractic (D^2) and quartic (D^4) traces of the dirac operator.
+where $g_2$ and $g_4$ are real numbers. This is the origin of the name of the class `Geom24` as the action contains the quadratic (D^2) and quartic (D^4) traces of the dirac operator.
 
 
 ## New RFL
-The new implementation of RFL has taken the original RFL source code and made it more flexible without compromising performance. A major part of the refactoring was to break down the two behemoth classes into smaller classes, implement a shallow layer of inheritence of abstract classes and migrate memory management to modern C++ techniques (read smart pointers with C++17).
+The new implementation of RFL has taken the original RFL source code and made it more flexible without compromising performance. A major part of the refactoring was to break down the two behemoth classes into smaller classes, implement a shallow layer of inheritance of abstract classes and migrate memory management to modern C++ techniques (read smart pointers with C++17).
 The new source code can be found in `./new_source`.
 
 This refactoring allows for better testing and for more flexibility for other users of the library.
 It is constantly being developed and any improvements or enhancements are welcome, please leave an issue on the GitHub repo.
 
 The high-performance that Mauro's original implementation strived to develop have been preserved.
-To ensure that this performance does not degradee, their is a unit test to capture the difference between the original and new implementations. This test requires that the new implementation is no more than 5% slower to run the same simulation in each implementation.
+To ensure that this performance does not degrade, their is a unit test to capture the difference between the original and new implementations. This test requires that the new implementation is no more than 5% slower to run the same simulation in each implementation.
