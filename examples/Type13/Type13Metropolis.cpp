@@ -26,7 +26,7 @@ int main() {
   auto simulation = Simulation(std::move(dirac), std::move(metropolis));
 
   for (int i = 0; i < 10; i++) {
-      simulation.run();
+    simulation.run();
   }
 
   return 0;
