@@ -8,7 +8,7 @@ endif()
 
 project(
         RFL
-        VERSION 0.1
+        VERSION 0.5
         DESCRIPTION
         "Random Fuzzy Library (RFL) - A library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative geometries."
         LANGUAGES CXX)
