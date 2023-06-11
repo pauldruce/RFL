@@ -59,7 +59,8 @@ jobs:
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
-          brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget doxygen graphviz
+          brew install cmake doxygen graphviz wget
+          brew install arpack hdf5 libaec openblas superlu pkg-config gsl
 
       - name: Download Armadillo from SourceForge
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
