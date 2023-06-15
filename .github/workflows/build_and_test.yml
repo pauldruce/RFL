@@ -70,7 +70,7 @@ jobs:
         if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
-          sudo apt-get upgrade -y
+          sudo apt-get upgrade -y || true
           sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev doxygen graphviz
 
       - name: Install macOS dependencies
