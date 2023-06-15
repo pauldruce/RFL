@@ -76,6 +76,7 @@ jobs:
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
+          brew upgrade
           brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget doxygen graphviz --overwrite
 
       - name: Download Armadillo from SourceForge
