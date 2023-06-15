@@ -1,9 +1,13 @@
 name: Build And Test
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "**"
+  pull_request:
+    branches:
+      - main
 
 jobs:
   generate_matrix:
@@ -15,10 +19,14 @@ jobs:
       - uses: actions/checkout@v3
       - id: set-matrix
         shell: bash
-        # Get 3 configurations to test against
         run: |
           echo "Seed for random selection is = ${{github.run_number}}"
-          includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} 3)
+          if [ "${{github.event_name}}" == "pull_request"]; then
+            NUMBER_OF_COMBINATIONS="all"
+          else
+            NUMBER_OF_COMBINATIONS=3
+          fi
+          includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} ${NUMBER_OF_COMBINATIONS})
           echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
 
   check-matrix:
@@ -32,13 +40,12 @@ jobs:
           echo "Check that the json can be converted using GitHubs fromJSON() without error"
           matrix_json='${{fromJson(needs.generate_matrix.outputs.matrix_includes)}}'
 
-
   build_and_test:
     needs: [generate_matrix, check-matrix]
     strategy:
       fail-fast: false
       matrix:
-        BUILD_TYPE: [ Release ]
+        BUILD_TYPE: [Release]
         OS: [ubuntu-22.04]
         ARMA_VERSION: [11.2.3]
         include: ${{fromJSON(needs.generate_matrix.outputs.matrix_includes)}}
