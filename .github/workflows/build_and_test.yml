@@ -24,14 +24,14 @@ jobs:
           echo "${{github.event_name}}"
           case "${{github.event_name}}" in
             "pull_request")
-              NUMBER_OF_COMBINATIONS="all"
+              includes=$(python3 -u .github/workflows/combination_selection.py "all")
+              echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
               ;;
             "push")
-              NUMBER_OF_COMBINATIONS=3
+              includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} 3)
+              echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
               ;;
           esac
-          includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} ${NUMBER_OF_COMBINATIONS})
-          echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
 
   check-matrix:
     runs-on: ubuntu-latest
