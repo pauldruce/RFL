@@ -10,6 +10,7 @@
   - [x] Action
   - [ ] Metropolis
   - [ ] Hamiltonian
+- [ ] Refactor the github actions to have reusable setup actions for linux, windows, macos.
 
 ## Completed
 
