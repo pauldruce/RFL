@@ -21,11 +21,15 @@ jobs:
         shell: bash
         run: |
           echo "Seed for random selection is = ${{github.run_number}}"
-          if [ "${{github.event_name}}" == "pull_request"]; then
-            NUMBER_OF_COMBINATIONS="all"
-          else
-            NUMBER_OF_COMBINATIONS=3
-          fi
+          echo "${{github.event_name}}"
+          case "${{github.event_name}}" in
+            "pull_request")
+              NUMBER_OF_COMBINATIONS="all"
+              ;;
+            "push")
+              NUMBER_OF_COMBINATIONS=3
+              ;;
+          esac
           includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} ${NUMBER_OF_COMBINATIONS})
           echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
 
