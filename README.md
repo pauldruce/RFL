@@ -9,7 +9,7 @@ The library is built using CMake, and detailed instructions on how to generate t
 
 Note that because this is a library and not an application, the reader must implement their application in C++ and include this project.
 Some examples of applications are included in `/examples` to demonstrate how to do this.
-These examples can also be built using CMake, and instructions on how to build them can be found in the README in `/examples`
+These examples can also be built using CMake, and instructions on they are built are in the README in `/examples`
 
 ## Library Dependencies
 Building this project requires you to have the libraries GSL and Armadillo available and CMake installed.
