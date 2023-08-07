@@ -502,8 +502,8 @@ double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, 
       res += epsilons[i_4] * tr_4 * tr_123;
 
       return -2 * cliff * res;
-      // NOTE: this minus here comes from the 'i' in cliff
-      // and the 'i' coming from 2i*imag
+      // NOTE: this minus here comes from the 'i' in cliff multiplied by
+      // the 'i' coming from 2i*imag.
     } else {
       return 0.;
     }

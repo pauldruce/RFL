@@ -18,7 +18,7 @@ public:
   // CONSTRUCTORS AND DESTRUCTORS
 
   /**
-   * The prefered constructor for the Barrett-Glaser action class.
+   * The preferred constructor for the Barrett-Glaser action class.
    *
    * @param g_2 The value of the quadratic coupling constant, \f$g_2\f$ you want to set.
    * @param g_4 The value of the quartic coupling constant, \f$g_4\f$ you want to set.
@@ -33,7 +33,7 @@ public:
   explicit Action(double g_2);
 
   /**
-   * A constructor for the Barett-Glaser action that sets the coupling constants to equal zero.
+   * A constructor for the Barrett-Glaser action that sets the coupling constants to equal zero.
    */
   Action() : m_g_2(0.0), m_g_4(0.0){};
 

@@ -27,6 +27,13 @@ public:
   Hamiltonian() = delete;
 
   /**
+   * @class Hamiltonian
+   * @brief Represents a Hamiltonian system for performing simulation.
+   *
+   * The Hamiltonian class encapsulates the necessary components for performing simulation
+   * using Hamiltonian dynamics. It combines an action, an integrator, a step size, and a random
+   * number generator into a coherent simulation algorithm.
+   *
    * To construct this class, you need to pass in:
    * @param action a unique_ptr to the Barrett-Glaser action, Action
    * @param integrator an enum to indicate which Hamiltonian algorithm method you want to use.
@@ -35,11 +42,25 @@ public:
    */
   Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng);
 
+
   double updateDirac(const DiracOperator& dirac) const override;
 
   // TODO: Document
+
+  /**
+ * @brief Sets the integrator for the system.
+ *
+ * This function sets the integrator for the system. The integrator is responsible
+ * for computing the derivatives of the system variables and updating their values
+ * over time.
+ *
+ * @param integrator The integrator object to be set.
+ *
+ * @sa Integrator
+ */
   void setIntegrator(Integrator integrator);
   // TODO: Document
+
   Integrator getIntegrator() const { return this->m_integrator; };
 
   // TODO: Document
