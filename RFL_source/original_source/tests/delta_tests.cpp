@@ -45,8 +45,8 @@ static void CompareDeltaToDifference(int p, int q, int dim, double g2) {
 
     double Sf = G.calculate_S();
     EXPECT_TRUE(fabs((Sf - Si) - dS) < 1e-7)
-            << "     Sf-Si =" << Sf - Si << ", dS = " << dS << " and |(Sf-Si) - dS| = "
-            << fabs(Sf - Si - dS);
+        << "     Sf-Si =" << Sf - Si << ", dS = " << dS << " and |(Sf-Si) - dS| = "
+        << fabs(Sf - Si - dS);
   }
 }
 
@@ -83,7 +83,7 @@ TEST(DeltaTest, DifferenceBetweenTwoActionMethodsIsSmall) {
         DeltaTestParameters params = {pair.first, pair.second, dim, g2};
         test_params.emplace_back(params);
         ASSERT_NO_THROW(CompareDeltaToDifference(pair.first, pair.second, dim, g2))
-                    << "An exception was thrown, most likely by constructor for Geom24";
+            << "An exception was thrown, most likely by constructor for Geom24";
       }
     }
   }

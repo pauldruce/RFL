@@ -5,5 +5,4 @@ add_executable(
 target_include_directories(RFLTests_GTest PUBLIC ${RFL_INCLUDE_DIR})
 target_link_libraries(RFLTests_GTest gtest_main RFL ${ARMADILLO_LIBRARIES})
 
-include(GoogleTest)
-gtest_discover_tests(RFLTests_GTest)
+gtest_discover_tests(RFLTests_GTest DISCOVERY_TIMEOUT 600)

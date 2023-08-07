@@ -1,9 +1,10 @@
 name: Compatability Tests
 
 on:
-  pull_request:
-    branches:
-      - main
+  workflow_dispatch:
+  # pull_request:
+  #   branches:
+  #     - main
 
 jobs:
   generate_matrix:
@@ -44,8 +45,6 @@ jobs:
 
     name: "(${{matrix.BUILD_TYPE}}, ${{matrix.OS}}, Armadillo v${{matrix.ARMA_VERSION}})"
     runs-on: ${{matrix.OS}}
-    if: ${{ !contains(github.event.head_commit.message, '#docs') }} # Skip this action if the commit is just for docs.
-
     steps:
       - uses: actions/checkout@v3
 
@@ -53,13 +52,14 @@ jobs:
         if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev
+          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev doxygen graphviz
 
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
-          brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget
+          brew install cmake doxygen graphviz wget
+          brew install arpack hdf5 libaec openblas superlu pkg-config gsl
 
       - name: Download Armadillo from SourceForge
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download

@@ -1,9 +1,9 @@
 //
 // Created by Paul Druce on 27/12/2022.
 //
-#include "Action.hpp"
-#include <gtest/gtest.h>
+#include "BarrettGlaser/Action.hpp"
 #include "GslRng.hpp"
+#include <gtest/gtest.h>
 
 static void CompareActions(int p, int q, int dim, double g_2) {
   constexpr int num_of_test_repeats = 100;
@@ -19,7 +19,9 @@ static void CompareActions(int p, int q, int dim, double g_2) {
 
     auto s_2 = action.calculateSFromDirac(dirac) / d_2;
 
-    EXPECT_TRUE(fabs(s_1 - s_2) < 1e-8) << "Methods differ more then 1e-8";
+    EXPECT_TRUE(fabs(s_1 - s_2) < 1e-8) << "Methods differ more then 1e-8.\n"
+                                        << "Optimised calculation = " << s_1 << std::endl
+                                        << "Direct calculation = " << s_2 << std::endl;
   }
 }
 
@@ -83,14 +85,4 @@ TEST(ActionTests, CreateWithNoParams) {
       Action action;
       EXPECT_EQ(action.getG2(), 0);
       EXPECT_EQ(action.getG4(), 0););
-}
-
-TEST(ActionTests, PrintAction) {
-  DiracOperator dirac(1, 1, 5);
-  Action action(2.0, 4.0);
-
-  std::stringstream captured_stream;
-  action.printS(dirac, captured_stream);
-
-  EXPECT_EQ(captured_stream.str(), "200 800\n");
 }

@@ -52,7 +52,7 @@ double Geom24::HMC_duav_core(const int& Nt,
     en_f[2] = en_i[2];
     en_f[3] = en_i[3];
   }
-    // now do the standard metropolis test
+  // now do the standard metropolis test
   else if (en_f[3] > en_i[3]) {
     double r = gsl_rng_uniform(engine);
     e = exp(en_i[3] - en_f[3]);

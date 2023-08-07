@@ -1,21 +1,28 @@
 //
 // Created by Paul Druce on 31/01/2023.
 //
-/**
- * This is an Abstract Class/Interface for the various Monte Carlo
- * algorithms that are used in a simulation.
- *
- */
 
 #ifndef RFL_IALGORITHM_HPP
 #define RFL_IALGORITHM_HPP
 
-#include "Action.hpp"
 #include "DiracOperator.hpp"
+#include "IAction.hpp"
 
+/**
+ * This is an Abstract Class/Interface for the various Monte Carlo
+ * algorithms that are used in a RFL simulation.
+ */
 class IAlgorithm {
 public:
-  virtual double updateDirac(const DiracOperator& dirac, const Action& action) const = 0;
+  /**
+   * updateDirac is the only method that an algorithm needs to implement to be used with the RFL
+   * library.
+   *
+   * @param dirac is the DiracOperator the algorithm will operate on.
+   * @return the acceptance rate of the process.
+   */
+  virtual double updateDirac(const DiracOperator& dirac) const = 0;
+
   virtual ~IAlgorithm() = default;
 };
 

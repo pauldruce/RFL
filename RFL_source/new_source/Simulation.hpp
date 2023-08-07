@@ -4,22 +4,41 @@
 
 #ifndef RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_
 #define RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_
-#include "Action.hpp"
+
 #include "DiracOperator.hpp"
+#include "IAction.hpp"
 #include "IAlgorithm.hpp"
 #include <memory>
 
+/**
+ * A class to control the simulation. This class is responsible for the lifespan of
+ * of the simulation, when this class goes out of scope, all resources will be cleaned up.
+ */
 class Simulation {
 public:
+  /**
+   * The default constructor for this class has been disabled.
+   */
   Simulation() = delete;
-  Simulation(const DiracOperator& dirac, const Action& action, std::unique_ptr<IAlgorithm> &&monte_carlo_algorithm);
+
+  /**
+   * The constructor for the Simulation class. It requires a configured Dirac operator class
+   * and a class derived from the IAlgorithm abstract class that implements a Monte Carlo algorithm.
+   *
+   * @param dirac
+   * @param monte_carlo_algorithm
+   */
+  Simulation(std::unique_ptr<DiracOperator>&& dirac, std::unique_ptr<IAlgorithm>&& monte_carlo_algorithm);
+
+  /**
+   * This method starts the simulation and will return when it is complete.
+   */
   void run() {
-    this->m_algorithm->updateDirac(m_dirac, m_action);
+    this->m_algorithm->updateDirac(*m_dirac);
   }
 
 private:
-  const DiracOperator& m_dirac;
-  const Action& m_action;
+  std::unique_ptr<DiracOperator> m_dirac;
   std::unique_ptr<IAlgorithm> m_algorithm;
 };
 

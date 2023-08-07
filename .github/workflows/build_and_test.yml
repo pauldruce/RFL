@@ -1,9 +1,13 @@
 name: Build And Test
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - "**"
+  pull_request:
+    branches:
+      - main
 
 jobs:
   generate_matrix:
@@ -15,11 +19,19 @@ jobs:
       - uses: actions/checkout@v3
       - id: set-matrix
         shell: bash
-        # Get 3 configurations to test against
         run: |
           echo "Seed for random selection is = ${{github.run_number}}"
-          includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} 3)
-          echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
+          echo "${{github.event_name}}"
+          case "${{github.event_name}}" in
+            "pull_request")
+              includes=$(python3 -u .github/workflows/combination_selection.py "all")
+              echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
+              ;;
+            "push")
+              includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} 3)
+              echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
+              ;;
+          esac
 
   check-matrix:
     runs-on: ubuntu-latest
@@ -32,13 +44,12 @@ jobs:
           echo "Check that the json can be converted using GitHubs fromJSON() without error"
           matrix_json='${{fromJson(needs.generate_matrix.outputs.matrix_includes)}}'
 
-
   build_and_test:
     needs: [generate_matrix, check-matrix]
     strategy:
       fail-fast: false
       matrix:
-        BUILD_TYPE: [ Release ]
+        BUILD_TYPE: [Release]
         OS: [ubuntu-22.04]
         ARMA_VERSION: [11.2.3]
         include: ${{fromJSON(needs.generate_matrix.outputs.matrix_includes)}}
@@ -59,13 +70,14 @@ jobs:
         if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev
+          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev doxygen graphviz
 
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
-          brew install cmake arpack hdf5 libaec openblas superlu pkg-config gsl wget
+          brew install cmake doxygen graphviz wget
+          brew install arpack hdf5 libaec openblas superlu pkg-config gsl
 
       - name: Download Armadillo from SourceForge
         run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
