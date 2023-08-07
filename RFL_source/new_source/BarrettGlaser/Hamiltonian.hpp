@@ -42,10 +42,7 @@ public:
    */
   Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng);
 
-
   double updateDirac(const DiracOperator& dirac) const override;
-
-  // TODO: Document
 
   /**
  * @brief Sets the integrator for the system.
@@ -59,12 +56,13 @@ public:
  * @sa Integrator
  */
   void setIntegrator(Integrator integrator);
-  // TODO: Document
 
+  // TODO: Document
   Integrator getIntegrator() const { return this->m_integrator; };
 
   // TODO: Document
   void setStepSize(double dt);
+
   // TODO: Document
   double getStepSize() const { return this->m_dt; };
 
