@@ -74,3 +74,17 @@ TEST(DiracOperatorTests, TotalNumMatricesIsSetCorrectly) {
     EXPECT_EQ(d.num_hl_mat, dirac.getNumMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
   }
 }
+
+TEST(DiracOperatorTests, GetType) {
+  std::vector<std::pair<int, int>> data = {
+      {1, 1},
+      {1, 2},
+      {2, 1},
+      {3, 3}};
+
+  for (auto& d : data) {
+    DiracOperator dirac(d.first, d.second, 5);
+    EXPECT_EQ(d.first, dirac.getType().first);
+    EXPECT_EQ(d.second, dirac.getType().second);
+  }
+}

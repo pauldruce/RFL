@@ -31,3 +31,12 @@ TEST(SimulationTests, RunCallsUpdateDirac) {
 
   simulation.run();
 }
+
+TEST(SimulationTests, GetDiracReturnsSameDirac) {
+  Simulation simulation(
+      std::make_unique<DiracOperator>(1, 1, 5),
+      std::make_unique<MockAlgorithm>());
+
+  const auto& dirac = simulation.getDiracOperator();
+  ASSERT_EQ(dirac.getType(), std::pair(1, 1));
+}

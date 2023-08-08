@@ -34,6 +34,14 @@ public:
   DiracOperator(int p, int q, int dim);
 
   /**
+   * Returns the Clifford type of the Dirac operator - encoded as a pair of integers
+   * representing the (p,q) values of the underlying Clifford module.
+   *
+   * @return std::pair<int,int> of values (p,q)
+   */
+  std::pair<int, int> getType() const { return std::pair<int, int>{m_clifford.getP(), m_clifford.getQ()}; }
+
+  /**
    * getMatrixDimension returns the dimension of the H and L matrices of the
    * Dirac operator
    */
@@ -118,6 +126,7 @@ private:
   // size of gamma matrices
   int m_gamma_dim;
 
+  Clifford m_clifford;
   // MATRICES
   // H and L matrices (all hermitian)
   std::unique_ptr<std::vector<arma::cx_mat>> m_matrices;

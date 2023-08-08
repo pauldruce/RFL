@@ -37,6 +37,14 @@ public:
     this->m_algorithm->updateDirac(*m_dirac);
   }
 
+  /**
+   * This method returns a reference to DiracOperator in use this class.
+   * @return const reference to DiracOperator object
+   */
+  const DiracOperator& getDiracOperator() const {
+    return *m_dirac.get();
+  }
+
 private:
   std::unique_ptr<DiracOperator> m_dirac;
   std::unique_ptr<IAlgorithm> m_algorithm;

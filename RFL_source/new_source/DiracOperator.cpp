@@ -9,13 +9,13 @@ using namespace std;
 using namespace arma;
 
 DiracOperator::DiracOperator(int p, int q, int dim)
-    : m_dim(dim) {
+    : m_dim(dim), m_clifford(Clifford(p, q)) {
   int n = p + q;
 
   // create a type (p, q) clifford module
-  Clifford clifford(p, q);
-  vector<cx_mat> gamma = clifford.getGammaMatrices();
-  this->m_gamma_dim = clifford.getGammaDimension();
+  this->m_clifford = Clifford(p, q);
+  vector<cx_mat> gamma = m_clifford.getGammaMatrices();
+  this->m_gamma_dim = m_clifford.getGammaDimension();
 
   vector<cx_mat> herm;
   herm.reserve(p);
