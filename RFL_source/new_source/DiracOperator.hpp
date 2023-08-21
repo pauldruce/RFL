@@ -104,6 +104,13 @@ public:
    */
   arma::cx_mat getDiracMatrix() const;
 
+  arma::vec getEigenvalues() const {
+    auto diracMatrix = getDiracMatrix();
+    assert(diracMatrix.is_hermitian(1e-16));
+    auto eigen_vals = arma::eig_sym(diracMatrix);
+    return eigen_vals;
+  }
+
   // TODO: Document
   arma::cx_mat derDirac24(const int& k, const bool& herm, double g_2) const;
   // TODO: Document

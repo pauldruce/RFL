@@ -8,6 +8,17 @@
 #include "GslRng.hpp"
 #include "Simulation.hpp"
 
+class Recorder {
+public:
+  void recordEigenvalues(const DiracOperator& dirac, std::string path = "./output") {
+    auto eigenvalues = dirac.getEigenvalues();
+    eigenvalues.print();
+  }
+
+private:
+  std::string m_output_path;
+};
+
 int main() {
   double metropolis_scale = 0.2;
   int iter = 10;
@@ -27,6 +38,9 @@ int main() {
 
   for (int i = 0; i < 10; i++) {
     simulation.run();
+    const auto& dirac2 = simulation.getDiracOperator();
+    Recorder recorder;
+    recorder.recordEigenvalues(dirac2);
   }
 
   return 0;
