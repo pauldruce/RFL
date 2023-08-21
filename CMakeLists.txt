@@ -21,7 +21,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   enable_testing()
 
-  add_compile_options(-Wall -Wextra -Wpedantic )
+  add_compile_options(-Wall -Wextra -Wpedantic -DARMA_USE_HDF5)
   add_compile_options(-fsanitize=address )
   add_link_options(-fsanitize=address )
 endif()

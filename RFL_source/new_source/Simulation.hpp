@@ -42,7 +42,7 @@ public:
    * @return const reference to DiracOperator object
    */
   const DiracOperator& getDiracOperator() const {
-    return *m_dirac.get();
+    return *m_dirac;
   }
 
 private:
