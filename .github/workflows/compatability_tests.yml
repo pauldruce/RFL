@@ -32,7 +32,7 @@ jobs:
           echo "Check that the json can be converted using GitHubs fromJSON() without error"
           matrix_json='${{fromJson(needs.generate_matrix.outputs.matrix_includes)}}'
 
-  build_and_test:
+  compatability_build_and_test:
     needs: [generate_matrix, check-matrix]
     strategy:
       fail-fast: false
@@ -52,7 +52,7 @@ jobs:
         if: startsWith(matrix.OS,'ubuntu')
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev doxygen graphviz
+          sudo apt-get install -y cmake libopenblas-dev liblapack-dev libarpack2-dev libsuperlu-dev wget libgsl-dev doxygen graphviz libhdf5-serial-dev
 
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')

@@ -4,6 +4,7 @@
 
 #include "DiracOperator.hpp"
 #include "Clifford.hpp"
+#include <cassert>
 
 using namespace std;
 using namespace arma;
@@ -126,6 +127,13 @@ static vector<int> baseConversion(int dec, const int& base, const int& max) {
   reverse(rem.begin(), rem.end());
 
   return rem;
+}
+
+vec DiracOperator::getEigenvalues() const {
+  auto diracMatrix = getDiracMatrix();
+  assert(diracMatrix.is_hermitian(1e-16));
+  auto eigen_vals = arma::eig_sym(diracMatrix);
+  return eigen_vals;
 }
 
 cx_mat DiracOperator::getDiracMatrix() const {
