@@ -38,7 +38,7 @@ public:
   }
 
   /**
-   * This method returns a reference to DiracOperator in use this class.
+   * This method returns a reference to DiracOperator in use in this class.
    * @return const reference to DiracOperator object
    */
   const DiracOperator& getDiracOperator() const {
