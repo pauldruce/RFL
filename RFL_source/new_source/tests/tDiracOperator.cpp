@@ -88,3 +88,29 @@ TEST(DiracOperatorTests, GetType) {
     EXPECT_EQ(d.second, dirac.getType().second);
   }
 }
+
+TEST(DiracOperatorTests, GetEigenvalues) {
+  std::vector<std::pair<int, int>> data = {
+      {1, 1},
+      {1, 2},
+      {2, 1},
+      {3, 3}};
+
+  for (auto& d : data) {
+    DiracOperator dirac(d.first, d.second, 5);
+
+    auto eigenvalues = dirac.getEigenvalues();
+
+    auto dirac_matrix = dirac.getDiracMatrix();
+    auto expected_eigenvalues = arma::eig_sym(dirac_matrix);
+
+    ASSERT_EQ(eigenvalues.n_elem, expected_eigenvalues.n_elem);
+
+    eigenvalues = arma::sort(eigenvalues);
+    expected_eigenvalues = arma::sort(expected_eigenvalues);
+
+    for (unsigned i = 0; i < (unsigned)eigenvalues.n_elem; i++) {
+      EXPECT_FLOAT_EQ(eigenvalues[i], expected_eigenvalues[i]);
+    }
+  }
+}

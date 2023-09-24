@@ -11,11 +11,13 @@
 #include <memory>
 
 /**
- * A class that represents the Dirac operator as described in the paper:
-
- * John W. Barrett, "Matrix geometries and fuzzy spaces as finite spectral triples",
- * J. Math. Phys. 56, 082301 (2015) https://doi.org/10.1063/1.4927224
+ * @class DiracOperator
  *
+ * @brief The DiracOperator class represents a Dirac operator with specified
+ *        Clifford type and dimension of matrices.
+ *
+ * The DiracOperator class provides methods to access various properties and
+ * perform computations related to the Dirac operator.
  */
 class DiracOperator {
 public:
@@ -131,7 +133,7 @@ private:
   int m_num_matrices, m_num_herm, m_num_antiherm;
   // size of gamma matrices
   int m_gamma_dim;
-
+  // The clifford module that makes up part of the Dirac operator.
   Clifford m_clifford;
   // MATRICES
   // H and L matrices (all hermitian)
