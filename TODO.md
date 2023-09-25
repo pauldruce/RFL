@@ -12,6 +12,8 @@
   - [ ] Hamiltonian
 - [ ] Refactor the github actions to have reusable setup actions for linux, windows, macos.
 - [ ] Create github actions to create built libraries for macOS, Windows and linux OS.
+- [ ] Make an interface for DiracOperator, rather than using concrete DiracOperator in
+  Simulation class and Algorithm.
 
 ## Completed
 

@@ -109,8 +109,8 @@ void Hamiltonian::runDualAverage(const DiracOperator& dirac,
                                  const int& iter,
                                  const double& target) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
-  auto* en_i = new double[4];
-  auto* en_f = new double[4];
+  auto en_i = vector<double>(4);
+  auto en_f = vector<double>(4);
 
   // dual averaging variables for dt
   const double shr = 0.05;
@@ -145,16 +145,14 @@ void Hamiltonian::runDualAverage(const DiracOperator& dirac,
   // set dt on its final dual averaged value
   m_dt = exp(log_dt_avg);
 
-  delete[] en_i;
-  delete[] en_f;
 }
 
 double Hamiltonian::run(const DiracOperator& dirac,
                         const int& num_iterations,
                         const int& iter) const {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
-  auto* en_i = new double[4];
-  auto* en_f = new double[4];
+  auto en_i = vector<double>(4);
+  auto en_f = vector<double>(4);
 
   // return statistic
   double stat = 0;
@@ -175,9 +173,6 @@ double Hamiltonian::run(const DiracOperator& dirac,
     stat += runCore(dirac, num_iterations, en_i, en_f);
   }
 
-  delete[] en_i;
-  delete[] en_f;
-
   return (stat / iter);
 }
 
@@ -187,8 +182,8 @@ double Hamiltonian::run(const DiracOperator& dirac,
                         const double& dt_max,
                         const int& iter) {
   // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
-  auto* en_i = new double[4];
-  auto* en_f = new double[4];
+  auto en_i = vector<double>(4);
+  auto en_f = vector<double>(4);
 
   // return statistic
   double stat = 0;
@@ -209,16 +204,13 @@ double Hamiltonian::run(const DiracOperator& dirac,
     stat += runCore(dirac, nt, dt_min, dt_max, en_i, en_f);
   }
 
-  delete[] en_i;
-  delete[] en_f;
-
   return (stat / iter);
 }
 
 double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
                                          const int& nt,
-                                         double* en_i,
-                                         double* en_f) const {
+                                         vector<double>& en_i,
+                                         vector<double>& en_f) const {
   // acceptance probability (return value)
   double e = 1;
 
@@ -227,8 +219,7 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
 
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
-  // TODO: Convert to smart pointer or vector/array
-  auto* mat_bk = new cx_mat[num_matrices];
+  auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
@@ -282,15 +273,13 @@ double Hamiltonian::runDualAveragingCore(const DiracOperator& dirac,
     }
   }
 
-  delete[] mat_bk;
-
   return e;
 }
 
 double Hamiltonian::runCore(const DiracOperator& dirac,
                             const int& nt,
-                            double* en_i,
-                            double* en_f) const {
+                            vector<double>& en_i,
+                            vector<double>& en_f) const {
   // acceptance probability (return value)
   double e = 1;
 
@@ -299,7 +288,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
-  auto* mat_bk = new cx_mat[num_matrices];
+  auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
@@ -338,8 +327,6 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
     }
   }
 
-  delete[] mat_bk;
-
   return e;
 }
 
@@ -353,7 +340,7 @@ double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
 
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
-  auto* mat_bk = new cx_mat[num_matrices];
+  auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
@@ -389,8 +376,6 @@ double Hamiltonian::runCoreDebug(const DiracOperator& dirac,
     }
   }
 
-  delete[] mat_bk;
-
   return e;
 }
 
@@ -398,8 +383,8 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
                             const int& nt,
                             const double& dt_min,
                             const double& dt_max,
-                            double* en_i,
-                            double* en_f) {
+                            vector<double>& en_i,
+                            vector<double>& en_f) {
   // acceptance probability (return value)
   double e = 1;
 
@@ -411,7 +396,7 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
 
   // store previous configuration
   auto num_matrices = dirac.getNumMatrices();
-  auto* mat_bk = new cx_mat[num_matrices];
+  auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
   for (int j = 0; j < num_matrices; j++) {
     mat_bk[j] = mat[j];
@@ -449,8 +434,6 @@ double Hamiltonian::runCore(const DiracOperator& dirac,
       en_f[3] = en_i[3];
     }
   }
-
-  delete[] mat_bk;
 
   return e;
 }

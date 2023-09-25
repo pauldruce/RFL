@@ -33,10 +33,17 @@ TEST(SimulationTests, RunCallsUpdateDirac) {
 }
 
 TEST(SimulationTests, GetDiracReturnsSameDirac) {
+  auto dirac = DiracOperator(1, 1, 5);
+  auto dirac_ptr = std::make_unique<DiracOperator>(dirac);
   Simulation simulation(
-      std::make_unique<DiracOperator>(1, 1, 5),
+      std::move(dirac_ptr),
       std::make_unique<MockAlgorithm>());
 
-  const auto& dirac = simulation.getDiracOperator();
-  ASSERT_EQ(dirac.getType(), std::pair(1, 1));
+  const DiracOperator& retrieved_dirac = simulation.getDiracOperator();
+  ASSERT_EQ(retrieved_dirac.getType(), std::pair(1, 1));
+  ASSERT_TRUE(arma::approx_equal(
+      retrieved_dirac.getDiracMatrix(),
+      dirac.getDiracMatrix(),
+      "absdiff",
+      1e-10));
 }

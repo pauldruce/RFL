@@ -26,7 +26,6 @@ public:
    * that are available
    */
   DiracOperator() = delete;
-  ~DiracOperator();
 
   /**
    * The constructor for this class. The parameters p and q represent the
@@ -34,6 +33,11 @@ public:
    * dimension of the H and L matrices for the Dirac operator.
    */
   DiracOperator(int p, int q, int dim);
+
+  /**
+   * A copy constructor to duplicate a DiracOperator
+   */
+  DiracOperator(const DiracOperator& original);
 
   /**
    * Returns the Clifford type of the Dirac operator - encoded as a pair of integers
@@ -126,6 +130,8 @@ public:
   void randomiseMatrices(const IRng& rng_engine) const;
 
 private:
+  // The clifford module that makes up part of the Dirac operator.
+  Clifford m_clifford;
   // CONSTANTS
   // The dimension of the H and L matrices.
   int m_dim;
@@ -133,8 +139,6 @@ private:
   int m_num_matrices, m_num_herm, m_num_antiherm;
   // size of gamma matrices
   int m_gamma_dim;
-  // The clifford module that makes up part of the Dirac operator.
-  Clifford m_clifford;
   // MATRICES
   // H and L matrices (all hermitian)
   std::unique_ptr<std::vector<arma::cx_mat>> m_matrices;

@@ -10,11 +10,9 @@ using namespace std;
 using namespace arma;
 
 DiracOperator::DiracOperator(int p, int q, int dim)
-    : m_dim(dim), m_clifford(Clifford(p, q)) {
+    : m_clifford(Clifford(p, q)), m_dim(dim) {
   int n = p + q;
 
-  // create a type (p, q) clifford module
-  this->m_clifford = Clifford(p, q);
   vector<cx_mat> gamma = m_clifford.getGammaMatrices();
   this->m_gamma_dim = m_clifford.getGammaDimension();
 
@@ -57,7 +55,7 @@ DiracOperator::DiracOperator(int p, int q, int dim)
       //            }
       bool first = true;
       for (const auto& v : vec) {
-        if (first) {// skipp first entry
+        if (first) {// skip first entry
           first = false;
           continue;
         }
@@ -101,7 +99,19 @@ DiracOperator::DiracOperator(int p, int q, int dim)
   }
 }
 
-DiracOperator::~DiracOperator() {
+DiracOperator::DiracOperator(const DiracOperator& original)
+    : m_clifford(original.m_clifford) {
+  // Make a copy of all state of original DiracOperator.
+  this->m_dim = original.m_dim;
+  this->m_num_matrices = original.m_num_herm;
+  this->m_num_herm = original.m_num_herm;
+  this->m_num_antiherm = original.m_num_antiherm;
+  this->m_gamma_dim = original.m_gamma_dim;
+  this->m_matrices = std::make_unique<std::vector<arma::cx_mat>>(*original.m_matrices);
+  this->m_momenta = std::make_unique<std::vector<arma::cx_mat>>(*original.m_momenta);
+  this->m_omegas = std::make_unique<std::vector<cx_mat>>(*original.m_omegas);
+  this->m_epsilons = std::make_unique<std::vector<int>>(*original.m_epsilons);
+  this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
 }
 
 // TODO: figure out what this function is for.
