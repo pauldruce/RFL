@@ -144,7 +144,6 @@ void Hamiltonian::runDualAverage(const DiracOperator& dirac,
 
   // set dt on its final dual averaged value
   m_dt = exp(log_dt_avg);
-
 }
 
 double Hamiltonian::run(const DiracOperator& dirac,
