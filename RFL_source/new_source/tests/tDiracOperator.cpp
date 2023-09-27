@@ -114,3 +114,76 @@ TEST(DiracOperatorTests, GetEigenvalues) {
     }
   }
 }
+
+TEST(DiracOperatorTests, CopyConstructorWorks) {
+  DiracOperator dirac_1(1, 3, 5);
+  DiracOperator dirac_2 = dirac_1;// NOLINT(*-unnecessary-copy-initialization)
+
+  ASSERT_TRUE(arma::approx_equal(
+      dirac_1.getDiracMatrix(),
+      dirac_2.getDiracMatrix(),
+      "absdiff",
+      1e-10));
+}
+
+TEST(DiracOperatorTests, GetHermitianMatricesReturnsHermitianMatrices) {
+  typedef struct {
+    int p;
+    int q;
+    int dim;
+    int n_herm_matrices;
+  } DiracParams;
+
+  std::vector<DiracParams> params{
+      {2, 1, 5, 3},
+      {1, 2, 6, 1},
+      {3, 3, 7, 16}};
+
+  for (auto& d : params) {
+    DiracOperator dirac(d.p, d.q, d.dim);
+
+    auto hermitian_matrices = dirac.getHermitianMatrices();
+    EXPECT_EQ(d.n_herm_matrices, hermitian_matrices.size())
+        << "For dirac params"
+        << "(p,q)=(" << d.p << "," << d.q << ")"
+        << " dim = " << d.dim;
+
+    for (auto& matrix : hermitian_matrices) {
+      EXPECT_TRUE(matrix.is_hermitian())
+          << "For dirac params"
+          << "(p,q)=(" << d.p << "," << d.q << ")"
+          << " dim = " << d.dim;
+    }
+  }
+}
+
+TEST(DiracOperatorTests, GetAntiHermitianMatricesReturnsAntiHermitianMatrices) {
+  typedef struct {
+    int p;
+    int q;
+    int dim;
+    int n_anti_herm_matrices;
+  } DiracParams;
+
+  std::vector<DiracParams> params{
+      {2, 1, 5, 1},
+      {1, 2, 6, 3},
+      {3, 3, 7, 16}};
+
+  for (auto& d : params) {
+    DiracOperator dirac(d.p, d.q, d.dim);
+
+    auto hermitian_matrices = dirac.getAntiHermitianMatrices();
+    EXPECT_EQ(d.n_anti_herm_matrices, hermitian_matrices.size())
+        << "For dirac params"
+        << "(p,q)=(" << d.p << "," << d.q << ")"
+        << " dim = " << d.dim;
+
+    for (auto& matrix : hermitian_matrices) {
+      EXPECT_TRUE(!matrix.is_hermitian())
+          << "For dirac params"
+          << "(p,q)=(" << d.p << "," << d.q << ")"
+          << " dim = " << d.dim;
+    }
+  }
+}

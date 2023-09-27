@@ -116,6 +116,18 @@ public:
    */
   arma::vec getEigenvalues() const;
 
+  /**
+   * Returns a vector of the Hermitian matrices, H_i, in the decomposition of
+   * the Dirac Operator.
+   */
+  std::vector<arma::cx_mat> getHermitianMatrices() const;
+
+  /**
+   * Returns a vector of the Hermitian matrices, H_i, in the decomposition of
+   * the Dirac Operator.
+   */
+  std::vector<arma::cx_mat> getAntiHermitianMatrices() const;
+
   // TODO: Document
   arma::cx_mat derDirac24(const int& k, const bool& herm, double g_2) const;
   // TODO: Document

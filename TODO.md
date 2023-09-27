@@ -3,8 +3,8 @@
   - [ ] Add documentation string for each class and public method
   - [ ] Add documentation generation to github actions
 - [ ] Transfer methods that can be made static in Action to more appropriate place
-- [ ] Investigate the use of multithreading to improve performance.
-  - Potentially can just use Armadillo here, rather than do the multithreading myself.
+- [ ] Investigate multithreading to improve performance.
+  - It might be possible to use Armadillo here, rather than do the multithreading myself.
 - [ ] Replace raw pointer use to use smart pointers and references.
   - [x] DiracOperator
   - [x] Action

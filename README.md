@@ -38,6 +38,17 @@ Here are my recommended methods of installing CMake per platform:
 
 Once you have installed the required dependencies, the RFL library can be built using CMake.
 
+tl;dr
+```bash
+   git clone https://github.com/pauldruce/RFL.git
+   cd RFL
+   mkdir build
+   cd build
+   cmake ..
+   cmake --build . --target all -j 4
+   ctest -j 4
+```
+
 Most C/C++ IDEs will have CMake capabilities, and CMake offers a GUI application to make this process easier.
 
 However, to build this project via a terminal, you use the following commands:

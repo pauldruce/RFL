@@ -139,13 +139,6 @@ static vector<int> baseConversion(int dec, const int& base, const int& max) {
   return rem;
 }
 
-vec DiracOperator::getEigenvalues() const {
-  auto diracMatrix = getDiracMatrix();
-  assert(diracMatrix.is_hermitian(1e-16));
-  auto eigen_vals = arma::eig_sym(diracMatrix);
-  return eigen_vals;
-}
-
 cx_mat DiracOperator::getDiracMatrix() const {
   // initialize dirac op to zero
   int dim_dirac = m_dim * m_dim * m_gamma_dim;
@@ -158,6 +151,33 @@ cx_mat DiracOperator::getDiracMatrix() const {
   }
 
   return dirac;
+}
+
+vec DiracOperator::getEigenvalues() const {
+  auto diracMatrix = getDiracMatrix();
+  assert(diracMatrix.is_hermitian(1e-16));
+  auto eigen_vals = arma::eig_sym(diracMatrix);
+  return eigen_vals;
+}
+
+vector<cx_mat> DiracOperator::getHermitianMatrices() const {
+  std::vector<arma::cx_mat> herm_matrices;
+  for (std::size_t i = 0; i < m_matrices->size(); i++) {
+    if (m_epsilons->at(i) == 1) {
+      herm_matrices.push_back(m_matrices->at(i));
+    }
+  }
+  return herm_matrices;
+}
+
+vector<cx_mat> DiracOperator::getAntiHermitianMatrices() const {
+  vector<arma::cx_mat> anti_herm_matrices;
+  for (size_t i = 0; i < m_matrices->size(); i++) {
+    if (m_epsilons->at(i) == -1) {
+      anti_herm_matrices.push_back(m_matrices->at(i) * cx_double(0, 1));
+    }
+  }
+  return anti_herm_matrices;
 }
 
 void DiracOperator::printOmegaTable4() const {
