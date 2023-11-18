@@ -238,7 +238,7 @@ Cliff& Cliff::operator*=(const Cliff& C2) {
   if ((s2 % 8) % 2) {
     const int s = (q - p + 8 * p) % 8;
     const cx_mat id1(dim_gamma, dim_gamma, fill::eye);
-    if ( s == 2 || s == 6 ) {
+    if (s == 2 || s == 6) {
       chiral = kron(-1 * id1, C2.get_chiral());
     } else {
       chiral = kron(id1, C2.get_chiral());

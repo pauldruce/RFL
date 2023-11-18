@@ -117,7 +117,7 @@ TEST(DiracOperatorTests, GetEigenvalues) {
 
 TEST(DiracOperatorTests, CopyConstructorWorks) {
   const DiracOperator dirac_1(1, 3, 5);
-  const DiracOperator dirac_2 = dirac_1; // NOLINT(*-unnecessary-copy-initialization)
+  const DiracOperator dirac_2 = dirac_1;// NOLINT(*-unnecessary-copy-initialization)
 
   ASSERT_TRUE(arma::approx_equal(
       dirac_1.getDiracMatrix(),

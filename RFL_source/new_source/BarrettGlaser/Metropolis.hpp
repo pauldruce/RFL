@@ -65,17 +65,17 @@ private:
 
   // TODO: These can be made static or members of DiracOperator
   static double delta2(const IDiracOperator& dirac,
-                const int& x,
-                const int& row_index,
-                const int& column_index,
-                const arma::cx_double& z);
+                       const int& x,
+                       const int& row_index,
+                       const int& column_index,
+                       const arma::cx_double& z);
 
   // TODO: These can be made static or members of DiracOperator
   static double delta4(const IDiracOperator& dirac,
-                const int& x,
-                const int& row_index,
-                const int& column_index,
-                const arma::cx_double& z);
+                       const int& x,
+                       const int& row_index,
+                       const int& column_index,
+                       const arma::cx_double& z);
 
   double runDualAverageCore(const IDiracOperator& dirac,
                             const double* s_i,

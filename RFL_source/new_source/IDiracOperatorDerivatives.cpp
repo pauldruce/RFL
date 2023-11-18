@@ -187,7 +187,7 @@ cx_mat derDirac4(const IDiracOperator& dirac, const int& k, const bool& herm) {
 
                 if (fabs(cliff_1) > 1e-10) {
                   res += computeB4(dirac, k, i_1, i_2, i_3, cliff_1, false);
-                  res += computeB4(dirac,k, i_1, i_3, i_2, cliff_2, false);
+                  res += computeB4(dirac, k, i_1, i_3, i_2, cliff_2, false);
                   res += computeB4(dirac, k, i_2, i_1, i_3, cliff_3, false);
                 }
               }
