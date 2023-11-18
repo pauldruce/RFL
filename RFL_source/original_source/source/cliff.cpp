@@ -97,7 +97,7 @@ Cliff::Cliff(int mode) {
 }
 
 Cliff::Cliff(int p_, int q_)
-    : p(p_), q(q_) {
+    : p(p_), q(q_), dim_gamma() {
   //(1,0)
   if (p == 1 && q == 0) {
     (*this) = Cliff(3);
@@ -154,7 +154,7 @@ Cliff& Cliff::operator=(const Cliff& C) {
   return *this;
 }
 
-static void decomp(int p, int q, int* dec) {
+static void decomp(const int p, const int q, int* dec) {
   if (p) {
     if (!(p % 2)) {
       dec[0] = p / 2;
@@ -201,34 +201,31 @@ void Cliff::init_gamma() {
       vec.emplace_back(i);
   }
 
-  auto begin = vec.begin();
-  auto end = vec.end();
+  const auto begin = vec.begin();
+  const auto end = vec.end();
 
-  Cliff C1 = (*begin);
+  Cliff C1 = *begin;
 
   for (auto iter = begin + 1; iter != end; ++iter)
-    C1 *= (*iter);
+    C1 *= *iter;
 
-  (*this) = C1;
+  *this = C1;
 }
 
 Cliff& Cliff::operator*=(const Cliff& C2) {
   // store C2 frequently used variables
-  int p2, q2, dim2;
-  p2 = C2.get_p();
-  q2 = C2.get_q();
-  dim2 = C2.get_dim_gamma();
+  const int p2 = C2.get_p();
+  const int q2 = C2.get_q();
+  const int dim2 = C2.get_dim_gamma();
 
   // temporary variables to avoid overwriting on (*this)
-  int p_, q_, dim_gamma_;
   vector<cx_mat> gamma_;
-
-  p_ = p + p2;
-  q_ = q + q2;
-  dim_gamma_ = dim_gamma * dim2;
+  const int p_ = p + p2;
+  const int q_ = q + q2;
+  const int dim_gamma_ = dim_gamma * dim2;
 
   // start computing product
-  cx_mat id2(dim2, dim2, fill::eye);
+  const cx_mat id2(dim2, dim2, fill::eye);
 
   gamma_.reserve(p + q);
   for (int i = 0; i < p + q; ++i)
@@ -237,11 +234,11 @@ Cliff& Cliff::operator*=(const Cliff& C2) {
     gamma_.emplace_back(kron(chiral, C2.get_gamma(i)));
 
   // compute chirality
-  int s2 = (q2 - p2 + 8 * p2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
+  const int s2 = (q2 - p2 + 8 * p2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
   if ((s2 % 8) % 2) {
-    int s = (q - p + 8 * p) % 8;
-    cx_mat id1(dim_gamma, dim_gamma, fill::eye);
-    if ((s == 2) || (s == 6)) {
+    const int s = (q - p + 8 * p) % 8;
+    const cx_mat id1(dim_gamma, dim_gamma, fill::eye);
+    if ( s == 2 || s == 6 ) {
       chiral = kron(-1 * id1, C2.get_chiral());
     } else {
       chiral = kron(id1, C2.get_chiral());
@@ -260,7 +257,7 @@ Cliff& Cliff::operator*=(const Cliff& C2) {
   for (const auto& v : gamma_)
     gamma.push_back(v);
 
-  return (*this);
+  return *this;
 }
 
 ostream& operator<<(ostream& out, const Cliff& C) {

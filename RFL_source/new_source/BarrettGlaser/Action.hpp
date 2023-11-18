@@ -4,10 +4,8 @@
 
 #ifndef RFL_ACTION_HPP
 #define RFL_ACTION_HPP
-#include "DiracOperator.hpp"
+#include "IDiracOperator.hpp"
 #include "IAction.hpp"
-#include <armadillo>
-#include <string>
 
 /**
  * Action implements the \f$ S(D) = g_2Tr(D^2) + g_4 Tr(D^4) \f$ action as described in the papers
@@ -76,7 +74,7 @@ public:
    * an optimised algorithm for the B-G action.
    * @param dirac A reference to the Dirac operator you want to calculate the Barrett-Glaser action of.
    */
-  double calculateS(const DiracOperator& dirac) const override;
+  double calculateS(const IDiracOperator& dirac) const override;
 
   /**
    * This calculates the Barrett-Glaser action for the supplied Dirac operator by computing the full
@@ -84,7 +82,7 @@ public:
    * optimum calculation. Please make use of calculateS(...) above for faster results.
    * @param dirac A reference to the Dirac operator you want to calculate the Barrett-Glaser action of.
    */
-  double calculateSFromDirac(const DiracOperator& dirac) const;
+  double calculateSFromDirac(const IDiracOperator& dirac) const;
 
 private:
   double m_g_2, m_g_4;

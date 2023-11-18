@@ -19,13 +19,13 @@
  *
  * To do so, a new class that implements the interface defined by IRng needs to be constructed.
  */
-class GslRng : public IRng {
+class GslRng final : public IRng {
 public:
   /**
    * This default constructor creates a GSL random number generator that is
    * seeded by the current time.
    */
-  GslRng() {
+  GslRng() : m_rng(nullptr){
     gsl_rng_env_setup();
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
     gsl_rng_set(m_rng, time(nullptr));
@@ -35,7 +35,7 @@ public:
    * This constructor creates a GSL random number generator that is seeded by
    * the provided parameter 'seed'.
    */
-  explicit GslRng(unsigned long seed) {
+  explicit GslRng(const unsigned long seed) : m_rng(nullptr) {
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
     gsl_rng_set(m_rng, seed);
   }
@@ -46,7 +46,7 @@ public:
     }
   }
 
-  double getGaussian(double sigma) const override {
+  double getGaussian(const double sigma) const override {
     return gsl_ran_gaussian(m_rng, sigma);
   }
   double getUniform() const override {

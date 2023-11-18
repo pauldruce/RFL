@@ -12,8 +12,8 @@
 using namespace arma;
 
 static std::string getCurrentDateTime() {
-  auto t = std::time(nullptr);
-  auto tm = *std::localtime(&t);
+  const auto t = std::time(nullptr);
+  const auto tm = *std::localtime(&t);
   std::stringstream ss;
   ss << std::put_time(&tm, "%Y%m%d%H%M%S");
   return ss.str();
@@ -23,7 +23,6 @@ int main() {
   double metropolisScale = 0.2;
   int iter = 10;
   auto rng = std::make_unique<GslRng>();
-
   auto dirac = std::make_unique<DiracOperator>(1, 3, 10);
 
   auto g2 = -2.7;
@@ -36,8 +35,8 @@ int main() {
       iter,
       std::move(rng));
 
-  auto simulation = Simulation(std::move(dirac), std::move(metropolis));
-  auto timeStamp = getCurrentDateTime();
+  const auto simulation = Simulation(std::move(dirac), std::move(metropolis));
+  const auto timeStamp = getCurrentDateTime();
 
   for (int i = 0; i < 10; i++) {
     simulation.run();

@@ -8,9 +8,9 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-class MockAlgorithm : public IAlgorithm {
+class MockAlgorithm final : public IAlgorithm {
 public:
-  MOCK_METHOD(double, updateDirac, (const DiracOperator& dirac), (const override));
+  MOCK_METHOD(double, updateDirac, (const IDiracOperator& dirac), (const override));
 };
 
 TEST(SimulationTests, ConstructorDoesNotThrow) {
@@ -25,7 +25,7 @@ TEST(SimulationTests, RunCallsUpdateDirac) {
   EXPECT_CALL(*algo, updateDirac(testing::_))
       .Times(1);
 
-  Simulation simulation(
+  const Simulation simulation(
       std::make_unique<DiracOperator>(1, 1, 5),
       std::move(algo));
 
@@ -35,7 +35,7 @@ TEST(SimulationTests, RunCallsUpdateDirac) {
 TEST(SimulationTests, GetDiracReturnsSameDirac) {
   auto dirac = DiracOperator(1, 1, 5);
   auto dirac_ptr = std::make_unique<DiracOperator>(dirac);
-  Simulation simulation(
+  const Simulation simulation(
       std::move(dirac_ptr),
       std::make_unique<MockAlgorithm>());
 

@@ -7,10 +7,6 @@
 
 #define ARMA_USE_HDF5
 #include "DiracOperator.hpp"
-#include <cstdlib>
-#include <filesystem>
-#include <iomanip>
-#include <utility>
 
 /**
  * @class EigenvalueRecorder
@@ -28,7 +24,7 @@
  */
 class EigenvalueRecorder {
 public:
-  EigenvalueRecorder(const DiracOperator& dirac, double g2, std::string simulationId)
+  EigenvalueRecorder(const DiracOperator& dirac, const double g2, const std::string& simulationId)
       : m_dirac(dirac), m_g2(g2), m_simulationId(simulationId) {
   }
 
@@ -38,7 +34,7 @@ public:
    * The recordEigenvalues function accepts a diracId as input and records the eigenvalues of
    * the dirac operator to a file.
    */
-  void recordEigenvalues(int diracId);
+  void recordEigenvalues(int diracId) const;
 
 private:
   const DiracOperator& m_dirac;

@@ -18,15 +18,15 @@ void Geom24::HMC_duav(const int& Nt,
   auto* en_f = new double[4];
 
   // dual averaging variables for dt
-  const double shr = 0.05;
-  const double kappa = 0.75;
-  const int i0 = 10;
   double Stat = 0;
-  double mu = log(10 * dt);
+  const double mu = log(10 * dt);
   double log_dt_avg = log(dt);
 
   // iter repetitions of leapfrog
   for (int i = 0; i < iter; ++i) {
+    constexpr int i0 = 10;
+    constexpr double kappa = 0.75;
+    constexpr double shr = 0.05;
     // if it's not the first interation set potential to
     // previous final value, otherwise compute it
     if (i) {
@@ -41,9 +41,9 @@ void Geom24::HMC_duav(const int& Nt,
     Stat += target - HMC_duav_core(Nt, dt, engine, en_i, en_f, integrator);
 
     // perform dual averaging on dt
-    double log_dt = mu - Stat * sqrt(i + 1) / (shr * (i + 1 + i0));
+    const double log_dt = mu - Stat * sqrt(i + 1) / (shr * (i + 1 + i0));
     dt = exp(log_dt);
-    double eta = pow(i + 1, -kappa);
+    const double eta = pow(i + 1, -kappa);
     log_dt_avg = eta * log_dt + (1 - eta) * log_dt_avg;
   }
 

@@ -7,7 +7,7 @@
 using namespace std;
 using namespace arma;
 
-double Metropolis::delta24(const DiracOperator& dirac,
+double Metropolis::delta24(const IDiracOperator& dirac,
                            const int& x,
                            const int& row_index,
                            const int& column_index,
@@ -15,29 +15,29 @@ double Metropolis::delta24(const DiracOperator& dirac,
   return m_action->getG2() * delta2(dirac, x, row_index, column_index, z) + delta4(dirac, x, row_index, column_index, z);
 }
 
-double Metropolis::delta2(const DiracOperator& dirac,
+double Metropolis::delta2(const IDiracOperator& dirac,
                           const int& x,
                           const int& row_index,
                           const int& column_index,
-                          const cx_double& z) const {
-  auto& mat = dirac.getMatrices();
-  auto& eps = dirac.getEpsilons();
-  auto mat_dim = dirac.getMatrixDimension();
-  auto gamma_dim = dirac.getGammaDimension();
+                          const cx_double& z) {
+  const auto& mat = dirac.getMatrices();
+  const auto& eps = dirac.getEpsilons();
+  const auto mat_dim = dirac.getMatrixDimension();
+  const auto gamma_dim = dirac.getGammaDimension();
 
   if (row_index != column_index) {
     return 4. * gamma_dim * mat_dim * (2. * (z * mat[x](column_index, row_index)).real() + norm(z));
   } else {
-    double tr_m = trace(mat[x]).real();
+    const double tr_m = trace(mat[x]).real();
     return 8. * gamma_dim * z.real() * (mat_dim * (mat[x](row_index, row_index).real() + z.real()) + eps[x] * (tr_m + z.real()));
   }
 }
 
-double Metropolis::delta4(const DiracOperator& dirac,
+double Metropolis::delta4(const IDiracOperator& dirac,
                           const int& x,
                           const int& row_index,
                           const int& column_index,
-                          const cx_double& z) const {
+                          const cx_double& z) {
   double res = 0.;
 
   auto& omega_table_4 = dirac.getOmegaTable4();
@@ -271,26 +271,26 @@ double Metropolis::delta4(const DiracOperator& dirac,
   return res;
 }
 
-double Metropolis::runDualAverage(const DiracOperator& dirac,
+double Metropolis::runDualAverage(const IDiracOperator& dirac,
                                   const double target) {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
-  auto mat_dim = dirac.getMatrixDimension();
+  const auto mat_dim = dirac.getMatrixDimension();
   // calculate length of a sweep in terms of dofs
-  int nsw = dirac.getNumMatrices() * mat_dim * mat_dim - dirac.getNumAntiHermitianMatrices();
+  const int nsw = dirac.getNumMatrices() * mat_dim * mat_dim - dirac.getNumAntiHermitianMatrices();
 
   // dual averaging variables
-  const double shr = 0.05;
-  const double kappa = 0.75;
-  const int i_0 = 10;
   double stat = 0;
-  double mu = log(10 * m_scale);
+  const double mu = log(10 * m_scale);
   double log_scale_avg = log(m_scale);
 
   // iter sweeps of metropolis
   for (int i = 0; i < m_num_steps; ++i) {
     for (int j = 0; j < nsw; ++j) {
+      constexpr int i_0 = 10;
+      constexpr double kappa = 0.75;
+      constexpr double shr = 0.05;
       // set action to previous final value,
       // unless it's the first iteration
       if (j) {
@@ -304,9 +304,9 @@ double Metropolis::runDualAverage(const DiracOperator& dirac,
       stat += target - runDualAverageCore(dirac, s_i, s_f);
 
       // perform dual averaging
-      double log_scale = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
+      const double log_scale = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
       m_scale = exp(log_scale);
-      double eta = pow(i + 1, -kappa);
+      const double eta = pow(i + 1, -kappa);
       log_scale_avg = eta * log_scale + (1 - eta) * log_scale_avg;
     }
   }
@@ -319,13 +319,13 @@ double Metropolis::runDualAverage(const DiracOperator& dirac,
   return (stat / (m_num_steps * nsw));
 }
 
-double Metropolis::run(const DiracOperator& dirac) const {
+double Metropolis::run(const IDiracOperator& dirac) const {
   // initial (_i) and final (_f) action2 and action4
   auto* s_i = new double[2];
   auto* s_f = new double[2];
-  auto mat_dim = dirac.getMatrixDimension();
+  const auto mat_dim = dirac.getMatrixDimension();
   // calculate length of a sweep in terms of dofs
-  int nsw = dirac.getNumMatrices() * mat_dim * mat_dim - dirac.getNumAntiHermitianMatrices();
+  const int nsw = dirac.getNumMatrices() * mat_dim * mat_dim - dirac.getNumAntiHermitianMatrices();
 
   // return statistic
   double stat = 0;
@@ -353,23 +353,23 @@ double Metropolis::run(const DiracOperator& dirac) const {
   return (stat / (m_num_steps * nsw));
 }
 
-double Metropolis::runDualAverageCore(const DiracOperator& dirac,
+double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
                                       const double* s_i,
                                       double* s_f) const {
   // acceptance probability
   double e;
-  auto num_matrices = dirac.getNumMatrices();
-  auto mat_dim = dirac.getMatrixDimension();
+  const auto num_matrices = dirac.getNumMatrices();
+  const auto mat_dim = dirac.getMatrixDimension();
 
   // metropolis
-  int x = (int)(num_matrices * m_rng->getUniform());
-  int row_index = (int)(mat_dim * m_rng->getUniform());
-  int column_index = (int)(mat_dim * m_rng->getUniform());
+  const int x = (int)(num_matrices * m_rng->getUniform());
+  const int row_index = (int)(mat_dim * m_rng->getUniform());
+  const int column_index = (int)(mat_dim * m_rng->getUniform());
 
   double re = 0;
-  double im = 0;
   cx_double z;
   if (row_index != column_index) {
+    double im = 0;
     re = m_scale * (-1. + 2. * m_rng->getUniform());
     im = m_scale * (-1. + 2. * m_rng->getUniform());
     z = cx_double(re, im);
@@ -378,9 +378,9 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
     z = cx_double(re, 0);
   }
 
-  double delta_2 = delta2(dirac, x, row_index, column_index, z);
-  double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = delta24(dirac, x, row_index, column_index, z);
+  const double delta_2 = delta2(dirac, x, row_index, column_index, z);
+  const double delta_4 = delta4(dirac, x, row_index, column_index, z);
+  const double action_delta = delta24(dirac, x, row_index, column_index, z);
 
   auto& mat = dirac.getMatrices();
   // metropolis test
@@ -401,7 +401,7 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
     e = 1;
   } else {
     e = exp(-action_delta);
-    double p = m_rng->getUniform();
+    const double p = m_rng->getUniform();
 
     if (e > p) {
       // update matrix element
@@ -424,23 +424,23 @@ double Metropolis::runDualAverageCore(const DiracOperator& dirac,
   return e;
 }
 
-double Metropolis::runCore(const DiracOperator& dirac,
+double Metropolis::runCore(const IDiracOperator& dirac,
                            const double* s_i,
                            double* s_f) const {
   // acceptance probability
   double ret = 0;
 
-  auto num_matrices = dirac.getNumMatrices();
-  auto mat_dim = dirac.getMatrixDimension();
+  const auto num_matrices = dirac.getNumMatrices();
+  const auto mat_dim = dirac.getMatrixDimension();
 
   // metropolis
-  int x = (int)(num_matrices * m_rng->getUniform());
-  int row_index = (int)(mat_dim * m_rng->getUniform());
-  int column_index = (int)(mat_dim * m_rng->getUniform());
+  const int x = (int)(num_matrices * m_rng->getUniform());
+  const int row_index = (int)(mat_dim * m_rng->getUniform());
+  const int column_index = (int)(mat_dim * m_rng->getUniform());
   double re = 0;
-  double im = 0;
   cx_double z;
   if (row_index != column_index) {
+    double im = 0;
     re = m_scale * (-1. + 2. * m_rng->getUniform());
     im = m_scale * (-1. + 2. * m_rng->getUniform());
     z = cx_double(re, im);
@@ -449,9 +449,9 @@ double Metropolis::runCore(const DiracOperator& dirac,
     z = cx_double(re, 0);
   }
 
-  double delta_2 = delta2(dirac, x, row_index, column_index, z);
-  double delta_4 = delta4(dirac, x, row_index, column_index, z);
-  double action_delta = m_action->getG2() * delta_2 + delta_4;
+  const double delta_2 = delta2(dirac, x, row_index, column_index, z);
+  const double delta_4 = delta4(dirac, x, row_index, column_index, z);
+  const double action_delta = m_action->getG2() * delta_2 + delta_4;
 
   auto& mat = dirac.getMatrices();
   // metropolis test
@@ -471,8 +471,8 @@ double Metropolis::runCore(const DiracOperator& dirac,
     // move accepted
     ret = 1;
   } else {
-    double e = exp(-action_delta);
-    double p = m_rng->getUniform();
+    const double e = exp(-action_delta);
+    const double p = m_rng->getUniform();
 
     if (e > p) {
       // update matrix element

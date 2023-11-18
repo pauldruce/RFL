@@ -4,11 +4,11 @@
 
 #ifndef RFL_HAMILTONIAN_HPP
 #define RFL_HAMILTONIAN_HPP
+#include <memory>
+
 #include "Action.hpp"
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
-#include <cmath>
-#include <memory>
 
 enum Integrator {
   LEAPFROG,
@@ -23,7 +23,7 @@ enum Integrator {
  * using Hamiltonian dynamics. It combines an action, an integrator, a step size, and a random
  * number generator into a coherent simulation algorithm.
  */
-class Hamiltonian : public IAlgorithm {
+class Hamiltonian final : public IAlgorithm {
 public:
   /**
    * The default constructor for this class has been disabled, please use another constructor.
@@ -46,7 +46,7 @@ public:
    */
   Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng);
 
-  double updateDirac(const DiracOperator& dirac) const override;
+  double updateDirac(const IDiracOperator& dirac) const override;
 
   /**
  * @brief Sets the integrator for the system.
@@ -93,45 +93,45 @@ public:
 
 private:
   std::unique_ptr<Action> m_action;
-  Integrator m_integrator = Integrator::LEAPFROG;
+  Integrator m_integrator = LEAPFROG;
   double m_dt;
   std::unique_ptr<IRng> m_rng;
 
   // This method seems to be the initialiser for the mom variables in DiracOperator.
-  void sampleMoments(const DiracOperator& dirac) const;
-  double calculateK(const DiracOperator& dirac) const;
-  double calculateH(const DiracOperator& dirac) const;
+  void sampleMoments(const IDiracOperator& dirac) const;
+  static double calculateK(const IDiracOperator& dirac);
+  double calculateH(const IDiracOperator& dirac) const;
 
-  double run(const DiracOperator& dirac,
+  double run(const IDiracOperator& dirac,
              const int& num_iterations,
              const int& iter) const;
 
-  double runDualAveragingCore(const DiracOperator& dirac,
+  double runDualAveragingCore(const IDiracOperator& dirac,
                               const int& nt,
                               std::vector<double>& en_i,
                               std::vector<double>& en_f) const;
 
-  double runCore(const DiracOperator& dirac,
+  double runCore(const IDiracOperator& dirac,
                  const int& nt,
                  std::vector<double>& en_i,
                  std::vector<double>& en_f) const;
 
-  double runCoreDebug(const DiracOperator& dirac,
+  double runCoreDebug(const IDiracOperator& dirac,
                       const int& nt) const;
 
   // The methods below modify the step size "this->dt".
-  void runDualAverage(const DiracOperator& dirac,
+  void runDualAverage(const IDiracOperator& dirac,
                       const int& nt,
                       const int& iter,
                       const double& target);
 
-  double run(const DiracOperator& dirac,
+  double run(const IDiracOperator& dirac,
              const int& nt,
              const double& dt_min,
              const double& dt_max,
              const int& iter);
 
-  double runCore(const DiracOperator& dirac,
+  double runCore(const IDiracOperator& dirac,
                  const int& nt,
                  const double& dt_min,
                  const double& dt_max,
@@ -139,11 +139,11 @@ private:
                  std::vector<double>& en_f);
 
   // INTEGRATORS
-  void leapfrog(const DiracOperator& dirac,
+  void leapfrog(const IDiracOperator& dirac,
                 const int& nt,
                 double g_2) const;
 
-  void omelyan(const DiracOperator& dirac,
+  void omelyan(const IDiracOperator& dirac,
                const int& nt,
                double g_2) const;
 };

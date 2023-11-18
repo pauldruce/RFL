@@ -17,7 +17,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   set(CMAKE_CXX_EXTENSIONS OFF)
-  # Let's nicely support folders in IDEs
+  # Nicely supports folders in IDEs
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
   enable_testing()
 

@@ -68,8 +68,6 @@ However, to build this project via a terminal, you use the following commands:
      The command should generally be `cmake /path/to/source/files` from within an empty build directory. We assumed the source files (notably, the CMakeLists.txt) are in the parent directory where we are running this command.
    * The command: `cmake -B ./build .` from the root directory of this project - skipping step 1.
      This is a different but handy way to create the build files. This command will create a folder `./build` and generate the build files within it.
-
-
 3. __Build the project__ This can be done by manually calling `make`, or it is equivalent in the `build` directory. Or CMake has a handy command which is platform-independent:
    ```bash
    cmake --build . --target all

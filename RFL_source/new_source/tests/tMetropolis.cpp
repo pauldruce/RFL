@@ -3,6 +3,7 @@
 //
 
 #include "BarrettGlaser/Metropolis.hpp"
+#include "DiracOperator.hpp"
 #include "GslRng.hpp"
 #include <gtest/gtest.h>
 
@@ -23,12 +24,12 @@ TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
   constexpr int num_steps = 20;
   auto action = std::make_unique<Action>(1.0, 1.0);
 
-  Metropolis metropolis(std::move(action), scale, num_steps, std::move(rng));
+  const Metropolis metropolis(std::move(action), scale, num_steps, std::move(rng));
 
-  auto dirac = DiracOperator(1, 1, 5);
-  auto old_dirac_matrix = dirac.getDiracMatrix();
+  const auto dirac = DiracOperator(1, 1, 5);
+  const auto old_dirac_matrix = dirac.getDiracMatrix();
   metropolis.updateDirac(dirac);
-  auto new_dirac_matrix = dirac.getDiracMatrix();
+  const auto new_dirac_matrix = dirac.getDiracMatrix();
 
   const auto diracs_are_equal = arma::approx_equal(new_dirac_matrix, old_dirac_matrix, "absdiff", 1e-6);
 

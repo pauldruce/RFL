@@ -12,7 +12,7 @@ struct diracData {
   int matrixSize;
 };
 
-static std::string create_eigenvalues_dataset(int diracId) {
+static std::string create_eigenvalues_dataset(const int diracId) {
   std::ostringstream ss;
   ss << "/eigenvalues_" << diracId;
   return ss.str();
@@ -58,7 +58,7 @@ static std::string create_output_dir(const diracData& data, const std::string& o
   std::ostringstream ss;
 
   // Create output dir if needed.
-  auto output_path = outputRootPath + "/output/";
+  const auto output_path = outputRootPath + "/output/";
   if (!fs::exists(output_path)) {
     fs::create_directory(output_path);
   }
@@ -67,17 +67,15 @@ static std::string create_output_dir(const diracData& data, const std::string& o
   ss.str("");
   ss.clear();
   ss << output_path << "Type" << data.p << data.q << "/";
-  std::string diracTypeDir = ss.str();
+  const std::string diracTypeDir = ss.str();
   if (!fs::exists(diracTypeDir)) {
     fs::create_directory(diracTypeDir);
   }
   return ss.str();
 }
 
-void EigenvalueRecorder::recordEigenvalues(int diracId) {
-  auto type = m_dirac.getType();
-  auto p = type.first;
-  auto q = type.second;
+void EigenvalueRecorder::recordEigenvalues(int diracId) const {
+  auto [p, q] = m_dirac.getType();
   auto matrixSize = m_dirac.getMatrixDimension();
   struct diracData data = {p, q, matrixSize};
 

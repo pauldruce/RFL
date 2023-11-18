@@ -6,9 +6,7 @@
 #define RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_
 
 #include "DiracOperator.hpp"
-#include "IAction.hpp"
 #include "IAlgorithm.hpp"
-#include <memory>
 
 /**
  * A class to control the simulation. This class is responsible for the lifespan of
@@ -33,8 +31,8 @@ public:
   /**
    * This method starts the simulation and will return when it is complete.
    */
-  void run() {
-    this->m_algorithm->updateDirac(*m_dirac);
+  double run() const {
+    return this->m_algorithm->updateDirac(*m_dirac);
   }
 
   /**

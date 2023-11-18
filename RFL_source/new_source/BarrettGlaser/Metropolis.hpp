@@ -9,14 +9,12 @@
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
 #include <armadillo>
-#include <memory>
-
 /**
  * Metropolis is a class that encapsulates the implementation of the Metropolis-Hasting
  * algorithm for random non-commutative geometries that are following a simulation
  * governed by the Barrett-Glaser action.
  */
-class Metropolis : public IAlgorithm {
+class Metropolis final : public IAlgorithm {
 public:
   /**
    * The default constructor has been disabled, please use another constructor.
@@ -29,20 +27,20 @@ public:
    * @param num_steps is the number of steps to take for each call to the updateDirac method below.
    * @param rng is a unique_ptr to an implementation of the abstract rng class IRng.
    */
-  Metropolis(std::unique_ptr<Action>&& action, double scale, int num_steps, std::unique_ptr<IRng>&& rng)
+  Metropolis(std::unique_ptr<Action>&& action, const double scale, const int num_steps, std::unique_ptr<IRng>&& rng)
       : m_action(std::move(action)), m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
 
   /**
    * setParams updates the scale, number_of_steps and rng parameters that are passed in as part of
    * the constructor.
    */
-  void setParams(double scale, int number_of_steps, std::unique_ptr<IRng>&& rng) {
+  void setParams(const double scale, const int number_of_steps, std::unique_ptr<IRng>&& rng) {
     this->m_scale = scale;
     this->m_num_steps = number_of_steps;
     this->m_rng = std::move(rng);
   }
 
-  double updateDirac(const DiracOperator& dirac) const override {
+  double updateDirac(const IDiracOperator& dirac) const override {
     return this->run(dirac);
   }
 
@@ -53,37 +51,37 @@ private:
   std::unique_ptr<IRng> m_rng;
 
   // MMC routine that doesn't perform dual averaging
-  double run(const DiracOperator& dirac) const;
+  double run(const IDiracOperator& dirac) const;
 
   // MMC routine that performs dual averaging
-  double runDualAverage(const DiracOperator& dirac,
+  double runDualAverage(const IDiracOperator& dirac,
                         double target);
 
-  double delta24(const DiracOperator& dirac,
+  double delta24(const IDiracOperator& dirac,
                  const int& x,
                  const int& row_index,
                  const int& column_index,
                  const arma::cx_double& z) const;
 
   // TODO: These can be made static or members of DiracOperator
-  double delta2(const DiracOperator& dirac,
+  static double delta2(const IDiracOperator& dirac,
                 const int& x,
                 const int& row_index,
                 const int& column_index,
-                const arma::cx_double& z) const;
+                const arma::cx_double& z);
 
   // TODO: These can be made static or members of DiracOperator
-  double delta4(const DiracOperator& dirac,
+  static double delta4(const IDiracOperator& dirac,
                 const int& x,
                 const int& row_index,
                 const int& column_index,
-                const arma::cx_double& z) const;
+                const arma::cx_double& z);
 
-  double runDualAverageCore(const DiracOperator& dirac,
+  double runDualAverageCore(const IDiracOperator& dirac,
                             const double* s_i,
                             double* s_f) const;
 
-  double runCore(const DiracOperator& dirac,
+  double runCore(const IDiracOperator& dirac,
                  const double* s_i,
                  double* s_f) const;
 };

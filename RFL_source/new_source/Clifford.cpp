@@ -103,23 +103,23 @@ Clifford::Clifford(int p, int q)
     : m_p(p), m_q(q), m_dim_gamma(0) {
   //(1,0)
   if (m_p == 1 && m_q == 0) {
-    (*this) = Clifford(3);
+    *this = Clifford(3);
   }
   //(0,1)
   if (m_p == 0 && m_q == 1) {
-    (*this) = Clifford(4);
+    *this = Clifford(4);
   }
   //(2,0)
   if (m_p == 2 && m_q == 0) {
-    (*this) = Clifford(0);
+    *this = Clifford(0);
   }
   //(1,1)
   if (m_p == 1 && m_q == 1) {
-    (*this) = Clifford(2);
+    *this = Clifford(2);
   }
   //(0,2)
   if (m_p == 0 && m_q == 2) {
-    (*this) = Clifford(1);
+    *this = Clifford(1);
     //any other case
   } else {
     initGammas();
@@ -166,7 +166,7 @@ Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
  * @param q
  * @param dec
  */
-static void decomp(int p, int q, int* dec) {
+static void decomp(const int p, const int q, int* dec) {
   if (p) {
     if (!(p % 2)) {
       dec[0] = p / 2;
@@ -217,33 +217,31 @@ void Clifford::initGammas() {
     }
   }
 
-  auto begin = vec.begin();
-  auto end = vec.end();
-  Clifford c_1 = (*begin);
+  const auto begin = vec.begin();
+  const auto end = vec.end();
+  Clifford c_1 = *begin;
   for (auto iter = begin + 1; iter != end; ++iter) {
-    c_1 *= (*iter);
+    c_1 *= *iter;
   }
-  (*this) = c_1;
+  *this = c_1;
 }
 
 // TODO: Go through this and make sure it agrees with Lawson+Michelson
 Clifford& Clifford::operator*=(const Clifford& clifford_2) {
   // store C2 frequently used variables
-  int p_2, q_2, dim_2;
-  p_2 = clifford_2.getP();
-  q_2 = clifford_2.getQ();
-  dim_2 = clifford_2.getGammaDimension();
+  const int p_2 = clifford_2.getP();
+  const int q_2 = clifford_2.getQ();
+  const int dim_2 = clifford_2.getGammaDimension();
 
   // temporary variables to avoid overwriting on (*this)
-  int p, q, dim_gamma;
   vector<cx_mat> gamma;
 
-  p = m_p + p_2;
-  q = m_q + q_2;
-  dim_gamma = m_dim_gamma * dim_2;
+  const int p = m_p + p_2;
+  const int q = m_q + q_2;
+  const int dim_gamma = m_dim_gamma * dim_2;
 
   // start computing product
-  cx_mat id_2(dim_2, dim_2, fill::eye);
+  const cx_mat id_2(dim_2, dim_2, fill::eye);
 
   gamma.reserve(m_p + m_q);
   for (int i = 0; i < m_p + m_q; ++i)
@@ -252,12 +250,11 @@ Clifford& Clifford::operator*=(const Clifford& clifford_2) {
     gamma.emplace_back(kron(m_chiral, clifford_2.getGammaAtIndex(i)));
 
   // compute chirality
-  int s_2 = (q_2 - p_2 + 8 * p_2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
-  bool s_2_even = (s_2 % 8) % 2 == 0;
-  if (!s_2_even) {
-    int s = (m_q - m_p + 8 * m_p) % 8;
-    cx_mat id_1(m_dim_gamma, m_dim_gamma, fill::eye);
-    if ((s == 2) || (s == 6)) {
+  const int s_2 = (q_2 - p_2 + 8 * p_2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
+  if (const bool s_2_even = s_2 % 8 % 2 == 0; !s_2_even) {
+    const int s = (m_q - m_p + 8 * m_p) % 8;
+    const cx_mat id_1(m_dim_gamma, m_dim_gamma, fill::eye);
+    if (s == 2 || s == 6) {
       m_chiral = kron(-1 * id_1, clifford_2.getChiral());
     } else {
       m_chiral = kron(id_1, clifford_2.getChiral());
@@ -275,7 +272,7 @@ Clifford& Clifford::operator*=(const Clifford& clifford_2) {
   for (const auto& v : gamma)
     m_gammas.push_back(v);
 
-  return (*this);
+  return *this;
 }
 
 ostream& operator<<(ostream& out, const Clifford& clifford) {
@@ -285,7 +282,7 @@ ostream& operator<<(ostream& out, const Clifford& clifford) {
 }
 
 bool areHermitian(const cx_mat& m_1, const cx_mat& m_2) {
-  return (!(m_2.is_hermitian()) && m_1.is_hermitian());
+  return !m_2.is_hermitian() && m_1.is_hermitian();
 }
 
 void Clifford::sortGammas() {

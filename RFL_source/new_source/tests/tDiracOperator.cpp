@@ -25,15 +25,15 @@ TEST(DiracOperatorTests, NumHermitianMatricesIsCorrectlySet) {
     int num_h_mat;
   } NumHMatData;
 
-  std::vector<NumHMatData> data = {
+  const std::vector<NumHMatData> data = {
       {1, 1, 1},
       {1, 2, 1},
       {2, 1, 3},
       {3, 3, 16}};
 
-  for (auto& d : data) {
-    DiracOperator dirac(d.p, d.q, 5);
-    EXPECT_EQ(d.num_h_mat, dirac.getNumHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
+  for (const auto& [p, q, num_h_mat] : data) {
+    DiracOperator dirac(p, q, 5);
+    EXPECT_EQ(num_h_mat, dirac.getNumHermitianMatrices()) << "(p,q) = (" << p << "," << q << ")";
   }
 }
 
@@ -44,15 +44,15 @@ TEST(DiracOperatorTests, NumAntiHermitianMatricesIsCorrectlySet) {
     int num_h_mat;
   } NumLMatData;
 
-  std::vector<NumLMatData> data = {
+  const std::vector<NumLMatData> data = {
       {1, 1, 1},
       {1, 2, 3},
       {2, 1, 1},
       {3, 3, 16}};
 
-  for (auto& d : data) {
-    DiracOperator dirac(d.p, d.q, 5);
-    EXPECT_EQ(d.num_h_mat, dirac.getNumAntiHermitianMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
+  for (const auto& [p, q, num_h_mat] : data) {
+    DiracOperator dirac(p, q, 5);
+    EXPECT_EQ(num_h_mat, dirac.getNumAntiHermitianMatrices()) << "(p,q) = (" << p << "," << q << ")";
   }
 }
 
@@ -63,41 +63,41 @@ TEST(DiracOperatorTests, TotalNumMatricesIsSetCorrectly) {
     int num_hl_mat;
   } NumTotalMatricesData;
 
-  std::vector<NumTotalMatricesData> data = {
+  const std::vector<NumTotalMatricesData> data = {
       {1, 1, 2},
       {1, 2, 4},
       {2, 1, 4},
       {3, 3, 32}};
 
-  for (auto& d : data) {
-    DiracOperator dirac(d.p, d.q, 5);
-    EXPECT_EQ(d.num_hl_mat, dirac.getNumMatrices()) << "(p,q) = (" << d.p << "," << d.q << ")";
+  for (const auto& [p, q, num_hl_mat] : data) {
+    DiracOperator dirac(p, q, 5);
+    EXPECT_EQ(num_hl_mat, dirac.getNumMatrices()) << "(p,q) = (" << p << "," << q << ")";
   }
 }
 
 TEST(DiracOperatorTests, GetType) {
-  std::vector<std::pair<int, int>> data = {
+  const std::vector<std::pair<int, int>> data = {
       {1, 1},
       {1, 2},
       {2, 1},
       {3, 3}};
 
-  for (auto& d : data) {
-    DiracOperator dirac(d.first, d.second, 5);
-    EXPECT_EQ(d.first, dirac.getType().first);
-    EXPECT_EQ(d.second, dirac.getType().second);
+  for (const auto& [p, q] : data) {
+    DiracOperator dirac(p, q, 5);
+    EXPECT_EQ(p, dirac.getType().first);
+    EXPECT_EQ(q, dirac.getType().second);
   }
 }
 
 TEST(DiracOperatorTests, GetEigenvalues) {
-  std::vector<std::pair<int, int>> data = {
+  const std::vector<std::pair<int, int>> data = {
       {1, 1},
       {1, 2},
       {2, 1},
       {3, 3}};
 
-  for (auto& d : data) {
-    DiracOperator dirac(d.first, d.second, 5);
+  for (const auto& [p, q] : data) {
+    DiracOperator dirac(p, q, 5);
 
     auto eigenvalues = dirac.getEigenvalues();
 
@@ -116,8 +116,8 @@ TEST(DiracOperatorTests, GetEigenvalues) {
 }
 
 TEST(DiracOperatorTests, CopyConstructorWorks) {
-  DiracOperator dirac_1(1, 3, 5);
-  DiracOperator dirac_2 = dirac_1;// NOLINT(*-unnecessary-copy-initialization)
+  const DiracOperator dirac_1(1, 3, 5);
+  const DiracOperator dirac_2 = dirac_1; // NOLINT(*-unnecessary-copy-initialization)
 
   ASSERT_TRUE(arma::approx_equal(
       dirac_1.getDiracMatrix(),
@@ -134,25 +134,25 @@ TEST(DiracOperatorTests, GetHermitianMatricesReturnsHermitianMatrices) {
     int n_herm_matrices;
   } DiracParams;
 
-  std::vector<DiracParams> params{
+  const std::vector<DiracParams> params{
       {2, 1, 5, 3},
       {1, 2, 6, 1},
       {3, 3, 7, 16}};
 
-  for (auto& d : params) {
-    DiracOperator dirac(d.p, d.q, d.dim);
+  for (const auto& [p, q, dim, n_herm_matrices] : params) {
+    DiracOperator dirac(p, q, dim);
 
     auto hermitian_matrices = dirac.getHermitianMatrices();
-    EXPECT_EQ(d.n_herm_matrices, hermitian_matrices.size())
+    EXPECT_EQ(n_herm_matrices, hermitian_matrices.size())
         << "For dirac params"
-        << "(p,q)=(" << d.p << "," << d.q << ")"
-        << " dim = " << d.dim;
+        << "(p,q)=(" << p << "," << q << ")"
+        << " dim = " << dim;
 
     for (auto& matrix : hermitian_matrices) {
       EXPECT_TRUE(matrix.is_hermitian())
           << "For dirac params"
-          << "(p,q)=(" << d.p << "," << d.q << ")"
-          << " dim = " << d.dim;
+          << "(p,q)=(" << p << "," << q << ")"
+          << " dim = " << dim;
     }
   }
 }
@@ -165,25 +165,25 @@ TEST(DiracOperatorTests, GetAntiHermitianMatricesReturnsAntiHermitianMatrices) {
     int n_anti_herm_matrices;
   } DiracParams;
 
-  std::vector<DiracParams> params{
+  const std::vector<DiracParams> params{
       {2, 1, 5, 1},
       {1, 2, 6, 3},
       {3, 3, 7, 16}};
 
-  for (auto& d : params) {
-    DiracOperator dirac(d.p, d.q, d.dim);
+  for (const auto& [p, q, dim, n_anti_herm_matrices] : params) {
+    DiracOperator dirac(p, q, dim);
 
     auto hermitian_matrices = dirac.getAntiHermitianMatrices();
-    EXPECT_EQ(d.n_anti_herm_matrices, hermitian_matrices.size())
+    EXPECT_EQ(n_anti_herm_matrices, hermitian_matrices.size())
         << "For dirac params"
-        << "(p,q)=(" << d.p << "," << d.q << ")"
-        << " dim = " << d.dim;
+        << "(p,q)=(" << p << "," << q << ")"
+        << " dim = " << dim;
 
     for (auto& matrix : hermitian_matrices) {
       EXPECT_TRUE(!matrix.is_hermitian())
           << "For dirac params"
-          << "(p,q)=(" << d.p << "," << d.q << ")"
-          << " dim = " << d.dim;
+          << "(p,q)=(" << p << "," << q << ")"
+          << " dim = " << dim;
     }
   }
 }

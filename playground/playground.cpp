@@ -3,7 +3,6 @@
 //
 
 #include <iostream>
-#include <memory>
 
 class Action {
 public:
@@ -11,13 +10,13 @@ public:
   virtual std::string calculate() = 0;
 };
 
-class quadraticAction : public Action {
+class quadraticAction final : public Action {
   std::string calculate() override {
     return "calculated by quadratic action";
   };
 };
 
-class barrettGlaserAction : public Action {
+class barrettGlaserAction final : public Action {
   std::string calculate() override {
     return "calculated by Barrett-Glaser action";
   }
@@ -33,8 +32,8 @@ public:
     m_action = std::move(new_action);
   }
 
-  void Print() {
-    auto action_val = m_action->calculate();
+  void Print() const {
+    const auto action_val = m_action->calculate();
     std::cout << action_val << std::endl;
   }
 

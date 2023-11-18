@@ -40,7 +40,7 @@ public:
    * getGammaAtIndex returns a copy of a gamma matrix located in the array at index
    * i.
    */
-  arma::cx_mat getGammaAtIndex(int i) const { return m_gammas.at(i); }
+  arma::cx_mat getGammaAtIndex(const int i) const { return m_gammas.at(i); }
 
   /**
    * getChiral returns a copy of the chirality matrix generated from the gamma
