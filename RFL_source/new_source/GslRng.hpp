@@ -25,7 +25,7 @@ public:
    * This default constructor creates a GSL random number generator that is
    * seeded by the current time.
    */
-  GslRng() : m_rng(nullptr){
+  GslRng() : m_rng(nullptr) {
     gsl_rng_env_setup();
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
     gsl_rng_set(m_rng, time(nullptr));
