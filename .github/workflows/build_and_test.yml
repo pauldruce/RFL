@@ -47,9 +47,20 @@ jobs:
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
-          brew update
-          brew install cmake doxygen graphviz wget
-          brew install arpack hdf5 libaec openblas superlu pkg-config gsl
+          brew update || true
+          brew link --overwrite python@3.11
+          brew install \
+            cmake \
+            doxygen \
+            graphviz \
+            wget \
+            arpack \
+            hdf5 \
+            libaec \
+            openblas \
+            superlu \
+            pkg-config \
+            gsl
 
       - name: Download Armadillo from SourceForge
         run: |
