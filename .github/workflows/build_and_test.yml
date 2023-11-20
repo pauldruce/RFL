@@ -47,9 +47,8 @@ jobs:
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
-          brew update || true
-          rm -rf /usr/local/bin/2to3 || true
-          brew install \
+          brew update
+          brew install --overwrite \
             cmake \
             doxygen \
             graphviz \
@@ -60,7 +59,7 @@ jobs:
             openblas \
             superlu \
             pkg-config \
-            gsl || true
+            gsl
 
       - name: Download Armadillo from SourceForge
         run: |
