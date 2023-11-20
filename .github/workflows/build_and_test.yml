@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        BUILD_TYPE: [ Debug ]
+        BUILD_TYPE: [ Release ]
         OS: [ ubuntu-latest, macos-latest ]
         ARMA_VERSION: [11.2.3]
 
