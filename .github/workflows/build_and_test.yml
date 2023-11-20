@@ -48,7 +48,7 @@ jobs:
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
-          brew install --overwrite \
+          brew install \
             cmake \
             doxygen \
             graphviz \
@@ -59,7 +59,7 @@ jobs:
             openblas \
             superlu \
             pkg-config \
-            gsl
+            gsl || true
 
       - name: Download Armadillo from SourceForge
         run: |
