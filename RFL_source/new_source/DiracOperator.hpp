@@ -9,6 +9,7 @@
 #include "IDiracOperator.hpp"
 #include "IRng.hpp"
 #include <armadillo>
+#include <memory>
 
 /**
  * @class DiracOperator

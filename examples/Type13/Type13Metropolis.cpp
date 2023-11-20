@@ -8,6 +8,7 @@
 #include "EigenvalueRecorder.hpp"
 #include "GslRng.hpp"
 #include "Simulation.hpp"
+#include <iomanip>
 
 using namespace arma;
 

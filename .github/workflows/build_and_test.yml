@@ -4,44 +4,16 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "main"
-  pull_request:
+      - "*"
 
 jobs:
-  generate_matrix:
-    name: Generate test matrix
-    runs-on: ubuntu-latest
-    outputs:
-      matrix_includes: ${{steps.set-matrix.outputs.matrix_includes}}
-    steps:
-      - uses: actions/checkout@v3
-      - id: set-matrix
-        shell: bash
-        run: |
-          echo "Seed for random selection is = ${{github.run_number}}"
-          includes=$(python3 -u .github/workflows/combination_selection.py ${{github.run_number}} 3)
-          echo "matrix_includes=${includes}" >> $GITHUB_OUTPUT
-
-  check-matrix:
-    runs-on: ubuntu-latest
-    needs: generate_matrix
-    steps:
-      - name: Check matrix definition
-        run: |
-          includes='${{ needs.generate_matrix.outputs.matrix_includes }}'
-          echo "Json received is = $includes"
-          echo "Check that the json can be converted using GitHubs fromJSON() without error"
-          matrix_json='${{fromJson(needs.generate_matrix.outputs.matrix_includes)}}'
-
   build_and_test:
-    needs: [generate_matrix, check-matrix]
     strategy:
       fail-fast: false
       matrix:
-        BUILD_TYPE: [Release]
-        OS: [ubuntu-22.04]
+        BUILD_TYPE: [ Debug ]
+        OS: [ ubuntu-latest, macos-latest ]
         ARMA_VERSION: [11.2.3]
-        include: ${{fromJSON(needs.generate_matrix.outputs.matrix_includes)}}
 
     # The CMake configure and build commands are platform-agnostic and should
     # work equally well on Windows or Mac. You can convert this to a matrix

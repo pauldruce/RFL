@@ -3,6 +3,8 @@
 //
 
 #include "EigenvalueRecorder.hpp"
+#include <filesystem>
+#include <iomanip>
 
 namespace fs = std::filesystem;
 
@@ -24,7 +26,7 @@ static std::string create_simulation_group(const std::string& timeString) {
   return ss.str();
 }
 
-static std::string create_eigenvalues_hdf_filename(const struct diracData& data, const double g2) {
+static std::string create_eigenvalues_hdf_filename(const diracData& data, const double g2) {
   std::ostringstream ss;
 
   ss << -1 * g2;
