@@ -60,7 +60,7 @@ jobs:
             openblas \
             superlu \
             pkg-config \
-            gsl
+            gsl || true
 
       - name: Download Armadillo from SourceForge
         run: |
