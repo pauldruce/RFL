@@ -9,6 +9,8 @@
 #include "IAlgorithm.hpp"
 #include "IRng.hpp"
 #include <armadillo>
+#include <memory>
+
 /**
  * Metropolis is a class that encapsulates the implementation of the Metropolis-Hasting
  * algorithm for random non-commutative geometries that are following a simulation
