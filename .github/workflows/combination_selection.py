@@ -23,7 +23,7 @@ def create_new_matrix(subset):
 
 
 def main(random_seed, num_selected, select_all):
-    build_type = ["Release", "Debug"]
+    build_type = ["Release"]
     os_versions = [
         "ubuntu-22.04",
         "ubuntu-20.04",
