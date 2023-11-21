@@ -26,7 +26,7 @@ def main(random_seed, num_selected, select_all):
     build_type = ["Release"]
     os_versions = [
         "ubuntu-20.04",
-        "macos-13"
+        "macos-13",
         "macos-11"
     ]
     armadillo_version = ["10.8.2", "11.2.3"]
