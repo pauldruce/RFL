@@ -5,7 +5,7 @@
 #ifndef RFL_IACTION_HPP
 #define RFL_IACTION_HPP
 
-#include "DiracOperator.hpp"
+#include "IDiracOperator.hpp"
 
 /**
  * IAction is an abstract class that provides an interface for any action you may want to use in a
@@ -22,7 +22,7 @@ public:
     * @param dirac is the Dirac operator that the action should be calculated for.
     * @return the value of the action for the input Dirac operator.
     */
-  virtual double calculateS(const DiracOperator& dirac) const = 0;
+  virtual double calculateS(const IDiracOperator& dirac) const = 0;
 
   virtual ~IAction() = default;
 };

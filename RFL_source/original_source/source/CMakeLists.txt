@@ -24,4 +24,4 @@ target_link_libraries(RFL ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
 install(TARGETS RFL
         DESTINATION ${CMAKE_SOURCE_DIR}/lib/RFL/bin/${CMAKE_BUILD_TYPE}
         PUBLIC_HEADER DESTINATION ${CMAKE_SOURCE_DIR}/lib/RFL/include
-        )
+)

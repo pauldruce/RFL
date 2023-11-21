@@ -14,7 +14,7 @@ typedef struct {
 } CliffordData;
 
 TEST(CliffordTests, NoErrorWhenConstructing) {
-  std::vector<CliffordData> cliff_data = {
+  const std::vector<CliffordData> cliff_data = {
       {1, 0},
       {0, 1},
       {1, 1},
@@ -26,9 +26,9 @@ TEST(CliffordTests, NoErrorWhenConstructing) {
       {2, 3},
       {3, 3}};
 
-  for (auto& d : cliff_data) {
+  for (const auto& [p, q] : cliff_data) {
     EXPECT_NO_THROW(
-        Clifford cliff(d.p, d.q););
+        Clifford cliff(p, q););
   }
 }
 
@@ -54,7 +54,7 @@ TEST(CliffordTests, GetDimGamma) {
     int dim_gamma;
   } DimGammaData;
 
-  std::vector<DimGammaData> data = {
+  const std::vector<DimGammaData> data = {
       {1, 0, 1},
       {0, 1, 1},
       {1, 1, 2},
@@ -63,9 +63,9 @@ TEST(CliffordTests, GetDimGamma) {
       {1, 3, 4},
       {3, 1, 4},
       {3, 3, 8}};
-  for (auto& d : data) {
-    Clifford cliff(d.p, d.q);
-    EXPECT_EQ(d.dim_gamma, cliff.getGammaDimension()) << "(p,q) = (" << d.p << "," << d.q << ")";
+  for (const auto& [p, q, dim_gamma] : data) {
+    Clifford cliff(p, q);
+    EXPECT_EQ(dim_gamma, cliff.getGammaDimension()) << "(p,q) = (" << p << "," << q << ")";
   }
 }
 
@@ -76,7 +76,7 @@ TEST(CliffordTests, GetGammas) {
     int num_gammas;
   } GetGammasData;
 
-  std::vector<GetGammasData> data = {
+  const std::vector<GetGammasData> data = {
       {1, 0, 1},
       {0, 1, 1},
       {1, 1, 2},
@@ -85,9 +85,9 @@ TEST(CliffordTests, GetGammas) {
       {1, 3, 4},
       {3, 3, 6}};
 
-  for (auto& d : data) {
-    Clifford cliff(d.p, d.q);
-    EXPECT_EQ(d.num_gammas, cliff.getGammaMatrices().size()) << "(p,q) = (" << d.p << "," << d.q << ")";
+  for (const auto& [p, q, num_gammas] : data) {
+    Clifford cliff(p, q);
+    EXPECT_EQ(num_gammas, cliff.getGammaMatrices().size()) << "(p,q) = (" << p << "," << q << ")";
   }
 }
 
@@ -101,21 +101,21 @@ TEST(CliffordTests, GammasHaveCorrectHermiticity) {
     }
   }
 
-  for (const auto& d : data) {
-    Clifford C(d.p, d.q);
+  for (const auto& [p, q] : data) {
+    Clifford C(p, q);
 
     auto gammas = C.getGammaMatrices();
-    std::vector<arma::cx_mat> herm_gammas(gammas.begin(), gammas.begin() + d.p);
-    std::vector<arma::cx_mat> anti_herm_gammas(gammas.begin() + d.p, gammas.end());
+    std::vector herm_gammas(gammas.begin(), gammas.begin() + p);
+    std::vector anti_herm_gammas(gammas.begin() + p, gammas.end());
 
-    EXPECT_EQ(d.p, herm_gammas.size());
+    EXPECT_EQ(p, herm_gammas.size());
     for (auto& hg : herm_gammas) {
-      EXPECT_TRUE(hg.is_hermitian()) << "(p,q) = (" << d.p << "," << d.q << ")\n ";
+      EXPECT_TRUE(hg.is_hermitian()) << "(p,q) = (" << p << "," << q << ")\n ";
     }
 
-    EXPECT_EQ(d.q, anti_herm_gammas.size());
+    EXPECT_EQ(q, anti_herm_gammas.size());
     for (auto& ahg : anti_herm_gammas) {
-      EXPECT_TRUE(!ahg.is_hermitian()) << "(p,q) = (" << d.p << "," << d.q << ")";
+      EXPECT_TRUE(!ahg.is_hermitian()) << "(p,q) = (" << p << "," << q << ")";
     }
   }
 }
@@ -131,11 +131,11 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
     }
   }
 
-  for (const auto& d : data) {
-    Clifford C(d.p, d.q);
-    int n = d.p + d.q;
-    int exponent = (n % 2 == 0) ? (int)n / 2 : (int)((n - 1) / 2);
-    int expect_dim = 1 << exponent;
+  for (const auto& [p, q] : data) {
+    Clifford C(p, q);
+    const int n = p + q;
+    const int exponent = (n % 2 == 0) ? (int)n / 2 : (int)((n - 1) / 2);
+    const int expect_dim = 1 << exponent;
 
     // Easy check
     EXPECT_EQ(expect_dim, C.getGammaDimension());
@@ -144,8 +144,8 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
     auto gammas = C.getGammaMatrices();
     for (auto& g : gammas) {
       ASSERT_EQ(g.n_rows, g.n_cols)
-          << "Gamma matrices not squarefailed for (p,q) = (" << d.p << "," << d.q << ")";
-      EXPECT_EQ(expect_dim, g.n_rows) << "Gamma dim not correct for (p,q) = (" << d.p << "," << d.q << ")";
+          << "Gamma matrices not squarefailed for (p,q) = (" << p << "," << q << ")";
+      EXPECT_EQ(expect_dim, g.n_rows) << "Gamma dim not correct for (p,q) = (" << p << "," << q << ")";
     }
   }
 }
@@ -154,20 +154,20 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
 TEST(CliffordTests, ChiralityIsCorrect) {
   // TODO: Fix source code, because this test fails if max_p, max_q is >= 6
   constexpr int max_p = 5;
-  constexpr int max_q = 5;
   vector<CliffordData> data = {};
 
   data.push_back({1, 0});
   data.push_back({0, 1});
   for (int q = 1; q < max_p; q++) {
+    constexpr int max_q = 5;
     for (int p = 1; p < max_q; p++) {
       data.push_back({p, q});
     }
   }
 
-  for (auto& d : data) {
-    Clifford C(d.p, d.q);
-    int s = (d.q - d.p + 8 * d.p) % 8;// Need to add 8*p because % does behave for negative values.
+  for (const auto& [p, q] : data) {
+    Clifford C(p, q);
+    const int s = (q - p + 8 * p) % 8;// Need to add 8*p because % does behave for negative values.
     auto gammas = C.getGammaMatrices();
     auto chirality = C.getChiral();
 
@@ -191,7 +191,7 @@ TEST(CliffordTests, ChiralityIsCorrect) {
 
 TEST(CliffordTests, CliffordModuleInlineMultiplication) {
   Clifford C1(1, 2);
-  Clifford C2(2, 1);
+  const Clifford C2(2, 1);
 
   C1 *= C2;
 
@@ -200,10 +200,10 @@ TEST(CliffordTests, CliffordModuleInlineMultiplication) {
 }
 
 TEST(CliffordTests, CliffordModuleMultiplication) {
-  Clifford C1(1, 2);
-  Clifford C2(2, 1);
+  const Clifford C1(1, 2);
+  const Clifford C2(2, 1);
 
-  auto C3 = C1 * C2;
+  const auto C3 = C1 * C2;
 
   // New Clifford module has correct dimensions
   EXPECT_EQ(C3.getP(), 3);

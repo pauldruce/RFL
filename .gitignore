@@ -10,3 +10,4 @@ lcov*
 .DS_Store
 /venv/
 /build-xcode/
+.vscode

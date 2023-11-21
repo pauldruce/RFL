@@ -3,51 +3,52 @@
 //
 
 #include "BarrettGlaser/Hamiltonian.hpp"
+#include "DiracOperator.hpp"
 #include "GslRng.hpp"
 #include <gtest/gtest.h>
 
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {
-  const Integrator integrator = LEAPFROG;
+  constexpr Integrator integrator = LEAPFROG;
   // TODO: How do we test random stuff? -> find out
-  double step_size = 0.1;
+  constexpr double step_size = 0.1;
   auto action = std::make_unique<Action>(1.0, 1.0);
   ASSERT_NO_THROW(
       const Hamiltonian hamiltonian(std::move(action), integrator, step_size, std::make_unique<GslRng>()););
 }
 
 TEST(HamiltonianTests, CanChangeIntegrator) {
-  const Integrator integrator = LEAPFROG;
-  double step_size = 0.1;
+  constexpr Integrator integrator = LEAPFROG;
+  constexpr double step_size = 0.1;
   auto action = std::make_unique<Action>(1.0, 1.0);
   Hamiltonian hamiltonian(std::move(action), integrator, step_size, std::make_unique<GslRng>());
 
   ASSERT_EQ(hamiltonian.getIntegrator(), integrator);
 
-  const Integrator new_integrator = OMELYAN;
+  constexpr Integrator new_integrator = OMELYAN;
   hamiltonian.setIntegrator(new_integrator);
   ASSERT_EQ(hamiltonian.getIntegrator(), new_integrator);
 }
 
 TEST(HamiltonianTests, CanChangeStepSize) {
-  const Integrator integrator = LEAPFROG;
-  double step_size = 0.1;
+  constexpr Integrator integrator = LEAPFROG;
+  constexpr double step_size = 0.1;
   auto action = std::make_unique<Action>(1.0, 1.0);
   Hamiltonian hamiltonian(std::move(action), integrator, step_size, std::make_unique<GslRng>());
 
   ASSERT_EQ(hamiltonian.getStepSize(), step_size);
 
-  const double new_step_size = 0.5;
+  constexpr double new_step_size = 0.5;
   hamiltonian.setStepSize(new_step_size);
   ASSERT_EQ(hamiltonian.getStepSize(), new_step_size);
 }
 
 TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
-  Hamiltonian hamiltonian(std::make_unique<Action>(), Integrator::LEAPFROG, 0.2, std::make_unique<GslRng>());
-  auto dirac = DiracOperator(1, 1, 5);
-  auto old_dirac_matrix = dirac.getDiracMatrix();
+  const Hamiltonian hamiltonian(std::make_unique<Action>(), Integrator::LEAPFROG, 0.2, std::make_unique<GslRng>());
+  const auto dirac = DiracOperator(1, 1, 5);
+  const auto old_dirac_matrix = dirac.getDiracMatrix();
   hamiltonian.updateDirac(dirac);
 
-  auto new_dirac_matrix = dirac.getDiracMatrix();
+  const auto new_dirac_matrix = dirac.getDiracMatrix();
 
   const auto diracs_are_equal = arma::approx_equal(new_dirac_matrix, old_dirac_matrix, "absdiff", 1e-6);
 

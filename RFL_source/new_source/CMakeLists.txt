@@ -1,4 +1,7 @@
-add_library(new_RFL)
+add_library(new_RFL
+        IDiracOperator.hpp
+        IDiracOperatorDerivatives.cpp
+        IDiracOperatorDerivatives.hpp)
 
 set(new_RFL_HEADERS
         BarrettGlaser/Action.hpp

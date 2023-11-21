@@ -5,8 +5,7 @@
 #ifndef RFL_IALGORITHM_HPP
 #define RFL_IALGORITHM_HPP
 
-#include "DiracOperator.hpp"
-#include "IAction.hpp"
+#include "IDiracOperator.hpp"
 
 /**
  * This is an Abstract Class/Interface for the various Monte Carlo
@@ -21,7 +20,7 @@ public:
    * @param dirac is the DiracOperator the algorithm will operate on.
    * @return the acceptance rate of the process.
    */
-  virtual double updateDirac(const DiracOperator& dirac) const = 0;
+  virtual double updateDirac(const IDiracOperator& dirac) const = 0;
 
   virtual ~IAlgorithm() = default;
 };

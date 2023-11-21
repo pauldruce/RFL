@@ -40,7 +40,7 @@ void NewMethod() {
 
   auto metropolis = std::make_unique<Metropolis>(std::move(action), SCALE, NUM_STEPS, std::move(rng));
 
-  auto simulation = Simulation(
+  const auto simulation = Simulation(
       std::move(dirac),
       std::move(metropolis));
 
@@ -70,25 +70,25 @@ TEST(BenchmarkTests, NewImplementationIsNotSignificantlySlower) {
   using std::chrono::high_resolution_clock;
   using std::chrono::milliseconds;
 
-  auto mauro_start = high_resolution_clock::now();
+  const auto mauro_start = high_resolution_clock::now();
   MauroMethod();
-  auto mauro_stop = high_resolution_clock::now();
+  const auto mauro_stop = high_resolution_clock::now();
 
   /* Getting number of milliseconds as an integer. */
-  auto mauro_ms_int = duration_cast<milliseconds>(mauro_stop - mauro_start);
+  const auto mauro_ms_int = duration_cast<milliseconds>(mauro_stop - mauro_start);
 
   std::cout << "Mauro's implementation:\n";
   std::cout << mauro_ms_int.count() << "ms\n";
 
-  auto new_start = high_resolution_clock::now();
+  const auto new_start = high_resolution_clock::now();
   NewMethod();
-  auto new_stop = high_resolution_clock::now();
+  const auto new_stop = high_resolution_clock::now();
 
-  auto new_ms_int = duration_cast<milliseconds>(new_stop - new_start);
+  const auto new_ms_int = duration_cast<milliseconds>(new_stop - new_start);
   std::cout << "New implementation:\n";
   std::cout << new_ms_int.count() << "ms\n";
 
-  auto winner = new_ms_int.count() < mauro_ms_int.count() ? "the new implementation" : "Mauro's implementation";
+  const auto winner = new_ms_int.count() < mauro_ms_int.count() ? "the new implementation" : "Mauro's implementation";
   std::cout << "The winner is: " << winner << std::endl;
 
   ASSERT_TRUE(new_ms_int.count() < mauro_ms_int.count() * MAX_FRACTION_DIFF) << "New implementation is slower by more than 5%";

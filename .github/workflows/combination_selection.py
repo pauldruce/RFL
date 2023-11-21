@@ -23,20 +23,20 @@ def create_new_matrix(subset):
 
 
 def main(random_seed, num_selected, select_all):
-    build_type = ["Release", "Debug"]
+    build_type = ["Release"]
     os_versions = [
-        "ubuntu-22.04",
+        "ubuntu-latest",
         "ubuntu-20.04",
-        "macos-12",
-        "macos-11"
+        "macos-13",
+        "macos-latest"
     ]
-    armadillo_version = ["10.8.2", "11.2.3"]
+    armadillo_version = ["10.8.2", "11.4.4"]
 
     list_of_lists = [build_type, os_versions, armadillo_version]
 
     combinations = [p for p in itertools.product(*list_of_lists)]
 
-    if select_all == False:
+    if not select_all:
         subset = create_combination_selection(combinations, random_seed, num_selected)
     else:
         subset = combinations
@@ -67,13 +67,8 @@ if __name__ == "__main__":
         else:
             random_seed = int(command_line_arguments[1])
 
-    if (len(command_line_arguments) == 3):
+    if len(command_line_arguments) == 3:
         random_seed = int(command_line_arguments[1])
         num_selected = int(command_line_arguments[2])
 
     sys.exit(main(random_seed, num_selected, select_all))
-
-# Proving that we can recreate the combinations by setting the random.seed
-# for i in range(10):
-#     random.seed(1)
-#     print(random.sample(combinations, 3))
