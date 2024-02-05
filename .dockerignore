@@ -1,0 +1,6 @@
+venv/
+cmake-*/
+build/
+.idea/
+.vscode/
+.github/

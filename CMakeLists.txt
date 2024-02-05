@@ -22,8 +22,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   enable_testing()
 
   add_compile_options(-Wall -Wextra -Wpedantic)
-  add_compile_options(-fsanitize=address )
-  add_link_options(-fsanitize=address )
+  # add_compile_options(-fsanitize=address )
+  # add_link_options(-fsanitize=address )
 endif()
 
 # Include ccache to speed up rebuild times.
@@ -42,10 +42,11 @@ doxygen_add_docs(doxygen
 
 # GSL is included with Armadillo above, but we need more.
 find_package(Armadillo REQUIRED)
-find_package(GSL REQUIRED)
 include_directories(${ARMADILLO_INCLUDE_DIRS})
+find_package(GSL REQUIRED)
 include_directories(${GSL_INCLUDE_DIRS})
-add_subdirectory(vendors)
+
+find_package(GTest REQUIRED)
 include(GoogleTest)
 
 add_subdirectory(RFL_source)
