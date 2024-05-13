@@ -10,3 +10,7 @@ lcov*
 .DS_Store
 /venv/
 /build-xcode/
+
+# Entries below this point are managed by Please (DO NOT EDIT)
+plz-out
+.plzconfig.local
