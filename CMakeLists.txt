@@ -27,7 +27,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 endif()
 
 # Include ccache to speed up rebuild times.
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/src/cmake")
 include(Ccache)
 
 option(${PROJECT_NAME}_ENABLE_CODE_COVERAGE "Enable code coverage through GCC." ON)
@@ -36,7 +36,7 @@ option(${PROJECT_NAME}_ENABLE_CODE_COVERAGE "Enable code coverage through GCC." 
 include(Doxygen)
 doxygen_add_docs(doxygen
         ${PROJECT_SOURCE_DIR}/README.md
-        ${PROJECT_SOURCE_DIR}/RFL_source/new_source
+        ${PROJECT_SOURCE_DIR}/src/RFL/new_RFL
         ${PROJECT_SOURCE_DIR}/examples
         COMMENT "Generate documentation for entire project")
 
@@ -48,8 +48,7 @@ include_directories(${GSL_INCLUDE_DIRS})
 add_subdirectory(vendors)
 include(GoogleTest)
 
-add_subdirectory(RFL_source)
-add_subdirectory(examples)
+add_subdirectory(src/RFL)
 
 # # Generate coverage using gcov
 # if (${CMAKE_PROJECT_NAME}_ENABLE_CODE_COVERAGE)
@@ -63,4 +62,4 @@ include(CPack)
 
 
 # AN DEMO/EXPERIMENT AREA
-add_subdirectory(playground)
+add_subdirectory(playground/cpp)
