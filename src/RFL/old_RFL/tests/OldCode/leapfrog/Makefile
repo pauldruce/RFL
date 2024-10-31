@@ -6,7 +6,7 @@
 #
 # "make" compiles and links the specified main programs and modules
 # using the specified libraries (if any), and produces the executables
-# 
+#
 # "make clean" removes all files created by "make"
 #
 # Dependencies on included files are automatically taken care of
@@ -17,11 +17,11 @@ all: rmxeq mkdep mkxeq
 .PHONY: all
 
 
-# main programs and required modules 
+# main programs and required modules
 
 MAIN = global reversibility
 
-SOURCE = action clifford derivative hamiltonian metropolis HMC_core HMC misc MMC_core MMC leapfrog 
+SOURCE = action clifford derivative hamiltonian metropolis HMC_core HMC misc MMC_core MMC leapfrog
 
 # search path for modules
 
@@ -33,16 +33,16 @@ VPATH = ../../source
 INCPATH = ../../include /home/pmxmd10/gsl/include
 
 
-# additional libraries to be included 
- 
+# additional libraries to be included
+
 LIBS = gsl openblas armadillo
 
 LIBPATH = /home/pmxmd10/gsl/lib
 
 
 # scheduling and optimization options (such as -DSSE -DSSE2 -DP4)
- 
-CFLAGS = -std=c++11 -pedantic -fstrict-aliasing -Wall -Wno-long-long -Werror 
+
+CFLAGS = -std=c++11 -pedantic -fstrict-aliasing -Wall -Wno-long-long -Werror
 
 ############################## do not change ###################################
 
@@ -88,7 +88,7 @@ mkxeq: $(MAIN)
 
 rmxeq:
 	@ -rm -f $(MAIN); \
-        echo "delete old executables"		
+        echo "delete old executables"
 
 
 # make dependencies
@@ -97,7 +97,7 @@ mkdep:  $(addsuffix .d,$(PGMS))
 	@ echo "generate tables of dependencies"
 
 
-# clean directory 
+# clean directory
 
 clean:
 	@ -rm -rf *.d *.o .tmp $(MAIN)

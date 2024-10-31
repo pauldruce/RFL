@@ -84,6 +84,19 @@ However, to build this project via a terminal, you use the following commands:
    ```
 
 
+## Building the Playground
+To build just the playground target of the CMake project, follow these steps:
+
+1. Navigate to the build directory:
+   ```bash
+   cd build
+   ```
+2. Run the CMake build command specifying the playground target:
+   ```bash
+   cmake --build . --target playground -j 4
+   ```
+This will compile only the playground target using 4 threads. Adjust the `-j` parameter to match the number of threads you want to use.
+
 
 ## Documentation
 

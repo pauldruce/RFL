@@ -1,12 +1,18 @@
-TIMESTAMP=$(shell date +%Y%m%d)
-IMAGE_NAME=RFL/rfl
-TIMESTAMP_FILE=.docker-timestamp
+FINAL_IMAGE_NAME=RFL/rfl
+BASE_IMAGE_NAME=RFL/rfl-base
+CMAKE_IMAGE_NAME=RFL/rfl-cmake
+TIMESTAMP=$(shell date +%Y%m%d-%H%M%S)
 
-# Main build target
-build: $(TIMESTAMP_FILE)
+base-docker:
+	docker build --target base -t $(BASE_IMAGE_NAME):$(TIMESTAMP) .
 
-# Timestamp file target with dependencies
-$(TIMESTAMP_FILE): Dockerfile docker/cmake/.docker-timestamp $(wildcard RFL_source/**/*)
-	docker build . -t $(IMAGE_NAME):$(TIMESTAMP)
-	docker tag $(IMAGE_NAME):$(TIMESTAMP) $(IMAGE_NAME):latest
-	echo $(TIMESTAMP) > $(TIMESTAMP_FILE)
+cmake-docker:
+	docker build --target cmake -t $(CMAKE_IMAGE_NAME):$(TIMESTAMP) .
+
+rfl-docker:
+	docker build --target full -t $(FINAL_IMAGE_NAME):$(TIMESTAMP) .
+	docker tag $(FINAL_IMAGE_NAME):$(TIMESTAMP) $(FINAL_IMAGE_NAME):latest
+
+all: base-docker cmake-docker rfl-docker
+
+.PHONY: base-docker cmake-docker rfl-docker all
