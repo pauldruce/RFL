@@ -11,7 +11,7 @@ jobs:
     outputs:
       matrix_includes: ${{steps.set-matrix.outputs.matrix_includes}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - id: set-matrix
         shell: bash
         run: |
@@ -44,7 +44,7 @@ jobs:
     name: "(${{matrix.BUILD_TYPE}}, ${{matrix.OS}}, Armadillo v${{matrix.ARMA_VERSION}})"
     runs-on: ${{matrix.OS}}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Linux dependencies
         if: startsWith(matrix.OS,'ubuntu')
