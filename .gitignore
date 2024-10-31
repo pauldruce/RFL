@@ -11,3 +11,4 @@ lcov*
 /venv/
 /build-xcode/
 .vscode
+.docker-timestamp
