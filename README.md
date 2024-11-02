@@ -5,7 +5,7 @@
 RFL is a C++ library to construct and run Finite Non-commutative Geometries (Finite NCGs) simulations. See §[Background](#background) below for more details on what a Finite NCG is.
 
 This library is written using C++17 and uses Armadillo and GSL for its mathematical operations.
-The library is built using CMake, and detailed instructions on how to generate the library files for your desired platform are listed below in  §[Building the library](#building-the-library)
+The library is built using CMake, and detailed instructions on how to generate the library files for your desired platform are listed below in §[Building the library](#building-the-library)
 
 Note that because this is a library and not an application, the reader must implement their application in C++ and include this project.
 Some examples of applications are included in `/examples` to demonstrate how to do this.
@@ -72,7 +72,7 @@ However, to build this project via a terminal, you use the following commands:
    ```bash
    cmake --build . --target all
    ```
-   This build process can be multi-threaded with the CMake command by adding `-j #threads` to the above command. For instance,
+   This build process can be multithreaded with the CMake command by adding `-j #threads` to the above command. For instance,
    ```bash
    cmake --build . --target all -j 4
    ```
@@ -85,11 +85,14 @@ However, to build this project via a terminal, you use the following commands:
 
 
 ## Building the Playground
-To build just the playground target of the CMake project, follow these steps:
+
+The playground is just an area to experiment with C++ - it's not a specific area
+for interacting with the RFL library by default.
+To build the playground target of the CMake project, follow these steps:
 
 1. Navigate to the build directory:
    ```bash
-   cd build
+   cmake -B ./build .
    ```
 2. Run the CMake build command specifying the playground target:
    ```bash
@@ -97,6 +100,23 @@ To build just the playground target of the CMake project, follow these steps:
    ```
 This will compile only the playground target using 4 threads. Adjust the `-j` parameter to match the number of threads you want to use.
 
+## Show all CMake targets available to build
+
+This project defines a number of CMake targets. For instance, there is a single
+target which builds the modern RFL library called "new_RFL". There is also a
+target for the original RFL library created by Mauro called just "RFL". This is
+the original code from which this repository is forked. Eventually this will be
+replaced when all the original functionality of Mauro's implementation has been
+reproduced using modern C++.
+
+So, how can you see all the available targets to build in this project? There is
+a handy command:
+```shell
+# Create the build directory for your platform.
+cmake -B ./build .
+# Use CMake to inspect the available targets.
+cmake --build ./build --target help
+```
 
 ## Documentation
 
