@@ -1,5 +1,5 @@
 /.idea/
-/cmake-*/
+cmake-build
 /build/
 /lib/
 /clion/
@@ -12,3 +12,7 @@ lcov*
 /build-xcode/
 .vscode
 .docker-timestamp
+
+# Entries below this point are managed by Please (DO NOT EDIT)
+plz-out
+.plzconfig.local
