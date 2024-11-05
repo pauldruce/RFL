@@ -1,0 +1,39 @@
+name: CI Checks
+on:
+  workflow_dispatch:
+  pull_request:
+
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            cmake                 \
+            libopenblas-dev       \
+            liblapack-dev         \
+            libarpack2-dev        \
+            libsuperlu-dev        \
+            wget                  \
+            libgsl-dev            \
+            doxygen               \
+            graphviz              \
+            libhdf5-serial-dev
+
+      - name: Install Armadillo
+        uses: .github/actions/install-armadillo
+        with:
+          version: '12.8.2'
+          os: 'ubuntu-latest'
+
+      - name: Build Project using Please
+        run: |
+          ./pleasew build
+
+      - name: Run Tests using Please
+        run: |
+          ./pleasew test
