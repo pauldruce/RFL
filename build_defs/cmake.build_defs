@@ -1,0 +1,70 @@
+def cmake_library(
+        name,
+        target,
+        srcs,
+        outs,
+        hdrs=None,
+        deps=None,
+        visibility=None,
+        tools=None):
+    cmds = (
+        f"cmake -B ./build . && "
+        f"cmake --build ./build --target {target} -j 4 && "
+        f"cmake --install ./build --prefix ./install"
+    )
+
+    cmake_rule = build_rule(
+        name = name,
+        tag = "cmake",
+        srcs = srcs,
+        cmd = cmds,
+        outs = outs,
+        building_description = f"Building {name} with Cmake",
+        deps = deps,
+        tools = ["cmake"],
+        visibility = visibility,
+    )
+
+    requires = ["cc_hdrs", "cc_mod"]
+    include_rule = filegroup(
+        name = f"{name}_includes",
+        srcs = [cmake_rule],
+        cmd = f"cp -r include/* $OUT",
+    )
+
+    lib_rule = filegroup(
+        name = f"{name}_lib",
+        srcs = [cmake_rule],
+        cmd = f"cp -r {name}/lib/**/* $OUT",
+    )
+
+    provides = {
+        "cc_hdrs": include_rule,
+        "cc": lib_rule,
+    }
+
+    return filegroup(
+        name = name,
+        srcs = [lib_rule],
+        deps = [include_rule],
+        provides = provides,
+        visibility = visibility,
+        output_is_complete = False,
+    )
+
+# genrule(
+#     name = "build_armadillo",
+#     srcs = glob(["armadillo-12.6.6/**/*"]),
+#     outs = ["armadillo-12.6.6/"],
+#     cmd = [
+#         "cmake -B ./build -DALLOW_OPENBLAS_MACOS=ON vendors/armadillo-12.6.6",
+#         "cmake --build ./build --target all -j 4",
+#         "cmake --install ./build --prefix armadillo-12.6.6/install",
+#     ],
+#     tools = ["cmake"],
+#     visibility = ["//visibility:public"],
+# )
+
+
+
+

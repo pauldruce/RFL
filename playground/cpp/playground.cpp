@@ -1,28 +1,7 @@
+#include "helpers/actions.hpp"
 #include <iostream>
 #include <memory>
 #include <string>
-
-// Abstract base class representing the Strategy interface
-class Action {
-public:
-  virtual ~Action() = default;
-  // Pure virtual function to be implemented by concrete strategies
-  virtual std::string calculate() = 0;
-};
-
-// Concrete Strategy implementing the Action interface
-class quadraticAction final : public Action {
-  std::string calculate() override {
-    return "calculated by quadratic action";
-  }
-};
-
-// Another Concrete Strategy implementing the Action interface
-class barrettGlaserAction final : public Action {
-  std::string calculate() override {
-    return "calculated by Barrett-Glaser action";
-  }
-};
 
 // Context class that uses an Action strategy
 class ActionManager {

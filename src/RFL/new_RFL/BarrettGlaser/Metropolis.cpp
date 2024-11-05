@@ -1,7 +1,7 @@
 //
 // Created by Paul Druce on 13/11/2022.
 //
-#include "Metropolis.hpp"
+#include "./Metropolis.hpp"
 #include <cmath>
 
 using namespace std;

@@ -4,8 +4,8 @@
 
 #ifndef RFL_ACTION_HPP
 #define RFL_ACTION_HPP
-#include "IAction.hpp"
-#include "IDiracOperator.hpp"
+#include "../IAction.hpp"
+#include "../IDiracOperator.hpp"
 
 /**
  * Action implements the \f$ S(D) = g_2Tr(D^2) + g_4 Tr(D^4) \f$ action as described in the papers

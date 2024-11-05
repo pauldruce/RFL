@@ -10,6 +10,7 @@
 
 [parse]
 preloadsubincludes = ///cc//build_defs:cc
+preloadsubincludes = //build_defs:cmake
 
 [Plugin "cc"]
 Target = //plugins:cc

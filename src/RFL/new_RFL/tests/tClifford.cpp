@@ -2,7 +2,7 @@
 // Created by Paul Druce on 27/12/2022.
 //
 
-#include "Clifford.hpp"
+#include "../Clifford.hpp"
 #include <gtest/gtest.h>
 
 using namespace arma;

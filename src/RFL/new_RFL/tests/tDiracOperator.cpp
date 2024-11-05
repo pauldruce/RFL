@@ -2,7 +2,7 @@
 // Created by Paul Druce on 28/12/2022.
 //
 
-#include "DiracOperator.hpp"
+#include "../DiracOperator.hpp"
 #include <gtest/gtest.h>
 
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {

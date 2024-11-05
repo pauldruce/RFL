@@ -2,9 +2,9 @@
 // Created by Paul Druce on 04/02/2023.
 //
 
-#include "BarrettGlaser/Metropolis.hpp"
-#include "DiracOperator.hpp"
-#include "GslRng.hpp"
+#include "../BarrettGlaser/Metropolis.hpp"
+#include "../DiracOperator.hpp"
+#include "../GslRng.hpp"
 #include <gtest/gtest.h>
 
 TEST(MetropolisTests, ConstructorDoesNotThrow) {

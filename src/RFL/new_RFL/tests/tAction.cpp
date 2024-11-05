@@ -1,9 +1,9 @@
 //
 // Created by Paul Druce on 27/12/2022.
 //
-#include "BarrettGlaser/Action.hpp"
-#include "DiracOperator.hpp"
-#include "GslRng.hpp"
+#include "../BarrettGlaser/Action.hpp"
+#include "../DiracOperator.hpp"
+#include "../GslRng.hpp"
 #include <gtest/gtest.h>
 
 static void CompareActions(const int p, const int q, const int dim, const double g_2) {
