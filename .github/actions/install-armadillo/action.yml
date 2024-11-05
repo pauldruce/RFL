@@ -21,9 +21,7 @@ runs:
       run: |
         mkdir armadillo
         cd armadillo
-        wget -O armadillo.tar.xz
-        https://sourceforge.net/projects/arma/files/armadillo-${{
-        inputs.ARMA_VERSION }}.tar.xz/download
+        wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{inputs.ARMA_VERSION }}.tar.xz/download
 
     - name: Unzip Armadillo tarball and create build directory
       shell: bash
