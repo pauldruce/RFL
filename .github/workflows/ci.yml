@@ -25,7 +25,7 @@ jobs:
             libhdf5-serial-dev
 
       - name: Install Armadillo
-        uses: .github/actions/install-armadillo
+        uses: ./.github/actions/install-armadillo
         with:
           version: '12.8.2'
           os: 'ubuntu-latest'

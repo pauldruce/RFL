@@ -6,11 +6,12 @@ inputs:
   version:
     description: 'The version of Armadillo to install'
     required: true
-    default: '10.7.0'
+    default: '12.8.2'
   os:
     description: 'The operating system'
     required: true
     default: 'ubuntu-latest'
+
 
 runs:
   using: "composite"
