@@ -7,5 +7,5 @@ cc_library(
         "-larmadillo",  # Depends on armadillo
         "-lgsl",  # Depends on GSL
     ],
-    visibility = ["//src/RFL/old_RFL/tests:oldRFL_tests"],
+    visibility = ["//src/RFL/..."],
 )

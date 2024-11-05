@@ -14,3 +14,7 @@
 - [ ] Create github actions to create built libraries for macOS, Windows and linux OS.
 - [ ] Make an interface for DiracOperator, rather than using concrete DiracOperator in
   Simulation class and Algorithm.
+
+
+- [ ] Change new_RFL source code to use an include folder pattern, rather than
+  mix and match the srcs and headers. It's just extra work for no gain.

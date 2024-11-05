@@ -23,6 +23,9 @@ cc_library(
         "IRng.hpp",
         "Simulation.hpp",
     ],
+    includes = [
+        "./",  # TODO: This is not ideal, I should keep my header files in an include directory which matches what the output will be.
+    ],
     linker_flags = [
         "-larmadillo",  # Depends on armadillo
         "-lgsl",  # Depends on GSL
