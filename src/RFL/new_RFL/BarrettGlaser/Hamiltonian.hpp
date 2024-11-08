@@ -6,9 +6,9 @@
 #define RFL_HAMILTONIAN_HPP
 #include <memory>
 
-#include "Action.hpp"
-#include "IAlgorithm.hpp"
-#include "IRng.hpp"
+#include "../IAlgorithm.hpp"
+#include "../IRng.hpp"
+#include "./Action.hpp"
 
 enum Integrator {
   LEAPFROG,

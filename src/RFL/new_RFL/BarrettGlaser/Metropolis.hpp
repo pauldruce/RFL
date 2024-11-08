@@ -5,9 +5,9 @@
 #ifndef RFL_METROPOLIS_HPP
 #define RFL_METROPOLIS_HPP
 
-#include "Action.hpp"
-#include "IAlgorithm.hpp"
-#include "IRng.hpp"
+#include "../IAlgorithm.hpp"
+#include "../IRng.hpp"
+#include "./Action.hpp"
 #include <armadillo>
 #include <memory>
 

@@ -1,14 +1,18 @@
 /.idea/
-/cmake-*/
+cmake-build
 /build/
 /lib/
 /clion/
 coverage
 lcov*
-/RFL_docs/
+RFL_docs
 /RFL_docs_sphinx/
 .DS_Store
 /venv/
 /build-xcode/
 .vscode
 .docker-timestamp
+
+# Entries below this point are managed by Please (DO NOT EDIT)
+plz-out
+.plzconfig.local

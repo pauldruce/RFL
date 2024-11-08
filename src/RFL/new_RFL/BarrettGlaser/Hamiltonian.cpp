@@ -2,9 +2,9 @@
 // Created by Paul Druce on 12/11/2022.
 //
 
-#include "Hamiltonian.hpp"
+#include "./Hamiltonian.hpp"
 #include "../IDiracOperatorDerivatives.hpp"
-#include "Action.hpp"
+#include "./Action.hpp"
 #include <armadillo>
 
 using namespace std;

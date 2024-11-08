@@ -2,11 +2,11 @@
 // Created by Paul Druce on 12/05/2023.
 //
 
-#include "DiracOperator.hpp"
-#include "IAlgorithm.hpp"
-#include "Simulation.hpp"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include "../DiracOperator.hpp"
+#include "../IAlgorithm.hpp"
+#include "../Simulation.hpp"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 class MockAlgorithm final : public IAlgorithm {
 public:

@@ -1,0 +1,52 @@
+name: Install Armadillo
+
+description: This action installs Armadillo from SourceForge.
+
+inputs:
+  version:
+    description: 'The version of Armadillo to install'
+    required: true
+    default: '12.8.2'
+  os:
+    description: 'The operating system'
+    required: true
+    default: 'ubuntu-latest'
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Armadillo from SourceForge
+      shell: bash
+      run: |
+        mkdir armadillo
+        cd armadillo
+        wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{inputs.version}}.tar.xz/download
+
+    - name: Unzip Armadillo tarball and create build directory
+      shell: bash
+      working-directory: armadillo
+      run: |
+        tar -xf ./armadillo.tar.xz
+        cd armadillo-${{ inputs.version }}
+        mkdir build
+        cd build
+
+    - name: Configure CMake for Armadillo macOS
+      shell: bash
+      if: startsWith(inputs.os, 'macos')
+      working-directory: armadillo/armadillo-${{ inputs.version }}/build
+      run: cmake -DALLOW_OPENBLAS_MACOS=ON ..
+
+    - name: Configure CMake for Armadillo Linux
+      shell: bash
+      if: startsWith(inputs.os, 'ubuntu')
+      working-directory: armadillo/armadillo-${{ inputs.version }}/build
+      run: cmake ..
+
+    - name: Build and Install Armadillo
+      shell: bash
+      working-directory: armadillo/armadillo-${{ inputs.version }}/build
+      run: |
+        cmake --build . --target all -j 2
+        sudo cmake --install .

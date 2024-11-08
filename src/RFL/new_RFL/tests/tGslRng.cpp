@@ -2,7 +2,7 @@
 // Created by Paul Druce on 11/02/2023.
 //
 
-#include "GslRng.hpp"
+#include "../GslRng.hpp"
 #include <gtest/gtest.h>
 
 TEST(GslRngTests, SettingSeedProducesSameValues) {
