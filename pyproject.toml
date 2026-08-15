@@ -1,0 +1,24 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11", "numpy"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "rfl"
+version = "0.5.0"
+description = "Random Fuzzy Library (RFL) - MCMC simulations of Finite Random Non-commutative geometries"
+readme = "README.md"
+authors = [{ name = "Paul Druce" }, { name = "Mauro D'Arcangelo" }]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.20"
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["jupyter", "nbformat"]
+
+[tool.scikit-build]
+cmake.source-dir = "src/RFL"
+
+[tool.scikit-build.cmake.define]
+CCACHE_PROGRAM = "OFF"

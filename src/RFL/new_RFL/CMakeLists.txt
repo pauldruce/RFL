@@ -32,13 +32,13 @@ target_link_libraries(new_RFL ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
 # Install static library files
 install(
         TARGETS new_RFL
-        DESTINATION ${CMAKE_SOURCE_DIR}/lib/new_RFL/bin/${CMAKE_BUILD_TYPE}
+        DESTINATION lib/new_RFL/bin/${CMAKE_BUILD_TYPE}
 )
 
 # Install include/header files.
 install(
         DIRECTORY ${new_RFL_INCLUDE_DIR}/
-        DESTINATION ${CMAKE_SOURCE_DIR}/lib/new_RFL/include
+        DESTINATION lib/new_RFL/include
         FILES_MATCHING PATTERN "*.hpp"
         PATTERN "tests" EXCLUDE
 )

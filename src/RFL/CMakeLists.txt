@@ -23,8 +23,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         enable_testing()
 
         add_compile_options(-Wall -Wextra -Wpedantic)
-        add_compile_options(-fsanitize=address)
-        add_link_options(-fsanitize=address)
+        if(NOT SKBUILD)
+            add_compile_options(-fsanitize=address)
+            add_link_options(-fsanitize=address)
+        endif()
 endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -65,4 +67,32 @@ add_subdirectory(${new_RFL_SOURCE_DIR})
 # Add tests if building tests.
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         add_subdirectory(${RFL_SOURCE_DIR}/tests)
+endif()
+
+# Python Bindings
+option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" ON)
+if(BUILD_PYTHON_BINDINGS)
+    include(FetchContent)
+
+    # Fetch carma (NumPy/Armadillo bridge)
+    FetchContent_Declare(
+        carma
+        GIT_REPOSITORY https://github.com/RUrlus/carma.git
+        GIT_TAG        v0.8.0
+    )
+    FetchContent_Populate(carma)
+    add_library(carma::carma INTERFACE IMPORTED)
+    set_target_properties(carma::carma PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${carma_SOURCE_DIR}/include"
+    )
+
+    # Fetch pybind11
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.13.1
+    )
+    FetchContent_MakeAvailable(pybind11)
+
+    add_subdirectory(python_bindings)
 endif()

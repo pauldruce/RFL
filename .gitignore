@@ -12,6 +12,11 @@ RFL_docs
 /build-xcode/
 .vscode
 .docker-timestamp
+_skbuild/
+.skbuild/
+*.egg-info/
+__pycache__/
+src/RFL/lib/
 
 # Entries below this point are managed by Please (DO NOT EDIT)
 plz-out
