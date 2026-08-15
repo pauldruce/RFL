@@ -286,5 +286,5 @@ bool areHermitian(const cx_mat& m_1, const cx_mat& m_2) {
 }
 
 void Clifford::sortGammas() {
-  sort(m_gammas.begin(), m_gammas.end(), areHermitian);
+  stable_sort(m_gammas.begin(), m_gammas.end(), areHermitian);
 }
