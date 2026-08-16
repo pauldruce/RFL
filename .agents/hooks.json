@@ -1,0 +1,15 @@
+{
+  "protect-research": {
+    "PreToolUse": [
+      {
+        "matcher": "write_to_file|replace_file_content|run_command",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./scripts/protect_research.sh"
+          }
+        ]
+      }
+    ]
+  }
+}
