@@ -1,8 +1,8 @@
 #include "Clifford.hpp"
 #include <algorithm>
 #include <iostream>
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 using namespace std;
 using namespace arma;
