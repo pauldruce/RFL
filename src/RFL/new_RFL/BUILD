@@ -32,3 +32,10 @@ cc_library(
     ],
     visibility = ["PUBLIC"],
 )
+
+# Export source files for the wheel build
+filegroup(
+    name = "wheel_srcs",
+    srcs = glob(["**/*.cpp", "**/*.hpp", "**/*.h", "**/CMakeLists.txt"]),
+    visibility = ["//src/RFL:rfl_wheel"],
+)

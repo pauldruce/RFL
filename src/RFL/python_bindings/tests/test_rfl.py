@@ -11,7 +11,7 @@ def test_dirac_operator():
     
     eigenvals = dirac.get_eigenvalues()
     assert isinstance(eigenvals, np.ndarray)
-    assert len(eigenvals) == 400  # For p=1, q=3, dim=10, the matrix size is 400x400
+    assert len(eigenvals) == 400
 
 def test_action():
     g_2 = -1.0

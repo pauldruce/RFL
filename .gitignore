@@ -12,6 +12,8 @@ RFL_docs
 /build-xcode/
 .vscode
 .docker-timestamp
+
+# Python build artifacts
 _skbuild/
 .skbuild/
 *.egg-info/
@@ -21,3 +23,4 @@ src/RFL/lib/
 # Entries below this point are managed by Please (DO NOT EDIT)
 plz-out
 .plzconfig.local
+/research

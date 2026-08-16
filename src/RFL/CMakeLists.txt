@@ -65,7 +65,7 @@ set(new_RFL_INCLUDE_DIR "${new_RFL_SOURCE_DIR}")
 add_subdirectory(${new_RFL_SOURCE_DIR})
 
 # Add tests if building tests.
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
         add_subdirectory(${RFL_SOURCE_DIR}/tests)
 endif()
 

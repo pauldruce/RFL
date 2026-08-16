@@ -43,4 +43,6 @@ install(
         PATTERN "tests" EXCLUDE
 )
 
-add_subdirectory(tests)
+if(NOT SKBUILD)
+    add_subdirectory(tests)
+endif()
