@@ -28,7 +28,7 @@ if [[ "$TOOL_NAME" == "run_command" ]]; then
   fi
   
   # Block if the command line references the research folder via relative or absolute paths
-  # Matches: /Users/paul/Dev/RFL/research, ./research, ../research, research/
+  # Matches: <absolute_workspace_root>/research, ./research, ../research, research/
   if echo "$CMD" | grep -qE "($WORKSPACE_ROOT/research|(^|[[:space:]])(\.\.?/)+research|(^|[[:space:]])research/)"; then
     echo '{"decision": "deny", "reason": "SECURITY BLOCK: The command references the /research directory which is protected."}'
     exit 0
