@@ -170,7 +170,7 @@ TEST(CliffordTests, GammasSatisfyAntiCommutationRelations) {
     for (int i = 0; i < num_gammas; ++i) {
       for (int j = i; j < num_gammas; ++j) {
         cx_mat anticommutator = gammas[i] * gammas[j] + gammas[j] * gammas[i];
-        
+
         if (i == j) {
           // gamma_i^2 = I if i < p (Hermitian), -I if i >= p (anti-Hermitian)
           double sign = (i < p) ? 1.0 : -1.0;
