@@ -56,6 +56,9 @@ public:
    * with the anti-Hermitian matrices afterwards in the vector.
    */
   void sortGammas();
+  
+  static void setMaxMode(int max_mode);
+  static int getMaxMode();
 
   explicit Clifford(int mode);
   Clifford(const Clifford& clifford_to_copy);

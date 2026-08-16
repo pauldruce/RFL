@@ -3,6 +3,7 @@
 #include <armadillo>
 
 #include "DiracOperator.hpp"
+#include "Clifford.hpp"
 #include "BarrettGlaser/Action.hpp"
 #include "GslRng.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
@@ -11,6 +12,9 @@ namespace py = pybind11;
 
 PYBIND11_MODULE(rfl, m) {
     m.doc() = "Python bindings for the Random Fuzzy Library (RFL)";
+
+    m.def("set_max_clifford_mode", &Clifford::setMaxMode, py::arg("max_mode"), "Set the maximum allowed Clifford algebra mode (p+q) to prevent excessive memory allocation.");
+    m.def("get_max_clifford_mode", &Clifford::getMaxMode, "Get the maximum allowed Clifford algebra mode (p+q)");
 
     py::class_<IDiracOperator>(m, "IDiracOperator");
 

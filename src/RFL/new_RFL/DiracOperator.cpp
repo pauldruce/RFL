@@ -5,12 +5,17 @@
 #include "DiracOperator.hpp"
 #include "Clifford.hpp"
 #include <cassert>
+#include <stdexcept>
 
 using namespace std;
 using namespace arma;
 
 DiracOperator::DiracOperator(int p, int q, int dim)
     : m_clifford(Clifford(p, q)), m_dim(dim) {
+  if (dim <= 0) {
+    throw std::invalid_argument("Matrix dimension 'dim' must be strictly positive.");
+  }
+
   int n = p + q;
 
   vector<cx_mat> gamma = m_clifford.getGammaMatrices();

@@ -1,5 +1,6 @@
 import rfl
 import numpy as np
+import pytest
 
 def test_dirac_operator():
     p, q = 1, 3
@@ -42,3 +43,4 @@ def test_metropolis():
     acceptance_rate = metropolis.update_dirac(dirac)
     
     assert 0.0 <= acceptance_rate <= 1.0
+
