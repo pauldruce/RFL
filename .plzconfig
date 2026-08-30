@@ -5,13 +5,19 @@
 ;
 ; Or you can uncomment the following to pin everyone to a particular version;
 ; when you change it all users will automatically get updated.
-; [please]
-; version = 17.12.1
+[please]
+version = 17.25.1
 
 [parse]
 preloadsubincludes = ///cc//build_defs:cc
+preloadsubincludes = ///python//build_defs:python
 
 [Plugin "cc"]
 Target = //plugins:cc
 DefaultOptCppFlags = --std=c++17 -Wall -Wextra -Wpedantic
+
+[Plugin "python"]
+Target = //plugins:python
+TestRunner = pytest
+
 

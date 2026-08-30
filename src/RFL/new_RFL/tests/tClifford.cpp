@@ -150,6 +150,44 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
   }
 }
 
+TEST(CliffordTests, GammasSatisfyAntiCommutationRelations) {
+  vector<CliffordData> data;
+  data.push_back({1, 0});
+  data.push_back({0, 1});
+  for (int p = 1; p < 5; p++) {
+    for (int q = 1; q < 5; q++) {
+      data.push_back({p, q});
+    }
+  }
+
+  for (const auto& [p, q] : data) {
+    Clifford C(p, q);
+    auto gammas = C.getGammaMatrices();
+    const int num_gammas = p + q;
+    const int dim = C.getGammaDimension();
+    const cx_mat I = arma::eye<cx_mat>(dim, dim);
+
+    for (int i = 0; i < num_gammas; ++i) {
+      for (int j = i; j < num_gammas; ++j) {
+        cx_mat anticommutator = gammas[i] * gammas[j] + gammas[j] * gammas[i];
+
+        if (i == j) {
+          // gamma_i^2 = I if i < p (Hermitian), -I if i >= p (anti-Hermitian)
+          double sign = (i < p) ? 1.0 : -1.0;
+          cx_mat expected = 2.0 * sign * I;
+          EXPECT_TRUE(arma::approx_equal(anticommutator, expected, "absdiff", 1e-10))
+              << "Failed anti-commutation relation for i=j=" << i << " in (p,q)=(" << p << "," << q << ")";
+        } else {
+          // gamma_i * gamma_j + gamma_j * gamma_i = 0
+          cx_mat expected = arma::zeros<cx_mat>(dim, dim);
+          EXPECT_TRUE(arma::approx_equal(anticommutator, expected, "absdiff", 1e-10))
+              << "Failed anti-commutation relation for i=" << i << ", j=" << j << " in (p,q)=(" << p << "," << q << ")";
+        }
+      }
+    }
+  }
+}
+
 // TODO: find minimum set of configurations of (p,q) that covers all code.
 TEST(CliffordTests, ChiralityIsCorrect) {
   // TODO: Fix source code, because this test fails if max_p, max_q is >= 6

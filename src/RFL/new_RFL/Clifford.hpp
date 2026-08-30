@@ -57,6 +57,9 @@ public:
    */
   void sortGammas();
 
+  static void setMaxMode(int max_mode);
+  static int getMaxMode();
+
   explicit Clifford(int mode);
   Clifford(const Clifford& clifford_to_copy);
   Clifford& operator=(const Clifford& clifford_to_copy);

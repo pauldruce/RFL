@@ -8,6 +8,8 @@ project(
         "Random Fuzzy Library (RFL) - A library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative geometries."
         LANGUAGES CXX)
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         set(CMAKE_CXX_STANDARD 17)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -18,8 +20,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         enable_testing()
 
         add_compile_options(-Wall -Wextra -Wpedantic)
-        add_compile_options(-fsanitize=address)
-        add_link_options(-fsanitize=address)
+        if(NOT SKBUILD)
+            add_compile_options(-fsanitize=address)
+            add_link_options(-fsanitize=address)
+        endif()
 endif()
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
@@ -45,7 +49,9 @@ doxygen_add_docs(doxygen
 # GSL is included with Armadillo above, but we need more.
 include(Armadillo)
 include(GSL)
-include(LoadGoogleTest)
+if(NOT SKBUILD)
+    include(LoadGoogleTest)
+endif()
 
 # Build RFL library
 set(RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/old_RFL")
@@ -58,6 +64,33 @@ set(new_RFL_INCLUDE_DIR "${new_RFL_SOURCE_DIR}")
 add_subdirectory(${new_RFL_SOURCE_DIR})
 
 # Add tests if building tests.
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
         add_subdirectory(${RFL_SOURCE_DIR}/tests)
+endif()
+
+if(SKBUILD)
+    set(BUILD_PYTHON_BINDINGS_DEFAULT ON)
+else()
+    set(BUILD_PYTHON_BINDINGS_DEFAULT OFF)
+endif()
+option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" ${BUILD_PYTHON_BINDINGS_DEFAULT})
+if(BUILD_PYTHON_BINDINGS)
+    include(FetchContent)
+
+    # Fetch carma (NumPy/Armadillo bridge)
+    FetchContent_Declare(
+        carma
+        GIT_REPOSITORY https://github.com/RUrlus/carma.git
+        GIT_TAG        v0.8.0
+    )
+
+    # Fetch pybind11
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.13.1
+    )
+    FetchContent_MakeAvailable(carma pybind11)
+
+    add_subdirectory(python_bindings)
 endif()

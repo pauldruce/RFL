@@ -1,10 +1,15 @@
 #include "Clifford.hpp"
 #include <algorithm>
 #include <iostream>
+#include <stdexcept>
 #include <vector>
 
 using namespace std;
 using namespace arma;
+
+static int s_max_mode = 16;
+void Clifford::setMaxMode(int max_mode) { s_max_mode = max_mode; }
+int Clifford::getMaxMode() { return s_max_mode; }
 
 // Constructors
 
@@ -101,6 +106,13 @@ Clifford::Clifford(int mode) {
 
 Clifford::Clifford(int p, int q)
     : m_p(p), m_q(q), m_dim_gamma(0) {
+  if (p < 0 || q < 0) {
+    throw std::invalid_argument("Clifford signature (p, q) cannot contain negative values.");
+  }
+  if (p + q > s_max_mode) {
+    throw std::invalid_argument("Clifford algebra mode (p+q) is too large. Max supported is " + std::to_string(s_max_mode) + " to prevent excessive memory allocation.");
+  }
+
   //(1,0)
   if (m_p == 1 && m_q == 0) {
     *this = Clifford(3);
@@ -286,5 +298,5 @@ bool areHermitian(const cx_mat& m_1, const cx_mat& m_2) {
 }
 
 void Clifford::sortGammas() {
-  sort(m_gammas.begin(), m_gammas.end(), areHermitian);
+  stable_sort(m_gammas.begin(), m_gammas.end(), areHermitian);
 }

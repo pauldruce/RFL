@@ -22,6 +22,6 @@ target_link_libraries(RFL ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
 
 # Install static library and header files
 install(TARGETS RFL
-        DESTINATION ${CMAKE_SOURCE_DIR}/lib/RFL/bin/${CMAKE_BUILD_TYPE}
-        PUBLIC_HEADER DESTINATION ${CMAKE_SOURCE_DIR}/lib/RFL/include
+        DESTINATION lib/RFL/bin/${CMAKE_BUILD_TYPE}
+        PUBLIC_HEADER DESTINATION lib/RFL/include
 )
