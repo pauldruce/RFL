@@ -1,10 +1,5 @@
-cmake_minimum_required(VERSION 3.7...3.23)
+cmake_minimum_required(VERSION 3.20...3.31)
 
-if(${CMAKE_VERSION} VERSION_LESS 3.23)
-        cmake_policy(VERSION ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION})
-else()
-        cmake_policy(VERSION 3.23)
-endif()
 
 project(
         RFL
