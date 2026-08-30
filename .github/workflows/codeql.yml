@@ -48,7 +48,7 @@ jobs:
         if: matrix.language == 'c-cpp'
         run: |
           cmake -B build src/RFL
-          cmake --build build
+          cmake --build build --target new_RFL
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
