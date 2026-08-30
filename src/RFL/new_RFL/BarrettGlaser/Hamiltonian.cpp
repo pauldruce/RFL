@@ -27,7 +27,7 @@ void Hamiltonian::sampleMoments(const IDiracOperator& dirac) const {
   const auto mat_dim = dirac.getMatrixDimension();
 
   for (int i = 0; i < num_matrices; ++i) {
-    // loop on indices
+    // Loop over matrix indices.
     for (int j = 0; j < mat_dim; ++j) {
       const double x = m_rng->getGaussian(1.0);
       mom[i](j, j) = cx_double(x, 0.);
@@ -107,22 +107,21 @@ void Hamiltonian::runDualAverage(const IDiracOperator& dirac,
                                  const int& nt,
                                  const int& iter,
                                  const double& target) {
-  // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
+  // Initial and final energy arrays.
   auto en_i = vector<double>(4);
   auto en_f = vector<double>(4);
 
-  // dual averaging variables for dt
+  // Dual-averaging variables for dt.
   double stat = 0;
   const double mu = log(10 * m_dt);
   double log_dt_avg = log(m_dt);
 
-  // iter repetitions of leapfrog
+  // Iterations of leapfrog trajectories.
   for (int i = 0; i < iter; ++i) {
     constexpr int i_0 = 10;
     constexpr double kappa = 0.75;
     constexpr double shr = 0.05;
-    // if it's not the first iteration set potential to
-    // previous final value, otherwise compute it
+    // If not the first iteration, set potential energy to previous final value; otherwise compute it.
     if (i) {
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
@@ -131,34 +130,33 @@ void Hamiltonian::runDualAverage(const IDiracOperator& dirac,
       en_i[1] = dirac.traceOfDirac4();
     }
 
-    // core part of HMC
+    // Core HMC trajectory update.
     stat += target - runDualAveragingCore(dirac, nt, en_i, en_f);
 
-    // perform dual averaging on dt
+    // Perform dual-averaging on dt.
     const double log_dt = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
     m_dt = exp(log_dt);
     const double eta = pow(i + 1, -kappa);
     log_dt_avg = eta * log_dt + (1 - eta) * log_dt_avg;
   }
 
-  // set dt on its final dual averaged value
+  // Set dt to its final dual-averaged value.
   m_dt = exp(log_dt_avg);
 }
 
 double Hamiltonian::run(const IDiracOperator& dirac,
                         const int& num_iterations,
                         const int& iter) const {
-  // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
+  // Initial and final energy arrays.
   auto en_i = vector<double>(4);
   auto en_f = vector<double>(4);
 
-  // return statistic
+  // Acceptance statistic accumulator.
   double stat = 0;
 
-  // iter repetitions of leapfrog
+  // Iterations of leapfrog trajectories.
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first iteration set potential to
-    // previous final value, otherwise compute it
+    // If not the first iteration, set potential energy to previous final value; otherwise compute it.
     if (i) {
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
@@ -167,7 +165,7 @@ double Hamiltonian::run(const IDiracOperator& dirac,
       en_i[1] = dirac.traceOfDirac4();
     }
 
-    // core part of HMC
+    // Core HMC trajectory update.
     stat += runCore(dirac, num_iterations, en_i, en_f);
   }
 
@@ -179,17 +177,16 @@ double Hamiltonian::run(const IDiracOperator& dirac,
                         const double& dt_min,
                         const double& dt_max,
                         const int& iter) {
-  // initial (_i) and final (_f) potential2, potential4, kinetic, hamiltonian
+  // Initial and final energy arrays.
   auto en_i = vector<double>(4);
   auto en_f = vector<double>(4);
 
-  // return statistic
+  // Acceptance statistic accumulator.
   double stat = 0;
 
-  // iter repetitions of leapfrog
+  // Iterations of leapfrog trajectories.
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first iteration set potential to
-    // previous final value, otherwise compute it
+    // If not the first iteration, set potential energy to previous final value; otherwise compute it.
     if (i) {
       en_i[0] = en_f[0];
       en_i[1] = en_f[1];
@@ -198,7 +195,7 @@ double Hamiltonian::run(const IDiracOperator& dirac,
       en_i[1] = dirac.traceOfDirac4();
     }
 
-    // core part of HMC
+    // Core HMC trajectory update.
     stat += runCore(dirac, nt, dt_min, dt_max, en_i, en_f);
   }
 
@@ -209,13 +206,13 @@ double Hamiltonian::runDualAveragingCore(const IDiracOperator& dirac,
                                          const int& nt,
                                          vector<double>& en_i,
                                          vector<double>& en_f) const {
-  // acceptance probability (return value)
+  // Acceptance probability return value.
   double e = 1;
 
-  // resample momentum
+  // Resample momentum.
   sampleMoments(dirac);
 
-  // store previous configuration
+  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -223,30 +220,28 @@ double Hamiltonian::runDualAveragingCore(const IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // calculate initial hamiltonian
+  // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
   en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
 
-  // integration
+  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt, m_action->getG2());
   }
 
-  // calculate final hamiltonian
+  // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
   en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
 
-  // metropolis test
-
-  // sometimes leapfrog diverges and Hf becomes nan.
-  // so first of all address this case
+  // Metropolis accept/reject test.
+  // If leapfrog integration diverges and produces NaN, reject proposal immediately.
   if (std::isnan(en_f[3])) {
     e = 0;
-    // restore old configuration
+    // Reject proposal and restore previous configuration.
     for (int j = 0; j < num_matrices; ++j)
       mat[j] = mat_bk[j];
     en_f[0] = en_i[0];
@@ -254,14 +249,13 @@ double Hamiltonian::runDualAveragingCore(const IDiracOperator& dirac,
     en_f[2] = en_i[2];
     en_f[3] = en_i[3];
   }
-  // now do the standard metropolis test
+  // Standard Metropolis accept/reject test.
   else if (en_f[3] > en_i[3]) {
-    //    double r = gsl_rng_uniform(m_engine);
     const double r = m_rng->getUniform();
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
-      // restore old configuration
+      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
@@ -278,13 +272,13 @@ double Hamiltonian::runCore(const IDiracOperator& dirac,
                             const int& nt,
                             vector<double>& en_i,
                             vector<double>& en_f) const {
-  // acceptance probability (return value)
+  // Acceptance probability return value.
   double e = 1;
 
-  // resample momentum
+  // Resample momentum.
   sampleMoments(dirac);
 
-  // store previous configuration
+  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -292,30 +286,30 @@ double Hamiltonian::runCore(const IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // calculate initial hamiltonian
+  // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
   en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
 
-  // integration
+  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt, m_action->getG2());
   }
 
-  // calculate final hamiltonian
+  // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
   en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
 
-  // metropolis test
+  // Metropolis accept/reject test.
   if (en_f[3] > en_i[3]) {
     const double r = m_rng->getUniform();
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
-      // restore old configuration
+      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
@@ -330,12 +324,12 @@ double Hamiltonian::runCore(const IDiracOperator& dirac,
 
 double Hamiltonian::runCoreDebug(const IDiracOperator& dirac,
                                  const int& nt) const {
-  // exp(-dH) (return value)
+  // Acceptance probability return value.
 
-  // resample momentum
+  // Resample momentum.
   sampleMoments(dirac);
 
-  // store previous configuration
+  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -343,29 +337,29 @@ double Hamiltonian::runCoreDebug(const IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // calculate initial hamiltonian
+  // Calculate initial Hamiltonian.
   const double initial_S = m_action->calculateS(dirac);
   const double initial_K = calculateK(dirac);
   const double initial_hamiltonian = initial_S + initial_K;
 
-  // integration
+  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt, m_action->getG2());
   }
 
-  // calculate final hamiltonian
+  // Calculate final Hamiltonian.
   const double final_S = m_action->calculateS(dirac);
   const double final_K = calculateK(dirac);
   const double final_hamiltonian = final_S + final_K;
 
   const double e = exp(initial_hamiltonian - final_hamiltonian);
 
-  // metropolis test
+  // Metropolis accept/reject test.
   if (final_hamiltonian > initial_hamiltonian) {
     if (const double r = m_rng->getUniform(); r > e) {
-      // restore old configuration
+      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
     }
@@ -380,16 +374,16 @@ double Hamiltonian::runCore(const IDiracOperator& dirac,
                             const double& dt_max,
                             vector<double>& en_i,
                             vector<double>& en_f) {
-  // acceptance probability (return value)
+  // Acceptance probability return value.
   double e = 1;
 
-  // resample momentum
+  // Resample momentum.
   sampleMoments(dirac);
 
-  // choose uniformly from [dt_min, dt_max)
+  // Choose dt uniformly from [dt_min, dt_max).
   this->m_dt = dt_min + (dt_max - dt_min) * m_rng->getUniform();
 
-  // store previous configuration
+  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -397,30 +391,30 @@ double Hamiltonian::runCore(const IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // calculate initial hamiltonian
+  // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
   en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
 
-  // integration
+  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt, m_action->getG2());
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt, m_action->getG2());
   }
 
-  // calculate final hamiltonian
+  // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
   en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
 
-  // metropolis test
+  // Metropolis accept/reject test.
   if (en_f[3] > en_i[3]) {
     const double r = m_rng->getUniform();
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
-      // restore old configuration
+      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];

@@ -16,31 +16,31 @@ static cx_mat computeB4(const IDiracOperator& dirac, const int& k,
   auto& epsilons = dirac.getEpsilons();
   const auto dim = dirac.getMatrixDimension();
 
-  // base matrix products
+  // Base matrix products.
   cx_mat m_2_m_3 = matrices[i_2] * matrices[i_3];
   cx_mat m_2_m_4 = matrices[i_2] * matrices[i_4];
   cx_mat m_3_m_4 = matrices[i_3] * matrices[i_4];
   cx_mat m_2_m_3_m_4 = m_2_m_3 * matrices[i_4];
 
-  // return value
+  // Return value.
   cx_mat res(dim, dim, fill::eye);
 
   if (neg) {
 
-    // traces
+    // Traces.
     double tr_234 = trace(m_2_m_3_m_4).imag();
     double tr_2 = trace(matrices[i_2]).real();
     double tr_3 = trace(matrices[i_3]).real();
     double tr_4 = trace(matrices[i_4]).real();
 
-    // compute sum
+    // Compute sum.
     res *= -2 * epsilons[k] * tr_234;
     res += cx_double(0., dim) * (m_2_m_3_m_4 - m_2_m_3_m_4.t());
     res += cx_double(0., epsilons[i_2] * tr_2) * (m_3_m_4 - m_3_m_4.t());
     res += cx_double(0., epsilons[i_3] * tr_3) * (m_2_m_4 - m_2_m_4.t());
     res += cx_double(0., epsilons[i_4] * tr_4) * (m_2_m_3 - m_2_m_3.t());
   } else {
-    // traces
+    // Traces.
     double tr_234 = trace(m_2_m_3_m_4).real();
     double tr_23 = trace(m_2_m_3).real();
     double tr_24 = trace(m_2_m_4).real();
@@ -49,7 +49,7 @@ static cx_mat computeB4(const IDiracOperator& dirac, const int& k,
     double tr_3 = trace(matrices[i_3]).real();
     double tr_4 = trace(matrices[i_4]).real();
 
-    // compute sum
+    // Compute sum.
     res *= 2 * epsilons[k] * tr_234;
     res += dim * (m_2_m_3_m_4 + m_2_m_3_m_4.t());
     res += epsilons[i_2] * tr_2 * (m_3_m_4 + m_3_m_4.t());
@@ -72,27 +72,27 @@ static cx_mat computeB2(const IDiracOperator& dirac, const int& k, const int& i)
   auto& matrices = dirac.getMatrices();
   auto& epsilons = dirac.getEpsilons();
 
-  // clifford product
+  // Clifford product.
   double cliff = omega_table_4[i + num_matrices * (k + num_matrices * (i + num_matrices * k))].real();
 
-  // base matrix products
+  // Base matrix products.
   cx_mat mi_mk = matrices[i] * matrices[k];
   cx_mat mi_mi = matrices[i] * matrices[i];
   cx_mat mi_mi_mk = matrices[i] * mi_mk;
   cx_mat mi_mk_mi = mi_mk * matrices[i];
 
-  // traces
+  // Traces.
   double triki = trace(mi_mk_mi).real();
   double trik = trace(mi_mk).real();
   double trii = trace(mi_mi).real();
   double tri = trace(matrices[i]).real();
   double trk = trace(matrices[k]).real();
 
-  // return value
+  // Return value.
   cx_mat res(dim, dim, fill::eye);
 
   if (cliff < 0) {
-    // compute sum
+    // Compute sum.
     res *= epsilons[k] * triki;
     res += dim * (mi_mi_mk + mi_mi_mk.t() - mi_mk_mi);
     res += epsilons[i] * tri * (mi_mk + mi_mk.t());
@@ -100,7 +100,7 @@ static cx_mat computeB2(const IDiracOperator& dirac, const int& k, const int& i)
     res += epsilons[k] * trk * mi_mi;
     res += trii * matrices[k];
   } else {
-    // compute sum
+    // Compute sum.
     res *= 3 * epsilons[k] * triki;
     res += dim * (mi_mi_mk + mi_mi_mk.t() + mi_mk_mi);
     res += 3 * epsilons[i] * tri * (mi_mk + mi_mk.t());
@@ -118,11 +118,11 @@ static cx_mat computeB(const IDiracOperator& dirac, const int& k) {
   const auto& matrices = dirac.getMatrices();
   const auto& epsilons = dirac.getEpsilons();
 
-  // base matrix products
+  // Base matrix products.
   const cx_mat m_2 = matrices[k] * matrices[k];
   const cx_mat m_3 = matrices[k] * m_2;
 
-  // traces
+  // Traces.
   const double tr_3 = trace(m_3).real();
   const double tr_2 = trace(m_2).real();
   const double tr_1 = trace(matrices[k]).real();
@@ -159,17 +159,16 @@ cx_mat derDirac4(const IDiracOperator& dirac, const int& k, const bool& herm) {
 
   cx_mat res(dim, dim, fill::zeros);
 
-  // four distinct indices
+  // Four distinct indices.
   for (int i_1 = 0; i_1 < num_matrices; ++i_1) {
     if (i_1 != k) {
       for (int i_2 = i_1 + 1; i_2 < num_matrices; ++i_2) {
         if (i_2 != k) {
           for (int i_3 = i_2 + 1; i_3 < num_matrices; ++i_3) {
             if (i_3 != k) {
-              // epsilon factor
-
+              // Epsilon factor.
               if (double e = epsilons[k] * epsilons[i_1] * epsilons[i_2] * epsilons[i_3]; e < 0) {
-                // clifford product
+                // Clifford product.
                 double cliff_1 = omega_table_4[i_3 + num_matrices * (i_2 + num_matrices * (i_1 + num_matrices * k))].imag();
                 double cliff_2 = omega_table_4[i_2 + num_matrices * (i_3 + num_matrices * (i_1 + num_matrices * k))].imag();
                 double cliff_3 = omega_table_4[i_3 + num_matrices * (i_1 + num_matrices * (i_2 + num_matrices * k))].imag();
@@ -180,7 +179,7 @@ cx_mat derDirac4(const IDiracOperator& dirac, const int& k, const bool& herm) {
                   res += computeB4(dirac, k, i_2, i_1, i_3, cliff_3, true);
                 }
               } else {
-                // clifford product
+                // Clifford product.
                 double cliff_1 = omega_table_4[i_3 + num_matrices * (i_2 + num_matrices * (i_1 + num_matrices * k))].real();
                 double cliff_2 = omega_table_4[i_2 + num_matrices * (i_3 + num_matrices * (i_1 + num_matrices * k))].real();
                 double cliff_3 = omega_table_4[i_3 + num_matrices * (i_1 + num_matrices * (i_2 + num_matrices * k))].real();
@@ -199,14 +198,14 @@ cx_mat derDirac4(const IDiracOperator& dirac, const int& k, const bool& herm) {
   }
   res = res + res.t();
 
-  // two distinct pairs of equal indices
+  // Two distinct pairs of equal indices.
   for (int i = 0; i < num_matrices; ++i) {
     if (i != k) {
       res += computeB2(dirac, k, i);
     }
   }
 
-  // all indices equal
+  // All indices equal.
   res += computeB(dirac, k);
 
   if (herm) {

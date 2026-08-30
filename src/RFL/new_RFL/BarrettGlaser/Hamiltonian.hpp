@@ -17,77 +17,62 @@ enum Integrator {
 
 /**
  * @class Hamiltonian
- * @brief Represents a Hamiltonian system for performing simulation.
  *
- * The Hamiltonian class encapsulates the necessary components for performing simulation
- * using Hamiltonian dynamics. It combines an action, an integrator, a step size, and a random
- * number generator into a coherent simulation algorithm.
+ * @brief Implements the Hybrid Monte Carlo (HMC) algorithm for the Barrett-Glaser action.
+ *
+ * Uses molecular dynamics integration and Metropolis accept/reject steps to sample
+ * Dirac operator configurations.
  */
 class Hamiltonian final : public IAlgorithm {
 public:
   /**
-   * The default constructor for this class has been disabled, please use another constructor.
+   * Default constructor deleted.
    */
   Hamiltonian() = delete;
 
   /**
-   * @class Hamiltonian
-   * @brief Represents a Hamiltonian system for performing simulation.
+   * Constructs a Hamiltonian simulation algorithm instance.
    *
-   * The Hamiltonian class encapsulates the necessary components for performing simulation
-   * using Hamiltonian dynamics. It combines an action, an integrator, a step size, and a random
-   * number generator into a coherent simulation algorithm.
-   *
-   * To construct this class, you need to pass in:
-   * @param action a unique_ptr to the Barrett-Glaser action, Action
-   * @param integrator an enum to indicate which Hamiltonian algorithm method you want to use.
-   * @param step_size is the number of steps to take for each call of the method updateDirac.
-   * @param rng a unique_ptr to a class that is derived from the abstract class IRng.
+   * @param action Unique pointer to a Barrett-Glaser Action object.
+   * @param integrator Numerical integration scheme (LEAPFROG or OMELYAN).
+   * @param step_size Integration step size dt.
+   * @param rng Unique pointer to random number generator engine.
    */
   Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng);
 
+  /**
+   * Runs HMC trajectory updates on the Dirac operator.
+   *
+   * @param dirac Dirac operator to update.
+   * @return Mean acceptance rate across trajectories.
+   */
   double updateDirac(const IDiracOperator& dirac) const override;
 
   /**
- * @brief Sets the integrator for the system.
- *
- * This function sets the integrator for the system. The integrator is responsible
- * for computing the derivatives of the system variables and updating their values
- * over time.
- *
- * @param integrator The integrator object to be set.
- *
- * @sa Integrator
- */
+   * Sets the numerical integrator scheme.
+   *
+   * @param integrator Integrator scheme (LEAPFROG or OMELYAN).
+   */
   void setIntegrator(Integrator integrator);
 
   /**
-   * @brief Get the integrator value.
+   * Returns the current numerical integrator scheme.
    *
-   * This function returns the current value of the integrator.
-   *
-   * @return The current value of the integrator.
+   * @return Current Integrator enum value.
    */
   Integrator getIntegrator() const { return this->m_integrator; };
 
   /**
-   * @brief Sets the step size for the simulation.
+   * Sets the integration step size dt.
    *
-   * This function sets the step size, represented by the parameter `dt`, for the simulation.
-   * The step size determines how different the next DiracOperator in the chain is from the
-   * starting point.
-   *
-   * @param dt The step size for the simulation.
+   * @param dt Integration step size.
    */
   void setStepSize(double dt);
 
   /**
-   * @brief Retrieves the step size value.
+   * Returns the current integration step size dt.
    *
-   * This function returns the step size value associated with the current
-   * object.
-   *
-   * @return The step size value.
+   * @return Integration step size.
    */
   double getStepSize() const { return this->m_dt; };
 
@@ -97,7 +82,7 @@ private:
   double m_dt;
   std::unique_ptr<IRng> m_rng;
 
-  // This method seems to be the initialiser for the mom variables in DiracOperator.
+  // Samples Gaussian conjugate momenta for the Dirac operator.
   void sampleMoments(const IDiracOperator& dirac) const;
   static double calculateK(const IDiracOperator& dirac);
   double calculateH(const IDiracOperator& dirac) const;
@@ -119,7 +104,7 @@ private:
   double runCoreDebug(const IDiracOperator& dirac,
                       const int& nt) const;
 
-  // The methods below modify the step size "this->dt".
+  // The methods below modify the step size m_dt.
   void runDualAverage(const IDiracOperator& dirac,
                       const int& nt,
                       const int& iter,
@@ -138,7 +123,7 @@ private:
                  std::vector<double>& en_i,
                  std::vector<double>& en_f);
 
-  // INTEGRATORS
+  // Numerical integrators.
   void leapfrog(const IDiracOperator& dirac,
                 const int& nt,
                 double g_2) const;
