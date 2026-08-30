@@ -34,7 +34,7 @@ static std::string create_eigenvalues_hdf_filename(const diracData& data, const 
   ss.str("");
   ss.clear();
 
-  // Replace decimal with underscore in g2 string.
+  // Replace decimal point with underscore in the g2 string.
   std::replace(g2_string.begin(), g2_string.end(), '.', '_');
 
   ss << "Eigenvalues_"
@@ -59,13 +59,13 @@ static std::string create_eigenvalues_dir(const diracData& data, const std::stri
 static std::string create_output_dir(const diracData& data, const std::string& outputRootPath) {
   std::ostringstream ss;
 
-  // Create output dir if needed.
+  // Create output directory if needed.
   const auto output_path = outputRootPath + "/output/";
   if (!fs::exists(output_path)) {
     fs::create_directory(output_path);
   }
 
-  // Create type folder if needed.
+  // Create geometry type directory if needed.
   ss.str("");
   ss.clear();
   ss << output_path << "Type" << data.p << data.q << "/";
@@ -81,7 +81,7 @@ void EigenvalueRecorder::recordEigenvalues(int diracId) const {
   auto matrixSize = m_dirac.getMatrixDimension();
   struct diracData data = {p, q, matrixSize};
 
-  std::cout << "Generating and saving eigenvalues for "
+  std::cout << "Computing and saving eigenvalues for "
             << "{p,q} = {" << p << ", " << q << "} "
             << "and N = " << matrixSize << "\n";
 

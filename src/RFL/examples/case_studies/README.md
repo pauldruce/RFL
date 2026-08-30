@@ -1,11 +1,12 @@
-# RFL Case Studies and Specialized Examples
+# RFL Case Studies and Specialised Examples
 
-This directory contains advanced use cases, specific physics simulations, and legacy thesis code for the Random Fuzzy Library. 
+This directory contains specialised simulations and case studies for the Random Fuzzy Library (RFL).
 
-While the official basic usage examples are located in the parent `examples/` directory (such as `examples/cpp/main.cpp` and `examples/python/main.py`), the code here demonstrates how to apply RFL to solve more complex or specialized research problems.
+For basic usage, see the parent `examples/` directory (`examples/cpp/main.cpp` and `examples/python/main.py`).
 
 ## Contents
 
-- **`type_13_simulation/`**: An extensive object-oriented C++ simulation setup specifically for the Type (1, 3) Dirac Operator using the modern RFL architecture. Includes eigenvalue recording and Metropolis evolution.
-- **`hmc_tuning.cpp`**: A script that demonstrates how to tune parameters (like `dt` and `tgt` acceptance rate) for the Hamiltonian Monte Carlo (HMC) algorithm using the legacy `Geom24` API.
-- **`mauro_thesis_mmc.cpp`**: Historical simulation code used as part of Mauro's original thesis work, demonstrating the legacy `Geom24` API executing a standard Metropolis Monte Carlo (MMC) evolution.
+- **`type_13_simulation/`**: Simulation of the type $(1, 3)$ Dirac operator. Records eigenvalue spectra to HDF5 files during Metropolis updates.
+- **`hmc_tuning.cpp`**: Demonstrates dual-averaging parameter tuning (step scale `dt` and target acceptance rate) for Hamiltonian Monte Carlo (HMC).
+- **`mauro_thesis_mmc.cpp`**: Historical thesis simulation code demonstrating Metropolis Monte Carlo updates with the `Geom24` API.
+

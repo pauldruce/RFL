@@ -19,7 +19,7 @@ int main() {
   cout << "========================================" << endl
        << endl;
 
-  // Configure safety limits
+  // Configure safety limits.
   int default_max = Clifford::getMaxMode();
   cout << "Default Max Clifford Mode (p+q): " << default_max << endl;
 
@@ -28,18 +28,18 @@ int main() {
        << endl;
   Clifford::setMaxMode(new_max);
 
-  // Initialize a Dirac Operator
+  // Initialise a Dirac operator.
   int p = 1;
   int q = 3;
   int dim = 10;
-  cout << "Initializing Dirac Operator with p=" << p << ", q=" << q << ", dim=" << dim << "..." << endl;
+  cout << "Initialising Dirac operator with p=" << p << ", q=" << q << ", dim=" << dim << "..." << endl;
 
   auto dirac = make_unique<DiracOperator>(p, q, dim);
 
   cout << "-> Matrix Dimension: " << dirac->getMatrixDimension() << "\n"
        << endl;
 
-  // Setup the Metropolis Algorithm
+  // Configure the Metropolis algorithm.
   double g_2 = -1.0;
   double g_4 = 1.0;
   double scale = 1.0;
@@ -56,8 +56,8 @@ int main() {
   cout << "-> Acceptance Rate: " << fixed << setprecision(2) << (acceptance_rate * 100.0) << "%\n"
        << endl;
 
-  // Analyze Eigenvalues
-  cout << "Computing eigenvalues..." << endl;
+  // Analyse eigenvalues.
+  cout << "Computing eigenvalue spectrum..." << endl;
   vec eigenvals_real = real(dirac->getEigenvalues());
 
   cout << "-> Found " << eigenvals_real.n_elem << " eigenvalues." << endl;

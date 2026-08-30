@@ -1,5 +1,5 @@
-#include <armadillo>
 #include <carma>
+#include <armadillo>
 #include <pybind11/pybind11.h>
 
 #include "BarrettGlaser/Action.hpp"
@@ -11,10 +11,10 @@
 namespace py = pybind11;
 
 PYBIND11_MODULE(rfl, m) {
-  m.doc() = "Python bindings for the Random Fuzzy Library (RFL)";
+  m.doc() = "Python bindings for the Random Fuzzy Library (RFL).";
 
   m.def("set_max_clifford_mode", &Clifford::setMaxMode, py::arg("max_mode"), "Set the maximum allowed Clifford algebra mode (p+q) to prevent excessive memory allocation.");
-  m.def("get_max_clifford_mode", &Clifford::getMaxMode, "Get the maximum allowed Clifford algebra mode (p+q)");
+  m.def("get_max_clifford_mode", &Clifford::getMaxMode, "Get the maximum allowed Clifford algebra mode (p+q).");
 
   py::class_<IDiracOperator>(m, "IDiracOperator");
 
@@ -23,7 +23,7 @@ PYBIND11_MODULE(rfl, m) {
       .def("get_type", &DiracOperator::getType)
       .def("get_matrix_dimension", &DiracOperator::getMatrixDimension)
       .def("get_eigenvalues", &DiracOperator::getEigenvalues,
-           "Returns the eigenvalues of the Dirac Operator");
+           "Return the eigenvalue spectrum of the Dirac operator.");
 
   py::class_<Action>(m, "Action")
       .def(py::init<double, double>(), py::arg("g_2"), py::arg("g_4"))
