@@ -49,13 +49,13 @@ When running research experiments (in Jupyter notebooks or scripts) and hitting 
 * Tag with `enhancement`, `bug`, or `research-need`.
 
 ### 2. Major Architecture & Physics Upgrades (Enhancement Proposals - EPs)
-When several related issues point to a major subsystem upgrade (such as v2.0 Value Semantics or Fermion Pfaffian Actions):
+When several related issues point to a major subsystem upgrade (such as Value Semantics or Fermion Pfaffian Actions):
 * Author an **Enhancement Proposal** in `docs/eps/` (e.g. [EP-1](docs/eps/ep-1-core-architecture-modernization.md)).
 * EPs capture **Research Scenarios**, **Requirements & Invariants Table**, and **Architecture Decision Records (ADRs)** with explicit trade-offs.
 * EPs are committed in git alongside the code for permanent versioned traceability.
 
 ### 3. Milestone Scheduling & PR Delivery
-* When an EP is approved, create a **GitHub Milestone** (e.g. `v2.0: Core Modernization (EP-1)`).
+* When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.7.0: Core Modernization (EP-1)`).
 * The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 

@@ -19,7 +19,7 @@ flowchart LR
 
 1. **Proposal (Draft):** Author the EP in `docs/eps/ep-<N>-<title>.md` defining requirements and trade-offs (`ADR-1`, `ADR-2`).
 2. **Approval Gate:** Reach agreement on architectural decisions and update status to `Approved`.
-3. **Milestone Creation:** Create a GitHub Milestone (e.g. `v2.0: Core Modernization (EP-1)`) and break the delivery plan into discrete GitHub Issues.
+3. **Milestone Creation:** Assign the delivery plan into discrete GitHub Issues under a GitHub Milestone (e.g. `v0.7.0: Core Modernization (EP-1)`).
 4. **Delivery via PRs:** Open bite-sized PRs referencing `Closes #X`. GitHub automatically tracks progress and closes issues upon merge.
 5. **Release & Closeout:** When the milestone reaches 100%, tag the release version, close the milestone, and update the EP status to `Implemented`.
 
@@ -34,7 +34,7 @@ Save each proposal in `docs/eps/ep-<N>-<title>.md` using this format:
 
 * **Author:** [Author Name]
 * **Status:** [Draft / In Discussion / Approved / In Progress / Completed]
-* **Target Version:** [e.g. RFL v2.0]
+* **Target Version:** [e.g. RFL v0.7.0]
 * **Date:** YYYY-MM-DD
 
 ---

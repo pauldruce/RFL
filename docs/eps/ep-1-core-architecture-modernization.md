@@ -3,7 +3,7 @@
 * **Title:** Research-Driven Architecture Modernization for RFL
 * **Author:** Paul Druce
 * **Status:** In Discussion
-* **Target Version:** RFL v2.0
+* **Target Version:** RFL v0.7.0
 * **Date:** 2026-08-30
 
 ---
