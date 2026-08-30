@@ -14,148 +14,180 @@
 /**
  * @class DiracOperator
  *
- * @brief The DiracOperator class represents a Dirac operator with specified
- *        Clifford type and dimension of matrices.
+ * @brief Represents a Dirac operator with specified signature and matrix dimension.
  *
- * The DiracOperator class provides methods to access various properties and
- * perform computations related to the Dirac operator.
+ * Provides methods to access properties and calculate quantities related to the Dirac operator.
  */
 class DiracOperator final : public IDiracOperator {
 public:
   /**
-   * The constructor for this class. The parameters p and q represent the
-   * Clifford type for the Dirac operator \f$(p,q)\f$. The parameter dim is the
-   * dimension of the H and L matrices for the Dirac operator.
+   * Constructs a Dirac operator with signature (p,q) and matrix dimension dim.
+   *
+   * @param p Number of Hermitian gamma matrices.
+   * @param q Number of anti-Hermitian gamma matrices.
+   * @param dim Matrix dimension of the H and L matrices.
    */
   DiracOperator(int p, int q, int dim);
 
   /**
-   * A copy constructor to duplicate a DiracOperator
+   * Copy constructor for DiracOperator.
+   *
+   * @param original DiracOperator object to copy.
    */
   DiracOperator(const DiracOperator& original);
 
   /**
-   * Returns the Clifford type of the Dirac operator - encoded as a pair of integers
-   * representing the (p,q) values of the underlying Clifford module.
+   * Returns the signature of the Dirac operator as a pair (p,q).
    *
-   * @return std::pair<int,int> of values (p,q)
+   * @return std::pair<int,int> containing (p,q).
    */
   std::pair<int, int> getType() const override { return std::pair{m_clifford.getP(), m_clifford.getQ()}; }
 
   /**
-   * getMatrixDimension returns the dimension of the H and L matrices of the
-   * Dirac operator
+   * Returns the matrix dimension of the H and L matrices.
    */
   int getMatrixDimension() const override { return m_dim; };
 
   /**
-   * getGammaDimension returns the dimension of the gamma matrices of the Dirac
-   * operator
+   * Returns the dimension of the gamma matrices.
    */
   int getGammaDimension() const override { return m_gamma_dim; };
 
   /**
-   * getNumMatrices returns the total number of H and L matrices
+   * Returns the total number of H and L matrices.
    */
   int getNumMatrices() const override { return m_num_matrices; };
 
   /**
-   * getNumHermitianMatrices returns the number of H matrices
+   * Returns the number of Hermitian matrices (H).
    */
   int getNumHermitianMatrices() const override { return m_num_herm; };
 
   /**
-   * getNumHermitianMatrices returns the number of L matrices
+   * Returns the number of anti-Hermitian matrices (L).
    */
   int getNumAntiHermitianMatrices() const override { return m_num_antiherm; };
 
   /**
-   * This method returns a reference to the vector of H and L matrices of the Dirac operator
+   * Returns a reference to the vector of H and L matrices.
    */
   std::vector<arma::cx_mat>& getMatrices() const override { return *m_matrices; }
 
   /**
-   * getEpsilons returns a reference to a vector of +/-1. The sign of the entry relates
-   * to the matrix with the same index returned from getMatrices. If the value is +1 then
-   * the associated matrix is Hermitian. If the value is -1, then the associated matrix
-   * is anti-Hermitian.
+   * Returns a reference to the vector of signs (+1 or -1).
+   *
+   * The sign matches the matrix at the same index in getMatrices().
+   * A value of +1 indicates a Hermitian matrix (H).
+   * A value of -1 indicates an anti-Hermitian matrix (L).
    */
   std::vector<int>& getEpsilons() const override { return *m_epsilons; }
 
   /**
-   * getMomenta returns a reference to a vector of matrices which correspond to..
+   * Returns a reference to the vector of conjugate momenta matrices.
    */
-  // TODO: This should probably be moved to the Hamiltonian class, or needs good documentation about it's use
+  // TODO: Move to Hamiltonian class or document usage.
   std::vector<arma::cx_mat>& getMomenta() const override { return *m_momenta; }
 
   /**
-   * Returns the value of \f$\text{Tr}(D^2)\f$
+   * Calculates the trace of the Dirac operator squared, \f$\text{Tr}(D^2)\f$.
+   *
+   * @return Trace value as a double.
    */
   double traceOfDiracSquared() const override;
 
   /**
-   * Returns the value of \f$\text{Tr}(D^4)\f$
-   * @return
+   * Calculates the trace of the fourth power of the Dirac operator, \f$\text{Tr}(D^4)\f$.
+   *
+   * @return Trace value as a double.
    */
   double traceOfDirac4() const override;
 
   /**
-   * getDiracMatrix returns a fully constructed matrix representation of the
-   * Dirac operator.
+   * Constructs and returns the assembled matrix representation of the Dirac operator.
+   *
+   * @return Assembled Dirac operator matrix.
    */
   arma::cx_mat getDiracMatrix() const override;
 
   /**
-   * getEigenvalues returns an armadillo vector of the eigenvalues of the Dirac Operator
-   * when expressed in it's fully assembled matrix form.
+   * Calculates and returns the eigenvalues of the assembled Dirac operator matrix.
+   *
+   * @return Armadillo vector of real eigenvalues.
    */
   arma::vec getEigenvalues() const override;
 
   /**
-   * Returns a vector of the Hermitian matrices, H_i, in the decomposition of
-   * the Dirac Operator.
+   * Returns a vector of the Hermitian matrices (H_i) in the Dirac operator.
    */
   std::vector<arma::cx_mat> getHermitianMatrices() const override;
 
   /**
-   * Returns a vector of the Hermitian matrices, H_i, in the decomposition of
-   * the Dirac Operator.
+   * Returns a vector of the anti-Hermitian matrices (L_j) in the Dirac operator.
    */
   std::vector<arma::cx_mat> getAntiHermitianMatrices() const override;
 
-  // TODO: Document
+  /**
+   * Calculates the derivative of the Barrett-Glaser action with respect to matrix element k.
+   *
+   * @param k Index of the matrix.
+   * @param herm True if the matrix is Hermitian, false otherwise.
+   * @param g_2 Coupling constant for Tr(D^2).
+   * @return Derivative matrix.
+   */
   arma::cx_mat derDirac24(const int& k, const bool& herm, double g_2) const;
-  // TODO: Document
+
+  /**
+   * Calculates the derivative of Tr(D^2) with respect to matrix element k.
+   *
+   * @param k Index of the matrix.
+   * @return Derivative matrix.
+   */
   arma::cx_mat derDirac2(const int& k) const;
-  // TODO: Document
+
+  /**
+   * Calculates the derivative of Tr(D^4) with respect to matrix element k.
+   *
+   * @param k Index of the matrix.
+   * @param herm True if the matrix is Hermitian, false otherwise.
+   * @return Derivative matrix.
+   */
   arma::cx_mat derDirac4(const int& k, const bool& herm) const;
-  // TODO: Document
+
+  /**
+   * Returns a reference to the four-product table of omega matrices.
+   */
   std::vector<arma::cx_double>& getOmegaTable4() const override { return *m_omega_table_4; }
-  // TODO: Document
+
+  /**
+   * Prints the four-product table of omega matrices to standard output.
+   */
   void printOmegaTable4() const;
-  // TODO: Document
+
+  /**
+   * Randomises all internal matrix elements using the provided random number generator.
+   *
+   * @param rng Random number generator engine.
+   */
   void randomiseMatrices(const IRng& rng) const override;
 
 private:
-  // The clifford module that makes up part of the Dirac operator.
+  // Clifford module for the Dirac operator.
   Clifford m_clifford;
-  // CONSTANTS
-  // The dimension of the H and L matrices.
+  // Matrix dimension of the H and L matrices.
   int m_dim;
-  // number of H and L matrices and total number of matrices.
+  // Total number of matrices, number of Hermitian matrices, and number of anti-Hermitian matrices.
   int m_num_matrices, m_num_herm, m_num_antiherm;
-  // size of gamma matrices
+  // Dimension of gamma matrices.
   int m_gamma_dim;
-  // MATRICES
-  // H and L matrices (all hermitian)
+  // Internal H and L matrices (all Hermitian representations).
   std::unique_ptr<std::vector<arma::cx_mat>> m_matrices;
-  // conjugate momenta
+  // Conjugate momenta matrices.
   std::unique_ptr<std::vector<arma::cx_mat>> m_momenta;
-  // omega matrices (all hermitian)
+  // Omega matrices.
   std::unique_ptr<std::vector<arma::cx_mat>> m_omegas;
-  // epsilon: +1 for H, -1 for L
+  // Sign vector: +1 for Hermitian (H), -1 for anti-Hermitian (L).
   std::unique_ptr<std::vector<int>> m_epsilons;
-  // omega 4-product table
+  // Four-product table for omega matrices.
   std::unique_ptr<std::vector<arma::cx_double>> m_omega_table_4{};
 
   void initOmegaTable4();

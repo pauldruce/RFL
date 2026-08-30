@@ -273,26 +273,25 @@ double Metropolis::delta4(const IDiracOperator& dirac,
 
 double Metropolis::runDualAverage(const IDiracOperator& dirac,
                                   const double target) {
-  // initial (_i) and final (_f) action2 and action4
+  // Initial and final action traces.
   auto* s_i = new double[2];
   auto* s_f = new double[2];
   const auto mat_dim = dirac.getMatrixDimension();
-  // calculate length of a sweep in terms of dofs
+  // Calculate number of degrees of freedom in a sweep.
   const int nsw = dirac.getNumMatrices() * mat_dim * mat_dim - dirac.getNumAntiHermitianMatrices();
 
-  // dual averaging variables
+  // Dual-averaging variables.
   double stat = 0;
   const double mu = log(10 * m_scale);
   double log_scale_avg = log(m_scale);
 
-  // iter sweeps of metropolis
+  // Run sweeps of the Metropolis algorithm.
   for (int i = 0; i < m_num_steps; ++i) {
     for (int j = 0; j < nsw; ++j) {
       constexpr int i_0 = 10;
       constexpr double kappa = 0.75;
       constexpr double shr = 0.05;
-      // set action to previous final value,
-      // unless it's the first iteration
+      // Set action to previous final value, unless on the first step of the sweep.
       if (j) {
         s_i[0] = s_f[0];
         s_i[1] = s_f[1];
@@ -303,7 +302,7 @@ double Metropolis::runDualAverage(const IDiracOperator& dirac,
 
       stat += target - runDualAverageCore(dirac, s_i, s_f);
 
-      // perform dual averaging
+      // Perform dual-averaging.
       const double log_scale = mu - stat * sqrt(i + 1) / (shr * (i + 1 + i_0));
       m_scale = exp(log_scale);
       const double eta = pow(i + 1, -kappa);
@@ -311,7 +310,7 @@ double Metropolis::runDualAverage(const IDiracOperator& dirac,
     }
   }
 
-  // set scale on its final dual averaged value
+  // Set proposal scale to its final dual-averaged value.
   m_scale = exp(log_scale_avg);
 
   delete[] s_i;
@@ -320,21 +319,20 @@ double Metropolis::runDualAverage(const IDiracOperator& dirac,
 }
 
 double Metropolis::run(const IDiracOperator& dirac) const {
-  // initial (_i) and final (_f) action2 and action4
+  // Initial and final action traces.
   auto* s_i = new double[2];
   auto* s_f = new double[2];
   const auto mat_dim = dirac.getMatrixDimension();
-  // calculate length of a sweep in terms of dofs
+  // Calculate number of degrees of freedom in a sweep.
   const int nsw = dirac.getNumMatrices() * mat_dim * mat_dim - dirac.getNumAntiHermitianMatrices();
 
-  // return statistic
+  // Acceptance statistic accumulator.
   double stat = 0;
 
-  // iter sweeps of metropolis
+  // Run sweeps of the Metropolis algorithm.
   for (int i = 0; i < m_num_steps; ++i) {
     for (int j = 0; j < nsw; ++j) {
-      // set action to previous final value,
-      // unless it's the first iteration
+      // Set action to previous final value, unless on the first step of the sweep.
       if (j) {
         s_i[0] = s_f[0];
         s_i[1] = s_f[1];
@@ -356,12 +354,12 @@ double Metropolis::run(const IDiracOperator& dirac) const {
 double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
                                       const double* s_i,
                                       double* s_f) const {
-  // acceptance probability
+  // Acceptance probability.
   double e;
   const auto num_matrices = dirac.getNumMatrices();
   const auto mat_dim = dirac.getMatrixDimension();
 
-  // metropolis
+  // Propose matrix element update.
   const int x = (int)(num_matrices * m_rng->getUniform());
   const int row_index = (int)(mat_dim * m_rng->getUniform());
   const int column_index = (int)(mat_dim * m_rng->getUniform());
@@ -383,9 +381,9 @@ double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
   const double action_delta = delta24(dirac, x, row_index, column_index, z);
 
   auto& mat = dirac.getMatrices();
-  // metropolis test
+  // Metropolis accept/reject test.
   if (action_delta < 0) {
-    // update matrix element
+    // Update matrix element.
     if (row_index != column_index) {
       mat[x](row_index, column_index) += z;
       mat[x](column_index, row_index) += conj(z);
@@ -393,18 +391,18 @@ double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
       mat[x](row_index, row_index) += 2. * z;
     }
 
-    // update action
+    // Update action.
     s_f[0] = s_i[0] + delta_2;
     s_f[1] = s_i[1] + delta_4;
 
-    // move accepted
+    // Proposal accepted.
     e = 1;
   } else {
     e = exp(-action_delta);
     const double p = m_rng->getUniform();
 
     if (e > p) {
-      // update matrix element
+      // Update matrix element.
       if (row_index != column_index) {
         mat[x](row_index, column_index) += z;
         mat[x](column_index, row_index) += conj(z);
@@ -412,7 +410,7 @@ double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
         mat[x](row_index, row_index) += 2. * z;
       }
 
-      // update action
+      // Update action.
       s_f[0] = s_i[0] + delta_2;
       s_f[1] = s_i[1] + delta_4;
     } else {
@@ -427,13 +425,13 @@ double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
 double Metropolis::runCore(const IDiracOperator& dirac,
                            const double* s_i,
                            double* s_f) const {
-  // acceptance probability
+  // Acceptance probability.
   double ret = 0;
 
   const auto num_matrices = dirac.getNumMatrices();
   const auto mat_dim = dirac.getMatrixDimension();
 
-  // metropolis
+  // Propose matrix element update.
   const int x = (int)(num_matrices * m_rng->getUniform());
   const int row_index = (int)(mat_dim * m_rng->getUniform());
   const int column_index = (int)(mat_dim * m_rng->getUniform());
@@ -454,9 +452,9 @@ double Metropolis::runCore(const IDiracOperator& dirac,
   const double action_delta = m_action->getG2() * delta_2 + delta_4;
 
   auto& mat = dirac.getMatrices();
-  // metropolis test
+  // Metropolis accept/reject test.
   if (action_delta < 0) {
-    // update matrix element
+    // Update matrix element.
     if (row_index != column_index) {
       mat[x](row_index, column_index) += z;
       mat[x](column_index, row_index) += conj(z);
@@ -464,18 +462,18 @@ double Metropolis::runCore(const IDiracOperator& dirac,
       mat[x](row_index, row_index) += 2. * z;
     }
 
-    // update action
+    // Update action.
     s_f[0] = s_i[0] + delta_2;
     s_f[1] = s_i[1] + delta_4;
 
-    // move accepted
+    // Proposal accepted.
     ret = 1;
   } else {
     const double e = exp(-action_delta);
     const double p = m_rng->getUniform();
 
     if (e > p) {
-      // update matrix element
+      // Update matrix element.
       if (row_index != column_index) {
         mat[x](row_index, column_index) += z;
         mat[x](column_index, row_index) += conj(z);
@@ -483,11 +481,11 @@ double Metropolis::runCore(const IDiracOperator& dirac,
         mat[x](row_index, row_index) += 2. * z;
       }
 
-      // update action
+      // Update action.
       s_f[0] = s_i[0] + delta_2;
       s_f[1] = s_i[1] + delta_4;
 
-      // move accepted
+      // Proposal accepted.
       ret = 1;
     } else {
       s_f[0] = s_i[0];

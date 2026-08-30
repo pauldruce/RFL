@@ -8,20 +8,20 @@
 #include "IDiracOperator.hpp"
 
 /**
- * IAction is an abstract class that provides an interface for any action you may want to use in a
- * random NCG simulation.
+ * @interface IAction
+ *
+ * @brief Interface for spectral action functionals in RFL.
+ *
+ * Defines the contract for evaluating an action functional on a Dirac operator.
  */
 class IAction {
 public:
   /**
-    * calculateS is a pure virtual method that needs to be implemented by a derived class
-    *
-    * Any implementation should calculate the action and return its value as a double precision
-    * floating point number.
-    *
-    * @param dirac is the Dirac operator that the action should be calculated for.
-    * @return the value of the action for the input Dirac operator.
-    */
+   * Calculates the action value for the given Dirac operator.
+   *
+   * @param dirac Dirac operator reference.
+   * @return Action value as a double.
+   */
   virtual double calculateS(const IDiracOperator& dirac) const = 0;
 
   virtual ~IAction() = default;

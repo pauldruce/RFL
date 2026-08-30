@@ -141,12 +141,12 @@ Clifford::Clifford(int p, int q)
 
 // Copy constructor
 Clifford::Clifford(const Clifford& clifford_to_copy) {
-  // copy parameters
+  // Copy parameters.
   m_p = clifford_to_copy.getP();
   m_q = clifford_to_copy.getQ();
   m_dim_gamma = clifford_to_copy.getGammaDimension();
 
-  // copy matrices
+  // Copy matrices.
   for (int i = 0; i < m_p + m_q; i++)
     m_gammas.push_back(clifford_to_copy.getGammaAtIndex(i));
 
@@ -159,7 +159,7 @@ Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
   m_q = clifford_to_copy.getQ();
   m_dim_gamma = clifford_to_copy.getGammaDimension();
 
-  // delete, reallocate and copy matrices
+  // Delete, reallocate and copy matrices.
   m_gammas.clear();
   for (int i = 0; i < m_p + m_q; i++)
     m_gammas.push_back(clifford_to_copy.getGammaAtIndex(i));
@@ -170,13 +170,13 @@ Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
 }
 
 /**
- * A method to split (p,q) into a combination of the base modes.
+ * Decomposes signature (p, q) into base mode counts.
  *
- * e.g. (5,3) = (2,0) + (2,0) + (0,2) + (1,1)
- * or   (7,2) = (2,0) + (2,0) + (2,0) + (1,0)
- * @param p
- * @param q
- * @param dec
+ * For example, (5,3) = (2,0) + (2,0) + (0,2) + (1,1).
+ *
+ * @param p Number of Hermitian gamma matrices.
+ * @param q Number of anti-Hermitian gamma matrices.
+ * @param dec Output array of base mode counts.
  */
 static void decomp(const int p, const int q, int* dec) {
   if (p) {
@@ -214,11 +214,10 @@ static void decomp(const int p, const int q, int* dec) {
   }
 }
 
-// init_gamma gets called only if p+q > 2
+// initGammas is called when p + q > 2.
 void Clifford::initGammas() {
 
-  // Decompose the (p,q) into products of the base 5 types (1,0), (0,1),
-  // (2,0), (1,1) and (0,2)
+  // Decompose (p, q) into products of the five base types: (1,0), (0,1), (2,0), (1,1), and (0,2).
   int dec[5];
   decomp(m_p, m_q, dec);
 
@@ -238,21 +237,21 @@ void Clifford::initGammas() {
   *this = c_1;
 }
 
-// TODO: Go through this and make sure it agrees with Lawson+Michelson
+// TODO: Verify agreement with Lawson and Michelson.
 Clifford& Clifford::operator*=(const Clifford& clifford_2) {
-  // store C2 frequently used variables
+  // Store frequently used variables.
   const int p_2 = clifford_2.getP();
   const int q_2 = clifford_2.getQ();
   const int dim_2 = clifford_2.getGammaDimension();
 
-  // temporary variables to avoid overwriting on (*this)
+  // Temporary vector to avoid overwriting members.
   vector<cx_mat> gamma;
 
   const int p = m_p + p_2;
   const int q = m_q + q_2;
   const int dim_gamma = m_dim_gamma * dim_2;
 
-  // start computing product
+  // Compute matrix tensor product.
   const cx_mat id_2(dim_2, dim_2, fill::eye);
 
   gamma.reserve(m_p + m_q);
@@ -261,8 +260,8 @@ Clifford& Clifford::operator*=(const Clifford& clifford_2) {
   for (int i = 0; i < p_2 + q_2; ++i)
     gamma.emplace_back(kron(m_chiral, clifford_2.getGammaAtIndex(i)));
 
-  // compute chirality
-  const int s_2 = (q_2 - p_2 + 8 * p_2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
+  // Compute chirality operator.
+  const int s_2 = (q_2 - p_2 + 8 * p_2) % 8;// +8*p2 is necessary because % returns negative remainder for negative values.
   if (const bool s_2_even = s_2 % 8 % 2 == 0; !s_2_even) {
     const int s = (m_q - m_p + 8 * m_p) % 8;
     const cx_mat id_1(m_dim_gamma, m_dim_gamma, fill::eye);
@@ -275,7 +274,7 @@ Clifford& Clifford::operator*=(const Clifford& clifford_2) {
     m_chiral = kron(m_chiral, clifford_2.getChiral());
   }
 
-  // overwrite on (*this)
+  // Overwrite member variables.
   m_p = p;
   m_q = q;
   m_dim_gamma = dim_gamma;
