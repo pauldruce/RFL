@@ -4,20 +4,20 @@
 
 #include <gtest/gtest.h>
 
-// For Mauro's implementation
+// Legacy reference implementation
 #include "Geom24.hpp"
 #include <ctime>
 #include <gsl/gsl_rng.h>
 #include <iostream>
 
-// For the new implementation
+// New RFL implementation
 #include "BarrettGlaser/Action.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
 #include "GslRng.hpp"
 #include "Simulation.hpp"
 
-// For benchmarking the two implementations
+// Benchmark timing utilities
 #include <chrono>
 
 constexpr int P = 2;
@@ -31,13 +31,8 @@ constexpr double MAX_FRACTION_DIFF = 1.05;
 
 void NewMethod() {
   auto rng = std::make_unique<GslRng>();
-
-  //  DiracOperator dirac(P, Q,MATRIX_DIM);
   auto dirac = std::make_unique<DiracOperator>(P, Q, MATRIX_DIM);
-
-  //  Action action(G_2, 1.0);
   auto action = std::make_unique<Action>(G_2, 1.0);
-
   auto metropolis = std::make_unique<Metropolis>(std::move(action), SCALE, NUM_STEPS, std::move(rng));
 
   const auto simulation = Simulation(
@@ -50,14 +45,14 @@ void NewMethod() {
 }
 
 void MauroMethod() {
-  // Initialize the random number generator
+  // Initialise the random number generator
   gsl_rng* engine = gsl_rng_alloc(gsl_rng_ranlxd1);
   gsl_rng_set(engine, time(nullptr));
   // Create the Dirac operator
   Geom24 geom(P, Q, MATRIX_DIM, G_2);
-  // Metropolis simulation
+  // Run Metropolis sampling
   for (int i = 0; i < NUM_ITERATIONS; ++i) {
-    // Metropolis evolution for 100 steps
+    // Run Metropolis sweep steps
     geom.MMC(SCALE, NUM_STEPS, engine);
   }
 
@@ -74,7 +69,7 @@ TEST(BenchmarkTests, NewImplementationIsNotSignificantlySlower) {
   MauroMethod();
   const auto mauro_stop = high_resolution_clock::now();
 
-  /* Getting number of milliseconds as an integer. */
+  // Calculate elapsed duration in milliseconds.
   const auto mauro_ms_int = duration_cast<milliseconds>(mauro_stop - mauro_start);
 
   std::cout << "Mauro's implementation:\n";
@@ -91,5 +86,5 @@ TEST(BenchmarkTests, NewImplementationIsNotSignificantlySlower) {
   const auto winner = new_ms_int.count() < mauro_ms_int.count() ? "the new implementation" : "Mauro's implementation";
   std::cout << "The winner is: " << winner << std::endl;
 
-  ASSERT_TRUE(new_ms_int.count() < mauro_ms_int.count() * MAX_FRACTION_DIFF) << "New implementation is slower by more than 5%";
+  ASSERT_TRUE(new_ms_int.count() < mauro_ms_int.count() * MAX_FRACTION_DIFF) << "New implementation is slower by more than 5 percent.";
 }

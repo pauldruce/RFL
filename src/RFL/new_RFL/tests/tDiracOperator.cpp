@@ -144,15 +144,11 @@ TEST(DiracOperatorTests, GetHermitianMatricesReturnsHermitianMatrices) {
 
     auto hermitian_matrices = dirac.getHermitianMatrices();
     EXPECT_EQ(n_herm_matrices, hermitian_matrices.size())
-        << "For dirac params"
-        << "(p,q)=(" << p << "," << q << ")"
-        << " dim = " << dim;
+        << "For Dirac operator parameters (p,q)=(" << p << "," << q << ") dim=" << dim;
 
     for (auto& matrix : hermitian_matrices) {
       EXPECT_TRUE(matrix.is_hermitian())
-          << "For dirac params"
-          << "(p,q)=(" << p << "," << q << ")"
-          << " dim = " << dim;
+          << "For Dirac operator parameters (p,q)=(" << p << "," << q << ") dim=" << dim;
     }
   }
 }
@@ -175,15 +171,11 @@ TEST(DiracOperatorTests, GetAntiHermitianMatricesReturnsAntiHermitianMatrices) {
 
     auto hermitian_matrices = dirac.getAntiHermitianMatrices();
     EXPECT_EQ(n_anti_herm_matrices, hermitian_matrices.size())
-        << "For dirac params"
-        << "(p,q)=(" << p << "," << q << ")"
-        << " dim = " << dim;
+        << "For Dirac operator parameters (p,q)=(" << p << "," << q << ") dim=" << dim;
 
     for (auto& matrix : hermitian_matrices) {
       EXPECT_TRUE(!matrix.is_hermitian())
-          << "For dirac params"
-          << "(p,q)=(" << p << "," << q << ")"
-          << " dim = " << dim;
+          << "For Dirac operator parameters (p,q)=(" << p << "," << q << ") dim=" << dim;
     }
   }
 }

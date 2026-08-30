@@ -21,7 +21,7 @@ TEST(GslRngTests, SettingSeedProducesSameValues) {
 
 TEST(GslRngTests, NoSeedProducesDifferentValues) {
 
-  // Get first 5 numbers
+  // Sample the first 10 random values.
   double first_values[10];
   for (double& first_value : first_values) {
     const GslRng rng;

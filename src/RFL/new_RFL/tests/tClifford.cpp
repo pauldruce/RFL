@@ -137,15 +137,15 @@ TEST(CliffordTests, GammasHaveCorrectDims) {
     const int exponent = (n % 2 == 0) ? (int)n / 2 : (int)((n - 1) / 2);
     const int expect_dim = 1 << exponent;
 
-    // Easy check
+    // Check gamma dimension
     EXPECT_EQ(expect_dim, C.getGammaDimension());
 
-    // Explicit check for all gammas
+    // Check dimensions of each gamma matrix
     auto gammas = C.getGammaMatrices();
     for (auto& g : gammas) {
       ASSERT_EQ(g.n_rows, g.n_cols)
-          << "Gamma matrices not squarefailed for (p,q) = (" << p << "," << q << ")";
-      EXPECT_EQ(expect_dim, g.n_rows) << "Gamma dim not correct for (p,q) = (" << p << "," << q << ")";
+          << "Gamma matrix is not square for (p,q) = (" << p << "," << q << ")";
+      EXPECT_EQ(expect_dim, g.n_rows) << "Gamma matrix dimension is incorrect for (p,q) = (" << p << "," << q << ")";
     }
   }
 }
@@ -176,21 +176,21 @@ TEST(CliffordTests, GammasSatisfyAntiCommutationRelations) {
           double sign = (i < p) ? 1.0 : -1.0;
           cx_mat expected = 2.0 * sign * I;
           EXPECT_TRUE(arma::approx_equal(anticommutator, expected, "absdiff", 1e-10))
-              << "Failed anti-commutation relation for i=j=" << i << " in (p,q)=(" << p << "," << q << ")";
+              << "Anti-commutation relation failed for i=j=" << i << " in (p,q)=(" << p << "," << q << ")";
         } else {
           // gamma_i * gamma_j + gamma_j * gamma_i = 0
           cx_mat expected = arma::zeros<cx_mat>(dim, dim);
           EXPECT_TRUE(arma::approx_equal(anticommutator, expected, "absdiff", 1e-10))
-              << "Failed anti-commutation relation for i=" << i << ", j=" << j << " in (p,q)=(" << p << "," << q << ")";
+              << "Anti-commutation relation failed for i=" << i << ", j=" << j << " in (p,q)=(" << p << "," << q << ")";
         }
       }
     }
   }
 }
 
-// TODO: find minimum set of configurations of (p,q) that covers all code.
+// TODO: Find the minimum set of (p,q) signatures to cover all code paths.
 TEST(CliffordTests, ChiralityIsCorrect) {
-  // TODO: Fix source code, because this test fails if max_p, max_q is >= 6
+  // TODO: Fix source code because this test fails when max_p or max_q is 6 or greater.
   constexpr int max_p = 5;
   vector<CliffordData> data = {};
 
@@ -205,7 +205,7 @@ TEST(CliffordTests, ChiralityIsCorrect) {
 
   for (const auto& [p, q] : data) {
     Clifford C(p, q);
-    const int s = (q - p + 8 * p) % 8;// Need to add 8*p because % does behave for negative values.
+    const int s = (q - p + 8 * p) % 8;// Add 8*p because the modulo operator can return negative values in C++.
     auto gammas = C.getGammaMatrices();
     auto chirality = C.getChiral();
 
@@ -219,7 +219,7 @@ TEST(CliffordTests, ChiralityIsCorrect) {
             gammas_producted * (std::complex<double>)std::pow(std::complex<double>(0, 1), exponent);
     expect_chirality.clean(1e-10);
     EXPECT_TRUE(arma::approx_equal(expect_chirality, chirality, "absdiff", 1e-4))
-        << "Chirality Operator not correct for " << C
+        << "Chirality operator is incorrect for " << C
         << "\nExpected Chirality:\n"
         << expect_chirality
         << "\nRetrieved Chirality:\n"
@@ -243,15 +243,15 @@ TEST(CliffordTests, CliffordModuleMultiplication) {
 
   const auto C3 = C1 * C2;
 
-  // New Clifford module has correct dimensions
+  // Verify product Clifford module has correct signature
   EXPECT_EQ(C3.getP(), 3);
   EXPECT_EQ(C3.getQ(), 3);
 
-  // Originals are not modified
+  // Verify original Clifford modules are not modified
   EXPECT_EQ(C1.getP(), 1);
   EXPECT_EQ(C1.getQ(), 2);
 
   EXPECT_EQ(C2.getP(), 2);
   EXPECT_EQ(C2.getQ(), 1);
 }
-// TODO: Write a test to check the first few types have correct gammas
+// TODO: Write a test to verify that initial signatures have correct gamma matrices.
