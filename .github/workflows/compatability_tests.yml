@@ -93,12 +93,15 @@ jobs:
       - name: Configure CMake for Armadillo macOS
         if: startsWith(matrix.OS,'macos')
         working-directory: armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
-        run: cmake -DALLOW_OPENBLAS_MACOS=ON ..
+        run: |
+          OPENBLAS_PREFIX="$(brew --prefix openblas 2>/dev/null || echo '/usr/local/opt/openblas')"
+          HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/usr/local')"
+          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DALLOW_OPENBLAS_MACOS=ON -DCMAKE_PREFIX_PATH="${OPENBLAS_PREFIX};${HOMEBREW_PREFIX}" -DOpenBLAS_HOME="${OPENBLAS_PREFIX}" ..
 
       - name: Configure CMake for Armadillo Linux
         working-directory: armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
         if: startsWith(matrix.OS,'ubuntu')
-        run: cmake ..
+        run: cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
 
       - name: Build and Install Armadillo
         working-directory: armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
@@ -108,9 +111,13 @@ jobs:
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/src/RFL
-        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}}
+        run: |
+          if [[ "${{matrix.OS}}" == macos* ]]; then
+            HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/usr/local')"
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}"
+          else
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}}
+          fi
 
       - name: Build the entire project
         working-directory: ${{github.workspace}}/src/RFL

@@ -1,21 +1,31 @@
-python_test(
+gentest(
     name = "unit_tests",
-    srcs = glob(["unit/test_*.py"]),
-    deps = [
+    data = [
         "//src/RFL:rfl_wheel",
-        "//third_party/python:pytest",
-        "//third_party/python:numpy"
+    ] + glob(["unit/*.py"]),
+    test_cmd = [
+        "python3 -m venv _venv",
+        "source _venv/bin/activate",
+        "pip install --quiet --cache-dir /tmp/pip_cache numpy pytest",
+        "pip install --quiet --cache-dir /tmp/pip_cache --no-index --find-links $(location //src/RFL:rfl_wheel) rfl",
+        "pytest src/RFL/python_bindings/tests/unit",
     ],
+    no_test_output = True,
     labels = ["unit"],
 )
 
-python_test(
+gentest(
     name = "integration_tests",
-    srcs = glob(["integration/test_*.py"]),
-    deps = [
+    data = [
         "//src/RFL:rfl_wheel",
-        "//third_party/python:pytest",
-        "//third_party/python:numpy"
+    ] + glob(["integration/*.py"]),
+    test_cmd = [
+        "python3 -m venv _venv",
+        "source _venv/bin/activate",
+        "pip install --quiet --cache-dir /tmp/pip_cache numpy pytest",
+        "pip install --quiet --cache-dir /tmp/pip_cache --no-index --find-links $(location //src/RFL:rfl_wheel) rfl",
+        "pytest src/RFL/python_bindings/tests/integration",
     ],
+    no_test_output = True,
     labels = ["integration"],
 )

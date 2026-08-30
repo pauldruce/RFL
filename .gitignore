@@ -19,6 +19,9 @@ _skbuild/
 *.egg-info/
 __pycache__/
 src/RFL/lib/
+.*_venv/
+*_venv/
+.venv/
 
 # Entries below this point are managed by Please (DO NOT EDIT)
 plz-out
