@@ -4,9 +4,10 @@ python_test(
     deps = [
         "//src/RFL:rfl_wheel",
         "//third_party/python:pytest",
-        "//third_party/python:numpy"
+        "//third_party/python:numpy",
     ],
     labels = ["unit"],
+    test_sandbox = False,
 )
 
 python_test(
@@ -15,7 +16,8 @@ python_test(
     deps = [
         "//src/RFL:rfl_wheel",
         "//third_party/python:pytest",
-        "//third_party/python:numpy"
+        "//third_party/python:numpy",
     ],
     labels = ["integration"],
+    test_sandbox = False,
 )
