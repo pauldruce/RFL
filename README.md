@@ -33,6 +33,45 @@ Here are my recommended methods of installing CMake per platform:
 - On Ubuntu - you can use `apt-get install cmake` should work.
 - Follow the instructions on the CMake webpage for Windows and other Linux distributions.
 
+## Development & Feature Request Workflow
+
+RFL follows a **3-tier research-driven development workflow** to keep friction near zero while maintaining architectural integrity:
+
+```
+1. GitHub Issues (30s)    ──>  Catchment basin for quick bugs, missing functions, and friction notes.
+2. EPs in docs/eps/       ──>  Enhancement Proposals for major architectural milestones & new physics.
+3. Milestones & PRs       ──>  Execution trackers and deliverable PR slices.
+```
+
+### 1. Requesting Small Features or Reporting Friction (GitHub Issues)
+When running research experiments (in Jupyter notebooks or scripts) and hitting a missing feature or bug:
+* Open a quick **GitHub Issue** (e.g. `Clifford gamma matrices should be accessible directly in Python`).
+* Tag with `enhancement`, `bug`, or `research-need`.
+
+### 2. Major Architecture & Physics Upgrades (Enhancement Proposals - EPs)
+When several related issues point to a major subsystem upgrade (such as v2.0 Value Semantics or Fermion Pfaffian Actions):
+* Author an **Enhancement Proposal** in `docs/eps/` (e.g. [EP-1](docs/eps/ep-1-core-architecture-modernization.md)).
+* EPs capture **Research Scenarios**, **Requirements & Invariants Table**, and **Architecture Decision Records (ADRs)** with explicit trade-offs.
+* EPs are committed in git alongside the code for permanent versioned traceability.
+
+### 3. Milestone Scheduling & PR Delivery
+* When an EP is approved, create a **GitHub Milestone** (e.g. `v2.0: Core Modernization (EP-1)`).
+* The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
+* PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
+
+## Supported Platforms & Dependencies
+
+RFL follows the **Active LTS Window Policy** (similar to SPEC 0 / NEP 29) to ensure compatibility across university HPC clusters and modern workstations:
+
+| Dependency / Tool | Minimum Supported Version | Supported Environment |
+| :--- | :--- | :--- |
+| **C++ Standard** | **C++17** | `std::optional`, `std::variant`, structured bindings |
+| **Armadillo** | **$\ge 11.4.0$** | Tested on 11.4.4 (LTS baseline), 12.8.4, and 14.2.2 |
+| **GSL** | **$\ge 2.6$** | GNU Scientific Library random number generators |
+| **Compilers** | **GCC $\ge 10$, Clang $\ge 11$, Apple Clang $\ge 13$, MSVC $\ge 2019$** | Conforming C++17 compilers |
+| **Operating Systems** | **Ubuntu $\ge 22.04$ LTS, macOS $\ge 14$ (Apple Silicon), Windows (WSL2)** | Active CI runners |
+| **Python** | **Python $\ge 3.9$** | NumPy $\ge 1.22$ |
+| **CMake** | **$\ge 3.20$** | Modern target export and packaging syntax |
 
 ## Building the library
 

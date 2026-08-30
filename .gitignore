@@ -13,6 +13,14 @@ RFL_docs
 .vscode
 .docker-timestamp
 
+# Python build artifacts
+_skbuild/
+.skbuild/
+*.egg-info/
+__pycache__/
+src/RFL/lib/
+
 # Entries below this point are managed by Please (DO NOT EDIT)
 plz-out
 .plzconfig.local
+/research
