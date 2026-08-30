@@ -10,17 +10,15 @@
 
 /**
  * @class EigenvalueRecorder
- * @brief A simple class to record the eigenvalues of a DiracOperator to a file.
+ * @brief Records the eigenvalue spectrum of a Dirac operator to an HDF5 file.
  *
- * This recorder uses a HDF5 file to store the eigenvalues.
+ * This recorder uses an HDF5 file to store eigenvalues.
  *
- * The output directory of the files is controlled by the environment variable
- * RFL_OUTPUT_DIR.
- * If this variable is not set, then all output is placed in /tmp/RFL
+ * The environment variable `RFL_OUTPUT_DIR` controls the output directory.
+ * If this variable is not set, the recorder writes output to `/tmp/RFL`.
  *
- * Each recorder writes to a dataset group in the HDF5 file named by the constructor
- * parameter "simulationId". Each eigenvalue data set is appended to this dataset group.
- *
+ * Each recorder writes to an HDF5 dataset group named by `simulationId`.
+ * The recorder appends eigenvalue datasets to this group.
  */
 class EigenvalueRecorder {
 public:
@@ -29,10 +27,9 @@ public:
   }
 
   /**
-   * @brief Records the eigenvalues of a given Dirac operator.
+   * @brief Records the eigenvalue spectrum of the Dirac operator.
    *
-   * The recordEigenvalues function accepts a diracId as input and records the eigenvalues of
-   * the dirac operator to a file.
+   * @param diracId Identifier for the Dirac operator configuration.
    */
   void recordEigenvalues(int diracId) const;
 

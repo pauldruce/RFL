@@ -21,6 +21,7 @@ static std::string getCurrentDateTime() {
 }
 
 int main() {
+  // Initialise Dirac operator and action parameters.
   double metropolisScale = 0.2;
   int iter = 10;
   auto rng = std::make_unique<GslRng>();
@@ -30,6 +31,7 @@ int main() {
   auto g4 = 1.0;
   auto action = std::make_unique<Action>(g2, g4);
 
+  // Configure the Metropolis algorithm.
   auto metropolis = std::make_unique<Metropolis>(
       std::move(action),
       metropolisScale,
@@ -39,6 +41,7 @@ int main() {
   const auto simulation = Simulation(std::move(dirac), std::move(metropolis));
   const auto timeStamp = getCurrentDateTime();
 
+  // Run simulation sweeps and record eigenvalue spectra.
   for (int i = 0; i < 10; i++) {
     simulation.run();
     const auto& dirac2 = simulation.getDiracOperator();
