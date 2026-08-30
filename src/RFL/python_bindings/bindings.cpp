@@ -1,5 +1,7 @@
+// clang-format off
 #include <carma>
 #include <armadillo>
+// clang-format on
 #include <pybind11/pybind11.h>
 
 #include "BarrettGlaser/Action.hpp"

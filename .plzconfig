@@ -20,3 +20,12 @@ DefaultOptCppFlags = --std=c++17 -Wall -Wextra -Wpedantic
 Target = //plugins:python
 TestRunner = pytest
 
+[alias "format"]
+Target = //:format_cpp
+Desc = Formats all C/C++ source files in the repository
+
+[alias "lint"]
+Target = //:lint_cpp
+Desc = Checks formatting of all C/C++ source files in the repository
+
+
