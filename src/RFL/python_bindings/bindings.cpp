@@ -1,5 +1,5 @@
-#include <armadillo>
 #include <carma>
+#include <armadillo>
 #include <pybind11/pybind11.h>
 
 #include "BarrettGlaser/Action.hpp"

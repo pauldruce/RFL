@@ -75,11 +75,6 @@ if(BUILD_PYTHON_BINDINGS)
         GIT_REPOSITORY https://github.com/RUrlus/carma.git
         GIT_TAG        v0.8.0
     )
-    FetchContent_Populate(carma)
-    add_library(carma::carma INTERFACE IMPORTED)
-    set_target_properties(carma::carma PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${carma_SOURCE_DIR}/include"
-    )
 
     # Fetch pybind11
     FetchContent_Declare(
@@ -87,7 +82,7 @@ if(BUILD_PYTHON_BINDINGS)
         GIT_REPOSITORY https://github.com/pybind/pybind11.git
         GIT_TAG        v2.13.1
     )
-    FetchContent_MakeAvailable(pybind11)
+    FetchContent_MakeAvailable(carma pybind11)
 
     add_subdirectory(python_bindings)
 endif()
