@@ -49,7 +49,9 @@ doxygen_add_docs(doxygen
 # GSL is included with Armadillo above, but we need more.
 include(Armadillo)
 include(GSL)
-include(LoadGoogleTest)
+if(NOT SKBUILD)
+    include(LoadGoogleTest)
+endif()
 
 # Build RFL library
 set(RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/old_RFL")

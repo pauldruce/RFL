@@ -1,10 +1,20 @@
-python_binary(
+genrule(
     name = "main",
-    main = "main.py",
-    deps = [
+    srcs = [
         "//src/RFL:rfl_wheel",
-        "//third_party/python:numpy",
+        "main.py",
     ],
+    outs = ["run_main.sh"],
+    cmd = [
+        "echo '#!/bin/bash' > $OUTS",
+        "echo 'python3 -m venv .main_venv' >> $OUTS",
+        "echo 'source .main_venv/bin/activate' >> $OUTS",
+        "echo 'pip install --quiet numpy' >> $OUTS",
+        "echo 'pip install --quiet --no-index --find-links $(out_location //src/RFL:rfl_wheel) rfl' >> $OUTS",
+        "echo 'python src/RFL/examples/python/main.py' >> $OUTS",
+        "chmod +x $OUTS",
+    ],
+    binary = True,
     visibility = ["PUBLIC"],
 )
 
@@ -18,10 +28,10 @@ genrule(
         "echo 'python3 -m venv .jupyter_venv' >> $OUTS",
         "echo 'source .jupyter_venv/bin/activate' >> $OUTS",
         "echo 'pip install --quiet jupyter matplotlib numpy' >> $OUTS",
-        "echo \"pip install --quiet $SRCS\" >> $OUTS",
+        "echo 'pip install --quiet --no-index --find-links $(out_location //src/RFL:rfl_wheel) rfl' >> $OUTS",
         "echo 'echo \"Launching Jupyter Notebook...\"' >> $OUTS",
         "echo 'jupyter notebook src/RFL/examples/python/rfl_playground.ipynb' >> $OUTS",
-        "chmod +x $OUTS"
+        "chmod +x $OUTS",
     ],
     binary = True,
     visibility = ["PUBLIC"],
