@@ -34,33 +34,28 @@ DiracOperator::DiracOperator(int p, int q, int dim)
   }
 
   int count = (int)pow(2, n);
-  // The outer for loop will run 2^n times (the number of all possible subsets).
-  // Here variable i will act as a binary counter
+  // The outer loop runs 2^n times for all possible subsets.
+  // Variable i acts as a binary counter.
   for (int i = 0; i < count; i++) {
     vector<int> vec;
-    // The inner for loop will run n times, As the maximum number of elements a set can have is n
-    // This loop will generate a subset
+    // The inner loop runs n times to generate a subset.
     for (int j = 0; j < n; j++) {
-      // This if condition will check if jth bit in binary representation of i is set or not
-      // if the value of (i & (1 << j)) is greater than 0, include arr[j] in the current subset
-      // otherwise exclude arr[j]
+      // Check if the jth bit in the binary representation of i is set.
+      // If set, include index j in the current subset.
       if ((i & (1 << j)) > 0) {
         vec.push_back(j);
       }
     }
 
-    // Now calculate and push product if it has odd number of gammas
+    // Calculate and store the product for odd numbers of gamma matrices.
     int k = (int)vec.size();
     if (k % 2 && k != 1) {
       vector<int>::const_iterator begin(vec.begin());
-      //            vector<int>::const_iterator end(vec.end());
       cx_mat mat = gamma.at(*begin);
-      //            for (auto iter = vec.begin() + 1; iter != end; ++iter) {
-      //                M *= gamma.at((*iter));
-      //            }
       bool first = true;
       for (const auto& v : vec) {
-        if (first) {// skip first entry
+        // Skip the first entry.
+        if (first) {
           first = false;
           continue;
         }
@@ -88,7 +83,7 @@ DiracOperator::DiracOperator(int p, int q, int dim)
 
   initOmegaTable4();
 
-  // allocate and initialize H and L matrices to identity
+  // Allocate and initialise H and L matrices to identity.
   m_matrices = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
   m_momenta = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
   m_epsilons = std::make_unique<std::vector<int>>(m_num_matrices);
@@ -106,7 +101,7 @@ DiracOperator::DiracOperator(int p, int q, int dim)
 
 DiracOperator::DiracOperator(const DiracOperator& original)
     : m_clifford(original.m_clifford) {
-  // Make a copy of all state of original DiracOperator.
+  // Copy all state from the original DiracOperator.
   this->m_dim = original.m_dim;
   this->m_num_matrices = original.m_num_herm;
   this->m_num_herm = original.m_num_herm;
@@ -119,14 +114,13 @@ DiracOperator::DiracOperator(const DiracOperator& original)
   this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
 }
 
-// TODO: figure out what this function is for.
 /**
- * @brief standalone function to do some form of conversion.
+ * Converts a decimal integer to a base representation vector.
  *
- * @param dec
- * @param base
- * @param max
- * @return vector<int>
+ * @param dec Decimal value to convert.
+ * @param base Target base for the conversion.
+ * @param max Maximum number of digits to output.
+ * @return Vector of digits in the target base.
  */
 static vector<int> baseConversion(int dec, const int& base, const int& max) {
   vector<int> rem;
@@ -145,7 +139,7 @@ static vector<int> baseConversion(int dec, const int& base, const int& max) {
 }
 
 cx_mat DiracOperator::getDiracMatrix() const {
-  // initialize dirac op to zero
+  // Initialise Dirac operator matrix to zero.
   const int dim_dirac = m_dim * m_dim * m_gamma_dim;
   cx_mat dirac(dim_dirac, dim_dirac, fill::zeros);
 
@@ -423,13 +417,13 @@ cx_mat DiracOperator::computeB(const int& k) const {
   return 2 * m_gamma_dim * res;
 }
 
-// TODO: Refactor this method, to reuse the randomisation process. Can just pass in the matrix or array of matrices to assign
+// TODO: Refactor to reuse the randomisation logic across matrix arrays.
 void DiracOperator::randomiseMatrices(const IRng& rng) const {
   auto& matrices = this->getMatrices();
   auto& momenta = this->getMomenta();
 
   for (int i = 0; i < m_num_matrices; ++i) {
-    // loop on indices
+    // Loop over matrix indices.
     for (int j = 0; j < m_dim; ++j) {
       const double x = rng.getGaussian(1.0);
       matrices[i](j, j) = cx_double(x, 0.);
@@ -444,7 +438,7 @@ void DiracOperator::randomiseMatrices(const IRng& rng) const {
   }
 
   for (int i = 0; i < m_num_matrices; ++i) {
-    // loop on indices
+    // Loop over matrix indices.
     for (int j = 0; j < m_dim; ++j) {
       const double x = rng.getGaussian(1.0);
       momenta[i](j, j) = cx_double(x, 0.);

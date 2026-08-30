@@ -11,19 +11,16 @@
 #include <gsl/gsl_rng.h>
 
 /**
- * This class is a thin wrap around the GSL random number generators to be used
- * in this project.
+ * @class GslRng
  *
- * The reason for this, is in case we want to use a different random number generator in the future
- * or if other users of this library want to switch this out for another rng.
+ * @brief GSL implementation of the IRng interface.
  *
- * To do so, a new class that implements the interface defined by IRng needs to be constructed.
+ * Wraps the GNU Scientific Library (GSL) random number generator engine.
  */
 class GslRng final : public IRng {
 public:
   /**
-   * This default constructor creates a GSL random number generator that is
-   * seeded by the current time.
+   * Constructs a GSL random number generator seeded with the current time.
    */
   GslRng() : m_rng(nullptr) {
     gsl_rng_env_setup();
@@ -32,8 +29,9 @@ public:
   }
 
   /**
-   * This constructor creates a GSL random number generator that is seeded by
-   * the provided parameter 'seed'.
+   * Constructs a GSL random number generator seeded with the specified seed.
+   *
+   * @param seed Unsigned integer seed value.
    */
   explicit GslRng(const unsigned long seed) : m_rng(nullptr) {
     m_rng = gsl_rng_alloc(gsl_rng_ranlxd1);
@@ -46,9 +44,21 @@ public:
     }
   }
 
+  /**
+   * Generates a Gaussian random variable with mean zero and standard deviation sigma.
+   *
+   * @param sigma Standard deviation of the Gaussian distribution.
+   * @return Gaussian random value.
+   */
   double getGaussian(const double sigma) const override {
     return gsl_ran_gaussian(m_rng, sigma);
   }
+
+  /**
+   * Generates a uniform random variable in the range [0, 1).
+   *
+   * @return Uniform random value in [0, 1).
+   */
   double getUniform() const override {
     return gsl_rng_uniform(m_rng);
   }

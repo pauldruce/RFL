@@ -8,17 +8,19 @@
 #include "IDiracOperator.hpp"
 
 /**
- * This is an Abstract Class/Interface for the various Monte Carlo
- * algorithms that are used in a RFL simulation.
+ * @interface IAlgorithm
+ *
+ * @brief Interface for Monte Carlo sampling algorithms in RFL.
+ *
+ * Defines the contract for updating Dirac operator configurations.
  */
 class IAlgorithm {
 public:
   /**
-   * updateDirac is the only method that an algorithm needs to implement to be used with the RFL
-   * library.
+   * Updates the Dirac operator and returns the acceptance rate.
    *
-   * @param dirac is the DiracOperator the algorithm will operate on.
-   * @return the acceptance rate of the process.
+   * @param dirac Dirac operator to update.
+   * @return Acceptance rate in the range [0, 1].
    */
   virtual double updateDirac(const IDiracOperator& dirac) const = 0;
 
