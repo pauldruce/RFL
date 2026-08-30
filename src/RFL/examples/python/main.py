@@ -14,7 +14,10 @@ def main():
     print(f"Default Max Clifford Mode (p+q): {default_max}")
 
     new_max = 20
-    print(f"Overriding Max Clifford Mode to: {new_max} (allows larger matrices)\n")
+    print(
+        f"Overriding Max Clifford Mode to: {new_max} "
+        "(allows larger matrices)\n"
+    )
     rfl.set_max_clifford_mode(new_max)
 
     # Initialise a Dirac operator.
@@ -33,7 +36,10 @@ def main():
     num_steps = 100
     seed = 42
 
-    print(f"Running Metropolis Algorithm (g_2={g_2}, g_4={g_4}, steps={num_steps})...")
+    print(
+        f"Running Metropolis algorithm (g_2={g_2}, g_4={g_4}, "
+        f"steps={num_steps})..."
+    )
     metropolis = rfl.Metropolis(g_2, g_4, scale, num_steps, seed)
     acceptance_rate = metropolis.update_dirac(dirac)
     print(f"-> Acceptance Rate: {acceptance_rate * 100:.2f}%\n")

@@ -1,7 +1,6 @@
 """Unit tests for the RFL Python core API."""
 
 import numpy as np
-import pytest
 import rfl
 
 
@@ -53,5 +52,3 @@ def test_metropolis():
     acceptance_rate = metropolis.update_dirac(dirac)
 
     assert 0.0 <= acceptance_rate <= 1.0
-
-

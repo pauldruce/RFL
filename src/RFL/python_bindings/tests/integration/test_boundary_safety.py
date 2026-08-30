@@ -1,5 +1,4 @@
-"""Integration tests for boundary conditions, memory safety, and exception propagation."""
-
+"""Integration tests for boundary safety and exception propagation."""
 import numpy as np
 import pytest
 import rfl
@@ -9,11 +8,11 @@ def test_exception_bubbling():
     """Verify that invalid parameters raise C++ exceptions in Python."""
     # 1. Verify that a negative matrix dimension raises an exception.
     with pytest.raises(Exception, match="Matrix dimension"):
-        invalid_dirac = rfl.DiracOperator(1, 3, -10)
+        rfl.DiracOperator(1, 3, -10)
 
-    # 2. Verify that an oversized Clifford module signature raises an exception.
+    # 2. Verify that an oversized Clifford module signature raises an error.
     with pytest.raises(Exception, match="Clifford algebra mode"):
-        invalid_dirac = rfl.DiracOperator(10, 10, 10)
+        rfl.DiracOperator(10, 10, 10)
 
     # 3. Verify that the user can configure the maximum Clifford mode.
     default_max = rfl.get_max_clifford_mode()
@@ -44,14 +43,13 @@ def test_numpy_integration():
     # Verify array validity and numeric operations.
     assert isinstance(mean_val, (float, np.floating))
     assert isinstance(std_val, (float, np.floating))
-    assert eigenvals.flags.owndata or eigenvals.base is not None  # Memory is safely managed.
+    assert eigenvals.flags.owndata or eigenvals.base is not None
 
 
 def test_lifecycle_and_gc():
-    """Verify object destruction during repeated allocation cycles without memory leaks."""
+    """Verify object destruction during repeated allocation cycles."""
     for _ in range(1000):
         temp_dirac = rfl.DiracOperator(1, 1, 5)
         temp_eigen = temp_dirac.get_eigenvalues()
         del temp_eigen
         del temp_dirac
-
