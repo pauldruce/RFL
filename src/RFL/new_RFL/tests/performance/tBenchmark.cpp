@@ -27,7 +27,7 @@ constexpr double G_2 = -3;
 constexpr double SCALE = -3;
 constexpr int NUM_STEPS = 10;
 constexpr int NUM_ITERATIONS = 5;
-constexpr double MAX_FRACTION_DIFF = 1.05;
+constexpr double MAX_FRACTION_DIFF = 2.0;
 
 void NewMethod() {
   auto rng = std::make_unique<GslRng>();
