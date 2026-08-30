@@ -6,26 +6,26 @@
 #define RFL_IRNG_HPP
 
 /**
- * IRng is an abstract class that provides the interface that a random number generator must satisfy to be
- * used in this project.
+ * @interface IRng
+ *
+ * @brief Interface for random number generator engines.
+ *
+ * Defines methods for drawing Gaussian and uniform random numbers.
  */
 class IRng {
 public:
   /**
-  * getGaussian is a pure virtual method that needs to be implemented by a derived class.
-  *
-  * Any implementation should return a random double precision floating point number selected from a Gaussian distribution
-  * with mean zero and standard deviation sigma
-  *
-  * @param sigma The standard deviation of the Gaussian distribution to select a number from.
-  */
+   * Generates a Gaussian random variable with mean zero and standard deviation sigma.
+   *
+   * @param sigma Standard deviation of the Gaussian distribution.
+   * @return Gaussian random value.
+   */
   virtual double getGaussian(double sigma) const = 0;
 
   /**
-   * getUniform is a pure virtual method that needs to be implemented by a dervied class.
+   * Generates a uniform random variable in the range [0, 1).
    *
-   * Any implementation should return a double precision floating point number uniformly distributed in the range [0,1).
-   * The range includes 0.0 but excludes 1.0.
+   * @return Uniform random value in [0, 1).
    */
   virtual double getUniform() const = 0;
 

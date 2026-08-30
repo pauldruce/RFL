@@ -12,29 +12,37 @@
 #include <memory>
 
 /**
- * Metropolis is a class that encapsulates the implementation of the Metropolis-Hasting
- * algorithm for random non-commutative geometries that are following a simulation
- * governed by the Barrett-Glaser action.
+ * @class Metropolis
+ *
+ * @brief Implements the Metropolis algorithm for the Barrett-Glaser action.
+ *
+ * Samples matrix elements of the Dirac operator according to the probability
+ * distribution defined by the Barrett-Glaser action.
  */
 class Metropolis final : public IAlgorithm {
 public:
   /**
-   * The default constructor has been disabled, please use another constructor.
+   * Default constructor deleted.
    */
   Metropolis() = delete;
 
   /**
-   * @param action is a unique_ptr to a Barrett-Glaser action class, Action.
-   * @param scale is a parameter to control to step size taken in the Metropolis algorithm
-   * @param num_steps is the number of steps to take for each call to the updateDirac method below.
-   * @param rng is a unique_ptr to an implementation of the abstract rng class IRng.
+   * Constructs a Metropolis algorithm instance.
+   *
+   * @param action Unique pointer to a Barrett-Glaser Action object.
+   * @param scale Step scale for matrix element proposals.
+   * @param num_steps Number of sweeps per call to updateDirac().
+   * @param rng Unique pointer to random number generator engine.
    */
   Metropolis(std::unique_ptr<Action>&& action, const double scale, const int num_steps, std::unique_ptr<IRng>&& rng)
       : m_action(std::move(action)), m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
 
   /**
-   * setParams updates the scale, number_of_steps and rng parameters that are passed in as part of
-   * the constructor.
+   * Updates sampling parameters and random number generator.
+   *
+   * @param scale Step scale for matrix element proposals.
+   * @param number_of_steps Number of sweeps per call.
+   * @param rng Unique pointer to random number generator engine.
    */
   void setParams(const double scale, const int number_of_steps, std::unique_ptr<IRng>&& rng) {
     this->m_scale = scale;
@@ -42,6 +50,12 @@ public:
     this->m_rng = std::move(rng);
   }
 
+  /**
+   * Runs Metropolis sweeps on the Dirac operator.
+   *
+   * @param dirac Dirac operator to update.
+   * @return Mean acceptance rate across sweeps.
+   */
   double updateDirac(const IDiracOperator& dirac) const override {
     return this->run(dirac);
   }
@@ -52,10 +66,10 @@ private:
   int m_num_steps;
   std::unique_ptr<IRng> m_rng;
 
-  // MMC routine that doesn't perform dual averaging
+  // MCMC routine without dual-averaging.
   double run(const IDiracOperator& dirac) const;
 
-  // MMC routine that performs dual averaging
+  // MCMC routine with dual-averaging.
   double runDualAverage(const IDiracOperator& dirac,
                         double target);
 
@@ -65,14 +79,14 @@ private:
                  const int& column_index,
                  const arma::cx_double& z) const;
 
-  // TODO: These can be made static or members of DiracOperator
+  // TODO: Move to DiracOperator or make static.
   static double delta2(const IDiracOperator& dirac,
                        const int& x,
                        const int& row_index,
                        const int& column_index,
                        const arma::cx_double& z);
 
-  // TODO: These can be made static or members of DiracOperator
+  // TODO: Move to DiracOperator or make static.
   static double delta4(const IDiracOperator& dirac,
                        const int& x,
                        const int& row_index,

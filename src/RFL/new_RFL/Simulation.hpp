@@ -9,35 +9,40 @@
 #include "IAlgorithm.hpp"
 
 /**
- * A class to control the simulation. This class is responsible for the lifespan of
- * of the simulation, when this class goes out of scope, all resources will be cleaned up.
+ * @class Simulation
+ *
+ * @brief Manages execution and resources for a Monte Carlo simulation.
+ *
+ * Combines a Dirac operator and a sampling algorithm to execute simulations.
  */
 class Simulation {
 public:
   /**
-   * The default constructor for this class has been disabled.
+   * Default constructor deleted.
    */
   Simulation() = delete;
 
   /**
-   * The constructor for the Simulation class. It requires a configured Dirac operator class
-   * and a class derived from the IAlgorithm abstract class that implements a Monte Carlo algorithm.
+   * Constructs a Simulation instance.
    *
-   * @param dirac
-   * @param monte_carlo_algorithm
+   * @param dirac Unique pointer to a DiracOperator object.
+   * @param monte_carlo_algorithm Unique pointer to an IAlgorithm sampling engine.
    */
   Simulation(std::unique_ptr<DiracOperator>&& dirac, std::unique_ptr<IAlgorithm>&& monte_carlo_algorithm);
 
   /**
-   * This method starts the simulation and will return when it is complete.
+   * Runs the simulation algorithm on the Dirac operator.
+   *
+   * @return Mean acceptance rate across algorithm sweeps or trajectories.
    */
   double run() const {
     return this->m_algorithm->updateDirac(*m_dirac);
   }
 
   /**
-   * This method returns a reference to DiracOperator in use in this class.
-   * @return const reference to DiracOperator object
+   * Returns a constant reference to the managed Dirac operator.
+   *
+   * @return Constant reference to DiracOperator.
    */
   const DiracOperator& getDiracOperator() const {
     return *m_dirac;
