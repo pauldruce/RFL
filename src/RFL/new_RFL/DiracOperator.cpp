@@ -54,7 +54,8 @@ DiracOperator::DiracOperator(int p, int q, int dim)
       cx_mat mat = gamma.at(*begin);
       bool first = true;
       for (const auto& v : vec) {
-        if (first) { // Skip the first entry.
+        // Skip the first entry.
+        if (first) {
           first = false;
           continue;
         }
