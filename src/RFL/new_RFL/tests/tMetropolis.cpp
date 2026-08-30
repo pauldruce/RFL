@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 
 TEST(MetropolisTests, ConstructorDoesNotThrow) {
-  // TODO: How do we test random stuff? -> find out
+  // TODO: Add unit tests for randomised state sampling.
   auto rng = std::make_unique<GslRng>();
   constexpr double scale = 0.1;
   constexpr int num_steps = 20;
@@ -33,5 +33,5 @@ TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
 
   const auto diracs_are_equal = arma::approx_equal(new_dirac_matrix, old_dirac_matrix, "absdiff", 1e-6);
 
-  ASSERT_FALSE(diracs_are_equal) << "The dirac matrix should have been changed";
+  ASSERT_FALSE(diracs_are_equal) << "The Dirac operator matrix must change.";
 }

@@ -9,7 +9,7 @@
 
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   constexpr Integrator integrator = LEAPFROG;
-  // TODO: How do we test random stuff? -> find out
+  // TODO: Add unit tests for randomised state generation.
   constexpr double step_size = 0.1;
   auto action = std::make_unique<Action>(1.0, 1.0);
   ASSERT_NO_THROW(
@@ -52,5 +52,5 @@ TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
 
   const auto diracs_are_equal = arma::approx_equal(new_dirac_matrix, old_dirac_matrix, "absdiff", 1e-6);
 
-  ASSERT_FALSE(diracs_are_equal) << "The dirac matrix should have been changed";
+  ASSERT_FALSE(diracs_are_equal) << "The Dirac operator matrix must change.";
 }
