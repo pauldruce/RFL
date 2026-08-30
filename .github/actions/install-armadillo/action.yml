@@ -39,13 +39,13 @@ runs:
       run: |
         OPENBLAS_PREFIX="$(brew --prefix openblas 2>/dev/null || echo '/usr/local/opt/openblas')"
         HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/usr/local')"
-        cmake -DALLOW_OPENBLAS_MACOS=ON -DCMAKE_PREFIX_PATH="${OPENBLAS_PREFIX};${HOMEBREW_PREFIX}" -DOpenBLAS_HOME="${OPENBLAS_PREFIX}" ..
+        cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DALLOW_OPENBLAS_MACOS=ON -DCMAKE_PREFIX_PATH="${OPENBLAS_PREFIX};${HOMEBREW_PREFIX}" -DOpenBLAS_HOME="${OPENBLAS_PREFIX}" ..
 
     - name: Configure CMake for Armadillo Linux
       shell: bash
       if: startsWith(inputs.os, 'ubuntu')
       working-directory: armadillo/armadillo-${{ inputs.version }}/build
-      run: cmake ..
+      run: cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
 
     - name: Build and Install Armadillo
       shell: bash
