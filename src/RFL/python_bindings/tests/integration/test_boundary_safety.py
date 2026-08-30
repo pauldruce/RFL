@@ -36,7 +36,7 @@ def test_numpy_integration():
     dirac = rfl.DiracOperator(1, 3, 10)
     eigenvals = dirac.get_eigenvalues()
     
-    # Perform native numpy operations
+    # Run native numpy operations
     mean_val = np.mean(eigenvals)
     std_val = np.std(eigenvals)
     
@@ -46,8 +46,7 @@ def test_numpy_integration():
     assert eigenvals.flags.owndata or eigenvals.base is not None # Memory is safely managed
 
 def test_lifecycle_and_gc():
-    # Rapidly create and destroy C++ objects to ensure pybind11 
-    # garbage collection correctly calls C++ destructors without leaking.
+    # Create and destroy C++ objects rapidly to verify garbage collection without leaks.
     for _ in range(1000):
         temp_dirac = rfl.DiracOperator(1, 1, 5)
         temp_eigen = temp_dirac.get_eigenvalues()
