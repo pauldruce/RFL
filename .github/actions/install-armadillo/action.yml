@@ -36,7 +36,10 @@ runs:
       shell: bash
       if: startsWith(inputs.os, 'macos')
       working-directory: armadillo/armadillo-${{ inputs.version }}/build
-      run: cmake -DALLOW_OPENBLAS_MACOS=ON ..
+      run: |
+        OPENBLAS_PREFIX="$(brew --prefix openblas 2>/dev/null || echo '/usr/local/opt/openblas')"
+        HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/usr/local')"
+        cmake -DALLOW_OPENBLAS_MACOS=ON -DCMAKE_PREFIX_PATH="${OPENBLAS_PREFIX};${HOMEBREW_PREFIX}" -DOpenBLAS_HOME="${OPENBLAS_PREFIX}" ..
 
     - name: Configure CMake for Armadillo Linux
       shell: bash
