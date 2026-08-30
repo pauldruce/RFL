@@ -64,8 +64,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
         add_subdirectory(${RFL_SOURCE_DIR}/tests)
 endif()
 
-# Python Bindings
-option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" ON)
+if(SKBUILD)
+    set(BUILD_PYTHON_BINDINGS_DEFAULT ON)
+else()
+    set(BUILD_PYTHON_BINDINGS_DEFAULT OFF)
+endif()
+option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" ${BUILD_PYTHON_BINDINGS_DEFAULT})
 if(BUILD_PYTHON_BINDINGS)
     include(FetchContent)
 
