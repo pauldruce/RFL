@@ -51,6 +51,7 @@ As the research program expands into **Fermion Functional Integrals (Barrett 202
 | **REQ-004** | **Detailed Balance & Ergodicity** | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
 | **REQ-005** | **Automated Step-Size Calibration** | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during burn-in. |
 | **REQ-006** | **Zero-Copy NumPy Interoperability** | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
+| **REQ-007** | **Active LTS Platform Policy** | Maintain compatibility with active Ubuntu LTS ($\ge 22.04$), macOS ($\ge 14$), Armadillo ($\ge 11.4$), and conforming C++17 compilers. |
 
 ---
 

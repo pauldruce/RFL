@@ -59,6 +59,20 @@ When several related issues point to a major subsystem upgrade (such as v2.0 Val
 * The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 
+## Supported Platforms & Dependencies
+
+RFL follows the **Active LTS Window Policy** (similar to SPEC 0 / NEP 29) to ensure compatibility across university HPC clusters and modern workstations:
+
+| Dependency / Tool | Minimum Supported Version | Supported Environment |
+| :--- | :--- | :--- |
+| **C++ Standard** | **C++17** | `std::optional`, `std::variant`, structured bindings |
+| **Armadillo** | **$\ge 11.4.0$** | Tested on 11.4.4 (LTS baseline), 12.8.4, and 14.2.2 |
+| **GSL** | **$\ge 2.6$** | GNU Scientific Library random number generators |
+| **Compilers** | **GCC $\ge 10$, Clang $\ge 11$, Apple Clang $\ge 13$, MSVC $\ge 2019$** | Conforming C++17 compilers |
+| **Operating Systems** | **Ubuntu $\ge 22.04$ LTS, macOS $\ge 14$ (Apple Silicon), Windows (WSL2)** | Active CI runners |
+| **Python** | **Python $\ge 3.9$** | NumPy $\ge 1.22$ |
+| **CMake** | **$\ge 3.20$** | Modern target export and packaging syntax |
+
 ## Building the library
 
 Once you have installed the required dependencies, the RFL library can be built using CMake.
