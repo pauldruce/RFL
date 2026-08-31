@@ -73,7 +73,7 @@ include(FetchContent)
 FetchContent_Declare(
     RFL
     GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-    GIT_TAG        v0.5.0
+    GIT_TAG        v0.1.0
 )
 FetchContent_MakeAvailable(RFL)
 

@@ -6,8 +6,8 @@ This document establishes the official release lifecycle, pre-release checklist,
 
 ## 1. Release Philosophy & Governance
 
-1. **Semantic Versioning & Beta Lifecycle:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.5.0`).
-   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research and architectural modernisation phase. Under Semantic Versioning rules, minor version increments (`v0.5.0` → `v0.6.0`) may introduce breaking API changes or refactors while the architecture evolves toward `v1.0.0`.
+1. **Semantic Versioning & Beta Lifecycle:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.1.0`).
+   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research and architectural modernisation phase. Under Semantic Versioning rules, minor version increments (`v0.1.0` → `v0.2.0`) may introduce breaking API changes or refactors while the architecture evolves toward `v1.0.0`.
    - **Stable Production Phase (`v1.0.0+`):** After `v1.0.0`, breaking changes occur only across MAJOR version increments, with a formal deprecation period across MINOR releases.
 2. **Controlled Language (ASD-STE100 & British English):**
    - Release documentation must follow controlled vocabulary defined in [docs/Glossary.md](Glossary.md).
@@ -25,23 +25,23 @@ This document establishes the official release lifecycle, pre-release checklist,
 
 ## 2. Pre-Releases & Release Candidates (RCs)
 
-Following the convention of major scientific libraries (such as NumPy, SciPy, PyTorch, and Armadillo), significant releases use **Release Candidates** (e.g. `v0.5.0rc1`):
+Following the convention of major scientific libraries (such as NumPy, SciPy, PyTorch, and Armadillo), significant releases use **Release Candidates** (e.g. `v0.1.0rc1`):
 
 ```mermaid
 flowchart TD
     subgraph "Phase 1: Pre-Release (RC)"
-        A["Tag: v0.5.0rc1\n(git tag v0.5.0rc1)"] --> B["Create Draft Pre-Release\n(gh release create --draft --prerelease)"]
+        A["Tag: v0.1.0rc1\n(git tag v0.1.0rc1)"] --> B["Create Draft Pre-Release\n(gh release create --draft --prerelease)"]
         B --> C["Review Draft Notes in UI\n(Zero workflows triggered)"]
         C --> D["Publish Pre-Release\n(gh release edit --draft=false)"]
         D --> E["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
-        E --> F["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.5.0rc1)"]
+        E --> F["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.1.0rc1)"]
     end
 
     subgraph "Phase 2: Final Promotion"
         F --> G{"Validation successful?"}
-        G -- Issues found --> H["Fix on branch → Tag v0.5.0rc2"]
+        G -- Issues found --> H["Fix on branch → Tag v0.1.0rc2"]
         H --> B
-        G -- Clean --> I["Tag Final: v0.5.0\n(git tag v0.5.0)"]
+        G -- Clean --> I["Tag Final: v0.1.0\n(git tag v0.1.0)"]
         I --> J["Create Draft Release\n(gh release create --draft)"]
         J --> K["Review Draft Notes in UI\n(Zero workflows triggered)"]
         K --> L["Publish Final Release\n(Official PyPI default & Latest tag)"]
@@ -51,19 +51,19 @@ flowchart TD
 ### 2.1 How Pre-Releases Work Across Ecosystems
 
 1. **Naming Standard (PEP 440 & Git SemVer):**
-   - Use `vX.Y.Zrc1` (e.g. `v0.5.0rc1`).
+   - Use `vX.Y.Zrc1` (e.g. `v0.1.0rc1`).
    - This tag format is natively recognised by Git, GitHub, `pip`, and `scikit-build-core`.
 2. **GitHub Releases Behaviour:**
    - Pre-releases are flagged with `--prerelease` (or the "Set as a pre-release" checkbox).
    - GitHub displays a `Pre-release` badge and retains the previous release as `Latest`.
 3. **PyPI & `pip` Behaviour:**
-   - PyPI automatically marks `0.5.0rc1` as a pre-release.
+   - PyPI automatically marks `0.1.0rc1` as a pre-release.
    - A standard `pip install rfl` will **never** install a pre-release by default.
    - Downstream researchers must explicitly opt in with:
      ```bash
      pip install --pre rfl
      # or
-     pip install rfl==0.5.0rc1
+     pip install rfl==0.1.0rc1
      ```
 4. **C++ & CMake `FetchContent` Behaviour:**
    - Downstream C++ solvers test the release candidate by pinning the RC git tag:
@@ -71,7 +71,7 @@ flowchart TD
      FetchContent_Declare(
          RFL
          GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-         GIT_TAG        v0.5.0rc1
+         GIT_TAG        v0.1.0rc1
      )
      ```
 
@@ -151,8 +151,8 @@ To author release notes for a new version:
 3. Commit `docs/releases/vX.Y.Z.md` on the release PR for peer review.
 4. Pass `--notes-file docs/releases/vX.Y.Z.md` when creating the GitHub Release.
 
-### 4.2 Historical Pre-Releases (`v0.1.0` – `v0.4.0`)
-Historical development milestones are backfilled in `docs/releases/` (`v0.1.0.md` through `v0.4.0.md`). These milestones were unpackaged internal iterations. For all Python and modern C++ research workflows, use **RFL `v0.5.0` or later**.
+### 4.2 Initial Release Baseline (`v0.1.0`)
+RFL versioning formally begins with **`v0.1.0`** as the initial packaged release with binary wheels and CMake target exports. Commits prior to `v0.1.0` represent unreleased prototype development recorded in git history.
 
 ### 4.3 Patch Releases & Maintenance Branch Workflow
 

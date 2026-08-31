@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.20...3.31)
 
 project(
         RFL
-        VERSION 0.5
+        VERSION 0.1.0
         DESCRIPTION
         "Random Fuzzy Library (RFL) - A library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative geometries."
         LANGUAGES CXX)

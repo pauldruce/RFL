@@ -3,7 +3,7 @@
 * **Title:** Research-Driven Architecture Modernisation for RFL
 * **Author:** Paul Druce
 * **Status:** In Discussion
-* **Target Version:** RFL v0.7.0
+* **Target Version:** RFL v0.3.0
 * **Date:** 2026-08-30
 
 ---
@@ -19,7 +19,7 @@ where the Dirac operator is decomposed into Hermitian and anti-Hermitian matrice
 
 $$D = \sum_{i=1}^p \gamma^i \otimes H_i + \sum_{j=1}^q \gamma^{p+j} \otimes L_j$$
 
-As the research program expands into **Fermion Functional Integrals (Barrett 2024)**, **Product Geometries $S_F^2 \otimes \mathcal{F}$ (Barrett 2026)**, and **Random Matrix Spectral Statistics**, the legacy codebase exhibits structural bottlenecks:
+As the research programme expands into **Fermion Functional Integrals (Barrett 2024)**, **Product Geometries $S_F^2 \otimes \mathcal{F}$ (Barrett 2026)**, and **Random Matrix Spectral Statistics**, the legacy codebase exhibits structural bottlenecks:
 1. **Opaque Execution Control:** The legacy `Simulation` class executes a monolithic, blocking loop. Researchers cannot inspect eigenvalue trajectories, stream observables to disk, or apply interactive stopping conditions in Jupyter notebooks.
 2. **Entangled Physics & Sampling:** The analytical trace variation formulas $\Delta \text{Tr}(D^2)$ and $\Delta \text{Tr}(D^4)$ are embedded directly inside `Metropolis.cpp`. This prevents reusing the same physics for Hybrid Monte Carlo (HMC) or new multi-term action potentials ($S_6, \text{Pfaffian}$).
 3. **Leaky Interface & Const Violation:** The legacy `IDiracOperator` interface exposes private precomputed lookup tables (`getOmegaTable4()`) and breaks `const`-correctness by returning mutable matrix references from `const` member functions to allow MCMC mutation.

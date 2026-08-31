@@ -55,7 +55,7 @@ When several related issues point to a major subsystem upgrade (such as Value Se
 * EPs are committed in git alongside the code for permanent versioned traceability.
 
 ### 3. Milestone Scheduling & PR Delivery
-* When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.7.0: Core Modernisation (EP-1)`).
+* When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.3.0: Core Modernisation (EP-1)`).
 * The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 

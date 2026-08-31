@@ -3,7 +3,7 @@
 * **Title:** Multi-Platform Package and Binary Distribution
 * **Author:** Paul Druce
 * **Status:** Accepted (In Progress)
-* **Target Versions:** RFL v0.5.0 (Phase 1), v0.7.0 (Phase 2), Backlog (Phase 3)
+* **Target Versions:** RFL v0.1.0 (Phase 1), v0.3.0 (Phase 2), Backlog (Phase 3)
 * **Date:** 2026-08-30
 
 ---
@@ -15,8 +15,8 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.5.0` | [`v0.5.0`](https://github.com/pauldruce/RFL/milestone/1) | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
-| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.7.0` | [`v0.7.0`](https://github.com/pauldruce/RFL/milestone/3) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
+| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.1.0` | [`v0.1.0`](https://github.com/pauldruce/RFL/milestone/1) | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
+| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.3.0` | [`v0.3.0`](https://github.com/pauldruce/RFL/milestone/3) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
 | **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | Backlog | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
 
 ---
