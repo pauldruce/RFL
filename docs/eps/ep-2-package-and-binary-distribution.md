@@ -16,7 +16,7 @@ The table below tracks the status of each implementation phase:
 | Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.5.0` | [`v0.5.0`](https://github.com/pauldruce/RFL/milestone/1) | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
-| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.7.0` | [`v0.7.0`](https://github.com/pauldruce/RFL/milestone/2) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
+| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.7.0` | [`v0.7.0`](https://github.com/pauldruce/RFL/milestone/3) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
 | **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | Backlog | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
 
 ---

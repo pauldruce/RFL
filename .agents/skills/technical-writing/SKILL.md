@@ -69,7 +69,7 @@ flowchart LR
 
 ## 3. British English Spelling Conventions
 
-RFL strictly standardizes on **British English**:
+RFL strictly standardises on **British English**:
 
 | Feature | British Standard (Approved) | US Form (Avoid) |
 | :--- | :--- | :--- |
@@ -79,7 +79,7 @@ RFL strictly standardizes on **British English**:
 | **Double 'l'** | *modelling, initialised, cancelled, travelling* | *modeling, initialized, canceled, traveling* |
 | **-programme** | *programme* (for scientific initiatives), *program* (for computer code) | *program* |
 | **-ence / -ense** | *licence* (noun), *license* (verb); *defence* | *license* (both); *defense* |
-| **Specialized terms** | *gauge, analogue, catalogue* | *gage, analog, catalog* |
+| **Specialised terms** | *gauge, analogue, catalogue* | *gage, analog, catalog* |
 
 ---
 
@@ -117,7 +117,7 @@ RFL strictly standardizes on **British English**:
 
 ## 5. Release Notes & Process Standard
 
-The single source of truth for the release lifecycle, quality gates, and scientific release notes formatting is:
+The single source of truth for the release lifecycle, pre-release checklist, and scientific release notes formatting is:
 📄 **[docs/Release_Process.md](docs/Release_Process.md)**
 
 When authoring release notes:

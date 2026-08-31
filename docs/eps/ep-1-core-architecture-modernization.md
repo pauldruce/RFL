@@ -1,6 +1,6 @@
-# EP-1: Research-Driven Architecture Modernization for RFL
+# EP-1: Research-Driven Architecture Modernisation for RFL
 
-* **Title:** Research-Driven Architecture Modernization for RFL
+* **Title:** Research-Driven Architecture Modernisation for RFL
 * **Author:** Paul Druce
 * **Status:** In Discussion
 * **Target Version:** RFL v0.7.0
@@ -40,7 +40,7 @@ As the research program expands into **Fermion Functional Integrals (Barrett 202
 ## 2. Research Workflows & Scientific Requirements
 
 ### 2.1 Core Research Scenarios
-1. **Scenario 1 (Interactive Exploration in Python):** A researcher sets up a spectral triple $(p, q, N)$ in a Jupyter notebook, runs 500 thermalization sweeps with automated dual-averaging step-size tuning, and plots the real-time eigenvalue density $\rho(\lambda)$.
+1. **Scenario 1 (Interactive Exploration in Python):** A researcher sets up a spectral triple $(p, q, N)$ in a Jupyter notebook, runs 500 thermalisation sweeps with automated dual-averaging step-size tuning, and plots the real-time eigenvalue density $\rho(\lambda)$.
 2. **Scenario 2 (Automated Batch Sampling & Statistics):** An automated batch script executes 100,000 production sweeps across a parameter grid $(g_2, g_4)$, recording eigenvalue spectra every 10 sweeps to compute the spectral dimension $d_{\text{spec}}$ and edge eigenvalue statistics (e.g. comparing largest eigenvalue fluctuations against the [Tracy–Widom distribution](https://en.wikipedia.org/wiki/Tracy%E2%80%93Widom_distribution)).
 3. **Scenario 3 (Extending Physics Actions):** A theorist implements a new action potential $S(D) = S_{\text{BG}}(D) - \ln \text{Pf}(JD)$ by subclassing or providing a new Action policy without modifying any Monte Carlo sampler code.
 
@@ -107,7 +107,7 @@ In the literature (Barrett 2024), adding fermions modifies the partition functio
 
 $$Z = \int \mathcal{D}D \, e^{-S_B(D)} \text{Pfaffian}(JD) = \int \mathcal{D}D \, e^{-S_{\text{eff}}(D)}$$
 
-where the acceptance probability factorizes as:
+where the acceptance probability factorises as:
 
 $$\alpha = \min\left(1, e^{-\Delta S_B} \cdot \left| \frac{\text{Pfaffian}(JD')}{\text{Pfaffian}(JD)} \right|\right)$$
 
@@ -125,4 +125,4 @@ $$\alpha = \min\left(1, e^{-\Delta S_B} \cdot \left| \frac{\text{Pfaffian}(JD')}
 
 ## 4. Target Architecture & Component Design
 
-*(Currently in collaborative discussion — component APIs and directory organization will be finalized next.)*
+*(Currently in collaborative discussion — component APIs and directory organisation will be finalised next.)*

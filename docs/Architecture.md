@@ -2,13 +2,13 @@
 
 ## 1. Vision & Core Philosophy
 
-`RFL` (Random Fuzzy Library) is a high-performance C++17/20 scientific library with native Python bindings designed for simulating and analyzing **Finite Noncommutative Geometries (Finite NCGs)**, **Fuzzy Spaces**, and **Random Spectral Triples**.
+`RFL` (Random Fuzzy Library) is a high-performance C++17/20 scientific library with native Python bindings designed for simulating and analysing **Finite Noncommutative Geometries (Finite NCGs)**, **Fuzzy Spaces**, and **Random Spectral Triples**.
 
 ### The Library Design Principle
 > *"Libraries provide mechanisms, vocabulary, and data structures; Applications provide policies, workflows, and orchestration."*
 
 > [!NOTE]
-> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernization for RFL](eps/ep-1-core-architecture-modernization.md)**.
+> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernisation for RFL](eps/ep-1-core-architecture-modernization.md)**.
 
 ---
 
@@ -21,7 +21,7 @@ flowchart TB
         Obs["<b>Observable & Telemetry Pipeline</b><br/>Eigenvalue Recorders, Autocorrelation, Observables"]
     end
 
-    subgraph SimulationCore["Sampling & Optimization Engine"]
+    subgraph SimulationCore["Sampling & Optimisation Engine"]
         Sampler["<b>MCMC & HMC Solvers</b><br/>Metropolis Stepper, Dual-Averaging Calibration"]
         Action["<b>Action & Energy Functionals</b><br/>Barrett-Glaser Action, Analytic Variations ΔS, Gradients ∇S"]
     end
@@ -131,7 +131,7 @@ classDiagram
         +computeEigenvalues() vec
         +traceDiracSquared() double
         +traceDiracQuartic() double
-        +randomize(IRng& rng) void
+        +randomise(IRng& rng) void
     }
 
     class BarrettGlaserAction {
@@ -217,8 +217,8 @@ public:
   double traceDiracSquared() const;
   double traceDiracQuartic() const;
 
-  // Randomization
-  void randomize(IRng& rng);
+  // Randomisation
+  void randomise(IRng& rng);
 
 private:
   int m_p{0};

@@ -1,13 +1,13 @@
 # RFL Release Process & Scientific Release Notes Guide
 
-This document establishes the official release lifecycle, quality gates, and release notes writing standard for the `RFL` (Random Fuzzy Library) project.
+This document establishes the official release lifecycle, pre-release checklist, and release notes writing standard for the `RFL` (Random Fuzzy Library) project.
 
 ---
 
 ## 1. Release Philosophy & Governance
 
 1. **Semantic Versioning & Beta Lifecycle:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.5.0`).
-   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research and architectural modernisation phase. Under Semantic Versioning rules, minor version increments (e.g. `v0.5.0` → `v0.6.0` → `v0.7.0`) may introduce breaking API changes, interface refactoring, or deprecations as the scientific architecture evolves toward `v1.0.0`.
+   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research and architectural modernisation phase. Under Semantic Versioning rules, minor version increments (`v0.5.0` → `v0.6.0`) may introduce breaking API changes or refactors while the architecture evolves toward `v1.0.0`.
    - **Stable Production Phase (`v1.0.0+`):** After `v1.0.0`, breaking changes occur only across MAJOR version increments, with a formal deprecation period across MINOR releases.
 2. **Controlled Language (ASD-STE100 & British English):**
    - Release documentation must follow controlled vocabulary defined in [docs/Glossary.md](Glossary.md).
@@ -28,12 +28,12 @@ flowchart TD
     subgraph "Phase 1: Pre-Release (RC)"
         A["Tag: v0.5.0rc1\n(git tag v0.5.0rc1)"] --> B["GitHub Pre-Release\n(gh release create --prerelease)"]
         B --> C["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
-        C --> D["Soak & Validation Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.5.0rc1)"]
+        C --> D["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.5.0rc1)"]
     end
 
     subgraph "Phase 2: Final Promotion"
         D --> E{"Validation successful?"}
-        E -- Issues found --> F["Fix on branch -> Tag v0.5.0rc2"]
+        E -- Issues found --> F["Fix on branch → Tag v0.5.0rc2"]
         F --> B
         E -- Clean --> G["Tag Final: v0.5.0\n(git tag v0.5.0)"]
         G --> H["Publish Final GitHub Release\n(Official PyPI default & Latest tag)"]
@@ -44,7 +44,7 @@ flowchart TD
 
 1. **Naming Standard (PEP 440 & Git SemVer):**
    - Use `vX.Y.Zrc1` (e.g. `v0.5.0rc1`).
-   - This tag format is natively recognized by Git, GitHub, `pip`, and `scikit-build-core`.
+   - This tag format is natively recognised by Git, GitHub, `pip`, and `scikit-build-core`.
 2. **GitHub Releases Behaviour:**
    - Pre-releases are flagged with `--prerelease` (or the "Set as a pre-release" checkbox).
    - GitHub displays a `Pre-release` badge and retains the previous release as `Latest`.
@@ -132,7 +132,7 @@ When drafting release notes (for candidates or final versions), use the standard
 > * **[Subsystem / API]:** [Describe the breaking change and the exact migration code / configuration].
 > * **[Target / Packaging]:** [Describe target renames, e.g. Old Target `X` → New Target `Y`].
 
-RFL version X.Y.Z introduces [one declarative sentence summarizing the release].
+RFL version X.Y.Z introduces [one declarative sentence summarising the release].
 
 ---
 
