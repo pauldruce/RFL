@@ -31,7 +31,7 @@ set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
 
 # Include ccache to speed up rebuild times.
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Ccache)
 
 option(${PROJECT_NAME}_ENABLE_CODE_COVERAGE "Enable code coverage through GCC." ON)
@@ -39,12 +39,16 @@ option(${PROJECT_NAME}_ENABLE_CODE_COVERAGE "Enable code coverage through GCC." 
 # Include Please's output directory
 include(GitRoot)
 
-include(Doxygen)
-doxygen_add_docs(doxygen
-        ${PROJECT_SOURCE_DIR}/README.md
-        ${PROJECT_SOURCE_DIR}/core
-        ${PROJECT_SOURCE_DIR}/examples
-        COMMENT "Generate documentation for entire project")
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
+    include(Doxygen)
+    if(DOXYGEN_FOUND)
+        doxygen_add_docs(doxygen
+                ${PROJECT_SOURCE_DIR}/README.md
+                ${PROJECT_SOURCE_DIR}/core
+                ${PROJECT_SOURCE_DIR}/examples
+                COMMENT "Generate documentation for entire project")
+    endif()
+endif()
 
 # GSL is included with Armadillo above, but we need more.
 include(Armadillo)
