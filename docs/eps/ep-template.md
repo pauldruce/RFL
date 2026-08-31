@@ -3,7 +3,7 @@
 * **Title:** [Feature / Enhancement Title]
 * **Author:** [Author Name]
 * **Status:** [Draft / In Discussion / Accepted (In Progress) / Completed]
-* **Target Versions:** [e.g. RFL v0.5.0 (Phase 1), v0.7.0 (Phase 2)]
+* **Target Versions:** [e.g. RFL v0.1.0 (Phase 1), v0.3.0 (Phase 2)]
 * **Date:** YYYY-MM-DD
 
 ---
@@ -13,10 +13,10 @@
 This proposal spans multiple releases.
 The table below tracks the status of each implementation phase:
 
-| Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | [Deliverables summary] | `v0.5.0` | [`v0.5.0`](...) | [PR #X](...) (Closes [#Y](...)) | ⏳ Scheduled |
-| **Phase 2** | [Deliverables summary] | `v0.7.0` | [`v0.7.0`](...) | [#Z](...) | 💡 Planned |
+| Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | [Deliverables summary] | `v0.1.0` | [PR #X](...) (Closes [#Y](...)) | ⏳ Scheduled |
+| **Phase 2** | [Deliverables summary] | `v0.3.0` | [#Z](...) | 💡 Planned |
 
 ---
 
@@ -27,7 +27,7 @@ The table below tracks the status of each implementation phase:
 
 ### 2.2 Goals
 * **Goal 1:** [Specific research or technical capability.]
-* **Goal 2:** [Specific scientific invariant or optimization.]
+* **Goal 2:** [Specific scientific invariant or optimisation.]
 
 ### 2.3 Non-Goals
 * [Explicitly declare what is out of scope for this proposal.]
@@ -66,7 +66,7 @@ The table below tracks the status of each implementation phase:
 ## 5. Target Architecture & Component Contracts
 
 ### 5.1 Subsystem Architecture
-[Define C++ class declarations, signatures, value types, and file organization.]
+[Define C++ class declarations, signatures, value types, and file organisation.]
 
 ### 5.2 Python Interoperability
 [Define pybind11 bindings, zero-copy buffer views, and NumPy integration.]
@@ -85,14 +85,14 @@ The table below tracks the status of each implementation phase:
 ## 7. Phased Delivery Plan
 
 ### Phase 1: [Phase 1 Title]
-* **Target Milestone:** `vX.Y.Z`
+* **Target Version:** `vX.Y.Z`
 * **GitHub Issue:** [Issue #A](...)
 * **Tasks:**
   1. [Task 1]
   2. [Task 2]
 
 ### Phase 2: [Phase 2 Title]
-* **Target Milestone:** `vX.Y.Z`
+* **Target Version:** `vX.Y.Z`
 * **GitHub Issue:** [Issue #B](...)
 * **Tasks:**
   1. [Task 1]

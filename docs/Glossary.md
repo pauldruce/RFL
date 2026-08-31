@@ -48,7 +48,7 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | **Calculate** | To determine a value using exact mathematical equations or analytical formulas. | *Compute (when analytical), evaluate (when vague)* |
 | **Compute** | To determine a value using iterative numerical algorithms or matrix solvers. | *Calculate (when iterative), figure out* |
 | **Initialise** | To set up starting memory, configurations, or objects before use. | *Instantiate, boot up, prepare* |
-| **Randomise** | To populate matrix elements with random values drawn from an RNG engine. | *Scramble, randomize (US spelling)* |
+| **Randomise** | To populate matrix elements with random values drawn from an RNG engine. | *Scramble, <!-- cspell:disable-line --> randomize (US spelling)* |
 | **Verify** | To test and prove that a state satisfies a mathematical invariant or requirement. | *Check, ensure, validate (when testing invariants)* |
 | **Sample** | To draw Markov chain states from the probability distribution $e^{-S(D)}$. | *Simulate (when referring to the MCMC step)* |
 | **Run** | To start and execute a simulation process or test suite. | *Carry out, perform, execute* |
@@ -73,6 +73,7 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 
 RFL strictly enforces **British English** spelling:
 
+<!-- cspell:disable -->
 | British English (Approved) | US English (Forbidden) | Example Context |
 | :--- | :--- | :--- |
 | **Initialise** | *Initialize* | `dirac.initialise()` |
@@ -86,3 +87,4 @@ RFL strictly enforces **British English** spelling:
 | **Fibre** | *Fiber* | Clifford fibre bundle |
 | **Gauge** | *Gage* | Gauge field fluctuations |
 | **Analogue** | *Analog* | Continuum analogue |
+<!-- cspell:enable -->

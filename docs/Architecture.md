@@ -2,13 +2,13 @@
 
 ## 1. Vision & Core Philosophy
 
-`RFL` (Random Fuzzy Library) is a high-performance C++17/20 scientific library with native Python bindings designed for simulating and analyzing **Finite Noncommutative Geometries (Finite NCGs)**, **Fuzzy Spaces**, and **Random Spectral Triples**.
+`RFL` (Random Fuzzy Library) is a high-performance C++17/20 scientific library with native Python bindings designed for simulating and analysing **Finite Noncommutative Geometries (Finite NCGs)**, **Fuzzy Spaces**, and **Random Spectral Triples**.
 
 ### The Library Design Principle
 > *"Libraries provide mechanisms, vocabulary, and data structures; Applications provide policies, workflows, and orchestration."*
 
 > [!NOTE]
-> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernization for RFL](eps/ep-1-core-architecture-modernization.md)**.
+> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernisation for RFL](eps/ep-1-core-architecture-modernisation.md)**.
 
 ---
 
@@ -21,7 +21,7 @@ flowchart TB
         Obs["<b>Observable & Telemetry Pipeline</b><br/>Eigenvalue Recorders, Autocorrelation, Observables"]
     end
 
-    subgraph SimulationCore["Sampling & Optimization Engine"]
+    subgraph SimulationCore["Sampling & Optimisation Engine"]
         Sampler["<b>MCMC & HMC Solvers</b><br/>Metropolis Stepper, Dual-Averaging Calibration"]
         Action["<b>Action & Energy Functionals</b><br/>Barrett-Glaser Action, Analytic Variations ΔS, Gradients ∇S"]
     end
@@ -44,7 +44,7 @@ flowchart TB
     Action -->|evaluates matrix products & traces| Dirac
     Dirac -->|computes Clifford representations| Clifford
     Dirac -->|delegates matrix math| Arma
-    Sampler -->|draws uniform/normal randoms| RNG
+    Sampler -->|draws uniform/normal random variates| RNG
 
     classDef userStyle fill:#4a90e2,stroke:#1d5bbf,stroke-width:2px,color:#fff;
     classDef simStyle fill:#20b2aa,stroke:#008b8b,stroke-width:2px,color:#fff;
@@ -60,8 +60,8 @@ flowchart TB
 ### Architectural Principles:
 * **Value Semantics & Regular Types:** Domain objects (`DiracOperator`, `CliffordModule`, `ActionConfig`) behave as regular C++ types: copyable, movable, default-constructible where sensible, with intuitive value equality and no nested pointer wrappers.
 * **Separation of State, Energy, and Algorithm:** The geometry state owns matrices, the action functional evaluates energy and derivatives, and samplers execute Markov transitions.
-* **Stepper / Iterator Pattern:** Callers retain 100% control over the execution loop for logging, checkpointing, and real-time visualization.
-* **Static Polymorphism in Hot Loops:** Inner Markov sweeps use templates/concepts to enable compiler inlining, register allocation, and SIMD vectorization.
+* **Stepper / Iterator Pattern:** Callers retain 100% control over the execution loop for logging, checkpointing, and real-time visualisation.
+* **Static Polymorphism in Hot Loops:** Inner Markov sweeps use templates/concepts to enable compiler inlining, register allocation, and SIMD vectorisation.
 * **Dual-Citizen C++/Python Architecture:** C++ compute core delivers raw execution speed; Python provides research agility with zero-copy NumPy array buffers.
 
 ---
@@ -75,7 +75,7 @@ graph TD
     end
 
     subgraph Computation["In-Loop Computation Patterns"]
-        Policy["<b>Policy-Based Customization</b><br/>Pluggable Action & Proposal Kernels (Compile-time)"]
+        Policy["<b>Policy-Based Customisation</b><br/>Pluggable Action & Proposal Kernels (Compile-time)"]
         NVI["<b>Non-Virtual Interface (NVI)</b><br/>Precondition Validation & Invariant Enforcement"]
     end
 
@@ -109,7 +109,7 @@ graph TD
 * **Dual-Tier Python Bridge:**
   Exposes C++ value types as idiomatic Python classes with generator streams (`iter_sweeps()`) and zero-copy NumPy array integration.
 * **Non-Virtual Interface (NVI):**
-  Public non-virtual methods enforce invariants and preconditions before delegating to private virtual customization points.
+  Public non-virtual methods enforce invariants and preconditions before delegating to private virtual customisation points.
 
 ---
 
@@ -131,7 +131,7 @@ classDiagram
         +computeEigenvalues() vec
         +traceDiracSquared() double
         +traceDiracQuartic() double
-        +randomize(IRng& rng) void
+        +randomise(IRng& rng) void
     }
 
     class BarrettGlaserAction {
@@ -217,8 +217,8 @@ public:
   double traceDiracSquared() const;
   double traceDiracQuartic() const;
 
-  // Randomization
-  void randomize(IRng& rng);
+  // Randomisation
+  void randomise(IRng& rng);
 
 private:
   int m_p{0};
@@ -343,7 +343,7 @@ rfl::MetropolisSampler sampler(action, 0.05, std::make_shared<rfl::GslRng>(42));
 auto recorder = std::make_shared<rfl::EigenvalueRecorder>(/*interval=*/10);
 sampler.add_observer(recorder);
 
-// Burn-in / Thermalization with dual averaging
+// Burn-in / Thermalisation with dual averaging
 for (int i = 0; i < 500; ++i) {
   sampler.sweepDualAveraging(dirac, 0.65);
 }

@@ -3,7 +3,7 @@
 * **Title:** Multi-Platform Package and Binary Distribution
 * **Author:** Paul Druce
 * **Status:** Accepted (In Progress)
-* **Target Versions:** RFL v0.5.0 (Phase 1), v0.7.0 (Phase 2), Backlog (Phase 3)
+* **Target Versions:** RFL v0.1.0 (Phase 1), v0.3.0 (Phase 2), Backlog (Phase 3)
 * **Date:** 2026-08-30
 
 ---
@@ -13,11 +13,11 @@
 This proposal spans multiple releases.
 The table below tracks the status of each implementation phase:
 
-| Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.5.0` | [`v0.5.0`](https://github.com/pauldruce/RFL/milestone/1) | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
-| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.7.0` | [`v0.7.0`](https://github.com/pauldruce/RFL/milestone/2) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
-| **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | Backlog | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
+| Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.1.0` | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
+| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.3.0` | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
+| **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
 
 ---
 
@@ -76,7 +76,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ## 4. Architecture Decision Records (ADRs) & Trade-offs
 
-### 4.1 ADR-1: Directory Layout & Target Names
+### 4.1 ADR-1: Directory Layout & Target Renaming
 
 | Criteria | Option A: Standardised Layout (`core/` & `legacy/`) (Selected) | Option B: Retain `new_RFL` / `old_RFL` |
 | :--- | :--- | :--- |
@@ -85,7 +85,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | **Packaging Cleanliness** | Standard CMake conventions | Non-standard paths |
 | **Decision** | **Selected (Option A)** | Rejected |
 
-*Rationale:* Promoting modern code to `src/RFL/core` and archiving historical code to `src/RFL/legacy` establishes an intuitive and lasting naming standard before the `v0.5.0` release.
+*Rationale:* Promoting modern code to `src/RFL/core` and archiving historical code to `src/RFL/legacy` establishes an intuitive and lasting naming standard before the `v0.1.0` release.
 
 ---
 
@@ -159,26 +159,26 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ```mermaid
 flowchart LR
-    subgraph "Phase 1: PyPI & GitHub Releases (v0.5.0)"
+    subgraph Phase1["Phase 1: PyPI & GitHub Releases (v0.1.0)"]
         P1A["Restructure core/ & legacy/"]
         P1B["cibuildwheel (Linux/macOS)"]
         P1C["PyPI OIDC Publishing"]
         P1D["CMake FetchContent (RFL::core)"]
     end
 
-    subgraph "Phase 2: CMake Targets & CPack (v0.7.0)"
+    subgraph Phase2["Phase 2: CMake Targets & CPack (v0.3.0)"]
         P2A["CMake install() Rules"]
         P2B["RFLConfig.cmake Export"]
         P2C["CPack Binary Tarballs"]
     end
 
-    subgraph "Phase 3: Package Managers (Future)"
+    subgraph Phase3["Phase 3: Package Managers (Future)"]
         P3A["Homebrew Tap (macOS)"]
         P3B["Conda-Forge Feedstock"]
         P3C["Conan / vcpkg Evaluation"]
     end
 
-    Phase 1 --> Phase 2 --> Phase 3
+    Phase1 --> Phase2 --> Phase3
 ```
 
 ### 5.2 Release Pipeline Workflow (`.github/workflows/release.yml`)
@@ -188,26 +188,31 @@ flowchart TD
     A["Release Published Event (v*)\nor workflow_dispatch"] --> B["Matrix: build_wheels"]
     A --> C["Job: build_sdist"]
     
-    subgraph "Matrix: cibuildwheel"
+    subgraph Matrix["Matrix: cibuildwheel"]
         B1["Linux x86_64\n(manylinux_2_28)"]
         B2["macOS x86_64\n(macos-13)"]
         B3["macOS arm64\n(macos-14)"]
     end
     
-    B --> B1 & B2 & B3
+    B --> B1
+    B --> B2
+    B --> B3
     
     B1 --> T1["pytest inside container"]
     B2 --> T2["pytest inside env"]
     B3 --> T3["pytest inside env"]
     
-    T1 & T2 & T3 --> U1["Upload Wheel Artifacts"]
+    T1 --> U1["Upload Wheel Artifacts"]
+    T2 --> U1
+    T3 --> U1
     C --> U2["Upload sdist Artifact"]
     
-    U1 & U2 --> G{"Release Published?"}
+    U1 --> G{"Release Published?"}
+    U2 --> G
     
-    G -- Yes --> R1["Job: upload_release_assets\n(Attach wheels + sdist)"]
-    G -- Yes --> R2["Job: publish_pypi\n(Trusted Publishing OIDC)"]
-    G -- No (Dry Run) --> R3["Retain Staged Artifacts"]
+    G -->|Yes| R1["Job: upload_release_assets\n(Attach wheels + sdist)"]
+    G -->|Yes| R2["Job: publish_pypi\n(Trusted Publishing OIDC)"]
+    G -->|No (Dry Run)| R3["Retain Staged Artifacts"]
 ```
 
 ---
@@ -216,6 +221,7 @@ flowchart TD
 
 | Verification Gate | Command / Test Description | Target Invariant |
 | :--- | :--- | :--- |
+| **C++ Core Unit Tests** | `ctest --test-dir build --output-on-failure` | Verifies `rfl_core` and `rfl_legacy` suites pass completely. |
 | **Local Unit Tests** | `pytest src/RFL/python_bindings/tests/unit` | Verifies Python API and exception propagation. |
 | **Local Integration Tests** | `pytest src/RFL/python_bindings/tests/integration` | Verifies NumPy zero-copy buffer safety and memory management. |
 | **Please Build Verification** | `./pleasew test //src/RFL/python_bindings/tests:all` | Validates in-tree Please hermetic build with new `core/` path. |
@@ -228,7 +234,7 @@ flowchart TD
 ## 7. Phased Delivery Plan
 
 ### Phase 1: Directory Restructuring, PyPI Wheels, GitHub Releases & CMake FetchContent
-* **Target Milestone:** `v0.5.0`
+* **Target Version:** `v0.1.0`
 * **GitHub Issue:** [Issue #18](https://github.com/pauldruce/RFL/issues/18)
 * **Tasks:**
   1. Rename `src/RFL/new_RFL` → `src/RFL/core` and `src/RFL/old_RFL` → `src/RFL/legacy`.
@@ -239,7 +245,7 @@ flowchart TD
   6. Update `README.md` and `docs/Consumption_Guide.md` with `pip` and `FetchContent` instructions.
 
 ### Phase 2: CMake Installation Targets & CPack Binary Packaging
-* **Target Milestone:** `v0.7.0`
+* **Target Version:** `v0.3.0`
 * **GitHub Issue:** [Issue #3](https://github.com/pauldruce/RFL/issues/3)
 * **Tasks:**
   1. Define CMake `install(TARGETS rfl_core EXPORT RFLTargets ...)` and header install rules.
@@ -248,10 +254,9 @@ flowchart TD
   4. Add CPack artifact generation step to `.github/workflows/release.yml`.
 
 ### Phase 3: Community Package Managers
-* **Target Milestone:** Future / Backlog
+* **Target Version:** Future / Backlog
 * **GitHub Issue:** [Issue #29](https://github.com/pauldruce/RFL/issues/29)
 * **Tasks:**
   1. Create Homebrew formula in `pauldruce/homebrew-rfl`.
   2. Create Conda-Forge feedstock for `librfl` and `rfl`.
   3. Complete research trade study on Conan and vcpkg registries.
-

@@ -68,7 +68,7 @@ TEST(DerivativeTests, DerivativesAreWhatExactly) {
  //      }
  //   };
  //
- //   TEST_P(DerivativeTests, DerivativesAreWhatsExactly)
+ //   TEST_P(DerivativeTests, DerivativesAreWhatExactly)
  //   {
  //      DerivativeParams params = GetParam();
  //      Geom24 G(params.p, params.q, params.dim, params.g2);

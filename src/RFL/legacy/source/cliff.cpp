@@ -234,7 +234,7 @@ Cliff& Cliff::operator*=(const Cliff& C2) {
     gamma_.emplace_back(kron(chiral, C2.get_gamma(i)));
 
   // compute chirality
-  const int s2 = (q2 - p2 + 8 * p2) % 8;// +8*p2 is necessary becase % does not mean modulo for negative numbers
+  const int s2 = (q2 - p2 + 8 * p2) % 8;// +8*p2 is necessary because % does not mean modulo for negative numbers
   if ((s2 % 8) % 2) {
     const int s = (q - p + 8 * p) % 8;
     const cx_mat id1(dim_gamma, dim_gamma, fill::eye);

@@ -23,3 +23,16 @@ genrule(
     ],
     visibility = ["PUBLIC"],
 )
+
+genrule(
+    name = "lint_spelling",
+    outs = ["lint_spelling.sh"],
+    binary = True,
+    cmd = [
+        "echo '#!/bin/bash' > $OUTS",
+        "echo 'echo \"Checking spelling compliance (CSpell)...\"' >> $OUTS",
+        "echo 'npx cspell lint \"**/*.{cpp,hpp,h,c,py,md,cmake,txt}\"' >> $OUTS",
+        "chmod +x $OUTS",
+    ],
+    visibility = ["PUBLIC"],
+)

@@ -69,7 +69,7 @@ flowchart LR
 
 ## 3. British English Spelling Conventions
 
-RFL strictly standardizes on **British English**:
+RFL strictly standardises on **British English**:
 
 | Feature | British Standard (Approved) | US Form (Avoid) |
 | :--- | :--- | :--- |
@@ -79,7 +79,7 @@ RFL strictly standardizes on **British English**:
 | **Double 'l'** | *modelling, initialised, cancelled, travelling* | *modeling, initialized, canceled, traveling* |
 | **-programme** | *programme* (for scientific initiatives), *program* (for computer code) | *program* |
 | **-ence / -ense** | *licence* (noun), *license* (verb); *defence* | *license* (both); *defense* |
-| **Specialized terms** | *gauge, analogue, catalogue* | *gage, analog, catalog* |
+| **Specialised terms** | *gauge, analogue, catalogue* | *gage, analog, catalog* |
 
 ---
 
@@ -112,3 +112,15 @@ RFL strictly standardizes on **British English**:
   The previous implementation used dynamic polymorphism with `std::unique_ptr` wrappers.
   To achieve optimal computational performance, we refactor the state into regular value types.
   ```
+
+---
+
+## 5. Release Notes & Process Standard
+
+The single source of truth for the release lifecycle, pre-release checklist, and scientific release notes formatting is:
+📄 **[docs/Release_Process.md](docs/Release_Process.md)**
+
+When authoring release notes:
+1. Use an objective, impersonal tone (no first-person pronouns or conversational greetings).
+2. Follow the standard section layout defined in [docs/Release_Process.md](docs/Release_Process.md).
+3. Ensure all sentence length limits (Rule 1) and British English spelling (Section 3) are strictly followed.

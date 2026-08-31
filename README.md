@@ -50,12 +50,12 @@ When running research experiments (in Jupyter notebooks or scripts) and hitting 
 
 ### 2. Major Architecture & Physics Upgrades (Enhancement Proposals - EPs)
 When several related issues point to a major subsystem upgrade (such as Value Semantics or Fermion Pfaffian Actions):
-* Author an **Enhancement Proposal** in `docs/eps/` (e.g. [EP-1](docs/eps/ep-1-core-architecture-modernization.md)).
+* Author an **Enhancement Proposal** in `docs/eps/` (e.g. [EP-1](docs/eps/ep-1-core-architecture-modernisation.md)).
 * EPs capture **Research Scenarios**, **Requirements & Invariants Table**, and **Architecture Decision Records (ADRs)** with explicit trade-offs.
 * EPs are committed in git alongside the code for permanent versioned traceability.
 
 ### 3. Milestone Scheduling & PR Delivery
-* When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.7.0: Core Modernization (EP-1)`).
+* When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.3.0: Core Modernisation (EP-1)`).
 * The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 
@@ -155,8 +155,12 @@ cmake --build ./build --target help
 
 ## Documentation
 
-Documentation for how this software is architected and implemented can be found in the READMEs in the
-directory `RFL_source` and its subdirectories.
+Documentation for the software architecture, release lifecycle, and controlled vocabulary is available in the `docs/` directory:
+- [Target Architecture Guide](docs/Architecture.md)
+- [Release Process & Notes Guide](docs/Release_Process.md)
+- [Controlled Vocabulary & Glossary](docs/Glossary.md)
+- [Consuming RFL in Research](docs/Consumption_Guide.md)
+- [Enhancement Proposals](docs/eps/)
 
 
 ## Background
