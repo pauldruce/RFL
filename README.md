@@ -66,12 +66,12 @@ RFL follows the **Active LTS Window Policy** (similar to SPEC 0 / NEP 29) to ens
 | Dependency / Tool | Minimum Supported Version | Supported Environment |
 | :--- | :--- | :--- |
 | **C++ Standard** | **C++17** | `std::optional`, `std::variant`, structured bindings |
-| **Armadillo** | **$\ge 11.4.0$** | Tested on 11.4.4 (LTS baseline), 12.8.4, and 14.2.2 |
-| **GSL** | **$\ge 2.6$** | GNU Scientific Library random number generators |
-| **Compilers** | **GCC $\ge 10$, Clang $\ge 11$, Apple Clang $\ge 13$, MSVC $\ge 2019$** | Conforming C++17 compilers |
-| **Operating Systems** | **Ubuntu $\ge 22.04$ LTS, macOS $\ge 14$ (Apple Silicon), Windows (WSL2)** | Active CI runners |
-| **Python** | **Python $\ge 3.9$** | NumPy $\ge 1.22$ |
-| **CMake** | **$\ge 3.20$** | Modern target export and packaging syntax |
+| **Armadillo** | **≥ 11.4.0** | Tested on 11.4.4 (LTS baseline), 12.8.4, and 14.2.2 |
+| **GSL** | **≥ 2.6** | GNU Scientific Library random number generators |
+| **Compilers** | **GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019** | Conforming C++17 compilers |
+| **Operating Systems** | **Ubuntu ≥ 22.04 LTS, macOS ≥ 14 (Apple Silicon), Windows (WSL2)** | Active CI runners |
+| **Python** | **Python ≥ 3.9** | NumPy ≥ 1.22 |
+| **CMake** | **≥ 3.20** | Modern target export and packaging syntax |
 
 ## Building the library
 

@@ -19,7 +19,7 @@ flowchart LR
 
 1. **Proposal (Draft):** Author the EP in `docs/eps/ep-<N>-<title>.md` defining requirements and trade-offs (`ADR-1`, `ADR-2`).
 2. **Approval Gate:** Reach agreement on architectural decisions and update status to `Accepted`.
-3. **Milestone Creation:** Decompose the delivery plan into discrete phases assigned to specific **GitHub Milestones** (e.g. Phase 1 $\to$ `v0.5.0`, Phase 2 $\to$ `v0.7.0`).
+3. **Milestone Creation:** Decompose the delivery plan into discrete phases assigned to specific **GitHub Milestones** (e.g. Phase 1 -> `v0.5.0`, Phase 2 -> `v0.7.0`).
 4. **Phased Delivery via PRs:** Deliver phases in bite-sized PRs referencing `Closes #X`. Track phase progress in the EP tracker table.
 5. **Release & Closeout:** When a milestone reaches 100%, tag the release. When all phases are shipped, update the EP status to `Completed`.
 

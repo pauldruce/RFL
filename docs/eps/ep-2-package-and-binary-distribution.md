@@ -25,7 +25,7 @@ The table below tracks the status of each implementation phase:
 
 ### 2.1 Problem Statement & Research Context
 `RFL` enables researchers to simulate finite noncommutative geometries and random fuzzy spaces using Markov Chain Monte Carlo methods.
-Researchers study spectral triples $(A, \mathcal{H}, D)$ and the Barrett-Glaser action across diverse computing environments:
+Researchers study spectral triples (A, H, D) and the Barrett-Glaser action across diverse computing environments:
 1. Python data science workflows (Jupyter notebooks, NumPy, SciPy, Matplotlib).
 2. High-performance C++ batch simulations.
 3. Automated cluster runs on Linux and macOS workstations.
@@ -38,11 +38,11 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ### 2.2 Goals
 * **Clean Target & Directory Standardisation:** Promote `new_RFL` to `core/` with target `rfl_core` (aliases: `RFL::core`, `RFL::rfl`), and archive `old_RFL` to `legacy/` (`rfl_legacy`).
-* **Zero-Compile Python Installation:** Publish precompiled binary wheels to PyPI and GitHub Releases for Linux and macOS (`x86_64`, `arm64`) across Python 3.8 to 3.13.
-* **Self-Contained Shared Binaries:** Vendor required dynamic libraries (`libarmadillo`, `libgsl`, `libopenblas`) inside wheels using `auditwheel` and `delocate`.
-* **Immediate C++ In-Tree Integration:** Provide namespaced CMake alias targets (`RFL::core`, `RFL::rfl`) for CMake `FetchContent` workflows.
-* **Precompiled C++ Binary Archives:** Generate installable tarballs (`rfl-vX.Y.Z-<os>-<arch>.tar.gz`) containing headers, compiled libraries, and `RFLConfig.cmake`.
-* **Multi-Phase Ecosystem Roadmap:** Structure distribution across discrete phases spanning PyPI, CMake, GitHub Releases, Homebrew, and Conda-Forge.
+* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) across Python 3.8–3.13.
+* **Hermetic Dynamic Library Vendoring:** Automatically vendor and bundle shared C++ runtime dependencies (`openblas`, `gsl`, `armadillo`) inside wheels via `auditwheel` and `delocate`.
+* **Zero-Secret CI/CD PyPI Publishing:** Implement automated PyPI deployment on version tag push using OpenID Connect (OIDC) Trusted Publishing.
+* **CMake In-Tree FetchContent Support:** Ensure external C++ codebases can integrate RFL seamlessly via standard `FetchContent`.
+* **Foundation for Package Managers:** Lay the ground for future CMake `install()` targets, CPack release archives, and community package managers (Homebrew, Conda-Forge).
 
 ### 2.3 Non-Goals
 * Supporting legacy Python versions (< 3.8) or non-standard interpreters (PyPy).
@@ -62,7 +62,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 | Requirement ID | Requirement Summary | Physical & Technical Invariant |
 | :--- | :--- | :--- |
-| **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` $\to$ `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` $\to$ `legacy/` (target `rfl_legacy`). |
+| **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` -> `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` -> `legacy/` (target `rfl_legacy`). |
 | **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) covering Python 3.8–3.13. |
 | **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
 | **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
@@ -231,7 +231,7 @@ flowchart TD
 * **Target Milestone:** `v0.5.0`
 * **GitHub Issue:** [Issue #18](https://github.com/pauldruce/RFL/issues/18)
 * **Tasks:**
-  1. Rename `src/RFL/new_RFL` $\to$ `src/RFL/core` and `src/RFL/old_RFL` $\to$ `src/RFL/legacy`.
+  1. Rename `src/RFL/new_RFL` -> `src/RFL/core` and `src/RFL/old_RFL` -> `src/RFL/legacy`.
   2. Update CMake target names (`rfl_core`, `RFL::core`, `RFL::rfl`, `rfl_legacy`) across CMakeLists.txt.
   3. Update Please build targets (`src/RFL/core/BUILD`, `src/RFL/legacy/BUILD`, `src/RFL/BUILD`).
   4. Configure `[tool.cibuildwheel]` in `src/RFL/pyproject.toml`.
