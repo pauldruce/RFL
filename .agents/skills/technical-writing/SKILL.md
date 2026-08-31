@@ -112,3 +112,18 @@ RFL strictly standardizes on **British English**:
   The previous implementation used dynamic polymorphism with `std::unique_ptr` wrappers.
   To achieve optimal computational performance, we refactor the state into regular value types.
   ```
+
+---
+
+## 5. Scientific Release Notes Standard
+
+Release notes for RFL follow the factual, impersonal conventions of scientific software (e.g. NumPy, SciPy, PyTorch).
+
+### 5.1 Rules for Release Notes
+1. **Impersonal Voice:** Do not use first-person pronouns (*"we"*, *"I"*, *"our"*) or conversational openings (*"We are pleased to announce..."*). State changes directly and objectively.
+2. **Standard Structure:**
+   * **Summary Statement:** One declarative sentence describing the release version and primary additions.
+   * **`## 1. Highlights`:** 3–5 bullet points summarizing primary features.
+   * **`## 2. [Subsystem / Module]`:** Specific technical changes grouped by component (e.g. Packaging, C++ Core, Python Bindings).
+   * **`## N. Compatibility & Verification`:** Compiler standards, dependency baselines, and test pass rates.
+3. **Controlled Language:** Apply ASD-STE100 sentence length limits and British English spelling across all release notes.
