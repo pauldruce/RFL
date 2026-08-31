@@ -13,11 +13,11 @@
 This proposal spans multiple releases.
 The table below tracks the status of each implementation phase:
 
-| Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.1.0` | [`v0.1.0`](https://github.com/pauldruce/RFL/milestone/1) | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
-| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.3.0` | [`v0.3.0`](https://github.com/pauldruce/RFL/milestone/3) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
-| **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | Backlog | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
+| Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.1.0` | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
+| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.3.0` | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
+| **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
 
 ---
 
@@ -60,23 +60,18 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Physical & Technical Invariant |
+| Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
 | :--- | :--- | :--- |
-| **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
-| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) covering Python 3.8–3.13. |
-| **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
-| **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
-| **REQ-PKG-05** | **Secure PyPI Publishing** | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |
-| **REQ-PKG-06** | **CMake FetchContent Support** | Export namespaced alias `RFL::core` and `RFL::rfl` in top-level CMake configuration. |
-| **REQ-PKG-07** | **Standard CMake Installation** | Define CMake `install()` targets for public headers, compiled libraries, and CMake config packages. |
-| **REQ-PKG-08** | **CPack Binary Packaging** | Generate `.tar.gz` release archives containing headers, static libraries, and package configuration files. |
-| **REQ-PKG-09** | **Ecosystem Package Distribution** | Provide recipes for Homebrew Tap, Conda-Forge, and evaluate C++ registries (Conan, vcpkg). |
+| **REQ-PKG-01** | **Hermetic Shared Library Vendoring** | Binary wheels must vendor dynamic dependencies (`.libs/`) so consumers do not need system GSL or Armadillo. |
+| **REQ-PKG-02** | **Zero-Copy NumPy Interop** | Matrix data conversion between Armadillo complex matrices and NumPy arrays must be zero-copy via Carma. |
+| **REQ-PKG-03** | **Zero-Secret CI/CD Pipeline** | Automated PyPI deployment must use GitHub OIDC Trusted Publishing with zero stored long-lived tokens. |
+| **REQ-PKG-04** | **Standard Target Export** | CMake builds must export `RFL::core` (and `RFL::rfl`) for direct consumption in `target_link_libraries()`. |
 
 ---
 
 ## 4. Architecture Decision Records (ADRs) & Trade-offs
 
-### 4.1 ADR-1: Directory Layout & Target Names
+### 4.1 ADR-1: Directory Layout & Target Renaming
 
 | Criteria | Option A: Standardised Layout (`core/` & `legacy/`) (Selected) | Option B: Retain `new_RFL` / `old_RFL` |
 | :--- | :--- | :--- |
@@ -221,7 +216,7 @@ flowchart TD
 
 | Verification Gate | Command / Test Description | Target Invariant |
 | :--- | :--- | :--- |
-| **Local Unit Tests** | `pytest src/RFL/python_bindings/tests/unit` | Verifies Python API and exception propagation. |
+| **C++ Core Unit Tests** | `ctest --test-dir build --output-on-failure` | Verifies `rfl_core` and `rfl_legacy` suites pass completely. |
 | **Local Integration Tests** | `pytest src/RFL/python_bindings/tests/integration` | Verifies NumPy zero-copy buffer safety and memory management. |
 | **Please Build Verification** | `./pleasew test //src/RFL/python_bindings/tests:all` | Validates in-tree Please hermetic build with new `core/` path. |
 | **cibuildwheel Test Phase** | `pytest {project}/src/RFL/python_bindings/tests` | Verifies installed wheel inside clean containers. |
@@ -233,7 +228,7 @@ flowchart TD
 ## 7. Phased Delivery Plan
 
 ### Phase 1: Directory Restructuring, PyPI Wheels, GitHub Releases & CMake FetchContent
-* **Target Milestone:** `v0.1.0`
+* **Target Version:** `v0.1.0`
 * **GitHub Issue:** [Issue #18](https://github.com/pauldruce/RFL/issues/18)
 * **Tasks:**
   1. Rename `src/RFL/new_RFL` → `src/RFL/core` and `src/RFL/old_RFL` → `src/RFL/legacy`.
@@ -244,7 +239,7 @@ flowchart TD
   6. Update `README.md` and `docs/Consumption_Guide.md` with `pip` and `FetchContent` instructions.
 
 ### Phase 2: CMake Installation Targets & CPack Binary Packaging
-* **Target Milestone:** `v0.3.0`
+* **Target Version:** `v0.3.0`
 * **GitHub Issue:** [Issue #3](https://github.com/pauldruce/RFL/issues/3)
 * **Tasks:**
   1. Define CMake `install(TARGETS rfl_core EXPORT RFLTargets ...)` and header install rules.
@@ -253,10 +248,9 @@ flowchart TD
   4. Add CPack artifact generation step to `.github/workflows/release.yml`.
 
 ### Phase 3: Community Package Managers
-* **Target Milestone:** Future / Backlog
+* **Target Version:** Future / Backlog
 * **GitHub Issue:** [Issue #29](https://github.com/pauldruce/RFL/issues/29)
 * **Tasks:**
   1. Create Homebrew formula in `pauldruce/homebrew-rfl`.
   2. Create Conda-Forge feedstock for `librfl` and `rfl`.
   3. Complete research trade study on Conan and vcpkg registries.
-

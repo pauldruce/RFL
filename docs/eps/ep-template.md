@@ -13,10 +13,10 @@
 This proposal spans multiple releases.
 The table below tracks the status of each implementation phase:
 
-| Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | [Deliverables summary] | `v0.1.0` | [`v0.1.0`](...) | [PR #X](...) (Closes [#Y](...)) | ⏳ Scheduled |
-| **Phase 2** | [Deliverables summary] | `v0.3.0` | [`v0.3.0`](...) | [#Z](...) | 💡 Planned |
+| Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | [Deliverables summary] | `v0.1.0` | [PR #X](...) (Closes [#Y](...)) | ⏳ Scheduled |
+| **Phase 2** | [Deliverables summary] | `v0.3.0` | [#Z](...) | 💡 Planned |
 
 ---
 
@@ -85,14 +85,14 @@ The table below tracks the status of each implementation phase:
 ## 7. Phased Delivery Plan
 
 ### Phase 1: [Phase 1 Title]
-* **Target Milestone:** `vX.Y.Z`
+* **Target Version:** `vX.Y.Z`
 * **GitHub Issue:** [Issue #A](...)
 * **Tasks:**
   1. [Task 1]
   2. [Task 2]
 
 ### Phase 2: [Phase 2 Title]
-* **Target Milestone:** `vX.Y.Z`
+* **Target Version:** `vX.Y.Z`
 * **GitHub Issue:** [Issue #B](...)
 * **Tasks:**
   1. [Task 1]

@@ -30,7 +30,7 @@ flowchart LR
 When an Enhancement Proposal spans multiple releases:
 * **Status Field:** Set to `Accepted (In Progress)` during active development. Update to `Completed` only when all planned phases ship.
 * **Target Versions:** List all target versions explicitly: `Target Versions: RFL v0.1.0 (Phase 1), v0.3.0 (Phase 2), Backlog (Phase 3)`.
-* **Implementation Tracker Table:** Include a dedicated phase tracking table at the top of the EP (Section 1) linking each phase to its milestone, issue, PR, and live status.
+* **Implementation Tracker Table:** Include a dedicated phase tracking table at the top of the EP (Section 1) linking each phase to its target version, issue, PR, and live status.
 
 ## 3. Canonical EP Template
 
