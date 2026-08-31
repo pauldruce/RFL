@@ -71,16 +71,14 @@ flowchart TD
 
 ## 3. The Complete Release Lifecycle
 
-### Step 1: Pre-Release Verification (Quality Gates)
-Before tagging any release or candidate, verify all automated gates:
-- **CTest Suite:** `ctest --test-dir build --output-on-failure` (100% pass).
-- **Pytest Suite:** `pytest src/RFL/python_bindings/tests` (100% pass).
-- **Please Hermetic Build:** `./pleasew test //...` (100% pass).
-- **CI Matrix:** All GitHub Actions workflows on `main` must be green.
+### Step 1: Pre-Release Checklist
+Before tagging any release or candidate:
+* Ensure all CI workflows on `main` are green.
+* Verify local builds and tests pass (`ctest`, `pytest`).
 
 ### Step 2: Milestone Triage & EP Status
-- Verify that all GitHub Issues and PRs for the milestone are merged.
-- Update the relevant Enhancement Proposal in [docs/eps/](eps/) to reflect current phase progress.
+* Verify that all GitHub Issues and PRs for the milestone are merged and closed.
+* Update the relevant Enhancement Proposal in [docs/eps/](eps/) to reflect current milestone status.
 
 ### Step 3: Tag and Publish a Release Candidate (`vX.Y.Zrc1`)
 1. Create and push the release candidate tag:
@@ -96,15 +94,15 @@ Before tagging any release or candidate, verify all automated gates:
    ```
 3. The release workflow automatically compiles wheels, packages `sdist`, attaches release assets, and uploads the pre-release to PyPI.
 
-### Step 4: Soak & Downstream Validation
-During the soak period (typically 24–72 hours for `0.y.z` releases):
-1. **Test Python Wheels:** In a clean virtual environment on Linux and macOS, run:
+### Step 4: Release Candidate Testing
+During the testing window (24–72 hours for `0.y.z` releases):
+1. **Python Wheels:** Verify in a clean virtual environment:
    ```bash
    python -m venv test_env && source test_env/bin/activate
    pip install --pre rfl
    python -c "import rfl; print(rfl.__version__)"
    ```
-2. **Test C++ CMake Target:** Verify `FetchContent` in an external test project linking `RFL::core`.
+2. **C++ CMake Integration:** Verify `FetchContent` in an external test project linking `RFL::core`.
 
 ### Step 5: Tag and Publish Final Release (`vX.Y.Z`)
 When the release candidate is validated with zero critical defects:
@@ -171,13 +169,12 @@ RFL version X.Y.Z introduces [one declarative sentence summarizing the release].
 
 ---
 
-## 6. Compatibility & Verification
+## 6. Compatibility & Requirements
 
 * **C++ Standard:** C++17 conforming compiler (GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019).
 * **Linear Algebra:** Armadillo ≥ 11.4.0, OpenBLAS / LAPACK.
 * **Stochastic Engine:** GNU Scientific Library (GSL) ≥ 2.6.
 * **Python Compatibility:** Python 3.8 – 3.13, NumPy ≥ 1.22.
-* **Quality Gates:** 100% test pass rate across CTest, Pytest, and CI matrix configurations.
 ```
 
 ---
