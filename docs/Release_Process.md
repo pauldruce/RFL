@@ -93,17 +93,17 @@ Before tagging any release or candidate:
    ```bash
    git checkout main
    git pull origin main
-   git tag v0.5.0rc1
-   git push origin v0.5.0rc1
+   git tag vX.Y.Zrc1
+   git push origin vX.Y.Zrc1
    ```
 2. Create the Draft Pre-Release using the committed release notes:
    ```bash
-   gh release create v0.5.0rc1 --draft --prerelease --title "v0.5.0rc1: Release Candidate 1" --notes-file docs/releases/v0.5.0.md
+   gh release create vX.Y.Zrc1 --draft --prerelease --title "vX.Y.Zrc1: Release Candidate 1" --notes-file docs/releases/vX.Y.Z.md
    ```
 3. Review the rendered release notes in the GitHub Web UI.
 4. Publish the pre-release:
    ```bash
-   gh release edit v0.5.0rc1 --draft=false
+   gh release edit vX.Y.Zrc1 --draft=false
    ```
    The release workflow compiles wheels, packages `sdist`, attaches release assets, and uploads the pre-release to PyPI.
 
@@ -121,17 +121,17 @@ During the testing window (24–72 hours for `0.y.z` releases):
 When the release candidate is validated with zero critical defects:
 1. Tag the release commit:
    ```bash
-   git tag v0.5.0
-   git push origin v0.5.0
+   git tag vX.Y.Z
+   git push origin vX.Y.Z
    ```
 2. Create the Draft Release:
    ```bash
-   gh release create v0.5.0 --draft --title "v0.5.0: Multi-Platform Package and Binary Distribution" --notes-file docs/releases/v0.5.0.md
+   gh release create vX.Y.Z --draft --title "vX.Y.Z: <Release Title>" --notes-file docs/releases/vX.Y.Z.md
    ```
 3. Review the rendered release notes in the GitHub Web UI.
 4. Publish the final release:
    ```bash
-   gh release edit v0.5.0 --draft=false
+   gh release edit vX.Y.Z --draft=false
    ```
    The final packages become the default on PyPI (`pip install rfl`), assets are attached to GitHub Releases, and the milestone is closed.
 
