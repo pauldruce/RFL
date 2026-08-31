@@ -96,9 +96,9 @@ Before tagging any release or candidate:
    git tag v0.5.0rc1
    git push origin v0.5.0rc1
    ```
-2. Create the Draft Pre-Release:
+2. Create the Draft Pre-Release using the committed release notes:
    ```bash
-   gh release create v0.5.0rc1 --draft --prerelease --title "v0.5.0rc1: Release Candidate 1" --notes-file release_notes.md
+   gh release create v0.5.0rc1 --draft --prerelease --title "v0.5.0rc1: Release Candidate 1" --notes-file docs/releases/v0.5.0.md
    ```
 3. Review the rendered release notes in the GitHub Web UI.
 4. Publish the pre-release:
@@ -126,7 +126,7 @@ When the release candidate is validated with zero critical defects:
    ```
 2. Create the Draft Release:
    ```bash
-   gh release create v0.5.0 --draft --title "v0.5.0: Multi-Platform Package and Binary Distribution" --notes-file release_notes.md
+   gh release create v0.5.0 --draft --title "v0.5.0: Multi-Platform Package and Binary Distribution" --notes-file docs/releases/v0.5.0.md
    ```
 3. Review the rendered release notes in the GitHub Web UI.
 4. Publish the final release:
@@ -137,15 +137,22 @@ When the release candidate is validated with zero critical defects:
 
 ---
 
-## 4. Canonical Release Notes Template
+## 4. In-Tree Release Notes Storage (`docs/releases/`)
 
-The single source of truth for drafting release notes (for candidates or final versions) is:
+Following scientific software conventions (NumPy, SciPy, Boost), all release notes are committed directly to the repository under **`docs/releases/vX.Y.Z.md`**.
+
+### 4.1 Canonical Template
+The single source of truth for authoring release notes is:
 📄 **[docs/release-note-template.md](release-note-template.md)**
 
-To draft release notes for a new version:
-1. Copy `docs/release-note-template.md` to `release_notes.md`.
+To author release notes for a new version:
+1. Copy `docs/release-note-template.md` to `docs/releases/vX.Y.Z.md`.
 2. Populate the breaking changes alert box, highlights, and component changes.
-3. Verify that all descriptions follow ASD-STE100 sentence length limits and British English spelling.
+3. Commit `docs/releases/vX.Y.Z.md` on the release PR for peer review.
+4. Pass `--notes-file docs/releases/vX.Y.Z.md` when creating the GitHub Release.
+
+### 4.2 Historical Pre-Releases (`v0.1.0` – `v0.4.0`)
+Historical development milestones are backfilled in `docs/releases/` (`v0.1.0.md` through `v0.4.0.md`). These milestones were unpackaged internal iterations. For all Python and modern C++ research workflows, use **RFL `v0.5.0` or later**.
 
 ---
 
