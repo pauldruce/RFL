@@ -128,6 +128,12 @@ When drafting release notes (for candidates or final versions), use the standard
 ```markdown
 # RFL vX.Y.Z Release Notes
 
+> [!WARNING]
+> ### Breaking Changes & Migration Guide (Beta Phase)
+> RFL is in active beta development (`v0.y.z`). This release introduces the following breaking changes and migration steps:
+> * **[Subsystem / API]:** [Describe the breaking change and the exact migration code / configuration].
+> * **[Target / Packaging]:** [Describe target renames, e.g. Old Target `X` → New Target `Y`].
+
 RFL version X.Y.Z introduces [one declarative sentence summarizing the release].
 
 ---
