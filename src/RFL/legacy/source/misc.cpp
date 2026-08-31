@@ -17,10 +17,10 @@ using namespace arma;
 // PD : Moved into DiracOperator constructor
 Geom24::Geom24(int p_, int q_, int dim_, double g2_)
     : p(p_), q(q_), dim(dim_), g2(g2_) {
-  // initialize derived parameters
+  // initialise derived parameters
   derived_parameters();
 
-  // allocate and initialize H and L matrices to identity
+  // allocate and initialise H and L matrices to identity
   mat = new arma::cx_mat[nHL];
   mom = new arma::cx_mat[nHL];
   eps = new int[nHL];
@@ -40,10 +40,10 @@ Geom24::Geom24(int p_, int q_, int dim_, double g2_)
 Geom24::Geom24(istream& in) {
   read_parameters(in);
 
-  // initialize derived parameters
+  // initialise derived parameters
   derived_parameters();
 
-  // allocate and initialize H and L matrices to identity
+  // allocate and initialise H and L matrices to identity
   mat = new arma::cx_mat[nHL];
   mom = new arma::cx_mat[nHL];
   eps = new int[nHL];
@@ -193,7 +193,7 @@ void Geom24::derived_parameters() {
       //            }
       bool first = true;
       for (const auto& v : vec) {
-        if (first) {// skipp first entry
+        if (first) {// skip first entry
           first = false;
           continue;
         }
@@ -368,11 +368,11 @@ void Geom24::print_omega_table_4() const {
 }
 
 //void Geom24::adjust() {
-//    // hermitianize
+//    // hermitianise
 //    for (int i = 0; i < nHL; ++i)
 //        mat[i] = 0.5 * (mat[i] + mat[i].t());
 //
-//    // tracelessitize
+//    // tracelessitise
 //    for (int i = nH; i < nHL; ++i) {
 //        double tr = trace(mat[i]).real() / dim;
 //        mat[i] = mat[i] - tr * cx_mat(dim, dim, fill::eye);
@@ -381,7 +381,7 @@ void Geom24::print_omega_table_4() const {
 
 // PD: In DiracOperator
 cx_mat Geom24::build_dirac() const {
-  // initialize dirac op to zero
+  // initialise dirac op to zero
   int dim_dirac = dim * dim * dim_omega;
   cx_mat dirac(dim_dirac, dim_dirac, fill::zeros);
 

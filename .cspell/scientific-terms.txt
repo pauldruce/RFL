@@ -1,0 +1,117 @@
+# ==============================================================================
+# RFL Project Dictionary for CSpell
+# This dictionary contains domain-specific terminology, scientific tokens,
+# and build/library identifiers valid within the Random Fuzzy Library project.
+# ==============================================================================
+
+# --- Noncommutative Geometry & Theoretical Physics ---
+antilinear
+anticommutator
+chirality
+Connes
+Grassmann
+Hermiticity
+infty
+Langevin
+mathcal
+mathbb
+noncommutative
+Pfaffian
+Pfaffians
+Widom
+
+# --- Dirac Operators & Simulation State ---
+antiherm
+Diagonalisation
+diagonalisation
+diracs
+DIRACOPERATOR
+duav
+hermitianise
+IDIRACOPERATOR
+IDIRACOPERATORDERIVATIVES
+OMELYAN
+Thermalisation
+thermalisation
+thermalise
+tracelessitise
+trdirac
+trii
+trik
+triki
+
+# --- Linear Algebra & Third-Party C++ Libraries ---
+arma
+Armadillo
+carma
+decomp
+diagmat
+eigen
+eigenvals
+EIGENVALUERECORDER
+GSLRNG
+gsl
+IRNG
+kron
+linspace
+owndata
+PIMPL
+pybind
+ranlxd
+recomputation
+subclassing
+
+# --- Build Systems (CMake & Please) ---
+CMakeLists
+CPACK
+ctest
+CUDA
+endfunction
+fsanitize
+gmock
+libarmadillo
+libgsl
+librfl
+MATHJAX
+MDFILE
+pleasew
+preloadsubincludes
+SKBUILD
+srcs
+subincludes
+subrepo
+subrepos
+UNDOC
+Wextra
+Wpedantic
+
+# --- Packaging, Wheel & Binary Distribution ---
+auditwheel
+BLAS
+cibuildwheel
+delocate
+LAPACK
+Linuxbrew
+listdeps
+manylinux
+MSVC
+ndarray
+openblas
+pypa
+pyproject
+sdist
+Vendored
+vendored
+vendoring
+
+# --- Documentation, Tooling & Contributors ---
+customisations
+D'arcangelo
+docstrings
+Druce
+frontmatter
+KaTeX
+pauldruce
+proselint
+Wikilinks
+wikilinks

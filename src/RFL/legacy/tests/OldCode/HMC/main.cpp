@@ -22,14 +22,14 @@ int main() {
   Geom24 G(cin);
   G.shuffle(engine);
 
-  // thermalize first
+  // thermalise first
   double tgt = 0.8;
   double dt = 0.000001;
   G.HMC_duav(10, dt, 10000, engine, tgt);
   cout << "dual averaging complete" << endl;
   cout << "dual averaged dt: " << dt << endl;
   double ar = G.HMC(10, dt, 10000, engine);
-  cout << "thermalization complete" << endl;
+  cout << "thermalisation complete" << endl;
   cout << "acceptance rate: " << ar << endl;
 
   vec O(N);

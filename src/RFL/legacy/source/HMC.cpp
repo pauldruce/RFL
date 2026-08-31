@@ -27,7 +27,7 @@ void Geom24::HMC_duav(const int& Nt,
     constexpr int i0 = 10;
     constexpr double kappa = 0.75;
     constexpr double shr = 0.05;
-    // if it's not the first interation set potential to
+    // if it's not the first iteration set potential to
     // previous final value, otherwise compute it
     if (i) {
       en_i[0] = en_f[0];
@@ -65,7 +65,7 @@ double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* en
 
   // iter repetitions of leapfrog
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first interation set potential to
+    // if it's not the first iteration set potential to
     // previous final value, otherwise compute it
     if (i) {
       en_i[0] = en_f[0];
@@ -85,7 +85,7 @@ double Geom24::HMC(const int& Nt, const double& dt, const int& iter, gsl_rng* en
   return (Stat / iter);
 }
 
-// HMC routine with randomized integration step
+// HMC routine with randomised integration step
 double Geom24::HMC(const int& Nt,
                    const double& dt_min,
                    const double& dt_max,
@@ -101,7 +101,7 @@ double Geom24::HMC(const int& Nt,
 
   // iter repetitions of leapfrog
   for (int i = 0; i < iter; ++i) {
-    // if it's not the first interation set potential to
+    // if it's not the first iteration set potential to
     // previous final value, otherwise compute it
     if (i) {
       en_i[0] = en_f[0];

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Pre-commit Hook: Spelling via CSpell
+# ==============================================================================
+set -euo pipefail
+
+# Find staged source and documentation files (ignoring deleted files)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=d | grep -E '\.(cpp|hpp|h|c|py|md|cmake|txt)$' || true)
+
+if [ -z "$STAGED_FILES" ]; then
+    exit 0
+fi
+
+echo "🔍 Checking staged files for spelling compliance (CSpell)..."
+
+if command -v cspell >/dev/null 2>&1; then
+    echo "$STAGED_FILES" | xargs cspell lint --no-must-find-files
+elif command -v npx >/dev/null 2>&1; then
+    echo "$STAGED_FILES" | xargs npx cspell lint --no-must-find-files
+else
+    echo "⚠️ Warning: Neither 'cspell' nor 'npx' is found. Skipping spell check."
+fi

@@ -37,7 +37,7 @@ int main() {
   actionManager.SetAction(std::make_unique<barrettGlaserAction>());
   actionManager.DisplayActionValue();// Output: calculated by Barrett-Glaser action
 
-  std::cout << "\nThe ActionManager can change its behavior at runtime by switching between different Action strategies.";
+  std::cout << "\nThe ActionManager can change its behaviour at runtime by switching between different Action strategies.";
 
   return 0;
 }
