@@ -29,7 +29,7 @@ Following the convention of major scientific libraries (such as NumPy, SciPy, Py
 
 ```mermaid
 flowchart TD
-    subgraph "Phase 1: Pre-Release (RC)"
+    subgraph Phase1["Phase 1: Pre-Release (RC)"]
         A["Tag: v0.1.0rc1\n(git tag v0.1.0rc1)"] --> B["Create Draft Pre-Release\n(gh release create --draft --prerelease)"]
         B --> C["Review Draft Notes in UI\n(Zero workflows triggered)"]
         C --> D["Publish Pre-Release\n(gh release edit --draft=false)"]
@@ -37,7 +37,7 @@ flowchart TD
         E --> F["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.1.0rc1)"]
     end
 
-    subgraph "Phase 2: Final Promotion"
+    subgraph Phase2["Phase 2: Final Promotion"]
         F --> G{"Validation successful?"}
         G -- Issues found --> H["Fix on branch → Tag v0.1.0rc2"]
         H --> B

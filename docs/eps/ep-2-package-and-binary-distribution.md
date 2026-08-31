@@ -159,26 +159,26 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ```mermaid
 flowchart LR
-    subgraph "Phase 1: PyPI & GitHub Releases (v0.1.0)"
+    subgraph Phase1["Phase 1: PyPI & GitHub Releases (v0.1.0)"]
         P1A["Restructure core/ & legacy/"]
         P1B["cibuildwheel (Linux/macOS)"]
         P1C["PyPI OIDC Publishing"]
         P1D["CMake FetchContent (RFL::core)"]
     end
 
-    subgraph "Phase 2: CMake Targets & CPack (v0.3.0)"
+    subgraph Phase2["Phase 2: CMake Targets & CPack (v0.3.0)"]
         P2A["CMake install() Rules"]
         P2B["RFLConfig.cmake Export"]
         P2C["CPack Binary Tarballs"]
     end
 
-    subgraph "Phase 3: Package Managers (Future)"
+    subgraph Phase3["Phase 3: Package Managers (Future)"]
         P3A["Homebrew Tap (macOS)"]
         P3B["Conda-Forge Feedstock"]
         P3C["Conan / vcpkg Evaluation"]
     end
 
-    Phase 1 --> Phase 2 --> Phase 3
+    Phase1 --> Phase2 --> Phase3
 ```
 
 ### 5.2 Release Pipeline Workflow (`.github/workflows/release.yml`)
