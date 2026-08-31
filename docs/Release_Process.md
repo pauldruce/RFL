@@ -16,6 +16,10 @@ This document establishes the official release lifecycle, pre-release checklist,
    - Write in an objective, third-person perspective.
    - Do not use first-person pronouns (*"we"*, *"I"*, *"our"*).
    - Avoid conversational openings (e.g. *"We are pleased to announce..."*).
+4. **Draft-First Review Gate:**
+   - Always create releases and release candidates as **Drafts** first (`--draft`).
+   - Review rendered release notes, breaking change warnings, and links in the GitHub UI before publishing.
+   - Transitioning from draft to published initiates the automated wheel build and PyPI distribution pipeline.
 
 ---
 
@@ -26,17 +30,21 @@ Following the convention of major scientific libraries (such as NumPy, SciPy, Py
 ```mermaid
 flowchart TD
     subgraph "Phase 1: Pre-Release (RC)"
-        A["Tag: v0.5.0rc1\n(git tag v0.5.0rc1)"] --> B["GitHub Pre-Release\n(gh release create --prerelease)"]
-        B --> C["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
-        C --> D["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.5.0rc1)"]
+        A["Tag: v0.5.0rc1\n(git tag v0.5.0rc1)"] --> B["Create Draft Pre-Release\n(gh release create --draft --prerelease)"]
+        B --> C["Review Draft Notes in UI\n(Zero workflows triggered)"]
+        C --> D["Publish Pre-Release\n(gh release edit --draft=false)"]
+        D --> E["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
+        E --> F["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.5.0rc1)"]
     end
 
     subgraph "Phase 2: Final Promotion"
-        D --> E{"Validation successful?"}
-        E -- Issues found --> F["Fix on branch → Tag v0.5.0rc2"]
-        F --> B
-        E -- Clean --> G["Tag Final: v0.5.0\n(git tag v0.5.0)"]
-        G --> H["Publish Final GitHub Release\n(Official PyPI default & Latest tag)"]
+        F --> G{"Validation successful?"}
+        G -- Issues found --> H["Fix on branch → Tag v0.5.0rc2"]
+        H --> B
+        G -- Clean --> I["Tag Final: v0.5.0\n(git tag v0.5.0)"]
+        I --> J["Create Draft Release\n(gh release create --draft)"]
+        J --> K["Review Draft Notes in UI\n(Zero workflows triggered)"]
+        K --> L["Publish Final Release\n(Official PyPI default & Latest tag)"]
     end
 ```
 
@@ -80,7 +88,7 @@ Before tagging any release or candidate:
 * Verify that all GitHub Issues and PRs for the milestone are merged and closed.
 * Update the relevant Enhancement Proposal in [docs/eps/](eps/) to reflect current milestone status.
 
-### Step 3: Tag and Publish a Release Candidate (`vX.Y.Zrc1`)
+### Step 3: Tag, Draft, and Publish a Release Candidate (`vX.Y.Zrc1`)
 1. Create and push the release candidate tag:
    ```bash
    git checkout main
@@ -88,11 +96,16 @@ Before tagging any release or candidate:
    git tag v0.5.0rc1
    git push origin v0.5.0rc1
    ```
-2. Create the GitHub Pre-Release:
+2. Create the Draft Pre-Release:
    ```bash
-   gh release create v0.5.0rc1 --prerelease --title "v0.5.0rc1: Release Candidate 1" --notes-file release_notes.md
+   gh release create v0.5.0rc1 --draft --prerelease --title "v0.5.0rc1: Release Candidate 1" --notes-file release_notes.md
    ```
-3. The release workflow automatically compiles wheels, packages `sdist`, attaches release assets, and uploads the pre-release to PyPI.
+3. Review the rendered release notes in the GitHub Web UI.
+4. Publish the pre-release:
+   ```bash
+   gh release edit v0.5.0rc1 --draft=false
+   ```
+   The release workflow compiles wheels, packages `sdist`, attaches release assets, and uploads the pre-release to PyPI.
 
 ### Step 4: Release Candidate Testing
 During the testing window (24–72 hours for `0.y.z` releases):
@@ -104,18 +117,23 @@ During the testing window (24–72 hours for `0.y.z` releases):
    ```
 2. **C++ CMake Integration:** Verify `FetchContent` in an external test project linking `RFL::core`.
 
-### Step 5: Tag and Publish Final Release (`vX.Y.Z`)
+### Step 5: Tag, Draft, and Publish Final Release (`vX.Y.Z`)
 When the release candidate is validated with zero critical defects:
 1. Tag the release commit:
    ```bash
    git tag v0.5.0
    git push origin v0.5.0
    ```
-2. Publish the official release:
+2. Create the Draft Release:
    ```bash
-   gh release create v0.5.0 --title "v0.5.0: Multi-Platform Package and Binary Distribution" --notes-file release_notes.md
+   gh release create v0.5.0 --draft --title "v0.5.0: Multi-Platform Package and Binary Distribution" --notes-file release_notes.md
    ```
-3. The final packages become the default on PyPI (`pip install rfl`), assets are attached to GitHub Releases, and the milestone is closed.
+3. Review the rendered release notes in the GitHub Web UI.
+4. Publish the final release:
+   ```bash
+   gh release edit v0.5.0 --draft=false
+   ```
+   The final packages become the default on PyPI (`pip install rfl`), assets are attached to GitHub Releases, and the milestone is closed.
 
 ---
 
