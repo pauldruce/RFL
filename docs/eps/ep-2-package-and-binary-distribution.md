@@ -2,15 +2,28 @@
 
 * **Title:** Multi-Platform Package and Binary Distribution
 * **Author:** Paul Druce
-* **Status:** Accepted (Phase 1 Implemented)
-* **Target Version:** RFL v0.5.0 – v0.7.0
+* **Status:** Accepted (In Progress)
+* **Target Versions:** RFL v0.5.0 (Phase 1), v0.7.0 (Phase 2), Backlog (Phase 3)
 * **Date:** 2026-08-30
 
 ---
 
-## 1. Motivation, Goals & Non-Goals
+## 1. Multi-Phase Implementation Tracker
 
-### 1.1 Problem Statement & Research Context
+This proposal spans multiple releases.
+The table below tracks the status of each implementation phase:
+
+| Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | Directory layout, PyPI binary wheels, and release CI/CD | `v0.5.0` | [`v0.5.0`](https://github.com/pauldruce/RFL/milestone/1) | [PR #30](https://github.com/pauldruce/RFL/pull/30) (Closes [#18](https://github.com/pauldruce/RFL/issues/18)) | ✅ Implemented |
+| **Phase 2** | CMake `install()` targets, `RFLConfig.cmake`, and CPack archives | `v0.7.0` | [`v0.7.0`](https://github.com/pauldruce/RFL/milestone/2) | [#3](https://github.com/pauldruce/RFL/issues/3) | ⏳ Scheduled |
+| **Phase 3** | Package manager distribution (Homebrew Tap, Conda-Forge, Conan) | Future | Backlog | [#29](https://github.com/pauldruce/RFL/issues/29) | 💡 Planned |
+
+---
+
+## 2. Motivation, Goals & Non-Goals
+
+### 2.1 Problem Statement & Research Context
 `RFL` enables researchers to simulate finite noncommutative geometries and random fuzzy spaces using Markov Chain Monte Carlo methods.
 Researchers study spectral triples $(A, \mathcal{H}, D)$ and the Barrett-Glaser action across diverse computing environments:
 1. Python data science workflows (Jupyter notebooks, NumPy, SciPy, Matplotlib).
@@ -19,37 +32,37 @@ Researchers study spectral triples $(A, \mathcal{H}, D)$ and the Barrett-Glaser 
 
 Previously, consuming RFL required compiling C++ source code locally.
 Consumers had to install CMake, C++17 compilers, Armadillo, LAPACK, BLAS, and GSL manually.
-This requirement created friction for theoretical physicists and data scientists who require a fast `pip install rfl` workflow.
-In addition, external C++ simulation programs had no standard CMake target mechanism to link `libnew_RFL`.
-The codebase also suffered from historical directory naming debt (`new_RFL` and `old_RFL`), which created confusing target names for external consumers.
+This requirement created friction for physicists and data scientists who require a quick `pip install rfl` workflow.
+In addition, external C++ simulation programs had no standard CMake target mechanism to link `rfl`.
+The codebase also suffered from historical directory naming debt (`new_RFL` and `old_RFL`), which created confusing target names.
 
-### 1.2 Goals
-* **Clean Target & Directory Standardization:** Promote `new_RFL` to `core/` with target `rfl` (aliases: `RFL::core`, `RFL::rfl`), and archive `old_RFL` to `legacy/` (`rfl_legacy`).
+### 2.2 Goals
+* **Clean Target & Directory Standardisation:** Promote `new_RFL` to `core/` with target `rfl_core` (aliases: `RFL::core`, `RFL::rfl`), and archive `old_RFL` to `legacy/` (`rfl_legacy`).
 * **Zero-Compile Python Installation:** Publish precompiled binary wheels to PyPI and GitHub Releases for Linux and macOS (`x86_64`, `arm64`) across Python 3.8 to 3.13.
 * **Self-Contained Shared Binaries:** Vendor required dynamic libraries (`libarmadillo`, `libgsl`, `libopenblas`) inside wheels using `auditwheel` and `delocate`.
 * **Immediate C++ In-Tree Integration:** Provide namespaced CMake alias targets (`RFL::core`, `RFL::rfl`) for CMake `FetchContent` workflows.
 * **Precompiled C++ Binary Archives:** Generate installable tarballs (`rfl-vX.Y.Z-<os>-<arch>.tar.gz`) containing headers, compiled libraries, and `RFLConfig.cmake`.
 * **Multi-Phase Ecosystem Roadmap:** Structure distribution across discrete phases spanning PyPI, CMake, GitHub Releases, Homebrew, and Conda-Forge.
 
-### 1.3 Non-Goals
+### 2.3 Non-Goals
 * Supporting legacy Python versions (< 3.8) or non-standard interpreters (PyPy).
 * Supporting 32-bit operating systems or musl libc distributions.
 * Distributing closed-source binary blobs without public build recipes.
 
 ---
 
-## 2. Research Workflows & Scientific Requirements
+## 3. Research Workflows & Scientific Requirements
 
-### 2.1 Core Research Scenarios
+### 3.1 Core Research Scenarios
 1. **Scenario 1 (Interactive Spectral Analysis in Python):** A physicist installs RFL via `pip install rfl` in an isolated virtual environment and computes Dirac eigenvalue spectra in Jupyter.
 2. **Scenario 2 (Custom C++ Simulation Pipeline):** A researcher includes RFL into an external C++ MCMC solver using `FetchContent_Declare(RFL ...)` and links `RFL::core` without manually configuring header search paths.
 3. **Scenario 3 (Unified Scientific Environment):** A research lab installs `librfl` and `rfl` via Conda into reproducible simulation environments.
 
-### 2.2 Functional Requirements & Invariants
+### 3.2 Functional Requirements & Invariants
 
 | Requirement ID | Requirement Summary | Physical & Technical Invariant |
 | :--- | :--- | :--- |
-| **REQ-PKG-01** | **Directory & Target Standardization** | Restructure `new_RFL/` $\to$ `core/` (target `rfl`, alias `RFL::core`) and `old_RFL/` $\to$ `legacy/` (target `rfl_legacy`). |
+| **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` $\to$ `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` $\to$ `legacy/` (target `rfl_legacy`). |
 | **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) covering Python 3.8–3.13. |
 | **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
 | **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
@@ -61,11 +74,11 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-## 3. Architecture Decision Records (ADRs) & Trade-offs
+## 4. Architecture Decision Records (ADRs) & Trade-offs
 
-### 3.1 ADR-1: Directory Layout & Target Names
+### 4.1 ADR-1: Directory Layout & Target Names
 
-| Criteria | Option A: Standardized Layout (`core/` & `legacy/`) (Selected) | Option B: Retain `new_RFL` / `old_RFL` |
+| Criteria | Option A: Standardised Layout (`core/` & `legacy/`) (Selected) | Option B: Retain `new_RFL` / `old_RFL` |
 | :--- | :--- | :--- |
 | **Public API Clarity** | High (`RFL::core`, `RFL::rfl`) | Poor (`RFL::new_RFL` conveys prototype state) |
 | **Historical Separation** | Clear (`legacy/` explicitly marked) | Ambiguous |
@@ -76,7 +89,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-### 3.2 ADR-2: Python Wheel Build Automation Framework
+### 4.2 ADR-2: Python Wheel Build Automation Framework
 
 | Criteria | Option A: `pypa/cibuildwheel` (Selected) | Option B: Custom Matrix Shell Scripts | Option C: Source Distribution (`sdist`) Only |
 | :--- | :--- | :--- | :--- |
@@ -90,7 +103,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-### 3.3 ADR-3: C++ Dependency Management & Library Vendoring
+### 4.3 ADR-3: C++ Dependency Management & Library Vendoring
 
 | Criteria | Option 1: Package Manager Provisioning + Vendoring (Selected) | Option 2: Monolithic Static Build from Source |
 | :--- | :--- | :--- |
@@ -104,7 +117,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-### 3.4 ADR-4: PyPI Authentication & Supply Chain Security
+### 4.4 ADR-4: PyPI Authentication & Supply Chain Security
 
 | Criteria | Option A: PyPI Trusted Publishing / OIDC (Selected) | Option B: Repository Secret API Token |
 | :--- | :--- | :--- |
@@ -117,7 +130,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-### 3.5 ADR-5: C++ Consumption & Distribution Strategy
+### 4.5 ADR-5: C++ Consumption & Distribution Strategy
 
 | Criteria | Option A: CMake `FetchContent` (Phase 1) | Option B: CPack Binary Tarballs (Phase 2) | Option C: Package Registries (Phase 3) |
 | :--- | :--- | :--- | :--- |
@@ -130,7 +143,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-### 3.6 ADR-6: Package Manager Ecosystem Trade-offs
+### 4.6 ADR-6: Package Manager Ecosystem Trade-offs
 
 | Package Manager | Target Ecosystem | Pros | Cons & Considerations |
 | :--- | :--- | :--- | :--- |
@@ -140,9 +153,9 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ---
 
-## 4. Target Architecture & Workflow Design
+## 5. Target Architecture & Workflow Design
 
-### 4.1 The 3-Phase Roadmap
+### 5.1 The 3-Phase Roadmap
 
 ```mermaid
 flowchart LR
@@ -168,11 +181,11 @@ flowchart LR
     Phase 1 --> Phase 2 --> Phase 3
 ```
 
-### 4.2 Release Pipeline Workflow (`.github/workflows/release.yml`)
+### 5.2 Release Pipeline Workflow (`.github/workflows/release.yml`)
 
 ```mermaid
 flowchart TD
-    A["Tag Push (v*)\nor workflow_dispatch"] --> B["Matrix: build_wheels"]
+    A["Release Published Event (v*)\nor workflow_dispatch"] --> B["Matrix: build_wheels"]
     A --> C["Job: build_sdist"]
     
     subgraph "Matrix: cibuildwheel"
@@ -190,16 +203,16 @@ flowchart TD
     T1 & T2 & T3 --> U1["Upload Wheel Artifacts"]
     C --> U2["Upload sdist Artifact"]
     
-    U1 & U2 --> G{"Is Version Tag (v*)?"}
+    U1 & U2 --> G{"Release Published?"}
     
-    G -- Yes --> R1["Job: create_github_release\n(Attach wheels + sdist + notes)"]
+    G -- Yes --> R1["Job: upload_release_assets\n(Attach wheels + sdist)"]
     G -- Yes --> R2["Job: publish_pypi\n(Trusted Publishing OIDC)"]
     G -- No (Dry Run) --> R3["Retain Staged Artifacts"]
 ```
 
 ---
 
-## 5. Verification Matrix & Quality Gates
+## 6. Verification Matrix & Quality Gates
 
 | Verification Gate | Command / Test Description | Target Invariant |
 | :--- | :--- | :--- |
@@ -212,24 +225,24 @@ flowchart TD
 
 ---
 
-## 6. Phased Delivery Plan
+## 7. Phased Delivery Plan
 
 ### Phase 1: Directory Restructuring, PyPI Wheels, GitHub Releases & CMake FetchContent
 * **Target Milestone:** `v0.5.0`
 * **GitHub Issue:** [Issue #18](https://github.com/pauldruce/RFL/issues/18)
 * **Tasks:**
   1. Rename `src/RFL/new_RFL` $\to$ `src/RFL/core` and `src/RFL/old_RFL` $\to$ `src/RFL/legacy`.
-  2. Update CMake target names (`rfl`, `RFL::core`, `RFL::rfl`, `rfl_legacy`) across CMakeLists.txt.
+  2. Update CMake target names (`rfl_core`, `RFL::core`, `RFL::rfl`, `rfl_legacy`) across CMakeLists.txt.
   3. Update Please build targets (`src/RFL/core/BUILD`, `src/RFL/legacy/BUILD`, `src/RFL/BUILD`).
   4. Configure `[tool.cibuildwheel]` in `src/RFL/pyproject.toml`.
-  5. Create `.github/workflows/release.yml` with wheel matrix, sdist build, GitHub Release creation, and PyPI OIDC publishing.
+  5. Create `.github/workflows/release.yml` with wheel matrix, sdist build, GitHub Release asset upload, and PyPI OIDC publishing.
   6. Update `README.md` and `docs/Consumption_Guide.md` with `pip` and `FetchContent` instructions.
 
 ### Phase 2: CMake Installation Targets & CPack Binary Packaging
 * **Target Milestone:** `v0.7.0`
 * **GitHub Issue:** [Issue #3](https://github.com/pauldruce/RFL/issues/3)
 * **Tasks:**
-  1. Define CMake `install(TARGETS rfl EXPORT RFLTargets ...)` and header install rules.
+  1. Define CMake `install(TARGETS rfl_core EXPORT RFLTargets ...)` and header install rules.
   2. Generate and install `RFLConfig.cmake` and `RFLConfigVersion.cmake`.
   3. Configure CPack to package `.tar.gz` and `.zip` archives.
   4. Add CPack artifact generation step to `.github/workflows/release.yml`.
@@ -241,3 +254,4 @@ flowchart TD
   1. Create Homebrew formula in `pauldruce/homebrew-rfl`.
   2. Create Conda-Forge feedstock for `librfl` and `rfl`.
   3. Complete research trade study on Conan and vcpkg registries.
+
