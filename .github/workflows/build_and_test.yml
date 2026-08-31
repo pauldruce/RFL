@@ -23,8 +23,8 @@ jobs:
 
     name: "${{matrix.BUILD_TYPE}}, ${{matrix.OS}}, Armadillo v${{matrix.ARMA_VERSION}}."
     runs-on: ${{matrix.OS}}
-    # Skip this action if the commit is just for docs.
-    if: ${{ !contains(github.event.head_commit.message, '#docs') }}
+    # Allow automatic runs, but restrict manual runs to repository owner; skip doc-only commits
+    if: (github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner) && !contains(github.event.head_commit.message, '#docs')
 
     steps:
       - uses: actions/checkout@v4
