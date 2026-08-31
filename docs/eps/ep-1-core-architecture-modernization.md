@@ -12,8 +12,11 @@
 
 ### 1.1 Problem Statement & Research Context
 `RFL` was created to study **Finite Noncommutative Geometries (Random Fuzzy Spaces)** and **Spectral Triples** via Monte Carlo simulations. The core mathematical framework is governed by the Barrett-Glaser action (Barrett & Glaser 2016):
+
 $$S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$$
+
 where the Dirac operator is decomposed into Hermitian and anti-Hermitian matrices ($H_i, L_j$) coupled to Clifford gamma matrices:
+
 $$D = \sum_{i=1}^p \gamma^i \otimes H_i + \sum_{j=1}^q \gamma^{p+j} \otimes L_j$$
 
 As the research program expands into **Fermion Functional Integrals (Barrett 2024)**, **Product Geometries $S_F^2 \otimes \mathcal{F}$ (Barrett 2026)**, and **Random Matrix Spectral Statistics**, the legacy codebase exhibits structural bottlenecks:
@@ -37,9 +40,9 @@ As the research program expands into **Fermion Functional Integrals (Barrett 202
 ## 2. Research Workflows & Scientific Requirements
 
 ### 2.1 Core Research Scenarios
-1. **Scenario 1 (Interactive Exploration in Python):** A researcher sets up a spectral triple $(p,q,N)$ in a Jupyter notebook, runs 500 thermalization sweeps with automated dual-averaging step-size tuning, and plots the real-time eigenvalue density $\rho(\lambda)$.
+1. **Scenario 1 (Interactive Exploration in Python):** A researcher sets up a spectral triple $(p, q, N)$ in a Jupyter notebook, runs 500 thermalization sweeps with automated dual-averaging step-size tuning, and plots the real-time eigenvalue density $\rho(\lambda)$.
 2. **Scenario 2 (Automated Batch Sampling & Statistics):** An automated batch script executes 100,000 production sweeps across a parameter grid $(g_2, g_4)$, recording eigenvalue spectra every 10 sweeps to compute the spectral dimension $d_{\text{spec}}$ and edge eigenvalue statistics (e.g. comparing largest eigenvalue fluctuations against the [Tracy–Widom distribution](https://en.wikipedia.org/wiki/Tracy%E2%80%93Widom_distribution)).
-3. **Scenario 3 (Extending Physics Actions):** A theorist implements a new action potential $S(D) = S_{\text{Barrett-Glaser}}(D) - \ln \text{Pf}(JD)$ by subclassing or providing a new Action policy without modifying any Monte Carlo sampler code.
+3. **Scenario 3 (Extending Physics Actions):** A theorist implements a new action potential $S(D) = S_{\text{BG}}(D) - \ln \text{Pf}(JD)$ by subclassing or providing a new Action policy without modifying any Monte Carlo sampler code.
 
 ### 2.2 Functional Requirements & Invariants
 
@@ -51,7 +54,7 @@ As the research program expands into **Fermion Functional Integrals (Barrett 202
 | **REQ-004** | **Detailed Balance & Ergodicity** | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
 | **REQ-005** | **Automated Step-Size Calibration** | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during burn-in. |
 | **REQ-006** | **Zero-Copy NumPy Interoperability** | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
-| **REQ-007** | **Active LTS Platform Policy** | Maintain compatibility with active Ubuntu LTS ($\ge 22.04$), macOS ($\ge 14$), Armadillo ($\ge 11.4$), and conforming C++17 compilers. |
+| **REQ-007** | **Active LTS Platform Policy** | Maintain compatibility with active Ubuntu LTS (≥ 22.04), macOS (≥ 14), Armadillo (≥ 11.4), and conforming C++17 compilers. |
 
 ---
 
@@ -101,8 +104,12 @@ As the research program expands into **Fermion Functional Integrals (Barrett 202
 ### 3.4 ADR-4: Action Extensibility for Fermionic Pfaffians & Multi-Term Models
 
 In the literature (Barrett 2024), adding fermions modifies the partition function via the Grassmann integral:
+
 $$Z = \int \mathcal{D}D \, e^{-S_B(D)} \text{Pfaffian}(JD) = \int \mathcal{D}D \, e^{-S_{\text{eff}}(D)}$$
-where the acceptance probability factorizes as $\alpha = \min\left(1, e^{-\Delta S_B} \cdot \left| \frac{\text{Pfaffian}(JD')}{\text{Pfaffian}(JD)} \right|\right)$.
+
+where the acceptance probability factorizes as:
+
+$$\alpha = \min\left(1, e^{-\Delta S_B} \cdot \left| \frac{\text{Pfaffian}(JD')}{\text{Pfaffian}(JD)} \right|\right)$$
 
 | Criteria | Option 1: Concrete Barrett-Glaser Core + Multiplicative Pfaffian Modifier | Option 2: Generic Composite Action Hierarchy (`IAction` + `add_term`) |
 | :--- | :--- | :--- |

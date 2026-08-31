@@ -40,15 +40,15 @@ RUN useradd -m -s /bin/bash fuzzyuser
 USER fuzzyuser
 WORKDIR /home/fuzzyuser
 
-COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/new_RFL/include /usr/include/RFL/
-COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/new_RFL/bin/ /usr/lib/RFL
+COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/rfl/include /usr/include/RFL/
+COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/rfl/bin/ /usr/lib/RFL
 
-COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/RFL/include /usr/include/old_RFL/
-COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/RFL/bin/ /usr/lib/old_RFL
+COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/rfl_legacy/include /usr/include/legacy_RFL/
+COPY --from=rfl_builder --chown=fuzzyuser:fuzzyuser /RFL/lib/rfl_legacy/bin/ /usr/lib/legacy_RFL
 
 COPY --chown=fuzzyuser:fuzzyuser . /home/fuzzyuser/RFL
 
 # Set up environment for C++ development
 ENV CXX=g++
 ENV CC=gcc
-ENV PATH="/usr/lib/RFL:/usr/lib/old_RFL:${PATH}"
+ENV PATH="/usr/lib/RFL:/usr/lib/legacy_RFL:${PATH}"

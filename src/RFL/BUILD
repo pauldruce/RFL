@@ -6,8 +6,8 @@ genrule(
         "python_bindings/bindings.cpp",
         "python_bindings/CMakeLists.txt",
         # Sub-package source files (exported via wheel_srcs filegroups)
-        "//src/RFL/new_RFL:wheel_srcs",
-        "//src/RFL/old_RFL:wheel_srcs",
+        "//src/RFL/core:wheel_srcs",
+        "//src/RFL/legacy:wheel_srcs",
     ] + glob(["cmake/*.cmake"]),
     outs = ["dist"],
     cmd = [

@@ -8,7 +8,7 @@ description: Use whenever writing, editing, or reviewing documentation, C++ docs
 This guide defines the writing rules for RFL documentation, code comments, docstrings, and research notes. It adapts the international **ASD-STE100** specification with **British English spelling**.
 
 > [!IMPORTANT]
-> The single source of truth for approved terms and their definitions is **[docs/Glossary.md](file:///Users/paul/Dev/RFL/docs/Glossary.md)**. Always check the glossary to maintain the "one word for one concept" rule.
+> The single source of truth for approved terms and their definitions is **[docs/Glossary.md](docs/Glossary.md)**. Always check the glossary to maintain the "one word for one concept" rule.
 
 ---
 

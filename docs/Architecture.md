@@ -8,7 +8,7 @@
 > *"Libraries provide mechanisms, vocabulary, and data structures; Applications provide policies, workflows, and orchestration."*
 
 > [!NOTE]
-> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernization for RFL](file:///Users/paul/Dev/RFL/docs/eps/ep-1-core-architecture-modernization.md)**.
+> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernization for RFL](eps/ep-1-core-architecture-modernization.md)**.
 
 ---
 
@@ -392,11 +392,11 @@ eigenvalues_array = np.array(eigenvalues_history)
 1. **Stack Allocations in Hot Kernels:**
    Replace temporary dynamic allocations (e.g. `new double[2]`) in MCMC sweeps with `std::array<double, 2>`.
 2. **Contiguous Buffer for Clifford Products:**
-   The 4-matrix trace table $\Omega^{(4)}_{abcd} = \text{Tr}(\gamma_a \gamma_b \gamma_c \gamma_d)$ is precomputed during geometry initialization into a flat contiguous `std::vector<std::complex<double>>` with index arithmetic:
+   The 4-matrix trace table $\Omega^{(4)}_{abcd} = \text{Tr}(\gamma_a \gamma_b \gamma_c \gamma_d)$ is precomputed during geometry initialisation into a flat contiguous `std::vector<std::complex<double>>` with index arithmetic:
    $$\text{idx}(a, b, c, d) = a + N(b + N(c + N d))$$
-3. **OpenMP Parallelization:**
+3. **OpenMP Parallelisation:**
    - Multi-chain simulation parallelism: Run $K$ independent Dirac Markov chains across threads without mutex locks (each chain has an independent RNG state).
-   - Trace and eigenvalue computation vectorization with Armadillo / LAPACK bindings.
+   - Trace and eigenvalue computation vectorisation with Armadillo / LAPACK bindings.
 
 ---
 
@@ -405,7 +405,7 @@ eigenvalues_array = np.array(eigenvalues_history)
 | Phase | Objective | Key Deliverables |
 | :--- | :--- | :--- |
 | **Phase 1** | **Value Semantics & Clean Types** | Remove `unique_ptr` container wrappers from `DiracOperator`; enforce strict `const` correctness; deprecate leaky `IDiracOperator` fat interface. |
-| **Phase 2** | **Action / Kernel Decoupling** | Extract $\Delta S$ trace formulas from `Metropolis.cpp` into `BarrettGlaserAction`; standardize `calculateDelta` and `calculateGradient`. |
+| **Phase 2** | **Action / Kernel Decoupling** | Extract $\Delta S$ trace formulas from `Metropolis.cpp` into `BarrettGlaserAction`; standardise `calculateDelta` and `calculateGradient`. |
 | **Phase 3** | **Modular Stepper & Observer API** | Implement `MetropolisSampler::sweep()` and `ISimulationObserver`; replace monolithic `Simulation` runner. |
 | **Phase 4** | **Python Bindings & NumPy Views** | Expose new stepper API and generator iterators in `src/RFL/python_bindings/bindings.cpp`. |
 | **Phase 5** | **Observables & Advanced Solvers** | Implement integrated autocorrelation time estimator and Hybrid Monte Carlo (HMC) sampler using gradients. |

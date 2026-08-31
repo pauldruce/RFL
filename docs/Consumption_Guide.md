@@ -66,7 +66,22 @@ ctest --test-dir build -j 4 --output-on-failure
 
 ## 3. Consuming RFL in C++ Projects
 
-To link RFL into an external C++ executable:
+### Option A: CMake FetchContent (Recommended)
+Add RFL directly to your project's `CMakeLists.txt`:
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    RFL
+    GIT_REPOSITORY https://github.com/pauldruce/RFL.git
+    GIT_TAG        v0.5.0
+)
+FetchContent_MakeAvailable(RFL)
+
+add_executable(my_simulation main.cpp)
+target_link_libraries(my_simulation PRIVATE RFL::core)
+```
+
+### Option B: Direct Linking against Compiled Binary
 1. Include the relevant headers:
    ```cpp
    #include "DiracOperator.hpp"
@@ -74,4 +89,4 @@ To link RFL into an external C++ executable:
    #include "BarrettGlaser/Action.hpp"
    #include "GslRng.hpp"
    ```
-2. Link against `libnew_RFL.a`, `armadillo`, and `gsl`.
+2. Link against `librfl.a`, `armadillo`, and `gsl`.

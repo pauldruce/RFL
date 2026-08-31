@@ -19,9 +19,9 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | **Spectral Triple** | The mathematical triplet $(A, \mathcal{H}, D)$ that defines a noncommutative geometry. | *NCG triplet, Connes triple* |
 | **Barrett-Glaser Action** | The spectral action functional $S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$. | *BG functional, Spectral potential* |
 | **Signature** | The integer pair $(p, q)$ representing $p$ Hermitian and $q$ anti-Hermitian matrix generators. | *Clifford type, metric signature* |
-| **Matrix Dimension ($N$)** | The size $N \times N$ of the internal matrices $H_i, L_j$. | *Matrix size, cutoff size* |
-| **Chirality Operator ($\Gamma$)** | The grading operator satisfying $\Gamma^2 = \mathbb{I}$ and $\{\Gamma, D\} = 0$ for even geometries. | *Grading operator, gamma five* |
-| **Reality Operator ($J$)** | The antilinear isometry representing charge conjugation in real spectral triples. | *Charge conjugation operator* |
+| **Matrix Dimension (N)** | The size $N \times N$ of the internal matrices $H_i, L_j$. | *Matrix size, cutoff size* |
+| **Chirality Operator (Gamma)** | The grading operator satisfying $\Gamma^2 = \mathbb{I}$ and $\{\Gamma, D\} = 0$ for even geometries. | *Grading operator, gamma five* |
+| **Reality Operator (J)** | The antilinear isometry representing charge conjugation in real spectral triples. | *Charge conjugation operator* |
 
 ---
 
@@ -36,7 +36,7 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | **Acceptance Rate** | The ratio of accepted proposals to total proposals in a sweep ($\in [0, 1]$). | *Acceptance ratio, hit rate* |
 | **Observable** | A physical quantity calculated from the Dirac operator (e.g. $\text{Tr}(D^2)$, $\text{Tr}(D^4)$, eigenvalues). | *Measurement, metric, output* |
 | **Observer** | A software object that listens to step/sweep events and records observables. | *Sink, listener, telemetry logger* |
-| **Autocorrelation Time ($\tau_{\text{int}}$)** | The integrated statistical correlation time between successive Markov samples. | *Correlation length, memory time* |
+| **Autocorrelation Time (tau_int)** | The integrated statistical correlation time between successive Markov samples ($\tau_{\text{int}}$). | *Correlation length, memory time* |
 | **Eigenvalue Spectrum** | The set of real eigenvalues $\{\lambda_i\}$ of the assembled Dirac operator $D$. | *Eigen-spectrum, Dirac energies* |
 
 ---

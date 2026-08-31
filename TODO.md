@@ -16,5 +16,5 @@
   Simulation class and Algorithm.
 
 
-- [ ] Change new_RFL source code to use an include folder pattern, rather than
+- [ ] Change core source code to use an include folder pattern, rather than
   mix and match the srcs and headers. It's just extra work for no gain.
