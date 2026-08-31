@@ -19,61 +19,111 @@ This document establishes the official release lifecycle, quality gates, and rel
 
 ---
 
-## 2. The 5-Step Release Lifecycle
+## 2. Pre-Releases & Release Candidates (RCs)
+
+Following the convention of major scientific libraries (such as NumPy, SciPy, PyTorch, and Armadillo), significant releases use **Release Candidates** (e.g. `v0.5.0rc1`):
 
 ```mermaid
-flowchart LR
-    A["1. Pre-Release Verification\n(CTest, Pytest, CI Matrix)"] --> B["2. Milestone Triage\n(100% completion)"]
-    B --> C["3. Git Tagging\n(git tag vX.Y.Z)"]
-    C --> D["4. Draft Release\n(Scientific notes on GitHub)"]
-    D --> E["5. Publish Release\n(Automated PyPI & Wheels)"]
+flowchart TD
+    subgraph "Phase 1: Pre-Release (RC)"
+        A["Tag: v0.5.0rc1\n(git tag v0.5.0rc1)"] --> B["GitHub Pre-Release\n(gh release create --prerelease)"]
+        B --> C["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
+        C --> D["Soak & Validation Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.5.0rc1)"]
+    end
+
+    subgraph "Phase 2: Final Promotion"
+        D --> E{"Validation successful?"}
+        E -- Issues found --> F["Fix on branch -> Tag v0.5.0rc2"]
+        F --> B
+        E -- Clean --> G["Tag Final: v0.5.0\n(git tag v0.5.0)"]
+        G --> H["Publish Final GitHub Release\n(Official PyPI default & Latest tag)"]
+    end
 ```
 
+### 2.1 How Pre-Releases Work Across Ecosystems
+
+1. **Naming Standard (PEP 440 & Git SemVer):**
+   - Use `vX.Y.Zrc1` (e.g. `v0.5.0rc1`).
+   - This tag format is natively recognized by Git, GitHub, `pip`, and `scikit-build-core`.
+2. **GitHub Releases Behaviour:**
+   - Pre-releases are flagged with `--prerelease` (or the "Set as a pre-release" checkbox).
+   - GitHub displays a `Pre-release` badge and retains the previous release as `Latest`.
+3. **PyPI & `pip` Behaviour:**
+   - PyPI automatically marks `0.5.0rc1` as a pre-release.
+   - A standard `pip install rfl` will **never** install a pre-release by default.
+   - Downstream researchers must explicitly opt in with:
+     ```bash
+     pip install --pre rfl
+     # or
+     pip install rfl==0.5.0rc1
+     ```
+4. **C++ & CMake `FetchContent` Behaviour:**
+   - Downstream C++ solvers test the release candidate by pinning the RC git tag:
+     ```cmake
+     FetchContent_Declare(
+         RFL
+         GIT_REPOSITORY https://github.com/pauldruce/RFL.git
+         GIT_TAG        v0.5.0rc1
+     )
+     ```
+
+---
+
+## 3. The Complete Release Lifecycle
+
 ### Step 1: Pre-Release Verification (Quality Gates)
-Before initiating a release, ensure all quality gates pass locally and on GitHub Actions:
+Before tagging any release or candidate, verify all automated gates:
 - **CTest Suite:** `ctest --test-dir build --output-on-failure` (100% pass).
 - **Pytest Suite:** `pytest src/RFL/python_bindings/tests` (100% pass).
 - **Please Hermetic Build:** `./pleasew test //...` (100% pass).
 - **CI Matrix:** All GitHub Actions workflows on `main` must be green.
 
 ### Step 2: Milestone Triage & EP Status
-- Verify that all GitHub Issues and PRs for the milestone are merged and closed.
-- Update the relevant Enhancement Proposal in [docs/eps/](eps/) to mark the phase as `✅ Implemented`.
+- Verify that all GitHub Issues and PRs for the milestone are merged.
+- Update the relevant Enhancement Proposal in [docs/eps/](eps/) to reflect current phase progress.
 
-### Step 3: Git Tagging
-Create and push an annotated git tag pointing to the release commit on `main`:
-```bash
-git checkout main
-git pull origin main
-git tag vX.Y.Z
-git push origin vX.Y.Z
-```
+### Step 3: Tag and Publish a Release Candidate (`vX.Y.Zrc1`)
+1. Create and push the release candidate tag:
+   ```bash
+   git checkout main
+   git pull origin main
+   git tag v0.5.0rc1
+   git push origin v0.5.0rc1
+   ```
+2. Create the GitHub Pre-Release:
+   ```bash
+   gh release create v0.5.0rc1 --prerelease --title "v0.5.0rc1: Release Candidate 1" --notes-file release_notes.md
+   ```
+3. The release workflow automatically compiles wheels, packages `sdist`, attaches release assets, and uploads the pre-release to PyPI.
 
-> [!NOTE]
-> Pushing a tag alone will **not** publish packages or trigger PyPI deployments. The release workflow triggers only when a GitHub Release is published.
+### Step 4: Soak & Downstream Validation
+During the soak period (typically 24–72 hours for `0.y.z` releases):
+1. **Test Python Wheels:** In a clean virtual environment on Linux and macOS, run:
+   ```bash
+   python -m venv test_env && source test_env/bin/activate
+   pip install --pre rfl
+   python -c "import rfl; print(rfl.__version__)"
+   ```
+2. **Test C++ CMake Target:** Verify `FetchContent` in an external test project linking `RFL::core`.
 
-### Step 4: Create a Draft Release
-Create a draft release on GitHub referencing the new tag. You can prepare and review the release notes safely in draft mode:
-
-```bash
-gh release create vX.Y.Z --draft --title "vX.Y.Z: <Release Title>" --notes-file release_notes.md
-```
-
-### Step 5: Publish Release & Automated Distribution
-Click **"Publish release"** in GitHub (or run `gh release edit vX.Y.Z --draft=false`).
-The `.github/workflows/release.yml` pipeline will automatically:
-1. Compile multi-platform binary wheels for Linux (`manylinux_2_28_x86_64`) and macOS (`x86_64`, Apple Silicon `arm64`) across Python 3.8–3.13.
-2. Execute the test suite inside clean wheel environments.
-3. Package the source distribution archive (`sdist`).
-4. Attach all compiled wheels and `sdist` tarballs to the GitHub Release.
-5. Publish packages to PyPI using OpenID Connect (OIDC) Trusted Publishing.
-6. Close the GitHub Milestone.
+### Step 5: Tag and Publish Final Release (`vX.Y.Z`)
+When the release candidate is validated with zero critical defects:
+1. Tag the release commit:
+   ```bash
+   git tag v0.5.0
+   git push origin v0.5.0
+   ```
+2. Publish the official release:
+   ```bash
+   gh release create v0.5.0 --title "v0.5.0: Multi-Platform Package and Binary Distribution" --notes-file release_notes.md
+   ```
+3. The final packages become the default on PyPI (`pip install rfl`), assets are attached to GitHub Releases, and the milestone is closed.
 
 ---
 
-## 3. Release Notes Template
+## 4. Release Notes Template
 
-When drafting release notes, use the standard scientific blueprint below:
+When drafting release notes (for candidates or final versions), use the standard scientific blueprint below:
 
 ```markdown
 # RFL vX.Y.Z Release Notes
@@ -126,7 +176,7 @@ RFL version X.Y.Z introduces [one declarative sentence summarizing the release].
 
 ---
 
-## 4. Testing the Release Pipeline (Dry Run)
+## 5. Testing the Release Pipeline (Dry Run)
 
 To test wheel compilation and packaging without uploading to PyPI or modifying release assets, trigger a manual dry run:
 
