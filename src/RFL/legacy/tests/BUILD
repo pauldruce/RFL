@@ -13,6 +13,6 @@ cc_test(
         "geometry.test.cpp",
     ],
     deps = [
-        "//src/RFL/old_RFL:rfl",
+        "//src/RFL/legacy:rfl",
     ],
 )

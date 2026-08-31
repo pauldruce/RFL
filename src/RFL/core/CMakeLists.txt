@@ -1,9 +1,9 @@
-add_library(new_RFL
+add_library(rfl_core
         IDiracOperator.hpp
         IDiracOperatorDerivatives.cpp
         IDiracOperatorDerivatives.hpp)
 
-set(new_RFL_HEADERS
+set(rfl_core_HEADERS
         BarrettGlaser/Action.hpp
         BarrettGlaser/Hamiltonian.hpp
         BarrettGlaser/Metropolis.hpp
@@ -16,7 +16,7 @@ set(new_RFL_HEADERS
         Simulation.hpp)
 
 target_sources(
-        new_RFL
+        rfl_core
         PRIVATE
         BarrettGlaser/Action.cpp
         BarrettGlaser/Hamiltonian.cpp
@@ -24,21 +24,21 @@ target_sources(
         Clifford.cpp
         DiracOperator.cpp
         Simulation.cpp
-        PUBLIC ${new_RFL_HEADERS})
+        PUBLIC ${rfl_core_HEADERS})
 
-target_include_directories(new_RFL PUBLIC ${new_RFL_INCLUDE_DIR})
-target_link_libraries(new_RFL ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
+target_include_directories(rfl_core PUBLIC ${core_RFL_INCLUDE_DIR})
+target_link_libraries(rfl_core PUBLIC ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
 
 # Install static library files
 install(
-        TARGETS new_RFL
-        DESTINATION lib/new_RFL/bin/${CMAKE_BUILD_TYPE}
+        TARGETS rfl_core
+        DESTINATION lib/rfl/bin/${CMAKE_BUILD_TYPE}
 )
 
 # Install include/header files.
 install(
-        DIRECTORY ${new_RFL_INCLUDE_DIR}/
-        DESTINATION lib/new_RFL/include
+        DIRECTORY ${core_RFL_INCLUDE_DIR}/
+        DESTINATION lib/rfl/include
         FILES_MATCHING PATTERN "*.hpp"
         PATTERN "tests" EXCLUDE
 )

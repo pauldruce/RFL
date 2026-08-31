@@ -9,6 +9,6 @@ cc_binary(
         "-lhdf5",
     ],
     deps = [
-        "//src/RFL/new_RFL:rfl",
+        "//src/RFL/core:rfl",
     ],
 )

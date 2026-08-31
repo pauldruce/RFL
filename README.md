@@ -141,18 +141,12 @@ This will compile only the playground target using 4 threads. Adjust the `-j` pa
 
 ## Show all CMake targets available to build
 
-This project defines a number of CMake targets. For instance, there is a single
-target which builds the modern RFL library called "new_RFL". There is also a
-target for the original RFL library created by Mauro called just "RFL". This is
-the original code from which this repository is forked. Eventually this will be
-replaced when all the original functionality of Mauro's implementation has been
-reproduced using modern C++.
+This project defines a number of CMake targets. The primary target which builds the modern RFL library is called `rfl` (available under aliases `RFL::core` and `RFL::rfl`). There is also a target for the original legacy RFL codebase called `rfl_legacy` (alias `RFL::legacy`), preserved for historical reference and validation.
 
-So, how can you see all the available targets to build in this project? There is
-a handy command:
+To inspect all available build targets:
 ```shell
 # Create the build directory for your platform.
-cmake -B ./build .
+cmake -B ./build src/RFL
 # Use CMake to inspect the available targets.
 cmake --build ./build --target help
 ```

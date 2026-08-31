@@ -42,7 +42,7 @@ include(GitRoot)
 include(Doxygen)
 doxygen_add_docs(doxygen
         ${PROJECT_SOURCE_DIR}/README.md
-        ${PROJECT_SOURCE_DIR}/new_RFL
+        ${PROJECT_SOURCE_DIR}/core
         ${PROJECT_SOURCE_DIR}/examples
         COMMENT "Generate documentation for entire project")
 
@@ -53,19 +53,24 @@ if(NOT SKBUILD)
     include(LoadGoogleTest)
 endif()
 
-# Build RFL library
-set(RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/old_RFL")
-set(RFL_INCLUDE_DIR "${RFL_SOURCE_DIR}/include")
-add_subdirectory(${RFL_SOURCE_DIR}/source)
+# Build legacy RFL library
+set(legacy_RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/legacy")
+set(legacy_RFL_INCLUDE_DIR "${legacy_RFL_SOURCE_DIR}/include")
+add_subdirectory(${legacy_RFL_SOURCE_DIR}/source)
 
-# Add new version of library
-set(new_RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/new_RFL")
-set(new_RFL_INCLUDE_DIR "${new_RFL_SOURCE_DIR}")
-add_subdirectory(${new_RFL_SOURCE_DIR})
+# Add core RFL library
+set(core_RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/core")
+set(core_RFL_INCLUDE_DIR "${core_RFL_SOURCE_DIR}")
+add_subdirectory(${core_RFL_SOURCE_DIR})
+
+# Add aliases for consumers
+add_library(RFL::core ALIAS rfl_core)
+add_library(RFL::rfl ALIAS rfl_core)
+add_library(RFL::legacy ALIAS rfl_legacy)
 
 # Add tests if building tests.
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
-        add_subdirectory(${RFL_SOURCE_DIR}/tests)
+        add_subdirectory(${legacy_RFL_SOURCE_DIR}/tests)
 endif()
 
 if(SKBUILD)

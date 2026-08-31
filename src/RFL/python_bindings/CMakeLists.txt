@@ -10,8 +10,8 @@ execute_process(
 message(STATUS "Found NumPy Include Dir: ${NUMPY_INCLUDE_DIR}")
 target_include_directories(rfl PRIVATE ${NUMPY_INCLUDE_DIR})
 
-# Link to new_RFL, carma, and Armadillo (which new_RFL uses)
-target_link_libraries(rfl PRIVATE new_RFL carma::carma)
+# Link to core rfl library, carma, and Armadillo
+target_link_libraries(rfl PRIVATE rfl_core carma::carma)
 
 # Pybind11 automatically requires C++11, but RFL needs C++17
 target_compile_features(rfl PRIVATE cxx_std_17)

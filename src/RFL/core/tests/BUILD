@@ -14,6 +14,6 @@ cc_test(
         "./tSimulation.cpp",
     ],
     deps = [
-        "//src/RFL/new_RFL:rfl",
+        "//src/RFL/core:rfl",
     ],
 )
