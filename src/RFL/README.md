@@ -13,17 +13,15 @@ The library defines two classes: `Cliff` and `Geom24`, defined in `legacy/includ
 respectively.
 
 - `Cliff` is responsible for creating the 'gamma matrices' for a specific Clifford module.
-  The general way to specify a Clifford module is by setting two positive integers `p` and `q`.
+  The general way to specify a Clifford module is by setting two positive integers $p$ and $q$.
 - `Geom24` is the main Class for this library. It is responsible for setting up and running the simulation.
 
 The original RFL code inherently uses an action of the form:
 
-```text
-S(D) = g_2 * Tr(D^2) + g_4 * Tr(D^4)
-```
+$$S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$$
 
-where `g_2` and `g_4` are real numbers. This action is the origin of the name of the class `Geom24` as the action
-contains the quadratic (`D^2`) and quartic (`D^4`) traces of the Dirac operator.
+where $g_2$ and $g_4$ are real numbers. This action is the origin of the name of the class `Geom24` as the action
+contains the quadratic ($D^2$) and quartic ($D^4$) traces of the Dirac operator.
 
 ## Core RFL
 
