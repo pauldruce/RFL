@@ -141,7 +141,9 @@ This will compile only the playground target using 4 threads. Adjust the `-j` pa
 
 ## Show all CMake targets available to build
 
-This project defines a number of CMake targets. The primary target which builds the modern RFL library is called `rfl` (available under aliases `RFL::core` and `RFL::rfl`). There is also a target for the original legacy RFL codebase called `rfl_legacy` (alias `RFL::legacy`), preserved for historical reference and validation.
+This project defines several CMake targets.
+The primary target that compiles the modern RFL library is `rfl_core` (available under aliases `RFL::core` and `RFL::rfl`).
+The project also preserves the original legacy codebase as `rfl_legacy` (alias `RFL::legacy`) for historical reference and verification.
 
 To inspect all available build targets:
 ```shell
