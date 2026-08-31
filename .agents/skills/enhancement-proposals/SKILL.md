@@ -35,9 +35,9 @@ When an Enhancement Proposal spans multiple releases:
 ## 3. Canonical EP Template
 
 The single source of truth for authoring new Enhancement Proposals is:
-📄 **[docs/eps/ep-template.md](file:///Users/paul/Dev/RFL/docs/eps/ep-template.md)**
+📄 **[docs/eps/ep-template.md](docs/eps/ep-template.md)**
 
 When authoring a new proposal:
 1. Copy `docs/eps/ep-template.md` to `docs/eps/ep-<N>-<title>.md`.
 2. Populate all sections according to the research scope.
-3. Maintain controlled language compliance as defined in the `technical-writing` skill and [docs/Glossary.md](file:///Users/paul/Dev/RFL/docs/Glossary.md).
+3. Maintain controlled language compliance as defined in the `technical-writing` skill and [docs/Glossary.md](docs/Glossary.md).
