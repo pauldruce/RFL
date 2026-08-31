@@ -6,10 +6,9 @@ This document establishes the official release lifecycle, quality gates, and rel
 
 ## 1. Release Philosophy & Governance
 
-1. **Semantic Versioning:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.5.0`).
-   - **MAJOR:** Breaking API or mathematical state changes.
-   - **MINOR:** New physical observables, solvers, platforms, or packaging enhancements.
-   - **PATCH:** Bug fixes, performance optimisations, or documentation updates.
+1. **Semantic Versioning & Beta Lifecycle:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.5.0`).
+   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research and architectural modernisation phase. Under Semantic Versioning rules, minor version increments (e.g. `v0.5.0` → `v0.6.0` → `v0.7.0`) may introduce breaking API changes, interface refactoring, or deprecations as the scientific architecture evolves toward `v1.0.0`.
+   - **Stable Production Phase (`v1.0.0+`):** After `v1.0.0`, breaking changes occur only across MAJOR version increments, with a formal deprecation period across MINOR releases.
 2. **Controlled Language (ASD-STE100 & British English):**
    - Release documentation must follow controlled vocabulary defined in [docs/Glossary.md](Glossary.md).
    - Use British English spelling (*standardisation*, *optimisation*, *behaviour*, *modelling*).
