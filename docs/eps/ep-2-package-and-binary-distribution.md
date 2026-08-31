@@ -85,7 +85,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | **Packaging Cleanliness** | Standard CMake conventions | Non-standard paths |
 | **Decision** | **Selected (Option A)** | Rejected |
 
-*Rationale:* Promoting modern code to `src/RFL/core` and archiving historical code to `src/RFL/legacy` establishes an intuitive and lasting naming standard before the `v0.5.0` release.
+*Rationale:* Promoting modern code to `src/RFL/core` and archiving historical code to `src/RFL/legacy` establishes an intuitive and lasting naming standard before the `v0.1.0` release.
 
 ---
 
@@ -159,14 +159,14 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ```mermaid
 flowchart LR
-    subgraph "Phase 1: PyPI & GitHub Releases (v0.5.0)"
+    subgraph "Phase 1: PyPI & GitHub Releases (v0.1.0)"
         P1A["Restructure core/ & legacy/"]
         P1B["cibuildwheel (Linux/macOS)"]
         P1C["PyPI OIDC Publishing"]
         P1D["CMake FetchContent (RFL::core)"]
     end
 
-    subgraph "Phase 2: CMake Targets & CPack (v0.7.0)"
+    subgraph "Phase 2: CMake Targets & CPack (v0.3.0)"
         P2A["CMake install() Rules"]
         P2B["RFLConfig.cmake Export"]
         P2C["CPack Binary Tarballs"]
@@ -228,7 +228,7 @@ flowchart TD
 ## 7. Phased Delivery Plan
 
 ### Phase 1: Directory Restructuring, PyPI Wheels, GitHub Releases & CMake FetchContent
-* **Target Milestone:** `v0.5.0`
+* **Target Milestone:** `v0.1.0`
 * **GitHub Issue:** [Issue #18](https://github.com/pauldruce/RFL/issues/18)
 * **Tasks:**
   1. Rename `src/RFL/new_RFL` → `src/RFL/core` and `src/RFL/old_RFL` → `src/RFL/legacy`.
@@ -239,7 +239,7 @@ flowchart TD
   6. Update `README.md` and `docs/Consumption_Guide.md` with `pip` and `FetchContent` instructions.
 
 ### Phase 2: CMake Installation Targets & CPack Binary Packaging
-* **Target Milestone:** `v0.7.0`
+* **Target Milestone:** `v0.3.0`
 * **GitHub Issue:** [Issue #3](https://github.com/pauldruce/RFL/issues/3)
 * **Tasks:**
   1. Define CMake `install(TARGETS rfl_core EXPORT RFLTargets ...)` and header install rules.

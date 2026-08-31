@@ -3,7 +3,7 @@
 * **Title:** [Feature / Enhancement Title]
 * **Author:** [Author Name]
 * **Status:** [Draft / In Discussion / Accepted (In Progress) / Completed]
-* **Target Versions:** [e.g. RFL v0.5.0 (Phase 1), v0.7.0 (Phase 2)]
+* **Target Versions:** [e.g. RFL v0.1.0 (Phase 1), v0.3.0 (Phase 2)]
 * **Date:** YYYY-MM-DD
 
 ---
@@ -15,8 +15,8 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | Milestone | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | [Deliverables summary] | `v0.5.0` | [`v0.5.0`](...) | [PR #X](...) (Closes [#Y](...)) | ⏳ Scheduled |
-| **Phase 2** | [Deliverables summary] | `v0.7.0` | [`v0.7.0`](...) | [#Z](...) | 💡 Planned |
+| **Phase 1** | [Deliverables summary] | `v0.1.0` | [`v0.1.0`](...) | [PR #X](...) (Closes [#Y](...)) | ⏳ Scheduled |
+| **Phase 2** | [Deliverables summary] | `v0.3.0` | [`v0.3.0`](...) | [#Z](...) | 💡 Planned |
 
 ---
 
