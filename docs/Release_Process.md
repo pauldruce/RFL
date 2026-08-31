@@ -154,6 +154,24 @@ To author release notes for a new version:
 ### 4.2 Historical Pre-Releases (`v0.1.0` – `v0.4.0`)
 Historical development milestones are backfilled in `docs/releases/` (`v0.1.0.md` through `v0.4.0.md`). These milestones were unpackaged internal iterations. For all Python and modern C++ research workflows, use **RFL `v0.5.0` or later**.
 
+### 4.3 Patch Releases & Maintenance Branch Workflow
+
+When a bug fix patch (`vX.Y.1`) is needed while `main` develops future versions (`vX.(Y+1).0`), use the **Maintenance Branch Workflow**:
+
+```mermaid
+flowchart TD
+    A["1. Bug Fix on main\n(Fix & tests merged to main)"] --> B["2. Backport to maintenance/X.Y.x\n(git cherry-pick <commit>)"]
+    B --> C["3. Draft Patch Notes\n(Add docs/releases/vX.Y.1.md on maintenance branch)"]
+    C --> D["4. Tag & Publish\n(git tag vX.Y.1 & gh release create)"]
+    D --> E["5. Forward-Port to main\n(Sync docs/releases/vX.Y.1.md to main)"]
+```
+
+1. **Fix on `main` First:** Always land bug fixes on `main` first via PR to prevent regressions in future versions.
+2. **Backport to Maintenance Branch:** Cherry-pick the bugfix commit to `maintenance/X.Y.x`.
+3. **Author Patch Release Notes:** Create `docs/releases/vX.Y.1.md` on the maintenance branch detailing the repaired issues. Patch releases must never contain breaking changes.
+4. **Tag & Publish:** Tag `vX.Y.1` from the maintenance branch and publish via `gh release create --notes-file docs/releases/vX.Y.1.md`.
+5. **Forward-Port Notes to `main`:** Merge or copy `docs/releases/vX.Y.1.md` into `main` so `main` retains the complete release history.
+
 ---
 
 ## 5. Testing the Release Pipeline (Dry Run)
