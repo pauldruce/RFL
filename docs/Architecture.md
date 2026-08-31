@@ -109,7 +109,7 @@ graph TD
 * **Dual-Tier Python Bridge:**
   Exposes C++ value types as idiomatic Python classes with generator streams (`iter_sweeps()`) and zero-copy NumPy array integration.
 * **Non-Virtual Interface (NVI):**
-  Public non-virtual methods enforce invariants and preconditions before delegating to private virtual customization points.
+  Public non-virtual methods enforce invariants and preconditions before delegating to private virtual customisation points.
 
 ---
 

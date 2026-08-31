@@ -27,7 +27,7 @@ The table below tracks the status of each implementation phase:
 
 ### 2.2 Goals
 * **Goal 1:** [Specific research or technical capability.]
-* **Goal 2:** [Specific scientific invariant or optimization.]
+* **Goal 2:** [Specific scientific invariant or optimisation.]
 
 ### 2.3 Non-Goals
 * [Explicitly declare what is out of scope for this proposal.]
@@ -66,7 +66,7 @@ The table below tracks the status of each implementation phase:
 ## 5. Target Architecture & Component Contracts
 
 ### 5.1 Subsystem Architecture
-[Define C++ class declarations, signatures, value types, and file organization.]
+[Define C++ class declarations, signatures, value types, and file organisation.]
 
 ### 5.2 Python Interoperability
 [Define pybind11 bindings, zero-copy buffer views, and NumPy integration.]
