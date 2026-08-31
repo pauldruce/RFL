@@ -39,9 +39,9 @@ flowchart TD
 
     subgraph Phase2["Phase 2: Final Promotion"]
         F --> G{"Validation successful?"}
-        G -- Issues found --> H["Fix on branch → Tag v0.1.0rc2"]
+        G -->|Issues found| H["Fix on branch → Tag v0.1.0rc2"]
         H --> B
-        G -- Clean --> I["Tag Final: v0.1.0\n(git tag v0.1.0)"]
+        G -->|Clean| I["Tag Final: v0.1.0\n(git tag v0.1.0)"]
         I --> J["Create Draft Release\n(gh release create --draft)"]
         J --> K["Review Draft Notes in UI\n(Zero workflows triggered)"]
         K --> L["Publish Final Release\n(Official PyPI default & Latest tag)"]

@@ -188,26 +188,31 @@ flowchart TD
     A["Release Published Event (v*)\nor workflow_dispatch"] --> B["Matrix: build_wheels"]
     A --> C["Job: build_sdist"]
     
-    subgraph "Matrix: cibuildwheel"
+    subgraph Matrix["Matrix: cibuildwheel"]
         B1["Linux x86_64\n(manylinux_2_28)"]
         B2["macOS x86_64\n(macos-13)"]
         B3["macOS arm64\n(macos-14)"]
     end
     
-    B --> B1 & B2 & B3
+    B --> B1
+    B --> B2
+    B --> B3
     
     B1 --> T1["pytest inside container"]
     B2 --> T2["pytest inside env"]
     B3 --> T3["pytest inside env"]
     
-    T1 & T2 & T3 --> U1["Upload Wheel Artifacts"]
+    T1 --> U1["Upload Wheel Artifacts"]
+    T2 --> U1
+    T3 --> U1
     C --> U2["Upload sdist Artifact"]
     
-    U1 & U2 --> G{"Release Published?"}
+    U1 --> G{"Release Published?"}
+    U2 --> G
     
-    G -- Yes --> R1["Job: upload_release_assets\n(Attach wheels + sdist)"]
-    G -- Yes --> R2["Job: publish_pypi\n(Trusted Publishing OIDC)"]
-    G -- No (Dry Run) --> R3["Retain Staged Artifacts"]
+    G -->|Yes| R1["Job: upload_release_assets\n(Attach wheels + sdist)"]
+    G -->|Yes| R2["Job: publish_pypi\n(Trusted Publishing OIDC)"]
+    G -->|No (Dry Run)| R3["Retain Staged Artifacts"]
 ```
 
 ---
