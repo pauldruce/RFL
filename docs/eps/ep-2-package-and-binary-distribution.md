@@ -60,12 +60,17 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
+| Requirement ID | Requirement Summary | Physical & Technical Invariant |
 | :--- | :--- | :--- |
-| **REQ-PKG-01** | **Hermetic Shared Library Vendoring** | Binary wheels must vendor dynamic dependencies (`.libs/`) so consumers do not need system GSL or Armadillo. |
-| **REQ-PKG-02** | **Zero-Copy NumPy Interop** | Matrix data conversion between Armadillo complex matrices and NumPy arrays must be zero-copy via Carma. |
-| **REQ-PKG-03** | **Zero-Secret CI/CD Pipeline** | Automated PyPI deployment must use GitHub OIDC Trusted Publishing with zero stored long-lived tokens. |
-| **REQ-PKG-04** | **Standard Target Export** | CMake builds must export `RFL::core` (and `RFL::rfl`) for direct consumption in `target_link_libraries()`. |
+| **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
+| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) covering Python 3.8–3.13. |
+| **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
+| **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
+| **REQ-PKG-05** | **Secure PyPI Publishing** | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |
+| **REQ-PKG-06** | **CMake FetchContent Support** | Export namespaced alias `RFL::core` and `RFL::rfl` in top-level CMake configuration. |
+| **REQ-PKG-07** | **Standard CMake Installation** | Define CMake `install()` targets for public headers, compiled libraries, and CMake config packages. |
+| **REQ-PKG-08** | **CPack Binary Packaging** | Generate `.tar.gz` release archives containing headers, static libraries, and package configuration files. |
+| **REQ-PKG-09** | **Ecosystem Package Distribution** | Provide recipes for Homebrew Tap, Conda-Forge, and evaluate C++ registries (Conan, vcpkg). |
 
 ---
 
@@ -217,6 +222,7 @@ flowchart TD
 | Verification Gate | Command / Test Description | Target Invariant |
 | :--- | :--- | :--- |
 | **C++ Core Unit Tests** | `ctest --test-dir build --output-on-failure` | Verifies `rfl_core` and `rfl_legacy` suites pass completely. |
+| **Local Unit Tests** | `pytest src/RFL/python_bindings/tests/unit` | Verifies Python API and exception propagation. |
 | **Local Integration Tests** | `pytest src/RFL/python_bindings/tests/integration` | Verifies NumPy zero-copy buffer safety and memory management. |
 | **Please Build Verification** | `./pleasew test //src/RFL/python_bindings/tests:all` | Validates in-tree Please hermetic build with new `core/` path. |
 | **cibuildwheel Test Phase** | `pytest {project}/src/RFL/python_bindings/tests` | Verifies installed wheel inside clean containers. |
