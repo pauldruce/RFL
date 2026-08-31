@@ -28,7 +28,8 @@ def main(random_seed, num_selected, select_all):
         "ubuntu-latest",
         "ubuntu-22.04",
         "macos-latest",
-        "macos-15",
+        "macos-15-intel",
+        "macos-14",
     ]
     armadillo_version = ["11.4.4", "12.8.4", "14.2.2"]
 
