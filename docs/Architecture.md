@@ -8,7 +8,7 @@
 > *"Libraries provide mechanisms, vocabulary, and data structures; Applications provide policies, workflows, and orchestration."*
 
 > [!NOTE]
-> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernisation for RFL](eps/ep-1-core-architecture-modernization.md)**.
+> For the complete research-driven enhancement proposal, design alternatives trade-offs, and verification matrix, see **[EP-1: Research-Driven Architecture Modernisation for RFL](eps/ep-1-core-architecture-modernisation.md)**.
 
 ---
 
