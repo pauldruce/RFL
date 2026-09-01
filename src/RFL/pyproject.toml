@@ -3,7 +3,7 @@ requires = ["scikit-build-core", "pybind11", "numpy"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "rfl"
+name = "pyrfl"
 version = "0.1.0"
 description = "Random Fuzzy Library (RFL) - MCMC simulations of Finite Random Non-commutative geometries"
 

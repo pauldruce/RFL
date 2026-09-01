@@ -12,7 +12,7 @@ jobs:
       fail-fast: false
       matrix:
         BUILD_TYPE: [ Release ]
-        OS: [ ubuntu-latest, macos-latest ]
+        OS: [ ubuntu-latest, macos-latest, macos-15-intel ]
         ARMA_VERSION: [ 12.6.6 ]
 
 

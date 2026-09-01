@@ -32,13 +32,13 @@ Researchers study spectral triples $(A, \mathcal{H}, D)$ and the Barrett-Glaser 
 
 Previously, consuming RFL required compiling C++ source code locally.
 Consumers had to install CMake, C++17 compilers, Armadillo, LAPACK, BLAS, and GSL manually.
-This requirement created friction for physicists and data scientists who require a quick `pip install rfl` workflow.
+This requirement created friction for physicists and data scientists who require a quick `pip install pyrfl` workflow.
 In addition, external C++ simulation programs had no standard CMake target mechanism to link `rfl`.
 The codebase also suffered from historical directory naming debt (`new_RFL` and `old_RFL`), which created confusing target names.
 
 ### 2.2 Goals
 * **Clean Target & Directory Standardisation:** Promote `new_RFL` to `core/` with target `rfl_core` (aliases: `RFL::core`, `RFL::rfl`), and archive `old_RFL` to `legacy/` (`rfl_legacy`).
-* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) across Python 3.8–3.13.
+* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) across Python 3.8–3.13 (`pip install pyrfl`).
 * **Hermetic Dynamic Library Vendoring:** Automatically vendor and bundle shared C++ runtime dependencies (`openblas`, `gsl`, `armadillo`) inside wheels via `auditwheel` and `delocate`.
 * **Zero-Secret CI/CD PyPI Publishing:** Implement automated PyPI deployment on version tag push using OpenID Connect (OIDC) Trusted Publishing.
 * **CMake In-Tree FetchContent Support:** Ensure external C++ codebases can integrate RFL seamlessly via standard `FetchContent`.
@@ -54,7 +54,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 ## 3. Research Workflows & Scientific Requirements
 
 ### 3.1 Core Research Scenarios
-1. **Scenario 1 (Interactive Spectral Analysis in Python):** A physicist installs RFL via `pip install rfl` in an isolated virtual environment and computes Dirac eigenvalue spectra in Jupyter.
+1. **Scenario 1 (Interactive Spectral Analysis in Python):** A physicist installs RFL via `pip install pyrfl` in an isolated virtual environment and computes Dirac eigenvalue spectra in Jupyter (`import rfl`).
 2. **Scenario 2 (Custom C++ Simulation Pipeline):** A researcher includes RFL into an external C++ MCMC solver using `FetchContent_Declare(RFL ...)` and links `RFL::core` without manually configuring header search paths.
 3. **Scenario 3 (Unified Scientific Environment):** A research lab installs `librfl` and `rfl` via Conda into reproducible simulation environments.
 
@@ -63,7 +63,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | Requirement ID | Requirement Summary | Physical & Technical Invariant |
 | :--- | :--- | :--- |
 | **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
-| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) covering Python 3.8–3.13. |
+| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28_x86_64`) and macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`) covering Python 3.8–3.13. |
 | **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
 | **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
 | **REQ-PKG-05** | **Secure PyPI Publishing** | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |
@@ -96,7 +96,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | **Standardisation** | High (PyPA standard for scientific Python) | Low (Bespoke maintenance) | High (Standard `build --sdist`) |
 | **Library Vendoring** | Automated (`auditwheel`, `delocate`) | Manual configuration | None (Fails on systems without C++ stack) |
 | **Isolated Testing** | Built-in per Python version | Custom virtual environments | Relies on consumer environment |
-| **User Experience** | Instant `pip install rfl` | Instant `pip install rfl` | High friction for non-C++ users |
+| **User Experience** | Instant `pip install pyrfl` | Instant `pip install pyrfl` | High friction for non-C++ users |
 | **Decision** | **Selected (Option A)** | Rejected | Rejected |
 
 *Rationale:* `cibuildwheel` encapsulates `manylinux` container management, executes tests inside clean wheel environments, and automates dynamic library vendoring.
@@ -114,6 +114,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 *Rationale:* Installing `openblas`, `lapack`, `gsl`, and `armadillo` via `dnf` on Linux and `brew` on macOS provides fast, reliable CI builds.
 `auditwheel` and `delocate` automatically discover and vendor dynamic dependencies into the wheel.
+On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silicon (`arm64`) and `15.0` on Intel (`x86_64`) to match Homebrew binary SDK baselines.
 
 ---
 
