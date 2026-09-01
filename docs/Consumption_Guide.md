@@ -4,18 +4,32 @@ This guide explains how to install RFL locally on your machine and consume it ac
 
 ---
 
-## 1. Local Python Installation (Recommended for Research)
+## 1. Python Package Installation
 
-RFL provides native Python bindings (compiled via pybind11 and scikit-build-core with Armadillo integration).
+RFL provides precompiled binary wheels on PyPI and supports local source builds via `pybind11` and `scikit-build-core`.
 
-### Option A: Standard Installation (Recommended / Easiest)
-For research consumers who just want to use the library without in-tree build artifacts:
+### Option A: PyPI Binary Installation (Easiest / No C++ Setup Required)
+Install standalone precompiled wheels from PyPI:
+```bash
+pip install pyrfl
+```
+*(For pre-releases, pass `pip install --pre pyrfl`)*
+
+> [!NOTE]
+> Precompiled wheels support:
+> * **Linux (`x86_64`):** glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8).
+> * **macOS (Apple Silicon `arm64`):** macOS ≥ 14.0 (Sonoma / Sequoia).
+> * **macOS (Intel `x86_64`):** macOS ≥ 15.0 (Sequoia).
+> * **Python:** CPython 3.8 – 3.13.
+
+### Option B: Local Source Installation
+For research consumers compiling from a local Git clone:
 ```bash
 pip install src/RFL
 ```
 *(To update after modifying C++ source code: `pip install --force-reinstall --no-deps src/RFL`)*
 
-### Option B: Editable Installation (For Active Development)
+### Option C: Editable Installation (For Active Development)
 For developers actively iterating on Python bindings and C++ code:
 ```bash
 pip install -e src/RFL

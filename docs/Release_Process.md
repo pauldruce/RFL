@@ -34,7 +34,7 @@ flowchart TD
         B --> C["Review Draft Notes in UI\n(Zero workflows triggered)"]
         C --> D["Publish Pre-Release\n(gh release edit --draft=false)"]
         D --> E["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
-        E --> F["Testing Period (24–72h)\n- pip install --pre rfl\n- CMake FetchContent (GIT_TAG v0.1.0rc1)"]
+        E --> F["Testing Period (24–72h)\n- pip install --pre pyrfl\n- CMake FetchContent (GIT_TAG v0.1.0rc1)"]
     end
 
     subgraph Phase2["Phase 2: Final Promotion"]
@@ -58,12 +58,12 @@ flowchart TD
    - GitHub displays a `Pre-release` badge and retains the previous release as `Latest`.
 3. **PyPI & `pip` Behaviour:**
    - PyPI automatically marks `0.1.0rc1` as a pre-release.
-   - A standard `pip install rfl` will **never** install a pre-release by default.
+   - A standard `pip install pyrfl` will **never** install a pre-release by default.
    - Downstream researchers must explicitly opt in with:
      ```bash
-     pip install --pre rfl
+     pip install --pre pyrfl
      # or
-     pip install rfl==0.1.0rc1
+     pip install pyrfl==0.1.0rc1
      ```
 4. **C++ & CMake `FetchContent` Behaviour:**
    - Downstream C++ solvers test the release candidate by pinning the RC git tag:
@@ -112,7 +112,7 @@ During the testing window (24–72 hours for `0.y.z` releases):
 1. **Python Wheels:** Verify in a clean virtual environment:
    ```bash
    python -m venv test_env && source test_env/bin/activate
-   pip install --pre rfl
+   pip install --pre pyrfl
    python -c "import rfl; print(rfl.__version__)"
    ```
 2. **C++ CMake Integration:** Verify `FetchContent` in an external test project linking `RFL::core`.
@@ -133,7 +133,7 @@ When the release candidate is validated with zero critical defects:
    ```bash
    gh release edit vX.Y.Z --draft=false
    ```
-   The final packages become the default on PyPI (`pip install rfl`), assets are attached to GitHub Releases, and the milestone is closed.
+   The final packages become the default on PyPI (`pip install pyrfl`), assets are attached to GitHub Releases, and the milestone is closed.
 
 ---
 

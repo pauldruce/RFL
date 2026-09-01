@@ -61,17 +61,29 @@ When several related issues point to a major subsystem upgrade (such as Value Se
 
 ## Supported Platforms & Dependencies
 
-RFL follows the **Active LTS Window Policy** (similar to SPEC 0 / NEP 29) to ensure compatibility across university HPC clusters and modern workstations:
+RFL provides two delivery mechanisms with distinct environment requirements:
 
-| Dependency / Tool | Minimum Supported Version | Supported Environment |
+### 1. Precompiled Python Wheels (Binary Delivery)
+Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `gsl`, `armadillo`) directly inside the package:
+
+| Platform | Architecture | Package Standard | Minimum OS Baseline | Python Coverage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Linux** | `x86_64` | `manylinux_2_28` | glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8) | 3.8 – 3.13 |
+| **macOS (Apple Silicon)** | `arm64` | `macosx_14_0_arm64` | macOS ≥ 14.0 (Sonoma / Sequoia) | 3.8 – 3.13 |
+| **macOS (Intel)** | `x86_64` | `macosx_15_0_x86_64` | macOS ≥ 15.0 (Sequoia) | 3.8 – 3.13 |
+| **Windows** | `x86_64` | WSL2 | Ubuntu 22.04 on WSL2 (Native MSVC in v0.3.0) | 3.8 – 3.13 |
+
+### 2. C++ Source Builds & CMake `FetchContent` (Source Delivery)
+When compiling RFL from source or linking via CMake `FetchContent`, RFL compiles against local toolchains:
+
+| Dependency | Minimum Version | Notes |
 | :--- | :--- | :--- |
 | **C++ Standard** | **C++17** | `std::optional`, `std::variant`, structured bindings |
-| **Armadillo** | **≥ 11.4.0** | Tested on 11.4.4 (LTS baseline), 12.8.4, and 14.2.2 |
-| **GSL** | **≥ 2.6** | GNU Scientific Library random number generators |
 | **Compilers** | **GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019** | Conforming C++17 compilers |
-| **Operating Systems** | **Ubuntu ≥ 22.04 LTS, macOS ≥ 14 (Apple Silicon), Windows (WSL2)** | Active CI runners |
-| **Python** | **Python ≥ 3.9** | NumPy ≥ 1.22 |
-| **CMake** | **≥ 3.20** | Modern target export and packaging syntax |
+| **CMake** | **≥ 3.20** | Modern target export and `FetchContent` syntax |
+| **Armadillo** | **≥ 11.4.0** | High-performance matrix mathematics |
+| **GSL** | **≥ 2.6** | GNU Scientific Library random number generators |
+| **BLAS / LAPACK** | **OpenBLAS / Accelerate / MKL** | Linear algebra backend for Armadillo |
 
 ## Building the library
 
