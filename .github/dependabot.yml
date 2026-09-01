@@ -1,0 +1,38 @@
+# ==============================================================================
+# Dependabot Configuration
+# Automatically monitor and update GitHub Actions and package dependencies.
+# See https://docs.github.com/en/code-security/dependabot/dependabot-version-updates
+# ==============================================================================
+
+version: 2
+
+updates:
+  # Maintain GitHub Actions workflows and custom actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Maintain Python package dependencies for RFL
+  - package-ecosystem: "pip"
+    directory: "/src/RFL"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Europe/London"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "build"
+      include: "scope"
