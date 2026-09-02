@@ -3,10 +3,19 @@ name: Release
 on:
   release:
     types: [published]
+  pull_request:
+    paths:
+      - ".github/workflows/release.yml"
+      - "src/RFL/pyproject.toml"
+      - "src/RFL/python_bindings/**"
   workflow_dispatch:
     inputs:
       publish_to_pypi:
         description: "Publish packages to PyPI"
+        type: boolean
+        default: false
+      publish_to_testpypi:
+        description: "Publish packages to TestPyPI"
         type: boolean
         default: true
       dry_run:
@@ -19,8 +28,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  id-token: write
+  contents: read
 
 jobs:
   build_wheels:
@@ -90,13 +98,42 @@ jobs:
           path: ./dist/*.tar.gz
           if-no-files-found: error
 
+  publish_testpypi:
+    name: TestPyPI Publication
+    if: (github.event_name == 'workflow_dispatch' && inputs.publish_to_testpypi && !inputs.dry_run) && github.actor == github.repository_owner
+    needs: [build_wheels, build_sdist]
+    runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+    permissions:
+      id-token: write
+    steps:
+      - name: Download all staged artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - name: Display release distribution assets
+        run: ls -la dist/
+
+      - name: Publish to TestPyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: dist/
+
   publish_release:
     name: GitHub Release & PyPI Publication
-    if: github.actor == github.repository_owner
+    if: (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi && !inputs.dry_run)) && github.actor == github.repository_owner
     needs: [build_wheels, build_sdist]
     runs-on: ubuntu-latest
     environment:
       name: pypi
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - name: Download all staged artifacts
         uses: actions/download-artifact@v4
@@ -112,11 +149,11 @@ jobs:
         if: (github.event_name == 'release') || (startsWith(github.ref, 'refs/tags/v') && !(github.event_name == 'workflow_dispatch' && inputs.dry_run))
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: |
           gh release upload "${{ github.event.release.tag_name || github.ref_name }}" dist/* --clobber
 
       - name: Publish to PyPI
-        if: (github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && inputs.publish_to_pypi)) && !(github.event_name == 'workflow_dispatch' && inputs.dry_run)
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
