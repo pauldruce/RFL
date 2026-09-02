@@ -174,10 +174,28 @@ flowchart TD
 
 ---
 
-## 5. Testing the Release Pipeline (Dry Run)
+## 5. Testing the Release Pipeline & TestPyPI Qualification
 
-To test wheel compilation and packaging without uploading to PyPI or modifying release assets, trigger a manual dry run:
+### 5.1 Automated Pull Request Testing
+Any pull request that modifies `.github/workflows/release.yml`, `src/RFL/pyproject.toml`, or `src/RFL/python_bindings/**` automatically executes the complete packaging matrix. The workflow compiles all 18 binary wheels across Linux, macOS Apple Silicon, and macOS Intel, and executes the `pytest` test suite without publishing assets.
+
+### 5.2 TestPyPI Publication & Pre-Flight Qualification
+To publish packages to TestPyPI (`test.pypi.org`) for downstream verification before an official release, dispatch the release workflow with `publish_to_testpypi=true`:
 
 ```bash
-gh workflow run release.yml -f dry_run=true -f publish_to_pypi=false
+gh workflow run release.yml -f publish_to_testpypi=true -f publish_to_pypi=false
+```
+
+Once publication completes, verify installation in a clean environment:
+
+```bash
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ --pre pyrfl
+python -c "import rfl; print('RFL loaded successfully from TestPyPI:', rfl)"
+```
+
+### 5.3 Dry Run (No Uploads)
+To test wheel compilation and packaging without publishing to any index or repository, trigger a manual dry run:
+
+```bash
+gh workflow run release.yml -f dry_run=true -f publish_to_pypi=false -f publish_to_testpypi=false
 ```
