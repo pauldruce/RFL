@@ -17,6 +17,13 @@ dependencies = [
 test = ["pytest"]
 dev = ["jupyter", "nbformat"]
 
+[project.urls]
+Homepage = "https://github.com/pauldruce/RFL"
+Documentation = "https://github.com/pauldruce/RFL#documentation"
+Repository = "https://github.com/pauldruce/RFL.git"
+Issues = "https://github.com/pauldruce/RFL/issues"
+Changelog = "https://github.com/pauldruce/RFL/blob/main/docs/releases/v0.1.0.md"
+
 [tool.scikit-build]
 cmake.source-dir = "."
 

@@ -1,37 +1,162 @@
-# Random Fuzzy Library - RFL
+# Random Fuzzy Library (RFL)
 
-![Build and Test Status](https://github.com/pauldruce/RFL/actions/workflows/build_and_test.yml/badge.svg)
+[![PyPI version](https://img.shields.io/pypi/v/pyrfl.svg?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/pyrfl/)
+[![Python versions](https://img.shields.io/pypi/pyversions/pyrfl.svg?logo=python&logoColor=white)](https://pypi.org/project/pyrfl/)
+[![GitHub Release](https://img.shields.io/github/v/release/pauldruce/RFL?color=informational&logo=github)](https://github.com/pauldruce/RFL/releases)
+[![Build and Test](https://github.com/pauldruce/RFL/actions/workflows/build_and_test.yml/badge.svg)](https://github.com/pauldruce/RFL/actions/workflows/build_and_test.yml)
+[![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20WSL2-lightgrey.svg)](https://pypi.org/project/pyrfl/)
+[![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C.svg?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/17)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/src/RFL/examples/python/rfl_playground.ipynb)
 
-RFL is a C++ library to construct and run Finite Non-commutative Geometries (Finite NCGs) simulations. See §[Background](#background) below for more details on what a Finite NCG is.
+> *"Continuous points are an approximation. Quantise spacetime with finite matrices."*
 
-This library is written using C++17 and uses Armadillo and GSL for its mathematical operations.
-The library is built using CMake, and detailed instructions on how to generate the library files for your desired platform are listed below in §[Building the library](#building-the-library)
+RFL is a high-performance C++ scientific library with Python bindings for Markov Chain Monte Carlo (MCMC) simulations of **Finite Noncommutative Geometries (Finite NCGs)** and **Random Fuzzy Spaces**.
 
-Note that because this is a library and not an application, the reader must implement their application in C++ and include this project.
-Some examples of applications are included in `/examples` to demonstrate how to do this.
-These examples can also be built using CMake, and instructions on they are built are in the README in `/examples`
+It simulates the Barrett-Glaser spectral action:
 
-## Library Dependencies
-Building this project requires you to have the libraries GSL and Armadillo available and CMake installed.
+$$S(D) = g_2 \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)$$
 
-The installation processes for GSL and Armadillo are very platform dependent, and you should follow the installation instructions detailed by each project:
+where $g_2, g_4 \in \mathbb{R}$ and $D$ is a finite Dirac operator. See §[Background & Citations](#background--citations) below for foundational academic papers.
 
-- GSL: [https://www.gnu.org/software/gsl/](https://www.gnu.org/software/gsl/)
-- Armadillo: [http://arma.sourceforge.net](http://arma.sourceforge.net)
+---
 
-Here are my recommended methods of installing these dependencies per platform:
+## Quick Start (Python)
 
-* On macOS, you should be okay using Homebrew, i.e. `brew install gsl` and `brew install armadillo`
-* On Ubuntu, I imagine `apt-get install libgsl-dev` and `apt-get install libarmadillo-dev` should suffice.
-* For Windows and other Linux distributions, you must follow the installation instructions on the website above.
+Precompiled binary wheels vendor dynamic linear algebra dependencies (`OpenBLAS`, `Armadillo`, `GSL`). No C++ compiler or local dependencies are required.
 
-To install CMake, please follow the instructions on the website: [https://cmake.org](https://cmake.org)
+### 1. Installation
 
-Here are my recommended methods of installing CMake per platform:
+Install the package from PyPI:
 
-- On macOS - you can use Homebrew - `brew install cmake`
-- On Ubuntu - you can use `apt-get install cmake` should work.
-- Follow the instructions on the CMake webpage for Windows and other Linux distributions.
+```bash
+pip install pyrfl
+```
+
+> [!NOTE]
+> The PyPI distribution package name is **`pyrfl`**. The Python module name is **`rfl`** (`import rfl`).
+
+### 2. Run a Simulation
+
+Run this 30-second simulation:
+
+```python
+import numpy as np
+import rfl
+
+# Initialise a Dirac operator with signature (p=1, q=3) and matrix dimension 10.
+dirac = rfl.DiracOperator(p=1, q=3, dim=10)
+
+# Configure and run the Metropolis algorithm.
+# Parameters: g_2, g_4, scale, num_steps, seed
+metropolis = rfl.Metropolis(g_2=-1.0, g_4=1.0, scale=1.0, num_steps=100, seed=42)
+acceptance_rate = metropolis.update_dirac(dirac)
+print(f"Acceptance Rate: {acceptance_rate * 100:.2f}%")
+
+# Extract eigenvalues directly as a NumPy array (zero-copy memory mapping).
+eigenvals = dirac.get_eigenvalues()
+print(f"Calculated {len(eigenvals)} eigenvalues.")
+print(f"Spectrum range: [{np.min(eigenvals):.2f}, {np.max(eigenvals):.2f}]")
+```
+
+### 3. Interactive Playground
+
+Explore simulations interactively in the Jupyter notebook playground:
+* Run locally: [`src/RFL/examples/python/rfl_playground.ipynb`](src/RFL/examples/python/rfl_playground.ipynb)
+* Run in browser: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/src/RFL/examples/python/rfl_playground.ipynb)
+
+---
+
+## Quick Start (C++)
+
+Add RFL directly to your `CMakeLists.txt` file using `FetchContent`:
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+    RFL
+    GIT_REPOSITORY https://github.com/pauldruce/RFL.git
+    GIT_TAG        v0.1.0
+)
+FetchContent_MakeAvailable(RFL)
+
+add_executable(my_simulation main.cpp)
+target_link_libraries(my_simulation PRIVATE RFL::core)
+```
+
+Include the headers in your C++ code:
+
+```cpp
+#include "DiracOperator.hpp"
+#include "BarrettGlaser/Metropolis.hpp"
+#include "BarrettGlaser/Action.hpp"
+#include "GslRng.hpp"
+```
+
+---
+
+## Supported Platforms & Delivery
+
+RFL supports two delivery methods:
+
+### 1. Precompiled Python Wheels (Binary Delivery)
+
+Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `gsl`, `armadillo`) directly inside the package:
+
+| Platform | Architecture | Package Standard | Minimum OS Baseline | Python Coverage |
+| :--- | :--- | :--- | :--- | :--- |
+| **Linux** | `x86_64` | `manylinux_2_28` | glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8) | 3.9 – 3.13 |
+| **macOS (Apple Silicon)** | `arm64` | `macosx_14_0_arm64` | macOS ≥ 14.0 (Sonoma / Sequoia) | 3.9 – 3.13 |
+| **macOS (Intel)** | `x86_64` | `macosx_15_0_x86_64` | macOS ≥ 15.0 (Sequoia) | 3.9 – 3.13 |
+| **Windows** | `x86_64` | WSL2 | Ubuntu 22.04 on WSL2 (Native MSVC in v0.3.0) | 3.9 – 3.13 |
+
+### 2. C++ Source Builds & CMake `FetchContent` (Source Delivery)
+
+When compiling RFL from source or linking via CMake `FetchContent`, RFL compiles against local toolchains:
+
+| Dependency | Minimum Version | Notes |
+| :--- | :--- | :--- |
+| **C++ Standard** | **C++17** | `std::optional`, `std::variant`, structured bindings |
+| **Compilers** | **GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019** | Conforming C++17 compilers |
+| **CMake** | **≥ 3.20** | Modern target export and `FetchContent` syntax |
+| **Armadillo** | **≥ 11.4.0** | High-performance matrix mathematics |
+| **GSL** | **≥ 2.6** | GNU Scientific Library random number generators |
+| **BLAS / LAPACK** | **OpenBLAS / Accelerate / MKL** | Linear algebra backend for Armadillo |
+
+---
+
+## Building from Source (C++)
+
+To contribute to RFL or build the C++ library locally:
+
+### 1. Install Dependencies
+
+* **macOS:** `brew install cmake gsl armadillo openblas`
+* **Ubuntu / Debian:** `sudo apt-get install cmake libgsl-dev libarmadillo-dev libopenblas-dev`
+* **Other platforms:** Follow installation instructions provided by CMake, GSL, and Armadillo.
+
+### 2. Build and Test
+
+```bash
+git clone https://github.com/pauldruce/RFL.git
+cd RFL
+cmake -B build src/RFL
+cmake --build build --target all -j 4
+ctest --test-dir build -j 4 --output-on-failure
+```
+
+### 3. Available CMake Targets
+
+* `rfl_core` (aliases: `RFL::core`, `RFL::rfl`): The modern C++17 library.
+* `rfl_legacy` (alias: `RFL::legacy`): The preserved historical codebase for baseline comparison.
+* `playground`: Standalone C++ experimentation target.
+
+To inspect all available build targets:
+
+```bash
+cmake --build build --target help
+```
+
+---
 
 ## Development & Feature Request Workflow
 
@@ -59,111 +184,7 @@ When several related issues point to a major subsystem upgrade (such as Value Se
 * The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 
-## Supported Platforms & Dependencies
-
-RFL provides two delivery mechanisms with distinct environment requirements:
-
-### 1. Precompiled Python Wheels (Binary Delivery)
-Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `gsl`, `armadillo`) directly inside the package:
-
-| Platform | Architecture | Package Standard | Minimum OS Baseline | Python Coverage |
-| :--- | :--- | :--- | :--- | :--- |
-| **Linux** | `x86_64` | `manylinux_2_28` | glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8) | 3.9 – 3.13 |
-| **macOS (Apple Silicon)** | `arm64` | `macosx_14_0_arm64` | macOS ≥ 14.0 (Sonoma / Sequoia) | 3.9 – 3.13 |
-| **macOS (Intel)** | `x86_64` | `macosx_15_0_x86_64` | macOS ≥ 15.0 (Sequoia) | 3.9 – 3.13 |
-| **Windows** | `x86_64` | WSL2 | Ubuntu 22.04 on WSL2 (Native MSVC in v0.3.0) | 3.9 – 3.13 |
-
-### 2. C++ Source Builds & CMake `FetchContent` (Source Delivery)
-When compiling RFL from source or linking via CMake `FetchContent`, RFL compiles against local toolchains:
-
-| Dependency | Minimum Version | Notes |
-| :--- | :--- | :--- |
-| **C++ Standard** | **C++17** | `std::optional`, `std::variant`, structured bindings |
-| **Compilers** | **GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019** | Conforming C++17 compilers |
-| **CMake** | **≥ 3.20** | Modern target export and `FetchContent` syntax |
-| **Armadillo** | **≥ 11.4.0** | High-performance matrix mathematics |
-| **GSL** | **≥ 2.6** | GNU Scientific Library random number generators |
-| **BLAS / LAPACK** | **OpenBLAS / Accelerate / MKL** | Linear algebra backend for Armadillo |
-
-## Building the library
-
-Once you have installed the required dependencies, the RFL library can be built using CMake.
-
-tl;dr
-```bash
-   git clone https://github.com/pauldruce/RFL.git
-   cd RFL
-   mkdir build
-   cd build
-   cmake ..
-   cmake --build . --target all -j 4
-   ctest -j 4
-```
-
-Most C/C++ IDEs will have CMake capabilities, and CMake offers a GUI application to make this process easier.
-
-However, to build this project via a terminal, you use the following commands:
-
-1. Create a directory for your build files within the cloned RFL repo. Typical directory names are `build`, `build-debug`, `build-release` etc.
-   A typical set of shell commands for cloning this repo and creating the build directory looks like this:
-   ```bash
-   git clone https://github.com/pauldruce/RFL.git
-   cd RFL
-   mkdir build
-   cd build
-   ```
-2. __Call CMake on the source files.__ CMake will create the build files for the project using whatever build system your operating system defaults to.
-   Note that it will produce the build files in the current working directory, so make sure to be in a build-only directory before calling CMake.
-   There are two main ways to do this via the terminal:
-   * The command: `cmake ..` from the new `./build` directory created by step 1.
-     The command should generally be `cmake /path/to/source/files` from within an empty build directory. We assumed the source files (notably, the CMakeLists.txt) are in the parent directory where we are running this command.
-   * The command: `cmake -B ./build .` from the root directory of this project - skipping step 1.
-     This is a different but handy way to create the build files. This command will create a folder `./build` and generate the build files within it.
-3. __Build the project__ This can be done by manually calling `make`, or it is equivalent in the `build` directory. Or CMake has a handy command which is platform-independent:
-   ```bash
-   cmake --build . --target all
-   ```
-   This build process can be multithreaded with the CMake command by adding `-j #threads` to the above command. For instance,
-   ```bash
-   cmake --build . --target all -j 4
-   ```
-   will run the build process on four threads and should be quicker.
-4. Run CTest to check everything works correctly. This is done simply by calling `ctest` from the build directory. Similar to the `cmake --build` command above,
-   the tests can be run on multiple threads with the `-j` command. For instance, to run the tests on four threads, just type:
-   ```bash
-   ctest -j 4
-   ```
-
-
-## Building the Playground
-
-The playground is just an area to experiment with C++ - it's not a specific area
-for interacting with the RFL library by default.
-To build the playground target of the CMake project, follow these steps:
-
-1. Navigate to the build directory:
-   ```bash
-   cmake -B ./build .
-   ```
-2. Run the CMake build command specifying the playground target:
-   ```bash
-   cmake --build . --target playground -j 4
-   ```
-This will compile only the playground target using 4 threads. Adjust the `-j` parameter to match the number of threads you want to use.
-
-## Show all CMake targets available to build
-
-This project defines several CMake targets.
-The primary target that compiles the modern RFL library is `rfl_core` (available under aliases `RFL::core` and `RFL::rfl`).
-The project also preserves the original legacy codebase as `rfl_legacy` (alias `RFL::legacy`) for historical reference and verification.
-
-To inspect all available build targets:
-```shell
-# Create the build directory for your platform.
-cmake -B ./build src/RFL
-# Use CMake to inspect the available targets.
-cmake --build ./build --target help
-```
+---
 
 ## Documentation
 
@@ -173,19 +194,43 @@ Documentation for the software architecture, release lifecycle, and controlled v
 - [Controlled Vocabulary & Glossary](docs/Glossary.md)
 - [Consuming RFL in Research](docs/Consumption_Guide.md)
 - [Enhancement Proposals](docs/eps/)
+- [v0.1.0 Release Notes](docs/releases/v0.1.0.md)
 
+---
 
-## Background
+## Background & Citations
 
-Random Finite NCGs are at the forefront of academic research into Finite NCGs, and several interesting results have been found.
-Some relevant academic papers can be found here:
+Random Finite NCGs are an active area of academic research in Quantum Gravity and Mathematical Physics. Foundational academic papers include:
 
-1. John W. Barrett and Lisa Glaser. (2016). Monte Carlo simulations of random non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 49, 24: 245001. https://doi.org/10.1088/1751-8113/49/24/245001
-2. Lisa Glaser. (2017). Scaling behaviour in random non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 50, 27: 275201. https://doi.org/10.1088/1751-8121/aa7424
-3. John W Barrett, Paul Druce, and Lisa Glaser. (2019). Spectral estimators for finite non-commutative geometries. Journal of Physics A: Mathematical and Theoretical 52, 27: 275203. https://doi.org/10.1088/1751-8121/ab22f8
-4. Lisa Glaser and Abel Stern. (2020). Understanding truncated non-commutative geometries through computer simulations. Journal of Mathematical Physics 61, 3: 033507. https://doi.org/10.1063/1.5131864
-5. Lisa Glaser and Abel B. Stern. (2021). Reconstructing manifolds from truncations of spectral triples. Journal of Geometry and Physics. https://doi.org/10.1016/j.geomphys.2020.103921
+1. John W. Barrett and Lisa Glaser. (2016). *Monte Carlo simulations of random non-commutative geometries*. Journal of Physics A: Mathematical and Theoretical 49, 24: 245001. [https://doi.org/10.1088/1751-8113/49/24/245001](https://doi.org/10.1088/1751-8113/49/24/245001)
+2. Lisa Glaser. (2017). *Scaling behaviour in random non-commutative geometries*. Journal of Physics A: Mathematical and Theoretical 50, 27: 275201. [https://doi.org/10.1088/1751-8121/aa7424](https://doi.org/10.1088/1751-8121/aa7424)
+3. John W. Barrett, Paul Druce, and Lisa Glaser. (2019). *Spectral estimators for finite non-commutative geometries*. Journal of Physics A: Mathematical and Theoretical 52, 27: 275203. [https://doi.org/10.1088/1751-8121/ab22f8](https://doi.org/10.1088/1751-8121/ab22f8)
+4. Lisa Glaser and Abel Stern. (2020). *Understanding truncated non-commutative geometries through computer simulations*. Journal of Mathematical Physics 61, 3: 033507. [https://doi.org/10.1063/1.5131864](https://doi.org/10.1063/1.5131864)
+5. Lisa Glaser and Abel B. Stern. (2021). *Reconstructing manifolds from truncations of spectral triples*. Journal of Geometry and Physics. [https://doi.org/10.1016/j.geomphys.2020.103921](https://doi.org/10.1016/j.geomphys.2020.103921)
+6. John W. Barrett. (2015). *Matrix geometries and fuzzy spaces as finite spectral triples*. Journal of Mathematical Physics 56, 082301. [https://doi.org/10.1063/1.4927224](https://doi.org/10.1063/1.4927224)
 
-For an introduction to the area of Non-commutative geometry and specifically finite non-commutative geometry, see:
+### BibTeX
 
-6. John W. Barrett, "Matrix geometries and fuzzy spaces as finite spectral triples", J. Math. Phys. 56, 082301 (2015) https://doi.org/10.1063/1.4927224
+```bibtex
+@article{Barrett_2016,
+  author = {Barrett, John W. and Glaser, Lisa},
+  title = {Monte Carlo simulations of random non-commutative geometries},
+  journal = {Journal of Physics A: Mathematical and Theoretical},
+  volume = {49},
+  number = {24},
+  pages = {245001},
+  year = {2016},
+  doi = {10.1088/1751-8113/49/24/245001}
+}
+
+@article{Barrett_2019,
+  author = {Barrett, John W. and Druce, Paul and Glaser, Lisa},
+  title = {Spectral estimators for finite non-commutative geometries},
+  journal = {Journal of Physics A: Mathematical and Theoretical},
+  volume = {52},
+  number = {27},
+  pages = {275203},
+  year = {2019},
+  doi = {10.1088/1751-8121/ab22f8}
+}
+```
