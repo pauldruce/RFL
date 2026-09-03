@@ -123,6 +123,7 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           packages-dir: dist/
+          skip-existing: true
 
   publish_release:
     name: GitHub Release & PyPI Publication
@@ -157,3 +158,4 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist/
+          skip-existing: true

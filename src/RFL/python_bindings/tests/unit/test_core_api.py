@@ -52,3 +52,15 @@ def test_metropolis():
     acceptance_rate = metropolis.update_dirac(dirac)
 
     assert 0.0 <= acceptance_rate <= 1.0
+
+
+def test_version():
+    """Verify package version string exists and conforms to PEP 440."""
+    import packaging.version
+
+    assert hasattr(rfl, "__version__")
+    assert isinstance(rfl.__version__, str)
+    assert len(rfl.__version__) > 0
+    parsed = packaging.version.parse(rfl.__version__)
+    assert parsed is not None
+

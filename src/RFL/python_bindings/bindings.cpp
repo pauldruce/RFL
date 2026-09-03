@@ -10,10 +10,15 @@
 #include "DiracOperator.hpp"
 #include "GslRng.hpp"
 
+#ifndef RFL_VERSION_STRING
+#define RFL_VERSION_STRING "0.1.0"
+#endif
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(rfl, m) {
   m.doc() = "Python bindings for the Random Fuzzy Library (RFL).";
+  m.attr("__version__") = RFL_VERSION_STRING;
 
   m.def("set_max_clifford_mode", &Clifford::setMaxMode, py::arg("max_mode"), "Set the maximum allowed Clifford algebra mode (p+q) to prevent excessive memory allocation.");
   m.def("get_max_clifford_mode", &Clifford::getMaxMode, "Get the maximum allowed Clifford algebra mode (p+q).");
