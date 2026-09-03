@@ -48,4 +48,4 @@ RFL version X.Y.Z introduces [one declarative sentence summarising the release].
 * **C++ Standard:** C++17 conforming compiler (GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019).
 * **Linear Algebra:** Armadillo ≥ 11.4.0, OpenBLAS / LAPACK.
 * **Stochastic Engine:** GNU Scientific Library (GSL) ≥ 2.6.
-* **Python Compatibility:** Python 3.8 – 3.13, NumPy ≥ 1.22.
+* **Python Compatibility:** Python 3.9 – 3.13, NumPy ≥ 1.22.

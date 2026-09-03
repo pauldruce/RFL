@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Random Fuzzy Library (RFL) - MCMC simulations of Finite Random Non-commutative geometries"
 
 authors = [{ name = "Paul Druce" }, { name = "Mauro D'Arcangelo" }]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "numpy>=1.20"
 ]
@@ -24,7 +24,7 @@ cmake.source-dir = "."
 CCACHE_PROGRAM = "OFF"
 
 [tool.cibuildwheel]
-build = "cp38-* cp39-* cp310-* cp311-* cp312-* cp313-*"
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
 skip = "pp* *-musllinux* *-win32 *i686"
 test-requires = ["pytest>=7.0", "numpy"]
 test-command = "pytest {project}/src/RFL/python_bindings/tests"
