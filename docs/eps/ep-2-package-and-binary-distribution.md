@@ -38,14 +38,14 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ### 2.2 Goals
 * **Clean Target & Directory Standardisation:** Promote `new_RFL` to `core/` with target `rfl_core` (aliases: `RFL::core`, `RFL::rfl`), and archive `old_RFL` to `legacy/` (`rfl_legacy`).
-* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) across Python 3.8–3.13 (`pip install pyrfl`).
+* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) across Python 3.9–3.13 (`pip install pyrfl`).
 * **Hermetic Dynamic Library Vendoring:** Automatically vendor and bundle shared C++ runtime dependencies (`openblas`, `gsl`, `armadillo`) inside wheels via `auditwheel` and `delocate`.
 * **Zero-Secret CI/CD PyPI Publishing:** Implement automated PyPI deployment on version tag push using OpenID Connect (OIDC) Trusted Publishing.
 * **CMake In-Tree FetchContent Support:** Ensure external C++ codebases can integrate RFL seamlessly via standard `FetchContent`.
 * **Foundation for Package Managers:** Lay the ground for future CMake `install()` targets, CPack release archives, and community package managers (Homebrew, Conda-Forge).
 
 ### 2.3 Non-Goals
-* Supporting legacy Python versions (< 3.8) or non-standard interpreters (PyPy).
+* Supporting legacy Python versions (< 3.9) or non-standard interpreters (PyPy).
 * Supporting 32-bit operating systems or musl libc distributions.
 * Distributing closed-source binary blobs without public build recipes.
 
@@ -63,7 +63,7 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | Requirement ID | Requirement Summary | Physical & Technical Invariant |
 | :--- | :--- | :--- |
 | **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
-| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28_x86_64`) and macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`) covering Python 3.8–3.13. |
+| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28_x86_64`) and macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`) covering Python 3.9–3.13. |
 | **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
 | **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
 | **REQ-PKG-05** | **Secure PyPI Publishing** | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |

@@ -13,10 +13,10 @@ jobs:
           - "examples"
           - "playground"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Run clang-format style check for ${{matrix.path }}.
-        uses: jidicula/clang-format-action@v4.11.0
+        uses: jidicula/clang-format-action@v4.18.0
         with:
           clang-format-version: "16"
           check-path: ${{ matrix.path }}

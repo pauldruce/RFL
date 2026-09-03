@@ -20,7 +20,7 @@ pip install pyrfl
 > * **Linux (`x86_64`):** glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8).
 > * **macOS (Apple Silicon `arm64`):** macOS ≥ 14.0 (Sonoma / Sequoia).
 > * **macOS (Intel `x86_64`):** macOS ≥ 15.0 (Sequoia).
-> * **Python:** CPython 3.8 – 3.13.
+> * **Python:** CPython 3.9 – 3.13.
 
 ### Option B: Local Source Installation
 For research consumers compiling from a local Git clone:

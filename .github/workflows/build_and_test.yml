@@ -27,7 +27,7 @@ jobs:
     if: (github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner) && !contains(github.event.head_commit.message, '#docs')
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install Linux dependencies
         if: startsWith(matrix.OS,'ubuntu')
