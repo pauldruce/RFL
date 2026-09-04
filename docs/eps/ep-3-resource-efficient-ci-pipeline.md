@@ -15,8 +15,8 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, Please graph pruning) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | 🔄 In Progress |
-| **Phase 2** | Tier 2 Exhaustive Compatibility Matrix on `main` merge & `ccache` caching | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 💡 Planned |
+| **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, Please graph pruning) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
+| **Phase 2** | Tier 2 Exhaustive Compatibility Matrix on `main` merge & `ccache` caching | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
 | **Phase 3** | Dependency decoupling using CMake `FetchContent` & system packages | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
 | **Phase 4** | Native Windows MSVC CI runner & binary wheel automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
 
