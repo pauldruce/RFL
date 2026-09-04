@@ -1,13 +1,13 @@
 name: Compatability Tests
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
-  pull_request:
 
 jobs:
   generate_matrix:
     name: Generate test matrix
-    if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
     runs-on: ubuntu-latest
     outputs:
       matrix_includes: ${{steps.set-matrix.outputs.matrix_includes}}
@@ -46,6 +46,11 @@ jobs:
     runs-on: ${{matrix.OS}}
     steps:
       - uses: actions/checkout@v7
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ matrix.OS }}-${{ matrix.ARMA_VERSION }}-${{ matrix.BUILD_TYPE }}
 
       - name: Install Linux dependencies
         if: startsWith(matrix.OS,'ubuntu')

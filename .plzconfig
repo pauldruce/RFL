@@ -20,4 +20,6 @@ DefaultOptCppFlags = --std=c++17 -Wall -Wextra -Wpedantic
 Target = //plugins:python
 TestRunner = pytest
 
-
+[cache]
+dir = .plz-cache
+dirclean = true

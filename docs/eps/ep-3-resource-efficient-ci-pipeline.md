@@ -2,7 +2,7 @@
 
 * **Title:** Resource-Efficient CI/CD Pipeline & Multi-Tier Validation
 * **Author:** Paul Druce
-* **Status:** In Discussion
+* **Status:** Accepted (In Progress)
 * **Target Versions:** RFL v0.2.0 (Phases 1 & 2), v0.2.0 (Phases 3 & 4)
 * **Date:** 2026-09-04
 
@@ -15,7 +15,7 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, Please graph pruning) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23) | ⏳ Scheduled |
+| **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, Please graph pruning) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | 🔄 In Progress |
 | **Phase 2** | Tier 2 Exhaustive Compatibility Matrix on `main` merge & `ccache` caching | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 💡 Planned |
 | **Phase 3** | Dependency decoupling using CMake `FetchContent` & system packages | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
 | **Phase 4** | Native Windows MSVC CI runner & binary wheel automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
