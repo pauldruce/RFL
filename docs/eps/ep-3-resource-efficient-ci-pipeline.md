@@ -17,7 +17,7 @@ The table below tracks the status of each implementation phase:
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, Please graph pruning) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23) | ⏳ Scheduled |
 | **Phase 2** | Tier 2 Exhaustive Compatibility Matrix on `main` merge & `ccache` caching | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 💡 Planned |
-| **Phase 3** | Dependency decoupling via CMake `FetchContent` & system packages | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
+| **Phase 3** | Dependency decoupling using CMake `FetchContent` & system packages | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
 | **Phase 4** | Native Windows MSVC CI runner & binary wheel automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
 
 ---
@@ -29,7 +29,7 @@ The table below tracks the status of each implementation phase:
 Currently, every push and pull request triggers an uncoordinated collection of workflows:
 1. `build_and_test.yml` executes on every push across three operating systems.
 2. `compatability_tests.yml` executes a 15-job matrix on every pull request.
-3. Each job downloads and builds Armadillo from SourceForge tarballs via custom shell scripts.
+3. Each job downloads and builds Armadillo from SourceForge tarballs using custom shell scripts.
 
 This approach creates severe research bottlenecks:
 * **Excessive Latency:** Developers wait 15 to 25 minutes for pull request checks to finish.
@@ -43,7 +43,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 * **Sub-2-Minute Dual-Platform PR Feedback:** Validate Ubuntu and macOS runners on pull requests in under two minutes using system packages.
 * **Near-Zero Compute for Documentation:** Ensure documentation changes consume zero C++ compilation runner minutes.
 * **Exhaustive Matrix on Merge to Main:** Execute the full 15-job multi-OS compatibility matrix whenever code merges into `main`.
-* **Hermetic Incremental Testing:** Leverage Please build (`plz query changes`) to test only targets affected by changed files.
+* **Hermetic Incremental Testing:** Use Please build (`plz query changes`) to test only targets affected by changed files.
 * **Persistent Build Caching in CI:** Persist Please build cache (`.plz-cache`) across ephemeral GitHub runners using `actions/cache`.
 * **Clean Test Artifact Extraction:** Use Please (`plz export outputs`) to isolate test payloads without copying internal build trees.
 * **Standardised CI Test Reporting:** Generate machine-readable JUnit XML test results for native GitHub pull request summaries.
@@ -62,7 +62,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 ### 3.1 Core Research Scenarios
 1. **Scenario 1 (Rapid Documentation and Theoretical Derivation Updates):** A researcher updates scientific derivations in `docs/` or notes in `.agents/`. The CI pipeline runs fast markdown checks. It completes in seconds without launching C++ compilers.
 2. **Scenario 2 (High-Frequency MCMC Algorithm Development):** A developer refactors Dirac operator routines in `src/RFL/core/`. The Tier 1 gate builds on Ubuntu and macOS using system packages and Please, executing unit tests in under two minutes.
-3. **Scenario 3 (Exhaustive Mainline Verification):** When a pull request merges into `main`, GitHub Actions automatically runs all 15 permutations of OS versions and Armadillo releases to verify release health.
+3. **Scenario 3 (Exhaustive Mainline Verification):** When a pull request merges into `main`, GitHub Actions runs all 15 matrix permutations. This verifies overall release health.
 
 ### 3.2 Functional Requirements & Invariants
 
@@ -92,7 +92,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **Exhaustive Verification Gate** | On every PR commit | ✅ **On every commit to `main`** | On every commit to `main` |
 | **Decision** | Rejected | **Selected (Option B)** | Rejected |
 
-*Rationale:* Personal repositories cannot use native GitHub Merge Queues. Option B provides the optimal balance: pull requests automatically test both Ubuntu and macOS using fast system packages (`apt` / `brew`), catching cross-platform compiler issues within 2 minutes. The full 15-job combination matrix runs automatically upon push to `main` to verify complete matrix compatibility.
+*Rationale:* Personal repositories cannot use native GitHub Merge Queues. Option B provides the optimal balance. Pull requests test Ubuntu and macOS with fast system packages (`apt` / `brew`). This catches compiler issues within 2 minutes. The full 15-job combination matrix runs automatically upon push to `main` to verify complete matrix compatibility.
 
 ---
 
@@ -130,10 +130,10 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **Execution Latency** | ⚠️ 30–60 seconds | ✅ **0.1–5 seconds** |
 | **Doc-Only Impact** | ⚠️ Compiles code regardless of changes | ✅ **Returns 0 targets; skips test execution** |
 | **Local Reproducibility** | ⚠️ Manual target selection | ✅ **Identical command runs on developer machines** |
-| **Binary Output Isolation** | ❌ Intermingled build tree | ✅ **Direct target export via `plz export outputs`** |
+| **Binary Output Isolation** | ❌ Intermingled build tree | ✅ **Direct target export using `plz export outputs`** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Please build maintains a precise directed acyclic graph (DAG) of project dependencies. Running `./pleasew query changes --since origin/main --level -1` identifies exactly which test targets require execution based on the git diff. In addition, Please provides clean artifact extraction via `plz export outputs` and persistent directory caching via `.plz-cache`.
+*Rationale:* Please build maintains a precise directed acyclic graph (DAG) of project dependencies. Running `./pleasew query changes --since origin/main --level -1` identifies exactly which test targets require execution based on the git diff. In addition, Please provides clean artifact extraction with `plz export outputs` and persistent directory caching using `.plz-cache`.
 
 ---
 
@@ -311,10 +311,10 @@ This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact tra
   1. Retarget `.github/workflows/compatability_tests.yml` to trigger on `push: branches: [ main ]` and `workflow_dispatch`.
   2. Remove automatic 15-job execution from `pull_request` events.
   3. Add `hendrikmuhs/ccache-action` across all matrix runners.
-  4. Cache pre-built Armadillo installations per matrix combination via `actions/cache`.
+  4. Cache pre-built Armadillo installations per matrix combination using `actions/cache`.
   5. Verify `combination_selection.py` matrix generator operates reliably on `main` push.
 
-### Phase 3: Dependency Decoupling via CMake FetchContent & System Packages
+### Phase 3: Dependency Decoupling with CMake FetchContent & System Packages
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#22](https://github.com/pauldruce/RFL/issues/22)
 * **Tasks:**
