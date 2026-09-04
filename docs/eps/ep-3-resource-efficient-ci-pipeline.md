@@ -44,6 +44,9 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 * **Near-Zero Compute for Documentation:** Ensure documentation changes consume zero C++ compilation runner minutes.
 * **Exhaustive Matrix on Merge to Main:** Execute the full 15-job multi-OS compatibility matrix whenever code merges into `main`.
 * **Hermetic Incremental Testing:** Leverage Please build (`plz query changes`) to test only targets affected by changed files.
+* **Persistent Build Caching in CI:** Persist Please build cache (`.plz-cache`) across ephemeral GitHub runners using `actions/cache`.
+* **Clean Test Artifact Extraction:** Use Please (`plz export outputs`) to isolate test payloads without copying internal build trees.
+* **Standardised CI Test Reporting:** Generate machine-readable JUnit XML test results for native GitHub pull request summaries.
 * **Compiler Caching:** Integrate `ccache` to eliminate redundant compilation across workflow runs.
 * **Decoupled Dependencies:** Replace custom SourceForge build scripts with system package managers (`apt`, `brew`) and CMake `FetchContent`.
 
@@ -71,6 +74,9 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **REQ-CI-004** | **Exhaustive Mainline Verification** | Every commit pushed or merged into `main` must execute the full 15-job compatibility matrix. |
 | **REQ-CI-005** | **Compiler Object Caching** | Unchanged C++ translation units must hit `ccache` caches with an average cache-hit rate exceeding 70%. |
 | **REQ-CI-006** | **Hermetic Graph Analysis** | Please build target calculation must match the exact transitive dependency closure of changed source files. |
+| **REQ-CI-007** | **Persistent Runner Caching** | The Please directory cache (`.plz-cache`) must be saved and restored across GitHub Actions runs. |
+| **REQ-CI-008** | **Minimal Test Artifact Footprint** | Exported test artifacts must contain only final binaries and libraries (< 20 MB total). |
+| **REQ-CI-009** | **Structured Test Reporting** | Test executions must export JUnit XML test results for native GitHub pull request reporting. |
 
 ---
 
@@ -117,16 +123,17 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 
 ---
 
-### 4.4 ADR-4: Build Graph Pruning Engine
+### 4.4 ADR-4: Build Graph Pruning & Hermetic Execution Engine (Please Build)
 
-| Criteria | Option A: Monolithic Test Execution (`ctest`) | Option B: Please Graph Analysis (`plz query changes`) (Selected) |
+| Criteria | Option A: Monolithic Test Execution (`ctest`) | Option B: Please Graph Analysis & Hermetic Engine (Selected) |
 | :--- | :--- | :--- |
 | **Execution Latency** | ⚠️ 30–60 seconds | ✅ **0.1–5 seconds** |
 | **Doc-Only Impact** | ⚠️ Compiles code regardless of changes | ✅ **Returns 0 targets; skips test execution** |
 | **Local Reproducibility** | ⚠️ Manual target selection | ✅ **Identical command runs on developer machines** |
+| **Binary Output Isolation** | ❌ Intermingled build tree | ✅ **Direct target export via `plz export outputs`** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Please build maintains a precise directed acyclic graph (DAG) of project dependencies. Running `./pleasew query changes --since origin/main --level -1` identifies exactly which test targets require execution based on the git diff.
+*Rationale:* Please build maintains a precise directed acyclic graph (DAG) of project dependencies. Running `./pleasew query changes --since origin/main --level -1` identifies exactly which test targets require execution based on the git diff. In addition, Please provides clean artifact extraction via `plz export outputs` and persistent directory caching via `.plz-cache`.
 
 ---
 
@@ -140,6 +147,19 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **Decision** | **Selected (Option A)** | Rejected |
 
 *Rationale:* Branch protection on `main` will require a single aggregate status check: `ci-gate`. This job evaluates the results of all upstream PR gate jobs. If jobs are safely skipped due to path filtering, `ci-gate` reports success. If any executed job fails, `ci-gate` fails and blocks merging.
+
+---
+
+### 4.6 ADR-6: Pipeline Phase Separation (Pre-Build Gate vs. Build vs. Post-Build Test)
+
+| Criteria | Option A: Monolithic Build-and-Test Script | Option B: Tri-Stage Phase Separation (Selected) |
+| :--- | :--- | :--- |
+| **Fail-Fast Latency** | ❌ 5–10 minutes (Fails linting after compilation) | ✅ **5–15 seconds (Fails linting before compilation)** |
+| **Compute Conservation** | ❌ Compiles code even if syntax or spelling is broken | ✅ **Zero compilation spent on unformatted code** |
+| **Artifact Portability** | ⚠️ Unstructured binary artifacts | ✅ **Structured exports for downstream test suites** |
+| **Decision** | Rejected | **Selected (Option B)** |
+
+*Rationale:* Splitting the pipeline into distinct phases ensures that fast pre-build checks (formatting, spelling, path evaluation) stop execution before expensive C++ compilers spin up. When building packages (such as Python wheels), building the artifact once and testing it across environments eliminates duplicate C++ compilation.
 
 ---
 
@@ -159,7 +179,56 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 > [!NOTE]
 > `.github/workflows/build_and_test.yml` is retired because its responsibilities are completely subsumed by `ci.yml` (Tier 1) and `compatability_tests.yml` (Tier 2).
 
-### 5.2 Workflow Configuration Contracts
+---
+
+### 5.2 Please Build CI Optimisation Architecture
+
+Please build provides specific capabilities to accelerate CI runs:
+
+#### 1. Graph Pruning (`plz query changes`)
+On pull requests, Please identifies affected test targets against the base branch:
+```bash
+TARGETS=$(./pleasew query changes --since origin/${{ github.base_ref || 'main' }} --level -1)
+if [ -n "$TARGETS" ]; then
+  ./pleasew test -p --test_results_file=plz-out/log/test_results.xml $TARGETS
+else
+  echo "No code targets affected by this change."
+fi
+```
+
+#### 2. Persistent Runner Caching (`.plz-cache` + `actions/cache`)
+Please supports local directory caching. By enabling `[cache]` in `.plzconfig`:
+```ini
+[cache]
+dir = .plz-cache
+dirclean = true
+```
+GitHub Actions saves and restores this cache across workflow runs:
+```yaml
+- name: Restore Please Cache
+  uses: actions/cache@v4
+  with:
+    path: .plz-cache
+    key: plz-cache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'BUILD*', '.plzconfig') }}
+    restore-keys: |
+      plz-cache-${{ runner.os }}-
+```
+Unchanged targets are retrieved from the local cache in milliseconds.
+
+#### 3. Lightweight Artifact Export (`plz export outputs`)
+When separating build and test jobs, Please exports only the final target outputs rather than copying the entire `plz-out/` directory:
+```bash
+./pleasew export outputs -o ./dist //src/RFL/core:rfl //src/RFL/core/tests:unit_tests
+```
+This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact transfer.
+
+#### 4. Plain CI Output & Structured Reporting
+* **Plain Terminal Logging (`-p`):** Disables ANSI interactive spinners so CI log files remain readable and concise.
+* **JUnit XML Output (`--test_results_file`):** Generates `test_results.xml` for GitHub Actions to render native test pass/fail annotations.
+
+---
+
+### 5.3 Workflow Configuration Contracts
 
 #### 1. Tier 1: Fast Dual-Platform PR Gate (`.github/workflows/ci.yml`)
 * **Triggers:** `pull_request` (targeting `main`), `workflow_dispatch`.
@@ -183,7 +252,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
   ```
 * **Jobs:**
   * `filter`: Evaluates changed paths in seconds using `dorny/paths-filter`.
-  * `test_ubuntu`: Executes if `code == true`. Uses `apt-get install libarmadillo-dev libgsl-dev`, `ccache`, and Please graph pruning (`plz query changes`).
+  * `test_ubuntu`: Executes if `code == true`. Uses `apt-get install libarmadillo-dev libgsl-dev`, `ccache`, Please cache restoration, and Please graph pruning (`plz query changes`).
   * `test_macos`: Executes if `code == true`. Uses `brew install armadillo gsl`, `ccache`, and CMake/CTest.
   * `ci-gate`: Always runs (`if: always()`). Evaluates upstream results; reports success if code passed or if docs were skipped.
 
@@ -197,7 +266,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
   * Build Type: `Release`.
 * **Optimisation:**
   * Initialise `hendrikmuhs/ccache-action` on all runners.
-  * Install dependencies via system package managers where appropriate.
+  * Cache Armadillo installations per OS and version using `actions/cache`.
 
 #### 3. C++ Linter (`.github/workflows/linter.yml`)
 * **Triggers:** `pull_request`, `push` to `main`.
@@ -213,6 +282,8 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **Doc-Only PR Gate** | Push commit modifying only `docs/README.md` | PR check passes in under 30 seconds with zero C++ compilation. |
 | **Core C++ PR Gate** | Push commit modifying `src/RFL/core/DiracOperator.cpp` | PR check tests Ubuntu + macOS and passes in under 120 seconds. |
 | **Please Graph Query** | `./pleasew query changes docs/README.md` | Returns zero targets. |
+| **Please Cache Restoration** | `./pleasew test //src/RFL/core/tests:unit_tests` | Re-execution reports cached targets in < 100 ms. |
+| **Artifact Export Footprint** | `./pleasew export outputs -o ./dist //src/RFL/core:rfl` | Output directory contains only libraries, < 20 MB total. |
 | **C++ Linter Execution** | `./pleasew run //:lint_cpp` | Successfully formats `src/RFL` without checking ignored build folders. |
 | **Mainline Trigger** | Push commit to `main` | Automatically triggers `compatability_tests.yml` across full matrix. |
 
@@ -227,10 +298,11 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
   1. Add path filtering to `.github/workflows/ci.yml` using `dorny/paths-filter`.
   2. Implement dual-platform PR smoke tests on Ubuntu (`libarmadillo-dev`) and macOS (`brew install armadillo`).
   3. Add `ci-gate` aggregate check in `ci.yml` for branch protection.
-  4. Integrate Please graph pruning (`plz query changes`) into `ci.yml`.
-  5. Fix paths in `.github/workflows/linter.yml` (`src/RFL` and `playground`).
-  6. Delete obsolete `.github/workflows/build_and_test.yml`.
-  7. Update `BUILD.plz` linting scripts to exclude build and IDE directories.
+  4. Enable Please directory caching (`.plz-cache`) in `.plzconfig` and `actions/cache`.
+  5. Integrate Please graph pruning (`plz query changes`) and `-p` logging into `ci.yml`.
+  6. Fix paths in `.github/workflows/linter.yml` (`src/RFL` and `playground`).
+  7. Delete obsolete `.github/workflows/build_and_test.yml`.
+  8. Update `BUILD.plz` linting scripts to exclude build and IDE directories.
 
 ### Phase 2: Tier 2 Exhaustive Compatibility Matrix on Push to Main
 * **Target Version:** `v0.2.0`
@@ -239,7 +311,8 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
   1. Retarget `.github/workflows/compatability_tests.yml` to trigger on `push: branches: [ main ]` and `workflow_dispatch`.
   2. Remove automatic 15-job execution from `pull_request` events.
   3. Add `hendrikmuhs/ccache-action` across all matrix runners.
-  4. Verify `combination_selection.py` matrix generator operates reliably on `main` push.
+  4. Cache pre-built Armadillo installations per matrix combination via `actions/cache`.
+  5. Verify `combination_selection.py` matrix generator operates reliably on `main` push.
 
 ### Phase 3: Dependency Decoupling via CMake FetchContent & System Packages
 * **Target Version:** `v0.2.0`
