@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.20...3.31)
 
 
+if(DEFINED SKBUILD_PROJECT_VERSION)
+    set(RFL_PROJECT_VERSION ${SKBUILD_PROJECT_VERSION})
+else()
+    set(RFL_PROJECT_VERSION 0.1.0)
+endif()
+
 project(
         RFL
-        VERSION 0.1.0
+        VERSION ${RFL_PROJECT_VERSION}
         DESCRIPTION
         "Random Fuzzy Library (RFL) - A library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative geometries."
         LANGUAGES CXX)
