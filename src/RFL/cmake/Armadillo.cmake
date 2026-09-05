@@ -1,9 +1,3 @@
-# The purpose of this CMake module is to find or fetch the Armadillo library.
-# It first checks if Armadillo has already been defined as a target.
-# If not, and unless RFL_FETCH_ARMADILLO is enabled, it attempts find_package(Armadillo QUIET).
-# If find_package fails or RFL_FETCH_ARMADILLO is ON, it falls back to FetchContent
-# from the upstream GitLab repository.
-
 if(NOT TARGET Armadillo::Armadillo AND NOT TARGET armadillo)
     if(NOT RFL_FETCH_ARMADILLO)
         message(STATUS "Searching for system Armadillo library...")

@@ -1,7 +1,3 @@
-# The purpose of this CMake module is to find the GNU Scientific Library (GSL).
-# It first checks if GSL has already been defined as a target.
-# If not, it uses CMake's standard find_package(GSL REQUIRED).
-
 if(NOT TARGET GSL::gsl)
     find_package(GSL REQUIRED)
 endif()
