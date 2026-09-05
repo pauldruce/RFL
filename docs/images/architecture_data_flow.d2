@@ -3,96 +3,85 @@
 
 direction: down
 
-py: "pyrfl Python Interface\n«entrypoint»\n--\nZero-copy NumPy buffers" {
-  style: {
-    fill: "#eff6ff"
-    stroke: "#1d4ed8"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#1e3a8a"
-  }
+py: "pyrfl:\nPython Entrypoint" {
+  class: internal_component
+  shape: rectangle
 }
 
 obs: "Telemetry & Observables\n«sink»\n--\nISimulationObserver • Recorders" {
-  style: {
-    fill: "#eff6ff"
-    stroke: "#1d4ed8"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#1e3a8a"
-  }
+  class: internal_component
 }
 
 sampler: "MetropolisSampler\n«algorithm»\n--\nDualAveraging calibration" {
-  style: {
-    fill: "#f0f7ff"
-    stroke: "#2563eb"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#1e40af"
-  }
+  class: internal_component
 }
 
 action: "BarrettGlaserAction\n«energy functional»\n--\nS = g₂ Tr(D²) + g₄ Tr(D⁴)" {
-  style: {
-    fill: "#f0f7ff"
-    stroke: "#2563eb"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#1e40af"
-  }
+  class: internal_component
 }
 
 dirac: "DiracOperator\n«value type»\n--\nMatrix spectral state" {
-  style: {
-    fill: "#f0f7ff"
-    stroke: "#2563eb"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#1e40af"
-  }
+  class: internal_component
 }
 
 clifford: "CliffordModule (p, q)\n«representation»\n--\nGamma matrices • Trace table" {
-  style: {
-    fill: "#f0f7ff"
-    stroke: "#2563eb"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#1e40af"
-  }
+  class: internal_component
 }
 
 arma: "Armadillo C++\n«third-party»\n--\ncx_mat • BLAS • LAPACK" {
-  style: {
-    fill: "#ffffff"
-    stroke: "#64748b"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#334155"
-  }
+  class: external_system
 }
 
 rng: "Stochastic Engine\n«third-party»\n--\nGSL Random Number Gen" {
-  style: {
-    fill: "#ffffff"
-    stroke: "#64748b"
-    stroke-width: 2
-    border-radius: 6
-    font-color: "#334155"
-  }
+  class: external_system
 }
 
 # Execution & Data Flow
-py -> sampler: configures { style.stroke-dash: 4 }
-py -> dirac: inspects { style.stroke-dash: 4 }
+py -> sampler: configures {style.stroke-dash: 4}
+py -> dirac: inspects {style.stroke-dash: 4}
 
-sampler -> obs: notifies { style.stroke-dash: 4 }
-sampler -> dirac: proposes updates
+sampler -> rng: draws variates {style.stroke-dash: 4}
+sampler -> obs: notifies {style.stroke-dash: 4}
 sampler -> action: queries variation ΔS
-sampler -> rng: draws variates { style.stroke-dash: 4 }
-
-action -> dirac: evaluates { style.stroke-dash: 4 }
+sampler -> dirac: proposes updates
 
 dirac -> clifford: uses
 dirac -> arma: delegates
+
+action -> dirac: evaluates {style.stroke-dash: 4}
+
+# Sylings
+classes: {
+  # Components
+  internal_component: {
+    style: {
+      fill: "#eff6ff"
+      stroke: "#1d4ed8"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#1e3a8a"
+    }
+  }
+  external_system: {
+    style: {
+      fill: "#ffffff"
+      stroke: "#64748b"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#334155"
+    }
+  }
+  # Arrow Styles
+  system_boundary: {
+    style: {
+      stroke-dash: 5
+      fill: "#f8f9fa"
+    }
+  }
+  container_boundary: {
+    style: {
+      stroke-dash: 3
+      fill: "#e9ecef"
+    }
+  }
+}
