@@ -1,0 +1,86 @@
+# RFL Modular CMake Target Architecture
+# Regenerate SVG: d2 --layout=elk cmake_targets.d2 cmake_targets_d2.svg
+
+direction: down
+
+rfl_targets: "rfl Targets (src/RFL/core)" {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#cbd5e1"
+    stroke-width: 2
+    border-radius: 8
+  }
+
+  core: "rfl_core\n«INTERFACE»\n--\nConsumer Aggregator Target" {
+    style: {
+      fill: "#eff6ff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 6
+    }
+  }
+
+  mcmc: "rfl_mcmc\n«STATIC»\n--\nAction • Metropolis • Simulation" {
+    style: {
+      fill: "#f0fdfa"
+      stroke: "#0d9488"
+      stroke-width: 2
+      border-radius: 6
+    }
+  }
+
+  geom: "rfl_geometry\n«STATIC»\n--\nDiracOperator • CliffordModule" {
+    style: {
+      fill: "#f0fdfa"
+      stroke: "#0d9488"
+      stroke-width: 2
+      border-radius: 6
+    }
+  }
+
+  rng: "rfl_rng\n«STATIC»\n--\nGslRng • IRng" {
+    style: {
+      fill: "#f0fdfa"
+      stroke: "#0d9488"
+      stroke-width: 2
+      border-radius: 6
+    }
+  }
+
+  core -> mcmc: aggregates { style.stroke-dash: 4 }
+  core -> geom: aggregates { style.stroke-dash: 4 }
+  core -> rng: aggregates { style.stroke-dash: 4 }
+
+  mcmc -> geom: links { style.stroke-dash: 4 }
+  mcmc -> rng: links { style.stroke-dash: 4 }
+}
+
+external: "Third-Party" {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#cbd5e1"
+    stroke-width: 2
+    border-radius: 8
+  }
+
+  arma: "Armadillo C++\n«third-party»\n--\ncx_mat, BLAS, LAPACK" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#64748b"
+      stroke-width: 2
+      border-radius: 6
+    }
+  }
+
+  gsl: "GSL\n«third-party»\n--\ngsl_rng engine" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#64748b"
+      stroke-width: 2
+      border-radius: 6
+    }
+  }
+}
+
+rfl_targets.geom -> external.arma: links { style.stroke-dash: 4 }
+rfl_targets.rng -> external.gsl: links { style.stroke-dash: 4 }
