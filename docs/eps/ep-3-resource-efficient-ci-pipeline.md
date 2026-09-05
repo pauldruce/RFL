@@ -248,43 +248,9 @@ RFL/
 
 To prevent full rebuilds when modifying leaf source files, `src/RFL/core/CMakeLists.txt` decomposes `rfl_core` into modular component targets:
 
-```mermaid
-classDiagram
-    direction TB
-    namespace rfl_targets {
-        class rfl_core {
-            <<INTERFACE>>
-            Aggregator Target
-        }
-        class rfl_mcmc {
-            <<STATIC>>
-            Action, Metropolis, Simulation
-        }
-        class rfl_geometry {
-            <<STATIC>>
-            DiracOperator, CliffordModule
-        }
-        class rfl_rng {
-            <<STATIC>>
-            GslRng, IRng
-        }
-    }
-    class Armadillo {
-        <<third-party>>
-        cx_mat, BLAS, LAPACK
-    }
-    class GSL {
-        <<third-party>>
-        gsl_rng
-    }
+![Modular CMake Target Architecture](../images/cmake_targets.svg)
 
-    rfl_core ..> rfl_mcmc : aggregates
-    rfl_mcmc ..> rfl_geometry : links
-    rfl_mcmc ..> rfl_rng : links
-
-    rfl_geometry ..> Armadillo : links
-    rfl_rng ..> GSL : links
-```
+*Figure 5.1: Modular CMake component target architecture (UML 2.5 Component Diagram). Source script co-located at [`docs/images/cmake_targets.puml`](../images/cmake_targets.puml).*
 
 | Target | Target Type | Contents | Dependencies |
 | :--- | :--- | :--- | :--- |

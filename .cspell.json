@@ -18,6 +18,7 @@
     "**/*.png",
     "**/*.svg",
     "**/*.jpg",
+    "**/*.puml",
     ".cspell.json"
   ],
   "ignoreRegExpList": [
