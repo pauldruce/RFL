@@ -175,7 +175,7 @@ The new architecture must address these bottlenecks by defining clear operationa
 
 ### 4.6 ADR-6: Automated Code Quality Architecture
 
-| Criteria | Option A: Custom Shell Scripts (`find | grep -v`) | Option B: Language-Specific CLI Tools | Option C: Pre-Commit Framework (Selected) |
+| Criteria | Option A: Custom Shell Scripts (Find & Grep) | Option B: Language-Specific CLI Tools | Option C: Pre-Commit Framework (Selected) |
 | :--- | :--- | :--- | :--- |
 | **File Discovery** | ❌ Fragile (Manual directory exclusions) | ⚠️ Manual path passing | ✅ **Automatic (Runs on git-tracked files)** |
 | **Version Consistency** | ❌ Local versions drift from CI | ❌ Local versions drift from CI | ✅ **Guaranteed (Pinned in config)** |
