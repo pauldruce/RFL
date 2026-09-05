@@ -248,21 +248,29 @@ RFL/
 
 To prevent full rebuilds when modifying leaf source files, `src/RFL/core/CMakeLists.txt` decomposes `rfl_core` into modular component targets:
 
-```mermaid
-graph TD
-    subgraph CMake Component Targets
-        RNG["rfl_rng<br>(GslRng, IRng)"]
-        GEOM["rfl_geometry<br>(Clifford, DiracOperator)"]
-        MCMC["rfl_mcmc<br>(Action, Hamiltonian, Metropolis, Simulation)"]
-        CORE["rfl_core (INTERFACE)<br>Aggregates sub-libraries"]
-    end
-
-    GEOM --> CORE
-    RNG --> CORE
-    MCMC --> CORE
-    MCMC --> GEOM
-    MCMC --> RNG
+```text
+                       ┌──────────────────────────────┐
+                       │     rfl_core (INTERFACE)     │
+                       │   (Aggregates sub-libraries) │
+                       └──────────────▲───────────────┘
+                                      │
+              ┌───────────────────────┼───────────────────────┐
+              │                       │                       │
+       ┌──────┴───────┐        ┌──────┴───────┐        ┌──────┴───────┐
+       │   rfl_rng    │        │ rfl_geometry │        │   rfl_mcmc   │
+       │ (GslRng,     │        │ (Clifford,   │        │ (Metropolis, │
+       │  IRng)       │        │ DiracOperator│        │ Simulation)  │
+       └──────────────┘        └──────────────┘        └──────┬───────┘
+              ▲                       ▲                       │
+              └───────────────────────┴───────────────────────┘
 ```
+
+| Target | Target Type | Contents | Dependencies |
+| :--- | :--- | :--- | :--- |
+| **`rfl_rng`** | `STATIC` | `GslRng`, `IRng` | GSL |
+| **`rfl_geometry`** | `STATIC` | `Clifford`, `DiracOperator` | Armadillo |
+| **`rfl_mcmc`** | `STATIC` | `Action`, `Hamiltonian`, `Metropolis`, `Simulation` | `rfl_geometry`, `rfl_rng` |
+| **`rfl_core`** | `INTERFACE` | Aggregate consumer target | `rfl_geometry`, `rfl_rng`, `rfl_mcmc` |
 
 1. **Target Isolation:** Editing a file in `rfl_mcmc` recompiles only that specific translation unit. Unrelated component libraries remain untouched.
 2. **Precompiled Headers (PCH):** Precompiling heavy scientific headers (`<armadillo>`, `<gsl/...>`, `<vector>`, `<complex>`) reduces compilation times by up to 70%:

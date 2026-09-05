@@ -27,26 +27,13 @@ This document establishes the official release lifecycle, pre-release checklist,
 
 Following the convention of major scientific libraries (such as NumPy, SciPy, PyTorch, and Armadillo), significant releases use **Release Candidates** (e.g. `v0.1.0rc1`):
 
-```mermaid
-flowchart TD
-    subgraph Phase1["Phase 1: Pre-Release (RC)"]
-        A["Tag: v0.1.0rc1\n(git tag v0.1.0rc1)"] --> B["Create Draft Pre-Release\n(gh release create --draft --prerelease)"]
-        B --> C["Review Draft Notes in UI\n(Zero workflows triggered)"]
-        C --> D["Publish Pre-Release\n(gh release edit --draft=false)"]
-        D --> E["Automated CI/CD\n- Build wheels & sdist\n- Upload assets\n- Publish to PyPI as pre-release"]
-        E --> F["Testing Period (24–72h)\n- pip install --pre pyrfl\n- CMake FetchContent (GIT_TAG v0.1.0rc1)"]
-    end
-
-    subgraph Phase2["Phase 2: Final Promotion"]
-        F --> G{"Validation successful?"}
-        G -->|Issues found| H["Fix on branch → Tag v0.1.0rc2"]
-        H --> B
-        G -->|Clean| I["Tag Final: v0.1.0\n(git tag v0.1.0)"]
-        I --> J["Create Draft Release\n(gh release create --draft)"]
-        J --> K["Review Draft Notes in UI\n(Zero workflows triggered)"]
-        K --> L["Publish Final Release\n(Official PyPI default & Latest tag)"]
-    end
-```
+| Stage | Action | Command / Trigger | Automation & Verification |
+| :--- | :--- | :--- | :--- |
+| **1. Tag RC** | Create release candidate tag | `git tag v0.1.0rc1 && git push origin v0.1.0rc1` | Records candidate commit point |
+| **2. Draft Pre-Release** | Author notes for review | `gh release create v0.1.0rc1 --draft --prerelease` | Zero CI workflows triggered while in draft |
+| **3. Publish RC** | Trigger packaging pipeline | `gh release edit v0.1.0rc1 --draft=false` | Builds wheels, uploads assets, publishes pre-release to PyPI |
+| **4. Test & Qualify** | Testing period (24–72h) | `pip install --pre pyrfl` | Downstream verification on user machines |
+| **5. Resolve or Promote** | Fix defects or promote to final | `git tag v0.1.0 && gh release create v0.1.0` | Official release on PyPI and GitHub `Latest` tag |
 
 ### 2.1 How Pre-Releases Work Across Ecosystems
 
@@ -157,14 +144,6 @@ RFL versioning formally begins with **`v0.1.0`** as the initial packaged release
 ### 4.3 Patch Releases & Maintenance Branch Workflow
 
 When a bug fix patch (`vX.Y.1`) is needed while `main` develops future versions (`vX.(Y+1).0`), use the **Maintenance Branch Workflow**:
-
-```mermaid
-flowchart TD
-    A["1. Bug Fix on main\n(Fix & tests merged to main)"] --> B["2. Backport to maintenance/X.Y.x\n(git cherry-pick <commit>)"]
-    B --> C["3. Draft Patch Notes\n(Add docs/releases/vX.Y.1.md on maintenance branch)"]
-    C --> D["4. Tag & Publish\n(git tag vX.Y.1 & gh release create)"]
-    D --> E["5. Forward-Port to main\n(Sync docs/releases/vX.Y.1.md to main)"]
-```
 
 1. **Fix on `main` First:** Always land bug fixes on `main` first via PR to prevent regressions in future versions.
 2. **Backport to Maintenance Branch:** Cherry-pick the bugfix commit to `maintenance/X.Y.x`.
