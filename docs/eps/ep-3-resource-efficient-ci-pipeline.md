@@ -15,10 +15,10 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Tier 1 Fast PR Gate (Path filtering, dual-platform smoke tests, `ci-gate`) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
-| **Phase 2** | Build & Tooling Consolidation (CMake single source, Mise, `pre-commit`, Please retirement) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
-| **Phase 3** | Dependency Decoupling using CMake `FetchContent` & system packages | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
-| **Phase 4** | Native Windows MSVC CI runner & binary wheel automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
+| **Phase 1** | Tier 1 Fast PR Gate (Path filtering, dual-platform smoke tests, status gatekeeper) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
+| **Phase 2** | Build & Tooling Consolidation (Single-source build, reproducible developer environment, automated code quality) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
+| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
+| **Phase 4** | Native Windows CI Runner, MSVC Verification & Binary Wheel Automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
 
 ---
 
@@ -26,78 +26,84 @@ The table below tracks the status of each implementation phase:
 
 ### 2.1 Problem Statement & Research Context
 `RFL` provides Markov Chain Monte Carlo (MCMC) simulations of finite noncommutative geometries.
-As the project evolved towards `v0.2.0`, the infrastructure accumulated technical debt across four core areas:
+As the project evolved towards `v0.2.0`, the infrastructure accumulated technical debt across five core areas:
 
-1. **Uncoordinated CI Workflows:**
-   * Pull requests triggered an un-cached 15-job compatibility matrix across operating systems.
-   * Developers waited 15 to 25 minutes for pull request feedback.
-   * Documentation changes triggered complete C++ recompilation matrices, wasting compute minutes.
+1. **Uncoordinated CI Workflows & Compute Bottlenecks:**
+   * Pull requests triggered an un-cached 15-job matrix across operating systems and compiler versions.
+   * Contributors waited 15 to 25 minutes for pull request feedback.
+   * Documentation updates triggered complete C++ recompilation matrices, consuming thousands of runner minutes pointlessly.
 
-2. **Build-System Duality:**
-   * The repository maintained two parallel build systems: `CMakeLists.txt` and `BUILD.plz`.
-   * Every C++ source file, header, and test required dual declaration.
-   * Please build added operational friction on macOS and obstructed native Windows MSVC support.
-   * Building Python wheels in Please wrapped `python -m build`, which invoked CMake anyway.
+2. **Build Specification Duality & Maintenance Overhead:**
+   * The repository maintained two distinct build systems simultaneously.
+   * Every C++ source file, header, and test suite required duplicate declarations across divergent configuration files.
+   * Divergent build configurations created operational friction across platforms and blocked native Windows support.
+   * Packaging Python wheels required invoking nested build scripts that obscured error reporting.
 
-3. **Fragile Formatting and Linting:**
-   * Linting relied on custom shell scripts using `find` and `grep -v`.
-   * These scripts required constant maintenance whenever new build folders appeared.
-   * Toolchain version drift between local developer machines and CI caused unexpected linter failures.
+3. **Fragile Formatting & Code Quality Scripts:**
+   * Repository formatting and linting relied on ad-hoc shell scripts with hardcoded file-finding logic.
+   * These scripts broke whenever developers added new directories or build folders.
+   * Toolchain version drift between local developer machines and CI caused unexpected linting failures.
 
-4. **Monolithic C++ Compilation:**
-   * Modifying a single leaf C++ file triggered widespread recompilation because targets were not modular.
-   * Heavy scientific headers (`<armadillo>`, `<gsl/...>`) were parsed repeatedly on every build.
+4. **Monolithic C++ Compilation & Slow Feedback Loops:**
+   * Modifying a single leaf C++ file triggered widespread recompilation because targets were tightly coupled.
+   * Heavy mathematical and scientific headers were parsed repeatedly on every build.
+
+5. **Inconsistent Developer Tooling Across Operating Systems:**
+   * Developers faced divergent manual setups, environment configurations, and command invocations across Linux, macOS, and Windows.
+   * Lack of declarative local tooling made onboarding slow and error-prone.
 
 A top-down architectural consolidation is required.
-The new architecture must unify the build system, developer tooling, code quality enforcement, and CI/CD pipelines into a single coherent framework.
+The new architecture must address these bottlenecks by defining clear operational requirements, evaluating competing solutions, and selecting robust technical standards.
 
 ### 2.2 Goals
-* **Sub-2-Minute Dual-Platform PR Feedback:** Validate Ubuntu and macOS runners on pull requests in under two minutes.
-* **Near-Zero Compute for Documentation:** Ensure documentation changes consume zero C++ compilation runner minutes.
-* **Exhaustive Mainline Verification:** Execute the full 15-job compatibility matrix when code merges into `main`.
-* **Single Source of Truth:** Establish modern CMake (3.24+) as the sole build engine across all platforms.
-* **Unified Developer Interface:** Use `mise` (`mise.toml`) as the standard toolchain and task manager.
-* **Zero-Maintenance Code Quality:** Use `pre-commit` with pinned tool versions and declarative root configs for all linting.
-* **Retire Please Build:** Phase out `BUILD.plz`, `.plzconfig`, and the Please wrapper script.
-* **Modular CMake Targets:** Decompose `rfl_core` into component libraries with Precompiled Headers (PCH).
-* **Cross-Platform Compiler Caching:** Integrate `ccache` with embedded debug symbols (`/Z7`) for fast Windows and POSIX rebuilds.
-* **Direct Python Packaging:** Build Python wheels directly using `scikit-build-core` without intermediate wrappers.
+* **Sub-2-Minute Dual-Platform PR Feedback:** Validate pull requests on Ubuntu and macOS runners in under two minutes.
+* **Zero-Compute Documentation Changes:** Ensure documentation-only pull requests consume zero compilation runner minutes.
+* **Exhaustive Mainline Compatibility Verification:** Execute the full multi-version matrix when code merges into the default branch.
+* **Single Source of Truth for Builds:** Consolidate all build, test, and packaging definitions into a single declarative build specification across all platforms.
+* **Unified, Cross-Platform Developer Interface:** Provide identical, declarative commands for common tasks (build, test, lint, format) across Linux, macOS, and Windows.
+* **Zero-Maintenance Code Quality Enforcement:** Automate linting, formatting, and spelling checks on tracked files with pinned tool versions, eliminating brittle scripts.
+* **Sub-2-Second Incremental Recompilation:** Decouple library components and optimise compilation units so leaf modifications build and test in under two seconds.
+* **Transparent Object Caching:** Support transparent compiler object caching across local development and CI runners.
+* **Strict Forward Windows Compatibility:** Ensure all build specifications, compiler flags, and project tooling support native Windows without requiring emulation layers or containers.
+* **Direct, Standardised Python Packaging:** Build native Python extension wheels directly through standard packaging interfaces without redundant wrapper layers.
 
 ### 2.3 Non-Goals
 * Managing self-hosted GitHub Actions runners.
-* Replacing CMake with another specialized monorepo build tool (such as Bazel or Meson).
-* Implementing distributed remote execution across private server clusters.
+* Implementing distributed remote execution across private compute clusters.
+* Supporting legacy compilers lacking C++17 conformance.
+* Rewriting core numerical algorithms in alternative programming languages.
 
 ---
 
 ## 3. Research Workflows & Scientific Requirements
 
 ### 3.1 Core Research Scenarios
-1. **Scenario 1 (Documentation and Theory Updates):** A researcher updates scientific derivations in `docs/`. The CI pipeline evaluates path filters and completes in seconds without launching compilers.
-2. **Scenario 2 (High-Frequency Algorithm Development):** A developer refactors Dirac operator routines in `src/RFL/core/`. Running `mise run test` recompiles only changed units and executes CTest in under two seconds.
-3. **Scenario 3 (Zero-Friction Formatting):** A developer edits C++, Python, and Markdown files. Running `mise run format` auto-formats all files according to repository standards.
-4. **Scenario 4 (Exhaustive Mainline Verification):** When a pull request merges into `main`, GitHub Actions executes all 15 matrix combinations to ensure platform compatibility.
-5. **Scenario 5 (Cross-Platform Contribution):** A researcher clones the repository on Linux, macOS, or Windows. Running `mise install` configures identical toolchains with zero manual setup.
+1. **Scenario 1 (Documentation and Theoretical Research):** A researcher updates scientific derivations in the documentation. The CI pipeline identifies documentation-only changes and completes in seconds without launching compilers.
+2. **Scenario 2 (Algorithm Iteration and Rapid Prototyping):** A developer refactors Dirac operator routines in core C++. Running the project test task recompiles only changed units and executes unit tests in under two seconds.
+3. **Scenario 3 (Zero-Friction Code Hygiene):** A developer modifies code across multiple languages. Running the project format task auto-formats all modified files according to project standards.
+4. **Scenario 4 (Exhaustive Mainline Verification):** When a pull request merges into the default branch, the CI pipeline executes all matrix combinations to guarantee broad compatibility.
+5. **Scenario 5 (Multi-Platform Onboarding):** A researcher clones the repository on Linux, macOS, or Windows. Running a single initialisation command configures identical developer toolchains with zero manual configuration.
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Operational & Physical Invariant |
+| Requirement ID | Requirement Summary | Operational & Invariant Definition |
 | :--- | :--- | :--- |
-| **REQ-ARC-001** | **Fast Dual-Platform PR Gate** | Tier 1 PR checks must validate Ubuntu and macOS in under 120 seconds using system packages. |
-| **REQ-ARC-002** | **Zero-Compute Documentation PRs** | Commits touching only `.md`, `docs/`, or `.agents/` must trigger zero C++ compilation jobs. |
+| **REQ-ARC-001** | **Fast Dual-Platform PR Gate** | Tier 1 PR checks must validate Ubuntu and macOS runners in under 120 seconds using pre-installed system packages. |
+| **REQ-ARC-002** | **Zero-Compute Documentation PRs** | Commits touching only documentation, markdown, or configuration files must trigger zero compilation jobs. |
 | **REQ-ARC-003** | **Branch Protection Integrity** | Path-filtered workflows must report passing status checks to GitHub to prevent pull request deadlocks. |
-| **REQ-ARC-004** | **Single Build Definition** | All C++ libraries, test targets, and bindings must be declared strictly in `CMakeLists.txt`. |
-| **REQ-ARC-005** | **Unified Task Interface** | Developer tasks must be defined in `mise.toml` with identical commands across all operating systems. |
-| **REQ-ARC-006** | **Zero-Maintenance Linting** | Formatting and linting must use `pre-commit` on git-tracked files, eliminating fragile shell scripts. |
-| **REQ-ARC-007** | **Modular Component Targets** | Core C++ code must be decomposed into modular libraries to prevent unnecessary recompilation. |
-| **REQ-ARC-008** | **Compiler Object Caching** | Translation units must hit `ccache` caches with an average cache-hit rate exceeding 70%. |
-| **REQ-ARC-009** | **Native Windows Support** | All targets and tests must compile cleanly under Windows MSVC without emulation or WSL. |
+| **REQ-ARC-004** | **Unified Single-Source Build Specification** | All C++ libraries, test targets, and bindings must be declared in a single build specification across all supported operating systems. |
+| **REQ-ARC-005** | **Declarative Multi-Platform Developer Tasks** | Developer workflows (build, test, lint, format) must be invoked through identical declarative commands across Linux, macOS, and Windows. |
+| **REQ-ARC-006** | **Automated Zero-Maintenance Code Hygiene** | Code formatting, linting, and spell-checking must run automatically on git-staged or tracked files with pinned tool versions. |
+| **REQ-ARC-007** | **Fine-Grained Modular Target Decomposition** | Core C++ libraries must be decomposed into independent component targets to ensure modifying a leaf file recompiles only dependent units. |
+| **REQ-ARC-008** | **Compiler Object Caching** | The build system must support transparent compiler object caching across local builds and CI runners, achieving cache hits above 70%. |
+| **REQ-ARC-009** | **Strict Forward Windows Compatibility** | All build definitions, compiler configurations, and repository conventions must support native Windows execution without emulation layers. |
+| **REQ-ARC-010** | **Direct Standardised Python Packaging** | The Python packaging mechanism must directly compile and package native extensions using standard PEP 517 workflows without wrapper scripts. |
 
 ---
 
 ## 4. Architecture Decision Records (ADRs) & Trade-offs
 
-### 4.1 ADR-1: Execution Topology (Tiered CI with Dual-Platform PR Smoke Test)
+### 4.1 ADR-1: CI Execution Topology (Tiered CI with Dual-Platform PR Smoke Test)
 
 | Criteria | Option A: Monolithic 15-Job Matrix on PR | Option B: Fast 2-Platform PR Gate + Full Matrix on Main (Selected) | Option C: Linux-Only PR Gate |
 | :--- | :--- | :--- | :--- |
@@ -124,7 +130,7 @@ The new architecture must unify the build system, developer tooling, code qualit
 
 ---
 
-### 4.3 ADR-3: Dependency Management in CI Runners
+### 4.3 ADR-3: CI Dependency Acquisition Strategy
 
 | Criteria | Option A: SourceForge Tarball Compilation | Option B: System Package Managers (`apt`/`brew`) | Option C: CMake `FetchContent` Fallback |
 | :--- | :--- | :--- | :--- |
@@ -138,7 +144,7 @@ The new architecture must unify the build system, developer tooling, code qualit
 
 ---
 
-### 4.4 ADR-4: Build System Consolidation (Modern CMake over Please Build)
+### 4.4 ADR-4: Build System Consolidation & Single Source of Truth
 
 | Criteria | Option A: Please Build Everywhere | Option B: Dual Build (`CMake` + `Please`) | Option C: Modern CMake + Ninja (Selected) |
 | :--- | :--- | :--- | :--- |
@@ -153,9 +159,9 @@ The new architecture must unify the build system, developer tooling, code qualit
 
 ---
 
-### 4.5 ADR-5: Developer Environment & Task Orchestration (Mise + `CMakePresets.json`)
+### 4.5 ADR-5: Developer Environment & Task Orchestration
 
-| Criteria | Option A: Ad-Hoc Shell Scripts | Option B: Custom Build Rules (`BUILD.plz`) | Option C: Mise + CMakePresets (Selected) |
+| Criteria | Option A: Ad-Hoc Shell Scripts & Makefiles | Option B: Custom Build Rules (`BUILD.plz`) | Option C: Mise + CMakePresets (Selected) |
 | :--- | :--- | :--- | :--- |
 | **Tool Version Management** | ❌ Manual (Distro dependent) | ⚠️ Go wrapper only | ✅ **Unified (Pins CMake, Ninja, Python)** |
 | **IDE Integration** | ❌ None | ❌ Custom plugin required | ✅ **Native (`CMakePresets.json`)** |
@@ -167,7 +173,7 @@ The new architecture must unify the build system, developer tooling, code qualit
 
 ---
 
-### 4.6 ADR-6: Automated Code Quality Architecture (`pre-commit` + Declarative Configs)
+### 4.6 ADR-6: Automated Code Quality Architecture
 
 | Criteria | Option A: Custom Shell Scripts (`find | grep -v`) | Option B: Language-Specific CLI Tools | Option C: Pre-Commit Framework (Selected) |
 | :--- | :--- | :--- | :--- |
@@ -181,7 +187,21 @@ The new architecture must unify the build system, developer tooling, code qualit
 
 ---
 
-### 4.7 ADR-7: CI Status Check Enforcement & Branch Protection (`ci-gate`)
+### 4.7 ADR-7: Python Packaging Backend Architecture
+
+| Criteria | Option A: Please Build Wrapper | Option B: Legacy `setuptools` with `setup.py` | Option C: `scikit-build-core` (Selected) |
+| :--- | :--- | :--- | :--- |
+| **Standards Compliance** | ⚠️ Custom non-standard build rule | ⚠️ Deprecated legacy configuration | ✅ **Strict PEP 517 / PEP 621 Standard** |
+| **CMake Integration** | ⚠️ Wrapped inside external process | ❌ Fragile custom C++ extensions | ✅ **First-class native CMake bridge** |
+| **Build Configuration** | ⚠️ Duplicated in build rules | ⚠️ Split across multiple files | ✅ **Declarative `pyproject.toml`** |
+| **Cross-Platform Wheels** | ❌ Obstructs Windows `cibuildwheel` | ⚠️ Difficult MSVC setup | ✅ **Seamless across Linux, macOS, Windows** |
+| **Decision** | Rejected | Rejected | **Selected (Option C)** |
+
+*Rationale:* Packaging native C++ extensions requires a modern, standards-compliant build backend. `scikit-build-core` communicates directly with CMake without wrapping layers. It reads configuration cleanly from `pyproject.toml` and works out of the box with `cibuildwheel` across Linux, macOS, and Windows.
+
+---
+
+### 4.8 ADR-8: CI Status Check Enforcement & Branch Protection (`ci-gate`)
 
 | Criteria | Option A: Aggregate Gatekeeper (`ci-gate`) (Selected) | Option B: Require Individual Matrix Jobs |
 | :--- | :--- | :--- |
