@@ -5,6 +5,9 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,7 +20,9 @@ jobs:
       docs: ${{ steps.filter.outputs.docs }}
       code: ${{ steps.filter.outputs.code }}
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -46,22 +51,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install Linux dependencies
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install -y \
-            cmake ninja-build     \
-            libopenblas-dev       \
-            liblapack-dev         \
-            libarpack2-dev        \
-            libsuperlu-dev        \
-            libgsl-dev            \
-            libhdf5-dev           \
-            libhdf5-serial-dev    \
-            libarmadillo-dev
-          # Ubuntu's libhdf5-serial-dev package installs libraries into a serial subdirectory.
-          # Create a symlink in the standard library path so Armadillo and CMake can discover HDF5.
-          sudo ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so 2>/dev/null || true
+      - name: Install dependencies
+        uses: ./.github/actions/install-linux-deps
+        with:
+          install-armadillo: 'true'
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -70,12 +63,14 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake -B build -S src/RFL -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-      - name: Build C++ library and tests
+      - name: Build
         run: cmake --build build --config Release
 
-      - name: Run CTest
+      - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
 
   test_macos:
@@ -87,9 +82,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install macOS dependencies
-        run: |
-          brew install cmake ninja armadillo gsl openblas hdf5 superlu arpack
+      - name: Install dependencies
+        uses: ./.github/actions/install-macos-deps
+        with:
+          install-armadillo: 'true'
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -99,12 +95,15 @@ jobs:
       - name: Configure CMake
         run: |
           HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
-          cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          cmake -B build -S src/RFL -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-      - name: Build C++ library and tests
+      - name: Build
         run: cmake --build build --config Release
 
-      - name: Run CTest
+      - name: Test
         run: ctest --test-dir build -C Release --output-on-failure
 
   ci-gate:
@@ -113,7 +112,7 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Evaluate Gatekeeper Results
+      - name: Evaluate results
         run: |
           echo "Filter result: ${{ needs.filter.result }}"
           echo "Ubuntu test result: ${{ needs.test_ubuntu.result }}"

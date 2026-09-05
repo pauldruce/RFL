@@ -1,12 +1,20 @@
-name: "CodeQL"
+name: CodeQL
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ main ]
   schedule:
     - cron: '0 0 * * 0'
+
+permissions:
+  contents: read
+  security-events: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -32,11 +40,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Install C++ dependencies
+      - name: Install dependencies
         if: matrix.language == 'c-cpp'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libarmadillo-dev libgsl-dev doxygen graphviz
+        uses: ./.github/actions/install-linux-deps
+        with:
+          install-armadillo: 'true'
 
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v4
@@ -47,7 +55,7 @@ jobs:
       - name: Build C++ code
         if: matrix.language == 'c-cpp'
         run: |
-          cmake -B build src/RFL
+          cmake -B build -S src/RFL
           cmake --build build --target rfl_core
 
       - name: Perform CodeQL Analysis

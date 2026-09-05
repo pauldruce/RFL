@@ -1,0 +1,31 @@
+name: Install Linux Dependencies
+description: Install system dependencies for building RFL on Ubuntu/Debian
+
+inputs:
+  install-armadillo:
+    description: 'Install system Armadillo package (libarmadillo-dev)'
+    required: false
+    default: 'false'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install Linux dependencies
+      shell: bash
+      run: |
+        sudo apt-get update -y
+        PACKAGES=(
+          cmake ninja-build
+          libopenblas-dev liblapack-dev
+          libarpack2-dev libsuperlu-dev
+          libgsl-dev
+          doxygen graphviz
+          libhdf5-dev libhdf5-serial-dev
+        )
+        if [[ "${{ inputs.install-armadillo }}" == "true" ]]; then
+          PACKAGES+=(libarmadillo-dev)
+        fi
+        sudo apt-get install -y "${PACKAGES[@]}"
+        # Ubuntu's libhdf5-serial-dev installs libraries into a serial subdirectory.
+        # Create a symlink so Armadillo and CMake can discover HDF5.
+        sudo ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so 2>/dev/null || true

@@ -16,6 +16,13 @@ on:
       - '.github/workflows/linter.yml'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   clang-format:
     runs-on: ubuntu-latest
@@ -25,9 +32,10 @@ jobs:
           - "src/RFL"
           - "playground"
     steps:
-      - uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-      - name: Run clang-format style check for ${{ matrix.path }}.
+      - name: Run clang-format style check for ${{ matrix.path }}
         uses: jidicula/clang-format-action@v4.18.0
         with:
           clang-format-version: "16"

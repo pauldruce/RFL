@@ -1,0 +1,27 @@
+name: Install macOS Dependencies
+description: Install system dependencies for building RFL on macOS via Homebrew
+
+inputs:
+  install-armadillo:
+    description: 'Install Armadillo via Homebrew'
+    required: false
+    default: 'false'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install macOS dependencies
+      shell: bash
+      run: |
+        brew update
+        PACKAGES=(
+          cmake ninja
+          doxygen graphviz
+          arpack hdf5 libaec
+          openblas superlu
+          pkg-config gsl
+        )
+        if [[ "${{ inputs.install-armadillo }}" == "true" ]]; then
+          PACKAGES+=(armadillo)
+        fi
+        brew install --overwrite "${PACKAGES[@]}" || true
