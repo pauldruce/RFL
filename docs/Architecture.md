@@ -14,26 +14,7 @@
 
 ## 2. System Architecture & Data Flow
 
-```text
-  ┌────────────────────────────────────────────────────────────────────────┐
-  │ Research & Exploration Layer (Python / pybind11)                      │
-  │ • pyrfl Python module       • Telemetry & Observable Sinks             │
-  └───────────────────┬───────────────────────────────────┬────────────────┘
-                      │ configures & orchestrates         │ inspects spectra
-                      ▼                                   ▼
-  ┌─────────────────────────────────────────┐     ┌────────────────────────┐
-  │ Sampling & Optimisation Engine          │     │ Noncommutative Core   │
-  │ • Metropolis & HMC Steppers             │────►│ • DiracOperator state  │
-  │ • Dual-Averaging Step Calibration       │     │ • CliffordModule (p, q)│
-  └───────────────────┬─────────────────────┘     └───────────┬────────────┘
-                      │ queries energy ΔS                     │ delegates math
-                      ▼                                       ▼
-  ┌─────────────────────────────────────────┐     ┌────────────────────────┐
-  │ Action & Energy Functionals             │     │ Foundational Math      │
-  │ • Barrett-Glaser Action (g2, g4)        │     │ • Armadillo / BLAS     │
-  │ • Analytic Trace Variations ΔS          │     │ • GSL Random Number Gen│
-  └─────────────────────────────────────────┘     └────────────────────────┘
-```
+![System Architecture & Data Flow](images/system_architecture.svg)
 
 | Architectural Layer | Core Responsibilities | Key Components |
 | :--- | :--- | :--- |
@@ -82,25 +63,7 @@
 
 ## 4. Component Structure & Relationships
 
-```text
-  ┌───────────────────────┐             ┌─────────────────────────┐
-  │     DiracOperator     │◄────────────┤   BarrettGlaserAction   │
-  │     (Value Type)      │  evaluates  │   (Energy Functional)   │
-  └───────────▲───────────┘             └────────────▲────────────┘
-              │                                      │
-              │ mutates                              │ computes ΔS
-              │                                      │
-  ┌───────────┴───────────┐             ┌────────────┴────────────┐
-  │   MetropolisSampler   ├────────────►│   ISimulationObserver   │
-  │   (Markov Stepper)    │   notifies  │   (Telemetry Sink)      │
-  └───────────────────────┘             └────────────▲────────────┘
-                                                     │
-                                                     │ implements
-                                        ┌────────────┴────────────┐
-                                        │   EigenvalueRecorder    │
-                                        │   (Observer Collector)  │
-                                        └─────────────────────────┘
-```
+![Component Structure & Relationships](images/component_relationships.svg)
 
 | Component Class | Architectural Role | Key Responsibilities |
 | :--- | :--- | :--- |

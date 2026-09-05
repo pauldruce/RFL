@@ -1,0 +1,121 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 380" width="100%" height="100%">
+  <defs>
+    <style>
+      .label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .class-title { font-size: 14px; font-weight: 700; fill: #0f172a; }
+      .class-type { font-size: 10px; font-weight: 600; fill: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+      .member { font-size: 11px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; fill: #334155; }
+      .edge-text { font-size: 11px; font-weight: 600; fill: #475569; }
+      .card { rx: 8px; ry: 8px; stroke-width: 1.5px; }
+      .flow-line { stroke: #64748b; stroke-width: 1.5px; fill: none; }
+      .dash-line { stroke: #0284c7; stroke-width: 1.5px; stroke-dasharray: 4 3; fill: none; }
+      
+      @media (prefers-color-scheme: dark) {
+        .class-title { fill: #f8fafc; }
+        .class-type { fill: #94a3b8; }
+        .member { fill: #cbd5e1; }
+        .edge-text { fill: #94a3b8; }
+        .flow-line { stroke: #94a3b8; }
+        .dash-line { stroke: #38bdf8; }
+        .edge-bg { fill: #0f172a; }
+      }
+    </style>
+    
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#0284c7"/>
+    </marker>
+    <marker id="diamond" viewBox="0 0 12 12" refX="0" refY="6" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M 0 6 L 6 0 L 12 6 L 6 12 z" fill="#ffffff" stroke="#64748b" stroke-width="1.5"/>
+    </marker>
+    
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="115%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.06"/>
+    </filter>
+  </defs>
+
+  <!-- 1. DiracOperator Box -->
+  <g transform="translate(40, 30)">
+    <rect class="card" x="0" y="0" width="320" height="130" fill="#ffffff" stroke="#d97706" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="320" height="30" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+    <rect x="0" y="22" width="320" height="8" fill="#fef3c7"/>
+    <text class="label class-title" x="14" y="20" fill="#b45309">DiracOperator</text>
+    <text class="label class-type" x="235" y="20">Value Type</text>
+    
+    <text class="label member" x="14" y="50">• matrices: vector&lt;arma::cx_mat&gt;</text>
+    <text class="label member" x="14" y="68">• clifford: CliffordModule (p, q)</text>
+    <text class="label member" x="14" y="86">+ calculate_spectrum() : arma::vec</text>
+    <text class="label member" x="14" y="104">+ trace_dirac_squared() : double</text>
+    <text class="label member" x="14" y="122">+ trace_dirac_quartic() : double</text>
+  </g>
+
+  <!-- 2. BarrettGlaserAction Box -->
+  <g transform="translate(500, 30)">
+    <rect class="card" x="0" y="0" width="320" height="130" fill="#ffffff" stroke="#8b5cf6" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="320" height="30" rx="8" fill="#f3e8ff" stroke="#8b5cf6" stroke-width="1.5"/>
+    <rect x="0" y="22" width="320" height="8" fill="#f3e8ff"/>
+    <text class="label class-title" x="14" y="20" fill="#6d28d9">BarrettGlaserAction</text>
+    <text class="label class-type" x="210" y="20">Energy Functional</text>
+    
+    <text class="label member" x="14" y="50">• g2: double, g4: double</text>
+    <text class="label member" x="14" y="68">• omega_table: OmegaTable</text>
+    <text class="label member" x="14" y="86">+ calculate(dirac) : double</text>
+    <text class="label member" x="14" y="104">+ calculate_delta(dirac, entry, dM) : double</text>
+    <text class="label member" x="14" y="122">+ calculate_gradient(dirac, i) : cx_mat</text>
+  </g>
+
+  <!-- Action -> Dirac (evaluates / queries) -->
+  <path class="flow-line" d="M 500 95 L 366 95" marker-end="url(#arrow)"/>
+  <rect class="edge-bg" x="405" y="85" width="55" height="16" rx="3" fill="#ffffff"/>
+  <text class="label edge-text" x="432" y="97" text-anchor="middle">evaluates</text>
+
+
+  <!-- 3. MetropolisSampler Box -->
+  <g transform="translate(40, 220)">
+    <rect class="card" x="0" y="0" width="320" height="130" fill="#ffffff" stroke="#0d9488" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="320" height="30" rx="8" fill="#ccfbf1" stroke="#0d9488" stroke-width="1.5"/>
+    <rect x="0" y="22" width="320" height="8" fill="#ccfbf1"/>
+    <text class="label class-title" x="14" y="20" fill="#0f766e">MetropolisSampler</text>
+    <text class="label class-type" x="205" y="20">Markov Stepper</text>
+    
+    <text class="label member" x="14" y="50">• step_size: double, rng: IRng&amp;</text>
+    <text class="label member" x="14" y="68">• observers: vector&lt;ObserverPtr&gt;</text>
+    <text class="label member" x="14" y="86">+ step(dirac, action) : StepResult</text>
+    <text class="label member" x="14" y="104">+ sweep(dirac, action) : SweepResult</text>
+    <text class="label member" x="14" y="122">+ add_observer(observer_ptr) : void</text>
+  </g>
+
+  <!-- Sampler mutates Dirac -->
+  <path class="flow-line" d="M 200 220 L 200 166" marker-end="url(#arrow)"/>
+  <rect class="edge-bg" x="155" y="185" width="90" height="16" rx="3" fill="#ffffff"/>
+  <text class="label edge-text" x="200" y="197" text-anchor="middle">mutates state</text>
+
+  <!-- Sampler uses Action -->
+  <path class="flow-line" d="M 360 250 C 430 250, 460 170, 520 162" marker-end="url(#arrow)"/>
+  <rect class="edge-bg" x="415" y="205" width="80" height="16" rx="3" fill="#ffffff"/>
+  <text class="label edge-text" x="455" y="217" text-anchor="middle">queries ΔS</text>
+
+
+  <!-- 4. ISimulationObserver Interface & Implementations -->
+  <g transform="translate(500, 220)">
+    <rect class="card" x="0" y="0" width="320" height="130" fill="#ffffff" stroke="#0284c7" filter="url(#shadow)"/>
+    <rect x="0" y="0" width="320" height="30" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="1.5"/>
+    <rect x="0" y="22" width="320" height="8" fill="#e0f2fe"/>
+    <text class="label class-title" x="14" y="20" fill="#0369a1">ISimulationObserver</text>
+    <text class="label class-type" x="225" y="20">&lt;&lt;Interface&gt;&gt;</text>
+    
+    <text class="label member" x="14" y="50">+ on_step(step, dirac, res) : void</text>
+    <text class="label member" x="14" y="68">+ on_sweep(sweep, dirac, res) : void</text>
+    <line x1="14" y1="78" x2="306" y2="78" stroke="#e2e8f0" stroke-width="1"/>
+    <text class="label subtitle" x="14" y="96">Concrete Recorders:</text>
+    <text class="label member" x="14" y="112">• EigenvalueRecorder : history&lt;vec&gt;</text>
+    <text class="label member" x="14" y="126">• ObservableCollector : Tr(D²), energy</text>
+  </g>
+
+  <!-- Sampler notifies Observer -->
+  <path class="flow-line" d="M 360 285 L 494 285" marker-end="url(#arrow-blue)"/>
+  <rect class="edge-bg" x="405" y="275" width="55" height="16" rx="3" fill="#ffffff"/>
+  <text class="label edge-text" x="432" y="287" text-anchor="middle" fill="#0284c7">notifies</text>
+</svg>

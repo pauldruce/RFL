@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 260" width="100%" height="100%">
+  <defs>
+    <style>
+      .label { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+      .target-title { font-size: 13px; font-weight: 700; fill: #0f172a; }
+      .target-type { font-size: 10px; font-weight: 600; fill: #64748b; text-transform: uppercase; }
+      .item { font-size: 11px; fill: #334155; }
+      .card { rx: 6px; ry: 6px; stroke-width: 1.5px; }
+      .flow-line { stroke: #64748b; stroke-width: 1.5px; fill: none; }
+      .edge-text { font-size: 10px; font-weight: 500; fill: #64748b; }
+      
+      @media (prefers-color-scheme: dark) {
+        .target-title { fill: #f8fafc; }
+        .target-type { fill: #94a3b8; }
+        .item { fill: #cbd5e1; }
+        .flow-line { stroke: #94a3b8; }
+        .edge-bg { fill: #0f172a; }
+      }
+    </style>
+    
+    <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- 1. Top Aggregate Target: rfl_core (INTERFACE) -->
+  <g transform="translate(230, 20)">
+    <rect class="card" x="0" y="0" width="300" height="58" fill="#eff6ff" stroke="#3b82f6"/>
+    <text class="label target-title" x="14" y="22" fill="#1d4ed8">rfl_core</text>
+    <rect x="200" y="10" width="85" height="16" rx="4" fill="#2563eb"/>
+    <text class="label" x="210" y="22" font-size="10px" font-weight="600" fill="#ffffff">INTERFACE</text>
+    <text class="label item" x="14" y="44">• Public aggregator target consumed by downstream projects</text>
+  </g>
+
+  <!-- Flow down to sub-targets -->
+  <!-- Split bar -->
+  <path class="flow-line" d="M 380 78 L 380 110" stroke="#3b82f6"/>
+  <path class="flow-line" d="M 130 110 L 630 110" stroke="#3b82f6"/>
+  <path class="flow-line" d="M 130 110 L 130 144" marker-end="url(#arrow-blue)" stroke="#3b82f6"/>
+  <path class="flow-line" d="M 380 110 L 380 144" marker-end="url(#arrow-blue)" stroke="#3b82f6"/>
+  <path class="flow-line" d="M 630 110 L 630 144" marker-end="url(#arrow-blue)" stroke="#3b82f6"/>
+
+  <!-- 2. Sub-targets row -->
+  <!-- Target 1: rfl_rng -->
+  <g transform="translate(30, 150)">
+    <rect class="card" x="0" y="0" width="200" height="85" fill="#f8fafc" stroke="#64748b"/>
+    <text class="label target-title" x="12" y="22">rfl_rng</text>
+    <text class="label target-type" x="140" y="22">STATIC</text>
+    <text class="label item" x="12" y="44">• IRng (Abstract Interface)</text>
+    <text class="label item" x="12" y="60">• GslRng (GSL Backend)</text>
+    <text class="label item" x="12" y="76">Dep: GNU Scientific Library</text>
+  </g>
+
+  <!-- Target 2: rfl_geometry -->
+  <g transform="translate(280, 150)">
+    <rect class="card" x="0" y="0" width="200" height="85" fill="#f8fafc" stroke="#64748b"/>
+    <text class="label target-title" x="12" y="22">rfl_geometry</text>
+    <text class="label target-type" x="140" y="22">STATIC</text>
+    <text class="label item" x="12" y="44">• DiracOperator</text>
+    <text class="label item" x="12" y="60">• CliffordModule (p, q)</text>
+    <text class="label item" x="12" y="76">Dep: Armadillo, OpenMP</text>
+  </g>
+
+  <!-- Target 3: rfl_mcmc -->
+  <g transform="translate(530, 150)">
+    <rect class="card" x="0" y="0" width="200" height="85" fill="#f8fafc" stroke="#64748b"/>
+    <text class="label target-title" x="12" y="22">rfl_mcmc</text>
+    <text class="label target-type" x="140" y="22">STATIC</text>
+    <text class="label item" x="12" y="44">• Action Functionals</text>
+    <text class="label item" x="12" y="60">• Metropolis, Simulation</text>
+    <text class="label item" x="12" y="76">Dep: rfl_geometry, rfl_rng</text>
+  </g>
+
+  <!-- Internal dependencies between sub-targets -->
+  <!-- rfl_mcmc depends on rfl_geometry and rfl_rng -->
+  <path class="flow-line" d="M 530 192 L 486 192" marker-end="url(#arrow)"/>
+  <path class="flow-line" d="M 530 208 C 460 208, 300 245, 236 210" marker-end="url(#arrow)"/>
+</svg>

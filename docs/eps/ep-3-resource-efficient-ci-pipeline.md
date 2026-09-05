@@ -248,22 +248,7 @@ RFL/
 
 To prevent full rebuilds when modifying leaf source files, `src/RFL/core/CMakeLists.txt` decomposes `rfl_core` into modular component targets:
 
-```text
-                       ┌──────────────────────────────┐
-                       │     rfl_core (INTERFACE)     │
-                       │   (Aggregates sub-libraries) │
-                       └──────────────▲───────────────┘
-                                      │
-              ┌───────────────────────┼───────────────────────┐
-              │                       │                       │
-       ┌──────┴───────┐        ┌──────┴───────┐        ┌──────┴───────┐
-       │   rfl_rng    │        │ rfl_geometry │        │   rfl_mcmc   │
-       │ (GslRng,     │        │ (Clifford,   │        │ (Metropolis, │
-       │  IRng)       │        │ DiracOperator│        │ Simulation)  │
-       └──────────────┘        └──────────────┘        └──────┬───────┘
-              ▲                       ▲                       │
-              └───────────────────────┴───────────────────────┘
-```
+![Modular CMake Target Architecture](../images/cmake_targets.svg)
 
 | Target | Target Type | Contents | Dependencies |
 | :--- | :--- | :--- | :--- |
