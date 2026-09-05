@@ -51,12 +51,13 @@ rfl_targets: "rfl Targets (src/RFL/core)" {
     }
   }
 
-  core -> mcmc: aggregates { style.stroke-dash: 4 }
-  core -> geom: aggregates { style.stroke-dash: 4 }
-  core -> rng: aggregates { style.stroke-dash: 4 }
+  core -> rng: aggregates {style.stroke-dash: 4}
 
-  mcmc -> geom: links { style.stroke-dash: 4 }
-  mcmc -> rng: links { style.stroke-dash: 4 }
+  core -> mcmc: aggregates {style.stroke-dash: 4}
+  mcmc -> geom: links {style.stroke-dash: 4}
+  mcmc -> rng: links {style.stroke-dash: 4}
+
+  core -> geom: aggregates {style.stroke-dash: 4}
 }
 
 external: "Third-Party" {
@@ -88,5 +89,5 @@ external: "Third-Party" {
   }
 }
 
-rfl_targets.geom -> external.arma: links { style.stroke-dash: 4 }
-rfl_targets.rng -> external.gsl: links { style.stroke-dash: 4 }
+rfl_targets.geom -> external.arma: links {style.stroke-dash: 4}
+rfl_targets.rng -> external.gsl: links {style.stroke-dash: 4}
