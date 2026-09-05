@@ -65,6 +65,9 @@ print(f"Min: {np.min(eigenvals):.4f}, Max: {np.max(eigenvals):.4f}, Mean: {np.me
 
 RFL requires `armadillo`, `gsl`, and `cmake`.
 
+> [!TIP]
+> If Armadillo is not installed locally, CMake automatically downloads and builds it in-tree via `FetchContent` from upstream GitLab. GSL should be installed via your system package manager (`sudo apt-get install libgsl-dev` on Debian/Ubuntu, `brew install gsl` on macOS).
+
 ### Build & Run Tests
 From the root of the `RFL` repository:
 ```bash

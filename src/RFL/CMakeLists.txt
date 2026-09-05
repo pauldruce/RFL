@@ -41,9 +41,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(Ccache)
 
 option(${PROJECT_NAME}_ENABLE_CODE_COVERAGE "Enable code coverage through GCC." ON)
-
-# Include Please's output directory
-include(GitRoot)
+option(RFL_FETCH_ARMADILLO "Fetch Armadillo via CMake FetchContent" OFF)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
     include(Doxygen)

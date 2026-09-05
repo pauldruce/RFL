@@ -57,81 +57,54 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
-            cmake                 \
+            cmake ninja-build     \
             libopenblas-dev       \
             liblapack-dev         \
             libarpack2-dev        \
             libsuperlu-dev        \
-            wget                  \
             libgsl-dev            \
             doxygen               \
             graphviz              \
+            libhdf5-dev           \
             libhdf5-serial-dev
+          sudo ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so 2>/dev/null || true
 
       - name: Install macOS dependencies
         if: startsWith(matrix.OS,'macos')
         run: |
           brew update
-          brew install --overwrite\
-            cmake \
-            doxygen \
-            graphviz \
-            wget \
-            arpack \
-            hdf5 \
-            libaec \
-            openblas \
-            superlu \
-            pkg-config \
+          brew install --overwrite \
+            cmake ninja           \
+            doxygen               \
+            graphviz              \
+            arpack                \
+            hdf5                  \
+            libaec                \
+            openblas              \
+            superlu               \
+            pkg-config            \
             gsl || true
 
-      - name: Download Armadillo from SourceForge
-        run: mkdir armadillo && cd armadillo && wget -O armadillo.tar.xz https://sourceforge.net/projects/arma/files/armadillo-${{matrix.ARMA_VERSION}}.tar.xz/download
-
-      - name: Unzip Armadillo tarball and create build directory
-        working-directory: armadillo
-        run: |
-          tar -xf ./armadillo.tar.xz
-          cd armadillo-${{matrix.ARMA_VERSION}}
-          mkdir build
-          cd build
-
-      - name: Configure CMake for Armadillo macOS
-        if: startsWith(matrix.OS,'macos')
-        working-directory: armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
-        run: |
-          OPENBLAS_PREFIX="$(brew --prefix openblas 2>/dev/null || echo '/usr/local/opt/openblas')"
-          HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/usr/local')"
-          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DALLOW_OPENBLAS_MACOS=ON -DCMAKE_PREFIX_PATH="${OPENBLAS_PREFIX};${HOMEBREW_PREFIX}" -DOpenBLAS_HOME="${OPENBLAS_PREFIX}" ..
-
-      - name: Configure CMake for Armadillo Linux
-        working-directory: armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
-        if: startsWith(matrix.OS,'ubuntu')
-        run: cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 ..
-
-      - name: Build and Install Armadillo
-        working-directory: armadillo/armadillo-${{matrix.ARMA_VERSION}}/build
-        run: |
-          cmake --build . --target all -j 2
-          sudo cmake --install .
-
       - name: Configure CMake
-        working-directory: ${{github.workspace}}/src/RFL
         run: |
           if [[ "${{matrix.OS}}" == macos* ]]; then
-            HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/usr/local')"
-            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}"
+            HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
+            cmake -B build -S src/RFL -G Ninja \
+              -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} \
+              -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}" \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DRFL_FETCH_ARMADILLO=ON \
+              -DARMADILLO_GIT_TAG=${{matrix.ARMA_VERSION}}
           else
-            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}}
+            cmake -B build -S src/RFL -G Ninja \
+              -DCMAKE_BUILD_TYPE=${{matrix.BUILD_TYPE}} \
+              -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+              -DRFL_FETCH_ARMADILLO=ON \
+              -DARMADILLO_GIT_TAG=${{matrix.ARMA_VERSION}}
           fi
 
       - name: Build the entire project
-        working-directory: ${{github.workspace}}/src/RFL
-        # Build your program with the given configuration
-        run: cmake --build ${{github.workspace}}/build --config ${{matrix.BUILD_TYPE}} --target all -j 2
+        run: cmake --build build --config ${{matrix.BUILD_TYPE}}
 
       - name: Run CTest
-        working-directory: ${{github.workspace}}/build
-        # Execute tests defined by the CMake configuration.
-        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-        run: ctest -j2 -C ${{matrix.BUILD_TYPE}} --output-on-failure
+        run: ctest --test-dir build -C ${{matrix.BUILD_TYPE}} --output-on-failure
