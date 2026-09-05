@@ -1,5 +1,5 @@
 @startuml
-' RFL Modular CMake Target Architecture
+' RFL Modular CMake Target Architecture (C4 Model Palette)
 ' Regenerate SVG: java -jar plantuml.jar -tsvg cmake_targets.puml
 ' Or via CLI: plantuml -tsvg cmake_targets.puml
 
@@ -29,15 +29,15 @@ skinparam component {
 }
 
 skinparam component<<STATIC>> {
-  BorderColor #0d9488
-  BackgroundColor #f0fdfa
-  FontColor #134e4a
+  BorderColor #2563eb
+  BackgroundColor #f0f7ff
+  FontColor #1e40af
 }
 
 skinparam component<<INTERFACE>> {
-  BorderColor #2563eb
+  BorderColor #1d4ed8
   BackgroundColor #eff6ff
-  FontColor #1e40af
+  FontColor #1e3a8a
 }
 
 skinparam component<<third-party>> {
