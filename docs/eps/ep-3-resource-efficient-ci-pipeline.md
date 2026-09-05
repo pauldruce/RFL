@@ -248,9 +248,8 @@ RFL/
 
 To prevent full rebuilds when modifying leaf source files, `src/RFL/core/CMakeLists.txt` decomposes `rfl_core` into modular component targets:
 
-![Modular CMake Target Architecture](../images/cmake_targets.svg)
+![Modular CMake Target Architecture](images/ep2_cmake_targets.svg)
 
-*Figure 5.1: Modular CMake component target architecture (C4 Model Palette). Source script co-located at [`docs/images/cmake_targets.d2`](../images/cmake_targets.d2).*
 
 | Target | Target Type | Contents | Dependencies |
 | :--- | :--- | :--- | :--- |
