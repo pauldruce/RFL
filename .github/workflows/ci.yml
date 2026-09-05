@@ -33,8 +33,6 @@ jobs:
               - 'src/**'
               - 'playground/**'
               - 'CMakeLists.txt'
-              - 'BUILD.plz'
-              - '.plzconfig'
               - 'third_party/**'
               - '.github/workflows/ci.yml'
               - '.github/workflows/linter.yml'
@@ -47,14 +45,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Install Linux dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
-            cmake                 \
+            cmake ninja-build     \
             libopenblas-dev       \
             liblapack-dev         \
             libarpack2-dev        \
@@ -70,29 +66,15 @@ jobs:
         with:
           key: ${{ runner.os }}-ubuntu-pr
 
-      - name: Restore Please Cache
-        uses: actions/cache@v4
-        with:
-          path: .plz-cache
-          key: plz-cache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'BUILD*', '.plzconfig') }}
-          restore-keys: |
-            plz-cache-${{ runner.os }}-
-
-      - name: Run changed tests with Please
+      - name: Configure CMake
         run: |
-          ALL_TARGETS=$(./pleasew query changes --since origin/${{ github.base_ref || 'main' }} --level -1)
-          if [ -n "$ALL_TARGETS" ]; then
-            TEST_TARGETS=$(echo "$ALL_TARGETS" | xargs ./pleasew query filter --include=test 2>/dev/null || true)
-            if [ -n "$TEST_TARGETS" ]; then
-              echo "Executing changed test targets: $TEST_TARGETS"
-              ./pleasew test -p --test_results_file=plz-out/log/test_results.xml $TEST_TARGETS
-            else
-              echo "No test targets affected by this change. Building changed targets..."
-              ./pleasew build -p $ALL_TARGETS
-            fi
-          else
-            echo "No code targets affected by this change."
-          fi
+          cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build C++ library and tests
+        run: cmake --build build --config Release
+
+      - name: Run CTest
+        run: ctest --test-dir build -C Release --output-on-failure
 
   test_macos:
     name: macOS PR Smoke Test
@@ -105,7 +87,7 @@ jobs:
 
       - name: Install macOS dependencies
         run: |
-          brew install cmake armadillo gsl openblas hdf5 superlu arpack
+          brew install cmake ninja armadillo gsl openblas hdf5 superlu arpack
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -115,13 +97,13 @@ jobs:
       - name: Configure CMake
         run: |
           HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
-          cmake -B build -S src/RFL -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}"
+          cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build C++ library and tests
-        run: cmake --build build --config Release -j 2
+        run: cmake --build build --config Release
 
       - name: Run CTest
-        run: ctest --test-dir build -j 2 -C Release --output-on-failure
+        run: ctest --test-dir build -C Release --output-on-failure
 
   ci-gate:
     name: CI Gatekeeper

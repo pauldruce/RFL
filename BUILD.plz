@@ -5,7 +5,7 @@ genrule(
     cmd = [
         "echo '#!/bin/bash' > $OUTS",
         "echo 'echo \"Formatting C/C++ source files...\"' >> $OUTS",
-        "echo 'find src/RFL playground \\( -name \"cmake-build*\" -o -name \"build*\" -o -name \"_deps\" -o -name \".vscode\" -o -name \".pytest_cache\" \\) -prune -o -type f \\( -name \"*.cpp\" -o -name \"*.hpp\" -o -name \"*.h\" -o -name \"*.c\" \\) -exec clang-format -i {} +' >> $OUTS",
+        "echo 'find src/RFL playground -type f \\( -name \"*.cpp\" -o -name \"*.hpp\" -o -name \"*.h\" -o -name \"*.c\" \\) -exec clang-format -i {} +' >> $OUTS",
         "chmod +x $OUTS",
     ],
     visibility = ["PUBLIC"],
@@ -18,7 +18,7 @@ genrule(
     cmd = [
         "echo '#!/bin/bash' > $OUTS",
         "echo 'echo \"Checking C/C++ source files formatting...\"' >> $OUTS",
-        "echo 'find src/RFL playground \\( -name \"cmake-build*\" -o -name \"build*\" -o -name \"_deps\" -o -name \".vscode\" -o -name \".pytest_cache\" \\) -prune -o -type f \\( -name \"*.cpp\" -o -name \"*.hpp\" -o -name \"*.h\" -o -name \"*.c\" \\) -exec clang-format --dry-run -Werror {} +' >> $OUTS",
+        "echo 'find src/RFL playground -type f \\( -name \"*.cpp\" -o -name \"*.hpp\" -o -name \"*.h\" -o -name \"*.c\" \\) -exec clang-format --dry-run -Werror {} +' >> $OUTS",
         "chmod +x $OUTS",
     ],
     visibility = ["PUBLIC"],

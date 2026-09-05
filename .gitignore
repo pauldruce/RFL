@@ -22,7 +22,6 @@ src/RFL/lib/
 .*_venv/
 *_venv/
 .venv/
-.plz-cache/
 
 # Entries below this point are managed by Please (DO NOT EDIT)
 plz-out
