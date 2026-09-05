@@ -60,8 +60,10 @@ jobs:
             libarpack2-dev        \
             libsuperlu-dev        \
             libgsl-dev            \
+            libhdf5-dev           \
             libhdf5-serial-dev    \
             libarmadillo-dev
+          sudo ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so 2>/dev/null || true
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
@@ -78,10 +80,16 @@ jobs:
 
       - name: Run changed tests with Please
         run: |
-          TARGETS=$(./pleasew query changes --since origin/${{ github.base_ref || 'main' }} --level -1)
-          if [ -n "$TARGETS" ]; then
-            echo "Executing changed targets: $TARGETS"
-            ./pleasew test -p --test_results_file=plz-out/log/test_results.xml $TARGETS
+          ALL_TARGETS=$(./pleasew query changes --since origin/${{ github.base_ref || 'main' }} --level -1)
+          if [ -n "$ALL_TARGETS" ]; then
+            TEST_TARGETS=$(echo "$ALL_TARGETS" | xargs ./pleasew query filter --include=test 2>/dev/null || true)
+            if [ -n "$TEST_TARGETS" ]; then
+              echo "Executing changed test targets: $TEST_TARGETS"
+              ./pleasew test -p --test_results_file=plz-out/log/test_results.xml $TEST_TARGETS
+            else
+              echo "No test targets affected by this change. Building changed targets..."
+              ./pleasew build -p $ALL_TARGETS
+            fi
           else
             echo "No code targets affected by this change."
           fi
