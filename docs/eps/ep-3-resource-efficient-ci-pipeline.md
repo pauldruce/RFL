@@ -1,6 +1,6 @@
-# EP-3: Resource-Efficient CI/CD Pipeline & Multi-Tier Validation
+# EP-3: Resource-Efficient CI/CD Pipeline & Modern Build Architecture
 
-* **Title:** Resource-Efficient CI/CD Pipeline & Multi-Tier Validation
+* **Title:** Resource-Efficient CI/CD Pipeline & Modern Build Architecture
 * **Author:** Paul Druce
 * **Status:** Accepted (In Progress)
 * **Target Versions:** RFL v0.2.0 (Phases 1 & 2), v0.2.0 (Phases 3 & 4)
@@ -15,8 +15,8 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, Please graph pruning) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
-| **Phase 2** | Tier 2 Exhaustive Compatibility Matrix on `main` merge & `ccache` caching | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
+| **Phase 1** | Tier 1 Fast PR Gate (Ubuntu + macOS, path filtering, `ci-gate`) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
+| **Phase 2** | Build Consolidation (CMake single source of truth, `mise.toml`, Please retirement) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
 | **Phase 3** | Dependency decoupling using CMake `FetchContent` & system packages | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
 | **Phase 4** | Native Windows MSVC CI runner & binary wheel automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
 
@@ -26,33 +26,37 @@ The table below tracks the status of each implementation phase:
 
 ### 2.1 Problem Statement & Research Context
 `RFL` requires continuous validation across multiple operating systems (Ubuntu, macOS, Windows) and scientific libraries (Armadillo, GSL, OpenBLAS).
-Currently, every push and pull request triggers an uncoordinated collection of workflows:
-1. `build_and_test.yml` executes on every push across three operating systems.
-2. `compatability_tests.yml` executes a 15-job matrix on every pull request.
-3. Each job downloads and builds Armadillo from SourceForge tarballs using custom shell scripts.
+Historically, the repository suffered from two major build and CI bottlenecks:
 
-This approach creates severe research bottlenecks:
-* **Excessive Latency:** Developers wait 15 to 25 minutes for pull request checks to finish.
-* **Wasted Compute:** A single pull request consumes 60 to 90 GitHub Actions runner minutes.
-* **Documentation Friction:** Changes to documentation (`docs/**`, `*.md`, `.agents/**`) trigger full C++ compilation matrices.
-* **Network Fragility:** SourceForge download mirrors frequently time out or throttle concurrent runners.
+1. **Uncoordinated, Heavy Workflows:**
+   * `build_and_test.yml` executed on every branch push across three operating systems.
+   * `compatability_tests.yml` executed an un-cached 15-job matrix on every pull request.
+   * Documentation changes triggered full C++ compilation matrices, delaying research feedback by 15 to 25 minutes.
 
-A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute feedback during development while preserving exhaustive platform verification on `main`.
+2. **Build-System Duality & Windows Friction:**
+   * The project maintained parallel build systems: `CMakeLists.txt` for external users and `BUILD.plz` for Please build.
+   * Every source file, header, and test required dual maintenance across both systems.
+   * Please build added operational friction on macOS and obstructed native Windows MSVC CI runners.
+   * Python wheel builds in Please wrapped `python -m build`, which invoked `scikit-build-core` and CMake anyway.
+
+A unified build and CI architecture is required.
+It must deliver sub-2-minute feedback on pull requests and eliminate dual-system maintenance.
+It must also provide native Windows MSVC compatibility for `v0.2.0`.
 
 ### 2.2 Goals
 * **Sub-2-Minute Dual-Platform PR Feedback:** Validate Ubuntu and macOS runners on pull requests in under two minutes using system packages.
 * **Near-Zero Compute for Documentation:** Ensure documentation changes consume zero C++ compilation runner minutes.
-* **Exhaustive Matrix on Merge to Main:** Execute the full 15-job multi-OS compatibility matrix whenever code merges into `main`.
-* **Hermetic Incremental Testing:** Use Please build (`plz query changes`) to test only targets affected by changed files.
-* **Persistent Build Caching in CI:** Persist Please build cache (`.plz-cache`) across ephemeral GitHub runners using `actions/cache`.
-* **Clean Test Artifact Extraction:** Use Please (`plz export outputs`) to isolate test payloads without copying internal build trees.
-* **Standardised CI Test Reporting:** Generate machine-readable JUnit XML test results for native GitHub pull request summaries.
-* **Compiler Caching:** Integrate `ccache` to eliminate redundant compilation across workflow runs.
-* **Decoupled Dependencies:** Replace custom SourceForge build scripts with system package managers (`apt`, `brew`) and CMake `FetchContent`.
+* **Exhaustive Mainline Verification:** Execute the full 15-job compatibility matrix when code merges into `main`.
+* **Single Source of Truth:** Standardise on modern CMake (3.24+) as the single build system across all platforms.
+* **Unified Developer Interface:** Use `mise` (`mise.toml`) as a lightweight local task runner, replacing custom Please rules.
+* **Retire Please Build:** Phase out `BUILD.plz`, `.plzconfig`, and the Please wrapper script.
+* **Modular CMake Targets:** Decompose `rfl_core` into modular component targets with precompiled headers (PCH) for fast incremental rebuilds.
+* **Cross-Platform Compiler Caching:** Integrate `ccache` with `/Z7` debug format on Windows to ensure high cache hit rates across runners.
+* **Decoupled Dependencies:** Replace custom SourceForge build scripts with system package managers and CMake `FetchContent`.
 
 ### 2.3 Non-Goals
 * Managing self-hosted GitHub Actions runners (standard GitHub-hosted runners remain sufficient).
-* Replacing CMake as the primary build system for external consumers.
+* Replacing CMake with another specialised monorepo tool (such as Bazel or Meson).
 * Implementing distributed build caching across private networks.
 
 ---
@@ -61,8 +65,9 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 
 ### 3.1 Core Research Scenarios
 1. **Scenario 1 (Rapid Documentation and Theoretical Derivation Updates):** A researcher updates scientific derivations in `docs/` or notes in `.agents/`. The CI pipeline runs fast markdown checks. It completes in seconds without launching C++ compilers.
-2. **Scenario 2 (High-Frequency MCMC Algorithm Development):** A developer refactors Dirac operator routines in `src/RFL/core/`. The Tier 1 gate builds on Ubuntu and macOS using system packages and Please, executing unit tests in under two minutes.
-3. **Scenario 3 (Exhaustive Mainline Verification):** When a pull request merges into `main`, GitHub Actions runs all 15 matrix permutations. This verifies overall release health.
+2. **Scenario 2 (High-Frequency MCMC Algorithm Development):** A developer refactors Dirac operator routines in `src/RFL/core/`. The Tier 1 gate builds on Ubuntu and macOS using system packages and CMake, executing unit tests in under two minutes.
+3. **Scenario 3 (Exhaustive Mainline Verification):** When a pull request merges into `main`, GitHub Actions runs all 15 matrix permutations. This verifies complete release health.
+4. **Scenario 4 (Cross-Platform Local Development):** A researcher clones the repository on macOS, Linux, or Windows. Running `mise run test` configures CMake with Ninja, compiles changed units, and runs tests.
 
 ### 3.2 Functional Requirements & Invariants
 
@@ -73,10 +78,10 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **REQ-CI-003** | **Branch Protection Integrity** | Path-filtered workflows must report passing status checks to GitHub to prevent pull request deadlocks. |
 | **REQ-CI-004** | **Exhaustive Mainline Verification** | Every commit pushed or merged into `main` must execute the full 15-job compatibility matrix. |
 | **REQ-CI-005** | **Compiler Object Caching** | Unchanged C++ translation units must hit `ccache` caches with an average cache-hit rate exceeding 70%. |
-| **REQ-CI-006** | **Hermetic Graph Analysis** | Please build target calculation must match the exact transitive dependency closure of changed source files. |
-| **REQ-CI-007** | **Persistent Runner Caching** | The Please directory cache (`.plz-cache`) must be saved and restored across GitHub Actions runs. |
-| **REQ-CI-008** | **Minimal Test Artifact Footprint** | Exported test artifacts must contain only final binaries and libraries (< 20 MB total). |
-| **REQ-CI-009** | **Structured Test Reporting** | Test executions must export JUnit XML test results for native GitHub pull request reporting. |
+| **REQ-CI-006** | **Single Build Definition** | All C++ libraries, tests, and bindings must be declared strictly within `CMakeLists.txt`. |
+| **REQ-CI-007** | **Unified Task Interface** | Developer tasks must be defined in `mise.toml` with zero toolchain drift across developer systems. |
+| **REQ-CI-008** | **Native Windows Compatibility** | All build targets and tests must compile cleanly under Windows MSVC without emulation or WSL. |
+| **REQ-CI-009** | **Direct Python Packaging** | Python wheels must build directly using `scikit-build-core` without nested intermediate build tools. |
 
 ---
 
@@ -98,9 +103,9 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 
 ### 4.2 ADR-2: Path Filtering Strategy
 
-| Criteria | Option A: Top-Level `paths-ignore` | Option B: Job-Level Path Evaluator (Selected) | Option C: Commit Message Tokens (Current) |
+| Criteria | Option A: Top-Level `paths-ignore` | Option B: Job-Level Path Evaluator (Selected) | Option C: Commit Message Tokens |
 | :--- | :--- | :--- | :--- |
-| **Branch Protection Compatibility** | ❌ Fails (Skipped workflows leave required checks pending) | ✅ **Guaranteed (Workflow executes and reports green check)** | ⚠️ Unreliable (Requires manual developer action) |
+| **Branch Protection Compatibility** | ❌ Fails (Skipped workflows leave checks pending) | ✅ **Guaranteed (Workflow executes and reports green check)** | ⚠️ Unreliable (Requires manual developer action) |
 | **Granularity** | ⚠️ Binary (Entire workflow skips) | ✅ **Multi-category (Docs, Python, Core C++)** | ❌ Single string matching |
 | **Reliability** | ✅ High | ✅ **High** | ❌ Poor (Developers forget `#docs` token) |
 | **Decision** | Rejected | **Selected (Option B)** | Rejected |
@@ -111,7 +116,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 
 ### 4.3 ADR-3: Dependency Management in CI Runners
 
-| Criteria | Option A: SourceForge Tarball Compilation (Current) | Option B: System Package Managers (`apt`/`brew`) | Option C: CMake `FetchContent` Fallback |
+| Criteria | Option A: SourceForge Tarball Compilation | Option B: System Package Managers (`apt`/`brew`) | Option C: CMake `FetchContent` Fallback |
 | :--- | :--- | :--- | :--- |
 | **Setup Duration** | ❌ 3–5 minutes per runner | ✅ **5–10 seconds per runner** | ⚠️ 1–2 minutes (cached) |
 | **Mirror Availability** | ❌ Unreliable (SourceForge timeouts) | ✅ **High (Local GitHub runner mirrors)** | ✅ High (Git mirror) |
@@ -119,21 +124,23 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **Multi-Version Flexibility** | ✅ High (Compiles any tag) | ⚠️ Limited to distro package | ✅ **High (Pulls any Git commit/tag)** |
 | **Decision** | Rejected | **Selected for Tier 1 Gate** | **Selected for Tier 2 & FetchContent** |
 
-*Rationale:* Recompiling Armadillo from SourceForge on every job wastes thousands of compute minutes annually. Tier 1 gates will use system packages (`libarmadillo-dev`, `brew install armadillo`) for instant setup. Tier 2 compatibility matrices will use CMake `FetchContent` and `ccache` to test specific library versions cleanly.
+*Rationale:* Recompiling Armadillo from SourceForge on every job wastes thousands of compute minutes annually. Tier 1 gates use system packages (`libarmadillo-dev`, `brew install armadillo`) for instant setup. Tier 2 compatibility matrices use CMake `FetchContent` and `ccache` to test specific library versions cleanly.
 
 ---
 
-### 4.4 ADR-4: Build Graph Pruning & Hermetic Execution Engine (Please Build)
+### 4.4 ADR-4: Unified Build System Architecture (Modern CMake + Mise over Please Build)
 
-| Criteria | Option A: Monolithic Test Execution (`ctest`) | Option B: Please Graph Analysis & Hermetic Engine (Selected) |
-| :--- | :--- | :--- |
-| **Execution Latency** | ⚠️ 30–60 seconds | ✅ **0.1–5 seconds** |
-| **Doc-Only Impact** | ⚠️ Compiles code regardless of changes | ✅ **Returns 0 targets; skips test execution** |
-| **Local Reproducibility** | ⚠️ Manual target selection | ✅ **Identical command runs on developer machines** |
-| **Binary Output Isolation** | ❌ Intermingled build tree | ✅ **Direct target export using `plz export outputs`** |
-| **Decision** | Rejected | **Selected (Option B)** |
+| Criteria | Option A: Please Build Everywhere | Option B: Dual Build (`CMake` + `Please`) | Option C: Modern CMake + Mise (Selected) |
+| :--- | :--- | :--- | :--- |
+| **Single Source of Truth** | ❌ No (CMake still required for external users) | ❌ No (Double maintenance of every file) | ✅ **Yes (`CMakeLists.txt` only)** |
+| **Platform Symmetry** | ⚠️ Asymmetric (WSL required for Windows) | ⚠️ Divergent (Ubuntu Please, macOS CMake) | ✅ **100% Identical (Linux, macOS, Windows)** |
+| **Windows MSVC Support** | ❌ High friction / Unsupported | ❌ High friction | ✅ **Native & Proven** |
+| **Developer Task CLI** | ✅ Native (`plz build`, `plz test`) | ⚠️ Mixed | ✅ **Uniform via `mise` (`mise run test`)** |
+| **Python Wheel Integration** | ⚠️ Nested wrapper around CMake | ⚠️ Nested wrapper around CMake | ✅ **Direct (`scikit-build-core`)** |
+| **Rebuild Latency** | ✅ < 1 second (`.plz-cache`) | ⚠️ Variable | ✅ **< 2 seconds (`ccache` + Ninja)** |
+| **Decision** | Rejected | Rejected | **Selected (Option C)** |
 
-*Rationale:* Please build maintains a precise directed acyclic graph (DAG) of project dependencies. Running `./pleasew query changes --since origin/main --level -1` identifies exactly which test targets require execution based on the git diff. In addition, Please provides clean artifact extraction with `plz export outputs` and persistent directory caching using `.plz-cache`.
+*Rationale:* Please build was introduced as an experiment in build graph pruning. However, maintaining two parallel build systems (`CMakeLists.txt` and `BUILD.plz`) adds heavy maintenance overhead. Furthermore, Please obstructs native Windows MSVC CI support and wraps `scikit-build-core` in an unnecessary layer. Modern CMake (3.24+) with Ninja, Precompiled Headers, and `ccache` delivers sub-2-second rebuilds. Mise provides a unified developer CLI without requiring custom build graph rules.
 
 ---
 
@@ -146,7 +153,7 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | **PR Clarity** | ✅ Single decisive status badge | ❌ Many confusing status items |
 | **Decision** | **Selected (Option A)** | Rejected |
 
-*Rationale:* Branch protection on `main` will require a single aggregate status check: `ci-gate`. This job evaluates the results of all upstream PR gate jobs. If jobs are safely skipped due to path filtering, `ci-gate` reports success. If any executed job fails, `ci-gate` fails and blocks merging.
+*Rationale:* Branch protection on `main` requires a single aggregate status check: `ci-gate`. This job evaluates the results of all upstream PR gate jobs. If jobs are safely skipped due to path filtering, `ci-gate` reports success. If any executed job fails, `ci-gate` fails and blocks merging.
 
 ---
 
@@ -156,10 +163,10 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 | :--- | :--- | :--- |
 | **Fail-Fast Latency** | ❌ 5–10 minutes (Fails linting after compilation) | ✅ **5–15 seconds (Fails linting before compilation)** |
 | **Compute Conservation** | ❌ Compiles code even if syntax or spelling is broken | ✅ **Zero compilation spent on unformatted code** |
-| **Artifact Portability** | ⚠️ Unstructured binary artifacts | ✅ **Structured exports for downstream test suites** |
+| **Artifact Portability** | ⚠️ Unstructured binary artefacts | ✅ **Structured exports for downstream test suites** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Splitting the pipeline into distinct phases ensures that fast pre-build checks (formatting, spelling, path evaluation) stop execution before expensive C++ compilers spin up. When building packages (such as Python wheels), building the artifact once and testing it across environments eliminates duplicate C++ compilation.
+*Rationale:* Splitting the pipeline into distinct phases ensures that fast pre-build checks (formatting, spelling, path evaluation) stop execution before expensive C++ compilers spin up. Building binary artefacts once and testing across environments eliminates duplicate C++ compilation.
 
 ---
 
@@ -169,66 +176,126 @@ A tiered, resource-efficient CI pipeline is required to deliver sub-2-minute fee
 
 ```
 .github/workflows/
-├── ci.yml                     # Tier 1: Fast Dual-Platform PR Gate (Ubuntu + macOS, system packages, < 2 min)
+├── ci.yml                     # Tier 1: Fast Dual-Platform PR Gate (Ubuntu + macOS, CMake + ccache, < 2 min)
 ├── compatability_tests.yml    # Tier 2: Exhaustive Matrix (On push to main, workflow_dispatch)
 ├── linter.yml                 # Code style & formatting (Clang-format on src/RFL and playground)
 ├── codeql.yml                 # Security scanning (Main branch and PRs to main)
 └── release.yml                # Binary wheels and PyPI publishing (Tag push and release PRs)
 ```
 
-> [!NOTE]
-> `.github/workflows/build_and_test.yml` is retired because its responsibilities are completely subsumed by `ci.yml` (Tier 1) and `compatability_tests.yml` (Tier 2).
+---
+
+### 5.2 Modular CMake Target Architecture
+
+To prevent full rebuilds when modifying leaf source files, `src/RFL/core/CMakeLists.txt` decomposes the monolithic `rfl_core` into modular component targets:
+
+```mermaid
+graph TD
+    subgraph CMake Component Targets
+        RNG["rfl_rng<br>(GslRng, IRng)"]
+        GEOM["rfl_geometry<br>(Clifford, DiracOperator)"]
+        MCMC["rfl_mcmc<br>(Action, Hamiltonian, Metropolis, Simulation)"]
+        CORE["rfl_core (INTERFACE)<br>Aggregates sub-libraries"]
+    end
+
+    GEOM --> CORE
+    RNG --> CORE
+    MCMC --> CORE
+    MCMC --> GEOM
+    MCMC --> RNG
+```
+
+1. **Target Isolation:** Editing a file in `rfl_mcmc` only recompiles that specific `.cpp` file. Unrelated component targets remain untouched.
+2. **Precompiled Headers (PCH):** Precompiling heavy scientific headers (`<armadillo>`, `<gsl/...>`, `<vector>`, `<complex>`) cuts compilation time by up to 70%:
+   ```cmake
+   target_precompile_headers(rfl_core
+       INTERFACE
+           <armadillo>
+           <gsl/gsl_rng.h>
+           <vector>
+           <complex>
+           <memory>
+   )
+   ```
+3. **CTest Labels for Targeted Execution:** Tests are tagged by component for selective execution:
+   ```cmake
+   set_tests_properties(GeometryTests PROPERTIES LABELS "Geometry")
+   set_tests_properties(McmcTests PROPERTIES LABELS "MCMC")
+   ```
 
 ---
 
-### 5.2 Please Build CI Optimisation Architecture
+### 5.3 Python Packaging Architecture (`scikit-build-core`)
 
-Please build provides specific capabilities to accelerate CI runs:
+Python extension packaging uses `scikit-build-core` in `src/RFL/pyproject.toml`, pointing directly to `CMakeLists.txt`:
+```toml
+[build-system]
+requires = ["scikit-build-core>=0.8.0", "setuptools-scm>=8.0", "pybind11", "numpy"]
+build-backend = "scikit_build_core.build"
 
-#### 1. Graph Pruning (`plz query changes`)
-On pull requests, Please identifies affected test targets against the base branch:
-```bash
-TARGETS=$(./pleasew query changes --since origin/${{ github.base_ref || 'main' }} --level -1)
-if [ -n "$TARGETS" ]; then
-  ./pleasew test -p --test_results_file=plz-out/log/test_results.xml $TARGETS
-else
-  echo "No code targets affected by this change."
-fi
+[tool.scikit-build]
+cmake.source-dir = "."
+build-dir = "build/{wheel_tag}"
+
+[tool.scikit-build.cmake.define]
+CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 ```
-
-#### 2. Persistent Runner Caching (`.plz-cache` + `actions/cache`)
-Please supports local directory caching. By enabling `[cache]` in `.plzconfig`:
-```ini
-[cache]
-dir = .plz-cache
-dirclean = true
-```
-GitHub Actions saves and restores this cache across workflow runs:
-```yaml
-- name: Restore Please Cache
-  uses: actions/cache@v4
-  with:
-    path: .plz-cache
-    key: plz-cache-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.hpp', 'BUILD*', '.plzconfig') }}
-    restore-keys: |
-      plz-cache-${{ runner.os }}-
-```
-Unchanged targets are retrieved from the local cache in milliseconds.
-
-#### 3. Lightweight Artifact Export (`plz export outputs`)
-When separating build and test jobs, Please exports only the final target outputs rather than copying the entire `plz-out/` directory:
-```bash
-./pleasew export outputs -o ./dist //src/RFL/core:rfl //src/RFL/core/tests:unit_tests
-```
-This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact transfer.
-
-#### 4. Plain CI Output & Structured Reporting
-* **Plain Terminal Logging (`-p`):** Disables ANSI interactive spinners so CI log files remain readable and concise.
-* **JUnit XML Output (`--test_results_file`):** Generates `test_results.xml` for GitHub Actions to render native test pass/fail annotations.
+This configuration eliminates intermediate build wrappers and passes the `ccache` compiler launcher directly into Python wheel builds.
 
 ---
 
-### 5.3 Workflow Configuration Contracts
+### 5.4 Unified Developer Interface with Mise (`mise.toml`)
+
+[Mise](https://mise.jdx.dev/) replaces the Please command-line interface. It manages development tools and defines reproducible project tasks:
+
+```toml
+[tools]
+cmake = "3.31"
+ninja = "1.12"
+ccache = "4.10"
+python = "3.12"
+
+[tasks.build]
+description = "Configure and build RFL C++ targets"
+run = "cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release && cmake --build build"
+
+[tasks.test]
+description = "Execute all CTest unit tests"
+depends = ["build"]
+run = "ctest --test-dir build --output-on-failure"
+
+[tasks.lint]
+description = "Check C++ source formatting using clang-format"
+run = "clang-format --dry-run -Werror src/RFL/**/*.cpp src/RFL/**/*.hpp"
+
+[tasks.format]
+description = "Format all C++ source files using clang-format"
+run = "clang-format -i src/RFL/**/*.cpp src/RFL/**/*.hpp"
+
+[tasks.dev]
+description = "Install editable Python bindings"
+run = "pip install -e src/RFL --no-build-isolation"
+```
+
+Developers run identical commands across Linux, macOS, and Windows.
+
+---
+
+### 5.5 Compiler Caching & Windows MSVC Configuration
+
+1. **Compiler Launcher:** CMake enables `ccache` automatically using `CMAKE_CXX_COMPILER_LAUNCHER=ccache`.
+2. **Windows MSVC Debug Information Format:**
+   To enable compiler caching under MSVC on Windows runners, CMake configures embedded debug symbols (`/Z7`):
+   ```cmake
+   if(MSVC)
+       set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
+   endif()
+   ```
+   This prevents `.pdb` lock contention and delivers high cache-hit rates on Windows.
+
+---
+
+### 5.6 Workflow Configuration Contracts
 
 #### 1. Tier 1: Fast Dual-Platform PR Gate (`.github/workflows/ci.yml`)
 * **Triggers:** `pull_request` (targeting `main`), `workflow_dispatch`.
@@ -246,32 +313,26 @@ This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact tra
       - 'src/**'
       - 'playground/**'
       - 'CMakeLists.txt'
-      - 'BUILD.plz'
-      - '.plzconfig'
+      - 'mise.toml'
       - 'third_party/**'
   ```
 * **Jobs:**
   * `filter`: Evaluates changed paths in seconds using `dorny/paths-filter`.
-  * `test_ubuntu`: Executes if `code == true`. Uses `apt-get install libarmadillo-dev libgsl-dev`, `ccache`, Please cache restoration, and Please graph pruning (`plz query changes`).
-  * `test_macos`: Executes if `code == true`. Uses `brew install armadillo gsl`, `ccache`, and CMake/CTest.
+  * `test_ubuntu`: Executes if `code == true`. Uses `apt-get install libarmadillo-dev libgsl-dev`, `ccache`, Ninja, and CMake/CTest.
+  * `test_macos`: Executes if `code == true`. Uses `brew install armadillo gsl`, `ccache`, Ninja, and CMake/CTest.
   * `ci-gate`: Always runs (`if: always()`). Evaluates upstream results; reports success if code passed or if docs were skipped.
 
 #### 2. Tier 2: Exhaustive Compatibility Matrix (`.github/workflows/compatability_tests.yml`)
 * **Triggers:**
   * `push` to `main` branch (every commit/merge into `main`).
-  * `workflow_dispatch` with manual parameter inputs (`all` vs. random subset).
+  * `workflow_dispatch` with manual parameter inputs.
 * **Runner Matrix:**
-  * Operating Systems: `ubuntu-latest`, `ubuntu-22.04`, `macos-latest`, `macos-15-intel`, `macos-14`.
+  * Operating Systems: `ubuntu-latest`, `ubuntu-22.04`, `macos-latest`, `macos-14`, `windows-latest`.
   * Armadillo Versions: `11.4.4`, `12.8.4`, `14.2.2`.
   * Build Type: `Release`.
 * **Optimisation:**
-  * Initialise `hendrikmuhs/ccache-action` on all runners.
+  * Initialise `hendrikmuhs/ccache-action` across all runners.
   * Cache Armadillo installations per OS and version using `actions/cache`.
-
-#### 3. C++ Linter (`.github/workflows/linter.yml`)
-* **Triggers:** `pull_request`, `push` to `main`.
-* **Target Directories:** `src/RFL` and `playground` (removing the legacy `RFL_source` path).
-* **Path Filtering:** Only execute when C/C++ files (`**/*.{cpp,hpp,h,c}`) or formatting configurations change.
 
 ---
 
@@ -281,10 +342,9 @@ This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact tra
 | :--- | :--- | :--- |
 | **Doc-Only PR Gate** | Push commit modifying only `docs/README.md` | PR check passes in under 30 seconds with zero C++ compilation. |
 | **Core C++ PR Gate** | Push commit modifying `src/RFL/core/DiracOperator.cpp` | PR check tests Ubuntu + macOS and passes in under 120 seconds. |
-| **Please Graph Query** | `./pleasew query changes docs/README.md` | Returns zero targets. |
-| **Please Cache Restoration** | `./pleasew test //src/RFL/core/tests:unit_tests` | Re-execution reports cached targets in < 100 ms. |
-| **Artifact Export Footprint** | `./pleasew export outputs -o ./dist //src/RFL/core:rfl` | Output directory contains only libraries, < 20 MB total. |
-| **C++ Linter Execution** | `./pleasew run //:lint_cpp` | Successfully formats `src/RFL` without checking ignored build folders. |
+| **Incremental Rebuild Speed** | Touch leaf `.cpp` file and run `cmake --build build` | Incremental compilation completes in < 2 seconds with `ccache`. |
+| **Mise Test Task** | `mise run test` | Builds and executes all unit tests with 100% pass rate. |
+| **C++ Linter Execution** | `mise run lint` | Evaluates C++ code formatting cleanly in < 2 seconds. |
 | **Mainline Trigger** | Push commit to `main` | Automatically triggers `compatability_tests.yml` across full matrix. |
 
 ---
@@ -294,29 +354,29 @@ This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact tra
 ### Phase 1: Tier 1 Fast Dual-Platform PR Gate & Path Filtering
 * **Target Version:** `v0.2.0`
 * **GitHub Issues:** [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23)
-* **Tasks:**
-  1. Add path filtering to `.github/workflows/ci.yml` using `dorny/paths-filter`.
-  2. Implement dual-platform PR smoke tests on Ubuntu (`libarmadillo-dev`) and macOS (`brew install armadillo`).
-  3. Add `ci-gate` aggregate check in `ci.yml` for branch protection.
-  4. Enable Please directory caching (`.plz-cache`) in `.plzconfig` and `actions/cache`.
-  5. Integrate Please graph pruning (`plz query changes`) and `-p` logging into `ci.yml`.
-  6. Fix paths in `.github/workflows/linter.yml` (`src/RFL` and `playground`).
-  7. Delete obsolete `.github/workflows/build_and_test.yml`.
-  8. Update `BUILD.plz` linting scripts to exclude build and IDE directories.
+* **Status:** ✅ Completed
+* **Delivered Capabilities:**
+  1. Job-level path filtering using `dorny/paths-filter`.
+  2. Dual-platform PR smoke testing on Ubuntu and macOS.
+  3. Aggregate `ci-gate` gatekeeper job for reliable branch protection.
+  4. Integration of `ccache` compiler caching across PR runners.
+  5. Retired obsolete `build_and_test.yml` workflow.
 
-### Phase 2: Tier 2 Exhaustive Compatibility Matrix on Push to Main
+### Phase 2: Build Consolidation & Mise Orchestration
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#23](https://github.com/pauldruce/RFL/issues/23)
+* **Status:** 🔄 In Progress
 * **Tasks:**
-  1. Retarget `.github/workflows/compatability_tests.yml` to trigger on `push: branches: [ main ]` and `workflow_dispatch`.
-  2. Remove automatic 15-job execution from `pull_request` events.
-  3. Add `hendrikmuhs/ccache-action` across all matrix runners.
-  4. Cache pre-built Armadillo installations per matrix combination using `actions/cache`.
-  5. Verify `combination_selection.py` matrix generator operates reliably on `main` push.
+  1. Add `mise.toml` defining standard developer tasks (`build`, `test`, `lint`, `format`, `dev`).
+  2. Update `ci.yml` Ubuntu job to use symmetric CMake + Ninja + `ccache`, matching macOS.
+  3. Decompose `src/RFL/core/CMakeLists.txt` into modular component targets (`rfl_geometry`, `rfl_mcmc`, `rfl_rng`).
+  4. Add Precompiled Headers (PCH) for Armadillo and GSL in `CMakeLists.txt`.
+  5. Retire and remove `BUILD.plz`, `.plzconfig`, and Please build rules.
 
 ### Phase 3: Dependency Decoupling with CMake FetchContent & System Packages
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#22](https://github.com/pauldruce/RFL/issues/22)
+* **Status:** 💡 Planned
 * **Tasks:**
   1. Update `src/RFL/cmake/Armadillo.cmake` with `FetchContent` fallback from upstream GitLab repository.
   2. Replace manual Armadillo shell scripts in Tier 2 matrix with CMake FetchContent or system packages.
@@ -325,7 +385,8 @@ This produces a clean payload (< 20 MB) suitable for GitHub Actions artifact tra
 ### Phase 4: Native Windows MSVC CI Runner & Binary Wheel Automation
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#21](https://github.com/pauldruce/RFL/issues/21)
+* **Status:** 💡 Planned
 * **Tasks:**
   1. Add `windows-latest` runner to Tier 2 matrix.
-  2. Configure MSVC compiler flags (`/std:c++17`, `/utf-8`, `/openmp`) in `CMakeLists.txt`.
+  2. Configure MSVC compiler flags (`/std:c++17`, `/utf-8`, `/openmp`) and `/Z7` debug format in `CMakeLists.txt`.
   3. Add Windows wheel compilation (`win_amd64`) to `.github/workflows/release.yml`.
