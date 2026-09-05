@@ -249,27 +249,41 @@ RFL/
 To prevent full rebuilds when modifying leaf source files, `src/RFL/core/CMakeLists.txt` decomposes `rfl_core` into modular component targets:
 
 ```mermaid
-flowchart TD
-    core["rfl_core (INTERFACE)
-    Consumer aggregator target"]
+classDiagram
+    direction TB
+    namespace rfl_targets {
+        class rfl_core {
+            <<INTERFACE>>
+            Aggregator Target
+        }
+        class rfl_mcmc {
+            <<STATIC>>
+            Action, Metropolis, Simulation
+        }
+        class rfl_geometry {
+            <<STATIC>>
+            DiracOperator, CliffordModule
+        }
+        class rfl_rng {
+            <<STATIC>>
+            GslRng, IRng
+        }
+    }
+    class Armadillo {
+        <<third-party>>
+        cx_mat, BLAS, LAPACK
+    }
+    class GSL {
+        <<third-party>>
+        gsl_rng
+    }
 
-    mcmc["rfl_mcmc (STATIC)
-    Action • Metropolis • Simulation"]
+    rfl_core ..> rfl_mcmc : aggregates
+    rfl_mcmc ..> rfl_geometry : links
+    rfl_mcmc ..> rfl_rng : links
 
-    geom["rfl_geometry (STATIC)
-    DiracOperator • CliffordModule
-    Dep: Armadillo C++"]
-
-    rng["rfl_rng (STATIC)
-    GslRng • IRng
-    Dep: GSL"]
-
-    core --> mcmc
-    core --> geom
-    core --> rng
-
-    mcmc --> geom
-    mcmc --> rng
+    rfl_geometry ..> Armadillo : links
+    rfl_rng ..> GSL : links
 ```
 
 | Target | Target Type | Contents | Dependencies |
