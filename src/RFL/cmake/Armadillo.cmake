@@ -1,28 +1,68 @@
-# The purpose of this Cmake module is to find the Armadillo library.
-# This library may be installed by the system/user in the standard install
-# location, or it might be installed to a custom location by the build system
-# Please.
-set(LOCAL_ARMADILLO_INSTALL_DIR "${GIT_PROJECT_ROOT}/plz-out/gen/vendors/armadillo-12.6.6/install")
+# The purpose of this CMake module is to find or fetch the Armadillo library.
+# It first checks if Armadillo has already been defined as a target.
+# If not, and unless RFL_FETCH_ARMADILLO is enabled, it attempts find_package(Armadillo QUIET).
+# If find_package fails or RFL_FETCH_ARMADILLO is ON, it falls back to FetchContent
+# from the upstream GitLab repository.
 
-# Create local variable which stores the files to search for
-message(DEBUG "Checking for local Armadillo library at ${LOCAL_ARMADILLO_INSTALL_DIR}")
+if(NOT TARGET Armadillo::Armadillo AND NOT TARGET armadillo)
+    if(NOT RFL_FETCH_ARMADILLO)
+        message(STATUS "Searching for system Armadillo library...")
+        find_package(Armadillo QUIET)
+    endif()
 
-if(EXISTS "${LOCAL_ARMADILLO_INSTALL_DIR}/lib/libarmadillo${CMAKE_SHARED_LIBRARY_SUFFIX}"
-    OR EXISTS "${LOCAL_ARMADILLO_INSTALL_DIR}/lib/libarmadillo${CMAKE_STATIC_LIBRARY_SUFFIX}")
-    message(STATUS "Using local Armadillo library at ${LOCAL_ARMADILLO_INSTALL_DIR}")
-    set(ARMADILLO_LIBRARIES "${LOCAL_ARMADILLO_INSTALL_DIR}/lib/libarmadillo${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    set(ARMADILLO_INCLUDE_DIRS "${LOCAL_ARMADILLO_INSTALL_DIR}/include")
+    if(NOT Armadillo_FOUND AND NOT ARMADILLO_FOUND)
+        message(STATUS "Armadillo not found or RFL_FETCH_ARMADILLO is enabled; fetching via FetchContent...")
+        include(FetchContent)
 
-    set(ARMADILLO_FOUND TRUE)
-    include_directories(${ARMADILLO_INCLUDE_DIRS})
-    link_directories(${ARMADILLO_LIBRARIES})
-else()
-    message(STATUS "Using system Armadillo library")
-    find_package(Armadillo REQUIRED)
-    include_directories(${ARMADILLO_INCLUDE_DIRS})
+        if(NOT DEFINED RFL_ARMADILLO_GIT_TAG)
+            if(DEFINED ARMADILLO_GIT_TAG)
+                set(RFL_ARMADILLO_GIT_TAG "${ARMADILLO_GIT_TAG}")
+            else()
+                set(RFL_ARMADILLO_GIT_TAG "14.2.x")
+            endif()
+        endif()
+
+        set(BUILD_SMOKE_TEST OFF CACHE BOOL "Disable Armadillo smoke test" FORCE)
+        set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static Armadillo library" FORCE)
+
+        if(APPLE)
+            set(ALLOW_OPENBLAS_MACOS ON CACHE BOOL "Allow detection of OpenBLAS on macOS" FORCE)
+        endif()
+
+        FetchContent_Declare(
+            armadillo
+            GIT_REPOSITORY https://gitlab.com/conradsnicta/armadillo-code.git
+            GIT_TAG        ${RFL_ARMADILLO_GIT_TAG}
+        )
+        FetchContent_MakeAvailable(armadillo)
+    endif()
 endif()
 
-# If the GSL package is not found, stop with an error
-if(NOT ARMADILLO_FOUND)
-    message(FATAL_ERROR "Armadillo library not found")
+if(TARGET armadillo)
+    if(NOT TARGET Armadillo::Armadillo)
+        add_library(Armadillo::Armadillo ALIAS armadillo)
+    endif()
+    set(ARMADILLO_LIBRARIES Armadillo::Armadillo)
+    set(ARMADILLO_FOUND TRUE)
+elseif(TARGET Armadillo::Armadillo)
+    set(ARMADILLO_LIBRARIES Armadillo::Armadillo)
+    set(ARMADILLO_FOUND TRUE)
+elseif(ARMADILLO_FOUND OR Armadillo_FOUND)
+    set(ARMADILLO_FOUND TRUE)
+    if(NOT TARGET Armadillo::Armadillo)
+        add_library(Armadillo::Armadillo INTERFACE IMPORTED)
+        if(ARMADILLO_INCLUDE_DIRS)
+            target_include_directories(Armadillo::Armadillo INTERFACE ${ARMADILLO_INCLUDE_DIRS})
+        endif()
+        if(ARMADILLO_LIBRARIES)
+            target_link_libraries(Armadillo::Armadillo INTERFACE ${ARMADILLO_LIBRARIES})
+        endif()
+    endif()
+    set(ARMADILLO_LIBRARIES Armadillo::Armadillo)
+else()
+    message(FATAL_ERROR "Armadillo library could not be found or fetched.")
+endif()
+
+if(DEFINED ARMADILLO_INCLUDE_DIRS)
+    include_directories(${ARMADILLO_INCLUDE_DIRS})
 endif()

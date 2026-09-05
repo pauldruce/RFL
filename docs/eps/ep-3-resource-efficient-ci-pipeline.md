@@ -17,7 +17,7 @@ The table below tracks the status of each implementation phase:
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Tier 1 Fast PR Gate (Path filtering, dual-platform smoke tests, status gatekeeper) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
 | **Phase 2** | Build & Tooling Consolidation (Single-source build, reproducible developer environment, automated code quality) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
-| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
+| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | ✅ Completed |
 | **Phase 4** | Native Windows CI Runner, MSVC Verification & Binary Wheel Automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
 
 ---
@@ -483,7 +483,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 ### Phase 3: Dependency Decoupling with CMake FetchContent & System Packages
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#22](https://github.com/pauldruce/RFL/issues/22)
-* **Status:** 💡 Planned
+* **Status:** ✅ Completed
 * **Tasks:**
   1. Update `src/RFL/cmake/Armadillo.cmake` with `FetchContent` fallback from upstream GitLab repository.
   2. Replace manual Armadillo shell scripts in Tier 2 matrix with CMake FetchContent or system packages.

@@ -31,7 +31,7 @@ def main(random_seed, num_selected, select_all):
         "macos-15-intel",
         "macos-14",
     ]
-    armadillo_version = ["11.4.4", "12.8.4", "14.2.2"]
+    armadillo_version = ["11.4.x", "12.8.x", "14.2.x"]
 
     list_of_lists = [build_type, os_versions, armadillo_version]
 
