@@ -1,6 +1,6 @@
 @startuml
 ' RFL Modular CMake Target Architecture (C4 Model Palette)
-' Regenerate SVG: java -jar plantuml.jar -tsvg cmake_targets.puml
+' Regenerate SVG: java -Djava.awt.headless=true -jar plantuml.jar -tsvg cmake_targets.puml
 ' Or via CLI: plantuml -tsvg cmake_targets.puml
 
 skinparam backgroundColor #FFFFFF
