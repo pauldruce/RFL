@@ -9,19 +9,11 @@ This workflow provides a structured process for research software engineering. I
 
 ## 1. The 5-Stage Collaborative Lifecycle
 
-```mermaid
-flowchart LR
-    A["1. Proposal (Draft)\n(EP in docs/eps/)"] --> B["2. Approval Gate\n(ADR consensus)"]
-    B --> C["3. Milestone Creation\n(Target versions & Issues)"]
-    C --> D["4. Phased Delivery (PRs)\n(Closes #X per phase)"]
-    D --> E["5. Release & Closeout\n(Tag & complete EP)"]
-```
-
 1. **Proposal (Draft):** Author the EP in `docs/eps/ep-<N>-<title>.md` defining requirements and trade-offs (`ADR-1`, `ADR-2`).
 2. **Approval Gate:** Reach agreement on architectural decisions and update status to `Accepted`.
 3. **Milestone Creation:** Decompose the delivery plan into discrete phases assigned to specific **GitHub Milestones** (e.g. Phase 1 → `v0.1.0`, Phase 2 → `v0.3.0`).
 4. **Phased Delivery via PRs:** Deliver phases in bite-sized PRs referencing `Closes #X`. Track phase progress in the EP tracker table.
-5. **Release & Closeout:** When a milestone reaches 100%, tag the release. When all phases are shipped, update the EP status to `Completed`.
+5. **Release & Completion:** When a milestone reaches 100%, tag the release. When all phases are shipped, update the EP status to `Completed`.
 
 ---
 
