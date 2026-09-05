@@ -3,7 +3,7 @@
 * **Title:** Unified Modern Build, Tooling & CI/CD Architecture
 * **Author:** Paul Druce
 * **Status:** Accepted (In Progress)
-* **Target Versions:** RFL v0.2.0 (Phases 1 & 2), v0.2.0 (Phases 3 & 4)
+* **Target Versions:** RFL v0.2.0
 * **Date:** 2026-09-04
 
 ---

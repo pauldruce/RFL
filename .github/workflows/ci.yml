@@ -59,6 +59,8 @@ jobs:
             libhdf5-dev           \
             libhdf5-serial-dev    \
             libarmadillo-dev
+          # Ubuntu's libhdf5-serial-dev package installs libraries into a serial subdirectory.
+          # Create a symlink in the standard library path so Armadillo and CMake can discover HDF5.
           sudo ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so 2>/dev/null || true
 
       - name: Set up ccache
