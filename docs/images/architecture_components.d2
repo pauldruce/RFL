@@ -1,0 +1,92 @@
+# RFL Component Structure & Relationships (UML Class Diagram)
+# Regenerate SVG: d2 architecture_components.d2 architecture_components.svg
+
+direction: down
+
+dirac: DiracOperator {
+  shape: class
+  -m_p: int
+  -m_q: int
+  -m_matrix_dim: int
+  -m_gamma_dim: int
+  -m_matrices: "vector<cx_mat>"
+  -m_epsilons: "vector<int>"
+  -m_omega_table: OmegaTable
+  +getType(): "pair<int, int>"
+  +getMatrixDimension(): int
+  +getMatrices(): "vector<cx_mat>&"
+  +computeEigenvalues(): vec
+  +traceDiracSquared(): double
+  +traceDiracQuartic(): double
+  +randomise(rng: IRng&): void
+}
+
+action: BarrettGlaserAction {
+  shape: class
+  -m_g2: double
+  -m_g4: double
+  +calculate(dirac: DiracOperator): double
+  +calculateDelta(dirac: DiracOperator, ...): double
+  +calculateGradient(dirac: DiracOperator, int): cx_mat
+  +getG2(): double
+  +getG4(): double
+}
+
+sampler: MetropolisSampler {
+  shape: class
+  -m_action: BarrettGlaserAction
+  -m_scale: double
+  -m_rng: "shared_ptr<IRng>"
+  -m_observers: "vector<shared_ptr<ISimulationObserver>>"
+  +step(dirac: DiracOperator&): StepResult
+  +sweep(dirac: DiracOperator&): SweepResult
+  +sweepDualAveraging(dirac: DiracOperator&, double): SweepResult
+  +add_observer(obs: shared_ptr<ISimulationObserver>): void
+  +getScale(): double
+  +setScale(scale: double): void
+}
+
+observer: ISimulationObserver {
+  shape: class
+  +on_step(step: size_t, dirac: DiracOperator&, res: StepResult): void
+  +on_sweep(sweep: size_t, dirac: DiracOperator&, res: SweepResult): void
+}
+
+recorder: EigenvalueRecorder {
+  shape: class
+  -m_interval: size_t
+  -m_history: "vector<vec>"
+  +on_sweep(sweep: size_t, dirac: DiracOperator&, res: SweepResult): void
+  +get_history(): "vector<vec>"
+}
+
+# Relationships
+recorder -> observer: implements {
+  target-arrowhead: {
+    shape: triangle
+    style.filled: false
+  }
+  style.stroke-dash: 4
+}
+
+action -> sampler: uses {
+  target-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+observer -> sampler: notifies {
+  target-arrowhead: {
+    shape: diamond
+    style.filled: false
+  }
+}
+
+sampler -> dirac: mutates during sweep {
+  style.stroke-dash: 4
+}
+
+action -> dirac: evaluates {
+  style.stroke-dash: 4
+}

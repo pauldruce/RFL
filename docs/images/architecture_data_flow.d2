@@ -1,0 +1,98 @@
+# RFL System Architecture & Data Flow
+# Regenerate SVG: d2 architecture_data_flow.d2 architecture_data_flow.svg
+
+direction: down
+
+py: "pyrfl Python Interface\n«entrypoint»\n--\nZero-copy NumPy buffers" {
+  style: {
+    fill: "#eff6ff"
+    stroke: "#1d4ed8"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#1e3a8a"
+  }
+}
+
+obs: "Telemetry & Observables\n«sink»\n--\nISimulationObserver • Recorders" {
+  style: {
+    fill: "#eff6ff"
+    stroke: "#1d4ed8"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#1e3a8a"
+  }
+}
+
+sampler: "MetropolisSampler\n«algorithm»\n--\nDualAveraging calibration" {
+  style: {
+    fill: "#f0f7ff"
+    stroke: "#2563eb"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#1e40af"
+  }
+}
+
+action: "BarrettGlaserAction\n«energy functional»\n--\nS = g₂ Tr(D²) + g₄ Tr(D⁴)" {
+  style: {
+    fill: "#f0f7ff"
+    stroke: "#2563eb"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#1e40af"
+  }
+}
+
+dirac: "DiracOperator\n«value type»\n--\nMatrix spectral state" {
+  style: {
+    fill: "#f0f7ff"
+    stroke: "#2563eb"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#1e40af"
+  }
+}
+
+clifford: "CliffordModule (p, q)\n«representation»\n--\nGamma matrices • Trace table" {
+  style: {
+    fill: "#f0f7ff"
+    stroke: "#2563eb"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#1e40af"
+  }
+}
+
+arma: "Armadillo C++\n«third-party»\n--\ncx_mat • BLAS • LAPACK" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#64748b"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#334155"
+  }
+}
+
+rng: "Stochastic Engine\n«third-party»\n--\nGSL Random Number Gen" {
+  style: {
+    fill: "#ffffff"
+    stroke: "#64748b"
+    stroke-width: 2
+    border-radius: 6
+    font-color: "#334155"
+  }
+}
+
+# Execution & Data Flow
+py -> sampler: configures { style.stroke-dash: 4 }
+py -> dirac: inspects { style.stroke-dash: 4 }
+
+sampler -> obs: notifies { style.stroke-dash: 4 }
+sampler -> dirac: proposes updates
+sampler -> action: queries variation ΔS
+sampler -> rng: draws variates { style.stroke-dash: 4 }
+
+action -> dirac: evaluates { style.stroke-dash: 4 }
+
+dirac -> clifford: uses
+dirac -> arma: delegates
