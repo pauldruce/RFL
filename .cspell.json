@@ -17,7 +17,8 @@
     "**/node_modules/**",
     "**/*.png",
     "**/*.svg",
-    "**/*.jpg"
+    "**/*.jpg",
+    ".cspell.json"
   ],
   "ignoreRegExpList": [
     "//\\s*NOLINT.*",
