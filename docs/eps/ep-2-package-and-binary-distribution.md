@@ -158,6 +158,25 @@ On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silico
 
 ### 5.1 The 3-Phase Roadmap
 
+```mermaid
+flowchart LR
+    P1["Phase 1 (v0.1.0)
+    • Core / Legacy layout
+    • cibuildwheel (Linux & macOS)
+    • PyPI OIDC Trusted Publishing
+    • CMake FetchContent"]
+    P2["Phase 2 (v0.3.0)
+    • CMake install() targets
+    • Export RFLConfig.cmake
+    • CPack binary .tar.gz archives"]
+    P3["Phase 3 (Backlog)
+    • Homebrew Tap formula
+    • Conda-Forge feedstock
+    • Evaluate Conan & vcpkg"]
+
+    P1 ==> P2 ==> P3
+```
+
 | Phase | Target Version | Scope & Key Deliverables | Ecosystem |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | `v0.1.0` | • Decompose `core/` and `legacy/`<br/>• `cibuildwheel` across Linux and macOS<br/>• PyPI OIDC Trusted Publishing<br/>• CMake `FetchContent` support (`RFL::core`) | Python & CMake FetchContent |
@@ -165,6 +184,31 @@ On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silico
 | **Phase 3** | Backlog | • Homebrew Tap for macOS (`brew install pauldruce/rfl/rfl`)<br/>• Conda-Forge feedstock for scientific Python<br/>• Conan / vcpkg packaging | Package Managers |
 
 ### 5.2 Release Pipeline Workflow (`.github/workflows/release.yml`)
+
+```mermaid
+flowchart TD
+    Trigger(["Trigger: Release Published or Workflow Dispatch"])
+
+    Trigger --> W1["cibuildwheel: Linux x86_64
+    (manylinux_2_28)"]
+    Trigger --> W2["cibuildwheel: macOS x86_64
+    (macos-15-intel)"]
+    Trigger --> W3["cibuildwheel: macOS arm64
+    (macos-14)"]
+    Trigger --> Sdist["Source Distribution (sdist)
+    (Ubuntu latest)"]
+
+    W1 --> Stage["Staged Release Artifacts
+    (dist/*.whl & dist/*.tar.gz)"]
+    W2 --> Stage
+    W3 --> Stage
+    Sdist --> Stage
+
+    Stage --> GH["GitHub Release
+    (Upload Assets)"]
+    Stage --> PyPI["PyPI Production
+    (Trusted OIDC)"]
+```
 
 | Pipeline Stage | Job Name | Execution Environment | Deliverables & Verification |
 | :--- | :--- | :--- | :--- |

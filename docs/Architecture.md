@@ -14,7 +14,35 @@
 
 ## 2. System Architecture & Data Flow
 
-![System Architecture & Data Flow](images/system_architecture.svg)
+```mermaid
+flowchart TD
+    Py["pyrfl Python Interface
+    (Zero-copy NumPy buffers)"]
+    Obs["Telemetry & Observables
+    (ISimulationObserver / Recorders)"]
+    Sampler["MetropolisSampler (MCMC)
+    (DualAveraging calibration)"]
+    Action["BarrettGlaserAction
+    (S = g2 Tr(D²) + g4 Tr(D⁴))"]
+    Dirac["DiracOperator (Value Type)
+    (Matrix spectral state)"]
+    Clifford["CliffordModule (p, q)
+    (Gamma matrices & trace table)"]
+    Arma["Armadillo C++
+    (cx_mat, BLAS, LAPACK)"]
+    RNG["Stochastic Engine
+    (GSL Random Number Gen)"]
+
+    Py -->|configures| Sampler
+    Py -->|inspects| Dirac
+    Sampler -->|notifies| Obs
+    Sampler -->|proposes updates| Dirac
+    Sampler -->|queries variation| Action
+    Action -.->|evaluates| Dirac
+    Dirac -->|uses| Clifford
+    Dirac -->|delegates| Arma
+    Sampler -->|draws variates| RNG
+```
 
 | Architectural Layer | Core Responsibilities | Key Components |
 | :--- | :--- | :--- |
@@ -63,7 +91,67 @@
 
 ## 4. Component Structure & Relationships
 
-![Component Structure & Relationships](images/component_relationships.svg)
+```mermaid
+classDiagram
+    class DiracOperator {
+        -int m_p
+        -int m_q
+        -int m_matrix_dim
+        -int m_gamma_dim
+        -vector~cx_mat~ m_matrices
+        -vector~int~ m_epsilons
+        -OmegaTable m_omega_table
+        +getType() pair~int,int~
+        +getMatrixDimension() int
+        +getMatrices() vector~cx_mat~&
+        +computeEigenvalues() vec
+        +traceDiracSquared() double
+        +traceDiracQuartic() double
+        +randomise(IRng& rng) void
+    }
+
+    class BarrettGlaserAction {
+        -double m_g2
+        -double m_g4
+        +calculate(DiracOperator) double
+        +calculateDelta(DiracOperator, int, int, int, cx_double) double
+        +calculateGradient(DiracOperator, int) cx_mat
+        +getG2() double
+        +getG4() double
+    }
+
+    class MetropolisSampler {
+        -BarrettGlaserAction m_action
+        -double m_scale
+        -shared_ptr~IRng~ m_rng
+        -vector~shared_ptr~ISimulationObserver~~ m_observers
+        +step(DiracOperator&) StepResult
+        +sweep(DiracOperator&) SweepResult
+        +sweepDualAveraging(DiracOperator&, double) SweepResult
+        +add_observer(shared_ptr~ISimulationObserver~) void
+        +getScale() double
+        +setScale(double) void
+    }
+
+    class ISimulationObserver {
+        <<interface>>
+        +on_step(size_t, DiracOperator&, StepResult) void
+        +on_sweep(size_t, DiracOperator&, SweepResult) void
+    }
+
+    class EigenvalueRecorder {
+        -size_t m_interval
+        -vector~vec~ m_history
+        +on_sweep(size_t, DiracOperator&, SweepResult) void
+        +get_history() vector~vec~
+    }
+
+    ISimulationObserver <|.. EigenvalueRecorder : implements
+    MetropolisSampler o-- BarrettGlaserAction : uses
+    MetropolisSampler o-- ISimulationObserver : notifies
+    MetropolisSampler ..> DiracOperator : mutates during sweep
+    BarrettGlaserAction ..> DiracOperator : evaluates
+```
 
 | Component Class | Architectural Role | Key Responsibilities |
 | :--- | :--- | :--- |
