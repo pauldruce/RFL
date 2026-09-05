@@ -1,0 +1,93 @@
+# RFL Modular CMake Target Architecture (C4 Model Palette)
+# Regenerate SVG: d2 --layout=elk cmake_targets.d2 cmake_targets_d2.svg
+
+direction: down
+
+rfl_targets: "rfl Targets (src/RFL/core)" {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#cbd5e1"
+    stroke-width: 2
+    border-radius: 8
+  }
+
+  core: "rfl_core\n«INTERFACE»\n--\nConsumer Aggregator Target" {
+    style: {
+      fill: "#eff6ff"
+      stroke: "#1d4ed8"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#1e3a8a"
+    }
+  }
+
+  mcmc: "rfl_mcmc\n«STATIC»\n--\nAction • Metropolis • Simulation" {
+    style: {
+      fill: "#f0f7ff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#1e40af"
+    }
+  }
+
+  geom: "rfl_geometry\n«STATIC»\n--\nDiracOperator • CliffordModule" {
+    style: {
+      fill: "#f0f7ff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#1e40af"
+    }
+  }
+
+  rng: "rfl_rng\n«STATIC»\n--\nGslRng • IRng" {
+    style: {
+      fill: "#f0f7ff"
+      stroke: "#2563eb"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#1e40af"
+    }
+  }
+
+  core -> rng: aggregates {style.stroke-dash: 4}
+
+  core -> mcmc: aggregates {style.stroke-dash: 4}
+  mcmc -> geom: links {style.stroke-dash: 4}
+  mcmc -> rng: links {style.stroke-dash: 4}
+
+  core -> geom: aggregates {style.stroke-dash: 4}
+}
+
+external: "Third-Party" {
+  style: {
+    fill: "#f8fafc"
+    stroke: "#cbd5e1"
+    stroke-width: 2
+    border-radius: 8
+  }
+
+  arma: "Armadillo C++\n«third-party»\n--\ncx_mat, BLAS, LAPACK" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#64748b"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#334155"
+    }
+  }
+
+  gsl: "GSL\n«third-party»\n--\ngsl_rng engine" {
+    style: {
+      fill: "#ffffff"
+      stroke: "#64748b"
+      stroke-width: 2
+      border-radius: 6
+      font-color: "#334155"
+    }
+  }
+}
+
+rfl_targets.geom -> external.arma: links {style.stroke-dash: 4}
+rfl_targets.rng -> external.gsl: links {style.stroke-dash: 4}

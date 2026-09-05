@@ -1,0 +1,10 @@
+[tools]
+"aqua:terrastruct/d2" = "0.8.2"
+
+[tasks.lint-d2]
+description = "Check that all compiled SVG diagrams match their D2 sources"
+run = "python3 scripts/check_d2_images.py"
+
+[tasks.build-d2]
+description = "Recompile all SVG diagrams from D2 sources"
+run = "python3 scripts/check_d2_images.py --fix"

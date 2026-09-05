@@ -36,3 +36,16 @@ genrule(
     ],
     visibility = ["PUBLIC"],
 )
+
+genrule(
+    name = "lint_d2",
+    outs = ["lint_d2.sh"],
+    binary = True,
+    cmd = [
+        "echo '#!/bin/bash' > $OUTS",
+        "echo 'echo \"Checking D2 diagrams are up to date...\"' >> $OUTS",
+        "echo 'python3 scripts/check_d2_images.py' >> $OUTS",
+        "chmod +x $OUTS",
+    ],
+    visibility = ["PUBLIC"],
+)

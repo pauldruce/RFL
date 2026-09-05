@@ -1,0 +1,16 @@
+shape: sequence_diagram
+
+client: Python (pyrfl)
+runner: Simulation Runner
+kernel: Dirac Operator
+
+client -> runner: run(n_sweeps)
+
+# Enclose iterations in a loop group block
+sweep_loop: {
+  runner -> kernel: compute_trace_d2()
+  kernel -> runner: trace_val
+  runner -> runner: accept_or_reject()
+}
+
+runner -> client: simulation_results

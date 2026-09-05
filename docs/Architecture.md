@@ -14,48 +14,17 @@
 
 ## 2. System Architecture & Data Flow
 
-```mermaid
-flowchart TB
-    subgraph UserLayer["Research & Exploration Layer"]
-        Py["<b>Python / Jupyter Interface</b><br/><code>import rfl</code> (pybind11 / carma)"]
-        Obs["<b>Observable & Telemetry Pipeline</b><br/>Eigenvalue Recorders, Autocorrelation, Observables"]
-    end
+![RFL System Architecture & Data Flow](images/architecture_data_flow.svg)
 
-    subgraph SimulationCore["Sampling & Optimisation Engine"]
-        Sampler["<b>MCMC & HMC Solvers</b><br/>Metropolis Stepper, Dual-Averaging Calibration"]
-        Action["<b>Action & Energy Functionals</b><br/>Barrett-Glaser Action, Analytic Variations ΔS, Gradients ∇S"]
-    end
+*Figure 2.1: RFL system architecture and data flow (C4 Model Palette). Source script co-located at [`docs/images/architecture_data_flow.d2`](images/architecture_data_flow.d2).*
 
-    subgraph GeometryCore["Noncommutative Geometry Core"]
-        Dirac["<b>Dirac Spectral State</b><br/>Value-type DiracOperator (H & L Matrices, Epsilons)"]
-        Clifford["<b>Clifford Algebra Engine</b><br/>CliffordModule (Gamma Matrices, Ω<sup>(4)</sup> Table)"]
-    end
 
-    subgraph HardwareFoundations["Foundational Math & Hardware Engines"]
-        Arma["<b>Linear Algebra Engine</b><br/>Armadillo / BLAS / LAPACK"]
-        RNG["<b>Stochastic Engine</b><br/>GSL Random Number Generator"]
-    end
-
-    Py -->|configures & orchestrates| Sampler
-    Py -->|inspects spectral data| Dirac
-    Sampler -->|proposes coordinate updates δM| Dirac
-    Sampler -->|queries variation ΔS| Action
-    Sampler -->|streams step & sweep events| Obs
-    Action -->|evaluates matrix products & traces| Dirac
-    Dirac -->|computes Clifford representations| Clifford
-    Dirac -->|delegates matrix math| Arma
-    Sampler -->|draws uniform/normal random variates| RNG
-
-    classDef userStyle fill:#4a90e2,stroke:#1d5bbf,stroke-width:2px,color:#fff;
-    classDef simStyle fill:#20b2aa,stroke:#008b8b,stroke-width:2px,color:#fff;
-    classDef geomStyle fill:#e67e22,stroke:#d35400,stroke-width:2px,color:#fff;
-    classDef baseStyle fill:#7f8c8d,stroke:#34495e,stroke-width:2px,color:#fff;
-
-    class Py,Obs userStyle;
-    class Sampler,Action simStyle;
-    class Dirac,Clifford geomStyle;
-    class Arma,RNG baseStyle;
-```
+| Architectural Layer | Core Responsibilities | Key Components |
+| :--- | :--- | :--- |
+| **Research & Exploration** | User API, interactive exploration, telemetry sinks | `pyrfl` Python module, `ISimulationObserver`, `EigenvalueRecorder` |
+| **Sampling & Optimisation** | Markov chain steppers, step calibration | `MetropolisSampler`, `DualAveraging`, symplectic integrators |
+| **Noncommutative Geometry** | Matrix spectral state, Clifford algebra representations | `DiracOperator`, `CliffordModule`, `OmegaTable` |
+| **Foundational Math** | High-performance matrix linear algebra and stochastic RNG | Armadillo (`arma::cx_mat`), BLAS, LAPACK, GSL RNG |
 
 ### Architectural Principles:
 * **Value Semantics & Regular Types:** Domain objects (`DiracOperator`, `CliffordModule`, `ActionConfig`) behave as regular C++ types: copyable, movable, default-constructible where sensible, with intuitive value equality and no nested pointer wrappers.
@@ -68,32 +37,14 @@ flowchart TB
 
 ## 3. Structural Design Patterns
 
-```mermaid
-graph TD
-    subgraph Packaging["Physical Code Boundaries"]
-        Pitchfork["<b>Public / Private Isolation</b><br/><code>include/rfl/</code> (Public API) vs <code>src/detail/</code> (Kernels)"]
-    end
-
-    subgraph Computation["In-Loop Computation Patterns"]
-        Policy["<b>Policy-Based Customisation</b><br/>Pluggable Action & Proposal Kernels (Compile-time)"]
-        NVI["<b>Non-Virtual Interface (NVI)</b><br/>Precondition Validation & Invariant Enforcement"]
-    end
-
-    subgraph Lifecycle["Configuration & Telemetry"]
-        ParamObj["<b>Parameter Objects</b><br/>Designated Initialiser Config Structs"]
-        Observer["<b>Observable Sinks</b><br/>Decoupled Telemetry & Measurement Collection"]
-    end
-
-    subgraph Interop["Language Bridge"]
-        Facade["<b>Dual-Tier Python Bridge</b><br/>Zero-Copy NumPy Arrays & Stream Generators"]
-    end
-
-    Packaging --> Computation
-    ParamObj --> Computation
-    Computation --> Observer
-    Computation --> Facade
-    Observer --> Facade
-```
+| Design Pattern | Subsystem | Architecture Intent | Modern C++ Implementation |
+| :--- | :--- | :--- | :--- |
+| **Physical Isolation (Pitchfork)** | Codebase Layout | Hide private kernels from public consumers | Public headers in `include/rfl/`; internal kernels in `src/detail/` |
+| **Policy-Based Design** | Simulation Core | Compile-time pluggable physics without virtual dispatch | Template policies for action functionals, proposals, and tuning |
+| **Observer / Event Sink** | Telemetry & Observables | Decouple telemetry from Markov chain steppers | `ISimulationObserver` interface with callback hooks (`on_step`, `on_sweep`) |
+| **Parameter Objects** | Configuration | Type-safe, designated-initializer configuration | Strongly-typed structs (`GeometryConfig`, `MetropolisConfig`) |
+| **Dual-Tier Python Bridge** | Language Interop | High-performance compute with Python research agility | `pybind11` binding zero-copy NumPy buffers and Pythonic generators |
+| **Non-Virtual Interface (NVI)** | Public Interfaces | Enforce preconditions and invariants reliably | Public non-virtual methods delegating to private virtual customisation hooks |
 
 ### Pattern Descriptions:
 
@@ -113,69 +64,20 @@ graph TD
 
 ---
 
-## 4. Component UML Class Diagram
+## 4. Component Structure & Relationships
 
-```mermaid
-classDiagram
-    class DiracOperator {
-        -int m_p
-        -int m_q
-        -int m_matrix_dim
-        -int m_gamma_dim
-        -vector~cx_mat~ m_matrices
-        -vector~int~ m_epsilons
-        -OmegaTable m_omega_table
-        +getType() pair~int,int~
-        +getMatrixDimension() int
-        +getMatrices() vector~cx_mat~&
-        +computeEigenvalues() vec
-        +traceDiracSquared() double
-        +traceDiracQuartic() double
-        +randomise(IRng& rng) void
-    }
+![Component Structure & Relationships](images/architecture_components.svg)
 
-    class BarrettGlaserAction {
-        -double m_g2
-        -double m_g4
-        +calculate(DiracOperator) double
-        +calculateDelta(DiracOperator, int, int, int, cx_double) double
-        +calculateGradient(DiracOperator, int) cx_mat
-        +getG2() double
-        +getG4() double
-    }
+*Figure 4.1: Core component structure and relationships (UML class diagram). Source script co-located at [`docs/images/architecture_components.d2`](images/architecture_components.d2).*
 
-    class MetropolisSampler {
-        -BarrettGlaserAction m_action
-        -double m_scale
-        -shared_ptr~IRng~ m_rng
-        -vector~shared_ptr~ISimulationObserver~~ m_observers
-        +step(DiracOperator&) StepResult
-        +sweep(DiracOperator&) SweepResult
-        +sweepDualAveraging(DiracOperator&, double) SweepResult
-        +add_observer(shared_ptr~ISimulationObserver~) void
-        +getScale() double
-        +setScale(double) void
-    }
 
-    class ISimulationObserver {
-        <<interface>>
-        +on_step(size_t, DiracOperator&, StepResult) void*
-        +on_sweep(size_t, DiracOperator&, SweepResult) void*
-    }
-
-    class EigenvalueRecorder {
-        -size_t m_interval
-        -vector~vec~ m_history
-        +on_sweep(size_t, DiracOperator&, SweepResult) void
-        +get_history() vector~vec~
-    }
-
-    ISimulationObserver <|.. EigenvalueRecorder : implements
-    MetropolisSampler o-- BarrettGlaserAction : uses
-    MetropolisSampler o-- ISimulationObserver : notifies
-    MetropolisSampler ..> DiracOperator : mutates during sweep
-    BarrettGlaserAction ..> DiracOperator : evaluates
-```
+| Component Class | Architectural Role | Key Responsibilities |
+| :--- | :--- | :--- |
+| **`DiracOperator`** | Spectral State | Value-type owning matrix elements $H_i, L_{ij}$, Clifford module, and eigenvalue spectra |
+| **`BarrettGlaserAction`** | Energy Functional | Calculates action $S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$ and analytic variations $\Delta S$ |
+| **`MetropolisSampler`** | MCMC Stepper | Drives Markov chain updates, tunes step sizes via dual averaging, and notifies observers |
+| **`ISimulationObserver`** | Telemetry Interface | Observer sink receiving `on_step()` and `on_sweep()` lifecycle events |
+| **`EigenvalueRecorder`** | Metric Collector | Collects spectral histories and observables across simulation sweeps |
 
 ---
 

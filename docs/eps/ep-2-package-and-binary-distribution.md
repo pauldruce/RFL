@@ -158,63 +158,21 @@ On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silico
 
 ### 5.1 The 3-Phase Roadmap
 
-```mermaid
-flowchart LR
-    subgraph Phase1["Phase 1: PyPI & GitHub Releases (v0.1.0)"]
-        P1A["Restructure core/ & legacy/"]
-        P1B["cibuildwheel (Linux/macOS)"]
-        P1C["PyPI OIDC Publishing"]
-        P1D["CMake FetchContent (RFL::core)"]
-    end
-
-    subgraph Phase2["Phase 2: CMake Targets & CPack (v0.3.0)"]
-        P2A["CMake install() Rules"]
-        P2B["RFLConfig.cmake Export"]
-        P2C["CPack Binary Tarballs"]
-    end
-
-    subgraph Phase3["Phase 3: Package Managers (Future)"]
-        P3A["Homebrew Tap (macOS)"]
-        P3B["Conda-Forge Feedstock"]
-        P3C["Conan / vcpkg Evaluation"]
-    end
-
-    Phase1 --> Phase2 --> Phase3
-```
+| Phase | Target Version | Scope & Key Deliverables | Ecosystem |
+| :--- | :--- | :--- | :--- |
+| **Phase 1** | `v0.1.0` | • Decompose `core/` and `legacy/`<br/>• `cibuildwheel` across Linux and macOS<br/>• PyPI OIDC Trusted Publishing<br/>• CMake `FetchContent` support (`RFL::core`) | Python & CMake FetchContent |
+| **Phase 2** | `v0.3.0` | • CMake `install()` rules<br/>• Export `RFLConfig.cmake` package files<br/>• CPack binary `.tar.gz` distributions | System C++ Installations |
+| **Phase 3** | Backlog | • Homebrew Tap for macOS (`brew install pauldruce/rfl/rfl`)<br/>• Conda-Forge feedstock for scientific Python<br/>• Conan / vcpkg packaging | Package Managers |
 
 ### 5.2 Release Pipeline Workflow (`.github/workflows/release.yml`)
 
-```mermaid
-flowchart TD
-    A["Release Published Event (v*)\nor workflow_dispatch"] --> B["Matrix: build_wheels"]
-    A --> C["Job: build_sdist"]
-    
-    subgraph Matrix["Matrix: cibuildwheel"]
-        B1["Linux x86_64\n(manylinux_2_28)"]
-        B2["macOS x86_64\n(macos-13)"]
-        B3["macOS arm64\n(macos-14)"]
-    end
-    
-    B --> B1
-    B --> B2
-    B --> B3
-    
-    B1 --> T1["pytest inside container"]
-    B2 --> T2["pytest inside env"]
-    B3 --> T3["pytest inside env"]
-    
-    T1 --> U1["Upload Wheel Artifacts"]
-    T2 --> U1
-    T3 --> U1
-    C --> U2["Upload sdist Artifact"]
-    
-    U1 --> G{"Release Published?"}
-    U2 --> G
-    
-    G -->|Yes| R1["Job: upload_release_assets\n(Attach wheels + sdist)"]
-    G -->|Yes| R2["Job: publish_pypi\n(Trusted Publishing OIDC)"]
-    G -->|No (Dry Run)| R3["Retain Staged Artifacts"]
-```
+| Pipeline Stage | Job Name | Execution Environment | Deliverables & Verification |
+| :--- | :--- | :--- | :--- |
+| **1. Trigger** | `release` (published) or `workflow_dispatch` | GitHub Actions | Dispatches matrix jobs concurrently |
+| **2. Binary Wheels** | `build_wheels` | • Linux x86_64 (`manylinux_2_28`)<br/>• macOS x86_64 (`macos-13`)<br/>• macOS arm64 (`macos-14`) | Compiles wheels via `cibuildwheel` and executes `pytest` |
+| **3. Source Dist** | `build_sdist` | Ubuntu latest | Generates canonical `.tar.gz` sdist |
+| **4. Asset Upload** | `upload_release_assets` | Ubuntu latest (on published release) | Attaches wheels and sdist to GitHub Release |
+| **5. PyPI Publish** | `publish_pypi` | Ubuntu latest (OIDC Trusted Publishing) | Publishes packages to PyPI index |
 
 ---
 

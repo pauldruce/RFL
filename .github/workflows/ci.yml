@@ -1,40 +1,138 @@
 name: CI Checks
-on:
-  workflow_dispatch:
-  pull_request:
 
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build_and_test:
-    if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
+  filter:
+    name: Path Filtering
     runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      code: ${{ steps.filter.outputs.code }}
     steps:
       - uses: actions/checkout@v7
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            docs:
+              - 'docs/**'
+              - '*.md'
+              - '.agents/**'
+              - 'research/**'
+              - 'vault/**'
+              - '.gitignore'
+            code:
+              - 'src/**'
+              - 'playground/**'
+              - 'CMakeLists.txt'
+              - 'third_party/**'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/linter.yml'
+
+  test_ubuntu:
+    name: Ubuntu PR Smoke Test
+    needs: filter
+    if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
       - name: Install Linux dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y \
-            cmake                 \
+            cmake ninja-build     \
             libopenblas-dev       \
             liblapack-dev         \
             libarpack2-dev        \
             libsuperlu-dev        \
-            wget                  \
             libgsl-dev            \
-            doxygen               \
-            graphviz              \
-            libhdf5-serial-dev
+            libhdf5-dev           \
+            libhdf5-serial-dev    \
+            libarmadillo-dev
+          # Ubuntu's libhdf5-serial-dev package installs libraries into a serial subdirectory.
+          # Create a symlink in the standard library path so Armadillo and CMake can discover HDF5.
+          sudo ln -s /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so /usr/lib/x86_64-linux-gnu/libhdf5.so 2>/dev/null || true
 
-      - name: Install Armadillo
-        uses: ./.github/actions/install-armadillo
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          version: '12.8.2'
-          os: 'ubuntu-latest'
+          key: ${{ runner.os }}-ubuntu-pr
 
-      - name: Build Project using Please
+      - name: Configure CMake
         run: |
-          ./pleasew build
+          cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
-      - name: Run Tests using Please
+      - name: Build C++ library and tests
+        run: cmake --build build --config Release
+
+      - name: Run CTest
+        run: ctest --test-dir build -C Release --output-on-failure
+
+  test_macos:
+    name: macOS PR Smoke Test
+    needs: filter
+    if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install macOS dependencies
         run: |
-          ./pleasew test
+          brew install cmake ninja armadillo gsl openblas hdf5 superlu arpack
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ runner.os }}-macos-pr
+
+      - name: Configure CMake
+        run: |
+          HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
+          cmake -B build -S src/RFL -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}" -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+
+      - name: Build C++ library and tests
+        run: cmake --build build --config Release
+
+      - name: Run CTest
+        run: ctest --test-dir build -C Release --output-on-failure
+
+  ci-gate:
+    name: CI Gatekeeper
+    needs: [filter, test_ubuntu, test_macos]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Evaluate Gatekeeper Results
+        run: |
+          echo "Filter result: ${{ needs.filter.result }}"
+          echo "Ubuntu test result: ${{ needs.test_ubuntu.result }}"
+          echo "macOS test result: ${{ needs.test_macos.result }}"
+
+          if [ "${{ needs.filter.result }}" = "failure" ] || [ "${{ needs.filter.result }}" = "cancelled" ]; then
+            echo "❌ Path filtering job failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.test_ubuntu.result }}" = "failure" ] || [ "${{ needs.test_ubuntu.result }}" = "cancelled" ]; then
+            echo "❌ Ubuntu PR smoke test failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.test_macos.result }}" = "failure" ] || [ "${{ needs.test_macos.result }}" = "cancelled" ]; then
+            echo "❌ macOS PR smoke test failed or was cancelled."
+            exit 1
+          fi
+
+          echo "✅ All required checks passed or were safely skipped."
+          exit 0

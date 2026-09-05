@@ -1,0 +1,13 @@
+# Simple stuff
+
+A: "This is A"
+B: "This is B"
+A -> B: creates
+B -> A: depends on
+
+# Slightly more advanced 
+
+client -> server: "HTTP POST /simulate"
+server -> database: "Store checkpoint"
+database -> server: "Ack"
+server -> client: "200 OK"

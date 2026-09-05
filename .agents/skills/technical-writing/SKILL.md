@@ -16,12 +16,12 @@ This guide defines the writing rules for RFL documentation, code comments, docst
 
 Controlled writing ensures clarity, reduces ambiguity, and makes technical documentation easy to read for humans and AI agents.
 
-```mermaid
-flowchart LR
-    A["1. Short Sentences\n(≤20 words instructions\n≤25 words descriptions)"] --> B["2. Active Voice\n(Direct verbs & imperatives)"]
-    B --> C["3. Controlled Vocabulary\n(One meaning per word)"]
-    C --> D["4. British Spelling\n(-ise, -our, -re, -ll-)"]
-```
+| Pillar | Standard |
+| :--- | :--- |
+| **1. Short Sentences** | Maximum 20 words for instructions; maximum 25 words for descriptions |
+| **2. Active Voice** | Direct verbs and imperatives |
+| **3. Controlled Vocabulary** | One meaning per word |
+| **4. British Spelling** | Standardise on British English (`-ise`, `-our`, `-re`, double `l`) |
 
 ---
 
@@ -71,6 +71,7 @@ flowchart LR
 
 RFL strictly standardises on **British English**:
 
+<!-- cspell:disable -->
 | Feature | British Standard (Approved) | US Form (Avoid) |
 | :--- | :--- | :--- |
 | **-ise / -isation** | *initialise, randomise, optimise, diagonalisation, categorise* | *initialize, randomize, optimize, diagonalization* |
@@ -80,6 +81,7 @@ RFL strictly standardises on **British English**:
 | **-programme** | *programme* (for scientific initiatives), *program* (for computer code) | *program* |
 | **-ence / -ense** | *licence* (noun), *license* (verb); *defence* | *license* (both); *defense* |
 | **Specialised terms** | *gauge, analogue, catalogue* | *gage, analog, catalog* |
+<!-- cspell:enable -->
 
 ---
 
@@ -124,3 +126,15 @@ When authoring release notes:
 1. Use an objective, impersonal tone (no first-person pronouns or conversational greetings).
 2. Follow the standard section layout defined in [docs/Release_Process.md](docs/Release_Process.md).
 3. Ensure all sentence length limits (Rule 1) and British English spelling (Section 3) are strictly followed.
+
+---
+
+## 6. Diagramming Policy: Avoid Unnecessary Mermaid Diagrams
+
+Do not use Mermaid diagrams for simple, linear, or text-first concepts.
+
+### Principles:
+1. **Prefer Standard Markdown:** Use bulleted lists, numbered steps, comparison tables, or ASCII / code blocks instead of Mermaid. Standard Markdown renders reliably across all browsers, mobile devices, diff viewers, and sandboxed environments without text clipping or layout bugs.
+2. **Never Use Horizontal Flowcharts (`flowchart LR`):** Wide multi-stage horizontal diagrams collapse into unreadable narrow strips on GitHub's viewport.
+3. **Avoid Text-Heavy Nodes:** Bounding-box calculation differences between system fonts and SVG containers cause persistent character truncation on GitHub.
+4. **Reserve Diagrams for Genuine Need:** Only use diagrams when communicating non-trivial, multi-branch network topologies or complex state machines that cannot be understood as text. If a diagram is strictly required, use vertical orientation (`flowchart TD`) with minimal node labels.
