@@ -159,7 +159,7 @@ On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silico
 ### 5.1 The 3-Phase Roadmap
 
 ```mermaid
-flowchart LR
+flowchart TD
     P1["Phase 1 (v0.1.0)
     • Core / Legacy layout
     • cibuildwheel (Linux & macOS)
@@ -189,20 +189,16 @@ flowchart LR
 flowchart TD
     Trigger(["Trigger: Release Published or Workflow Dispatch"])
 
-    Trigger --> W1["cibuildwheel: Linux x86_64
-    (manylinux_2_28)"]
-    Trigger --> W2["cibuildwheel: macOS x86_64
-    (macos-15-intel)"]
-    Trigger --> W3["cibuildwheel: macOS arm64
-    (macos-14)"]
-    Trigger --> Sdist["Source Distribution (sdist)
-    (Ubuntu latest)"]
+    Trigger --> BuildWheels["cibuildwheel Matrix
+    • Linux x86_64 (manylinux_2_28)
+    • macOS x86_64 (macos-15-intel)
+    • macOS arm64 (macos-14)"]
+    Trigger --> BuildSdist["Source Distribution (sdist)
+    • Canonical source tarball (.tar.gz)"]
 
-    W1 --> Stage["Staged Release Artifacts
+    BuildWheels --> Stage["Staged Release Artifacts
     (dist/*.whl & dist/*.tar.gz)"]
-    W2 --> Stage
-    W3 --> Stage
-    Sdist --> Stage
+    BuildSdist --> Stage
 
     Stage --> GH["GitHub Release
     (Upload Assets)"]
