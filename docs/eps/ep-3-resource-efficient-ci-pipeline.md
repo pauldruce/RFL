@@ -285,6 +285,7 @@ Mise manages development tools and defines reproducible project tasks:
 
 ```toml
 [tools]
+"aqua:terrastruct/d2" = "0.8.2"
 cmake = "3.31"
 ninja = "1.12"
 ccache = "4.10"
@@ -311,6 +312,14 @@ run = "pre-commit run --all-files"
 [tasks.format]
 description = "Automatically format all code across the repository"
 run = "pre-commit run --all-files"
+
+[tasks.lint-d2]
+description = "Check that all compiled SVG diagrams match their D2 sources"
+run = "python3 scripts/check_d2_images.py"
+
+[tasks.build-d2]
+description = "Recompile all SVG diagrams from D2 sources"
+run = "python3 scripts/check_d2_images.py --fix"
 
 [tasks.dev]
 description = "Install editable Python bindings"
@@ -463,7 +472,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 * **GitHub Issue:** [#23](https://github.com/pauldruce/RFL/issues/23)
 * **Status:** 🔄 In Progress
 * **Tasks:**
-  1. Add `mise.toml` defining standard developer tasks (`build`, `test`, `lint`, `format`, `dev`).
+  1. Add `mise.toml` defining standard developer tasks (`build`, `test`, `lint`, `format`, `dev`, `lint-d2`, `build-d2`).
   2. Add `CMakePresets.json` configuring Ninja, Release mode, and `ccache` for IDEs.
   3. Expand `.pre-commit-config.yaml` to include `clang-format`, `ruff`, and file hygiene hooks.
   4. Update `.github/workflows/linter.yml` to use `pre-commit/action`.

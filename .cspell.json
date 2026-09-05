@@ -31,7 +31,7 @@
     "-W[A-Za-z0-9_-]+",
     "[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+(?:@[v0-9.]+)?",
     "compatability_tests\\.ya?ml",
-    "lib[a-z0-9_]+(?:-[a-z0-9]+)*",
+    "\\blib[a-z0-9_]+(?:-[a-z0-9]+)*\\b",
     "\\.[a-zA-Z0-9_]*config"
   ],
   "words": [
@@ -171,7 +171,8 @@
     "wextra",
     "widom",
     "wikilinks",
-    "wpedantic"
+    "wpedantic",
+    "worktrees"
   ],
   "flagWords": [
     "initialize",

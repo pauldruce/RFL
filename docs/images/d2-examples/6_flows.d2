@@ -1,0 +1,23 @@
+direction: down
+
+pr: "Pull Request" {shape: circle}
+
+smoke: "Tier 1: Smoke Tests" {
+  style.fill: "#f0fdf4"
+  style.stroke: "#16a34a"
+
+  lint: "CSpell + Formatter"
+  build: "Ninja Build"
+  lint -> build
+}
+
+pr -> smoke.lint
+
+gate: "Tests Pass?" {shape: diamond}
+smoke.build -> gate
+
+gate -> release: "Yes" {style.stroke: "#16a34a"}
+gate -> blocked: "No" {style.stroke: "#dc2626"}
+
+release: "Deploy Artefact"
+blocked: "Block PR"

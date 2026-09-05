@@ -1,0 +1,23 @@
+# Groupings
+
+system: {
+  database: Postgres
+  api: FastAPI
+  workers: "Async Queue"
+  workers -> database: polls for work
+  api -> workers: sends work
+}
+
+frontend: "Client Layer" {
+  ui: "Web UI"
+  cli: "CLI Tool"
+}
+
+backend: "Compute Engine" {
+  sim: "Simulation Worker"
+  geom: "Dirac Operator"
+
+  sim -> geom: "compute"
+}
+
+frontend.cli -> backend.sim: "submit job"
