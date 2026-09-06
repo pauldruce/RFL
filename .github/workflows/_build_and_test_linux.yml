@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       os:
-        description: 'Operating system runner (Allowed: ubuntu-latest, ubuntu-24.04, ubuntu-22.04)'
+        description: 'Operating system runner (e.g. ubuntu-latest, ubuntu-22.04)'
         type: string
         required: true
       build_type:
@@ -34,20 +34,9 @@ jobs:
       - name: Validate inputs
         shell: bash
         run: |
-          ALLOWED_OS=("ubuntu-latest" "ubuntu-24.04" "ubuntu-22.04")
-          if [[ ! " ${ALLOWED_OS[*]} " =~ " ${{ inputs.os }} " ]]; then
-            echo "::error::Invalid os '${{ inputs.os }}'. Must be one of: ${ALLOWED_OS[*]}"
-            exit 1
-          fi
-
           ALLOWED_BUILD_TYPES=("Release" "Debug")
           if [[ ! " ${ALLOWED_BUILD_TYPES[*]} " =~ " ${{ inputs.build_type }} " ]]; then
             echo "::error::Invalid build_type '${{ inputs.build_type }}'. Must be one of: ${ALLOWED_BUILD_TYPES[*]}"
-            exit 1
-          fi
-
-          if [ "${{ inputs.install_system_armadillo }}" != "true" ] && [ -z "${{ inputs.arma_version }}" ]; then
-            echo "::error::arma_version is required when install_system_armadillo is false"
             exit 1
           fi
 
