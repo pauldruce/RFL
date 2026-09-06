@@ -75,6 +75,7 @@ jobs:
             -S src/RFL
             -G Ninja
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           )
           if [ "${{ inputs.install_system_armadillo }}" != "true" ]; then
@@ -91,10 +92,3 @@ jobs:
       - name: Test
         run: ctest --test-dir build -C ${{ inputs.build_type }} --output-on-failure
 
-      - name: Ccache Statistics
-        if: always()
-        run: |
-          echo "### Ccache Statistics (${{ inputs.os }})" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          ccache -s >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY

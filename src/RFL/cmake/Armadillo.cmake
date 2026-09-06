@@ -18,6 +18,7 @@ if(NOT TARGET Armadillo::Armadillo AND NOT TARGET armadillo)
 
         set(BUILD_SMOKE_TEST OFF CACHE BOOL "Disable Armadillo smoke test" FORCE)
         set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static Armadillo library" FORCE)
+        set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "Minimum policy version for fetched dependencies" FORCE)
 
         if(APPLE)
             set(ALLOW_OPENBLAS_MACOS ON CACHE BOOL "Allow detection of OpenBLAS on macOS" FORCE)
