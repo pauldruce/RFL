@@ -3,6 +3,7 @@ name: CI Checks
 on:
   pull_request:
     branches: [ main ]
+    types: [ opened, labeled, unlabeled, synchronize, reopened ]
   workflow_dispatch:
 
 permissions:
@@ -67,9 +68,39 @@ jobs:
       os: macos-latest
       install_system_armadillo: true
 
+  matrix_linux:
+    name: "Matrix Linux"
+    needs: filter
+    if: (needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch') && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04]
+        arma_version: ["11.4.x", "12.8.x", "14.2.x"]
+    uses: ./.github/workflows/_build_and_test_linux.yml
+    with:
+      os: ${{ matrix.os }}
+      arma_version: ${{ matrix.arma_version }}
+      install_system_armadillo: false
+
+  matrix_macos:
+    name: "Matrix macOS"
+    needs: filter
+    if: (needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch') && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-15-intel, macos-14]
+        arma_version: ["11.4.x", "12.8.x", "14.2.x"]
+    uses: ./.github/workflows/_build_and_test_macos.yml
+    with:
+      os: ${{ matrix.os }}
+      arma_version: ${{ matrix.arma_version }}
+      install_system_armadillo: false
+
   ci-gate:
     name: CI Gatekeeper
-    needs: [filter, lint, test_ubuntu, test_macos]
+    needs: [filter, lint, test_ubuntu, test_macos, matrix_linux, matrix_macos]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -77,8 +108,10 @@ jobs:
         run: |
           echo "Filter result: ${{ needs.filter.result }}"
           echo "Lint result: ${{ needs.lint.result }}"
-          echo "Ubuntu test result: ${{ needs.test_ubuntu.result }}"
-          echo "macOS test result: ${{ needs.test_macos.result }}"
+          echo "Ubuntu smoke test result: ${{ needs.test_ubuntu.result }}"
+          echo "macOS smoke test result: ${{ needs.test_macos.result }}"
+          echo "Linux matrix result: ${{ needs.matrix_linux.result }}"
+          echo "macOS matrix result: ${{ needs.matrix_macos.result }}"
 
           if [ "${{ needs.filter.result }}" = "failure" ] || [ "${{ needs.filter.result }}" = "cancelled" ]; then
             echo "❌ Path filtering job failed or was cancelled."
@@ -97,6 +130,16 @@ jobs:
 
           if [ "${{ needs.test_macos.result }}" = "failure" ] || [ "${{ needs.test_macos.result }}" = "cancelled" ]; then
             echo "❌ macOS PR smoke test failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.matrix_linux.result }}" = "failure" ] || [ "${{ needs.matrix_linux.result }}" = "cancelled" ]; then
+            echo "❌ Linux compatibility matrix failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.matrix_macos.result }}" = "failure" ] || [ "${{ needs.matrix_macos.result }}" = "cancelled" ]; then
+            echo "❌ macOS compatibility matrix failed or was cancelled."
             exit 1
           fi
 
