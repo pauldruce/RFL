@@ -1,0 +1,102 @@
+name: Build and Test macOS
+
+on:
+  workflow_call:
+    inputs:
+      os:
+        description: 'Operating system runner (e.g. macos-latest, macos-14, macos-15-intel)'
+        type: string
+        required: true
+      build_type:
+        description: 'CMake build type (Allowed: Release, Debug)'
+        type: string
+        required: false
+        default: 'Release'
+      arma_version:
+        description: 'Armadillo Git tag/version branch (e.g. 11.4.x, 12.8.x, 14.2.x)'
+        type: string
+        required: false
+        default: ''
+      install_system_armadillo:
+        description: 'Whether to install Armadillo from system package manager'
+        type: boolean
+        required: false
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: "macOS (${{ inputs.os }}, ${{ inputs.build_type }})"
+    runs-on: ${{ inputs.os }}
+    steps:
+      - name: Validate inputs
+        shell: bash
+        run: |
+          ALLOWED_BUILD_TYPES=("Release" "Debug")
+          if [[ ! " ${ALLOWED_BUILD_TYPES[*]} " =~ " ${{ inputs.build_type }} " ]]; then
+            echo "::error::Invalid build_type '${{ inputs.build_type }}'. Must be one of: ${ALLOWED_BUILD_TYPES[*]}"
+            exit 1
+          fi
+
+          if [ "${{ inputs.install_system_armadillo }}" = "true" ] && [ -n "${{ inputs.arma_version }}" ]; then
+            echo "::error::Conflicting inputs: arma_version ('${{ inputs.arma_version }}') cannot be set when install_system_armadillo is true. Set install_system_armadillo to false to test a specific Armadillo version via FetchContent."
+            exit 1
+          fi
+
+          if [ "${{ inputs.install_system_armadillo }}" != "true" ] && [ -z "${{ inputs.arma_version }}" ]; then
+            echo "::error::arma_version must be specified when install_system_armadillo is false."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Install dependencies
+        uses: ./.github/actions/install-macos-deps
+        with:
+          install-armadillo: ${{ inputs.install_system_armadillo }}
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ccache-macOS-${{ inputs.build_type }}
+          max-size: 500M
+
+      - name: Configure CMake
+        env:
+          CCACHE_BASEDIR: ${{ github.workspace }}
+          CCACHE_NOHASHDIR: "1"
+          CCACHE_COMPRESS: "1"
+        run: |
+          HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
+          CMAKE_ARGS=(
+            -B build
+            -S src/RFL
+            -G Ninja
+            -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
+            -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}"
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+          )
+          if [ "${{ inputs.install_system_armadillo }}" != "true" ]; then
+            CMAKE_ARGS+=(
+              -DRFL_FETCH_ARMADILLO=ON
+              -DARMADILLO_GIT_TAG=${{ inputs.arma_version }}
+            )
+          fi
+          cmake "${CMAKE_ARGS[@]}"
+
+      - name: Build
+        run: cmake --build build --config ${{ inputs.build_type }}
+
+      - name: Test
+        run: ctest --test-dir build -C ${{ inputs.build_type }} --output-on-failure
+
+      - name: Ccache Statistics
+        if: always()
+        run: |
+          echo "### Ccache Statistics (${{ inputs.os }})" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          ccache -s >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY

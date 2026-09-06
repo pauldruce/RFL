@@ -17,7 +17,7 @@ The table below tracks the status of each implementation phase:
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Tier 1 Fast PR Gate (Path filtering, dual-platform smoke tests, status gatekeeper) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
 | **Phase 2** | Build & Tooling Consolidation (Single-source build, reproducible developer environment, automated code quality) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
-| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | 💡 Planned |
+| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | ✅ Completed |
 | **Phase 4** | Native Windows CI Runner, MSVC Verification & Binary Wheel Automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
 
 ---
@@ -221,10 +221,11 @@ The new architecture must address these bottlenecks by defining clear operationa
 ```
 RFL/
 ├── .github/
-│   └── workflows/
-│       ├── ci.yml                 # Tier 1: Fast PR smoke gate (Ubuntu, macOS via CMake + ccache)
-│       ├── compatability_tests.yml# Tier 2: Exhaustive compatibility matrix on push to main
-│       ├── linter.yml             # Code quality gate using pre-commit
+│       ├── ci.yml                 # Tier 1: Fast PR smoke gate (lint + tests + gatekeeper)
+│       ├── main.yml               # Tier 2: Exhaustive compatibility matrix on push to main
+│       ├── _build_and_test_linux.yml # Reusable Linux build & test workflow
+│       ├── _build_and_test_macos.yml # Reusable macOS build & test workflow
+│       ├── codeql.yml             # Security analysis with paths-ignore filtering
 │       └── release.yml            # Automated wheel generation and PyPI distribution
 ├── cmake/                         # Modular CMake modules (Armadillo, FetchContent, Ccache, PCH)
 ├── src/RFL/
@@ -421,7 +422,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
   * `test_macos`: Executes if `code == true`. Uses `brew install armadillo gsl`, `ccache`, Ninja, and CMake/CTest.
   * `ci-gate`: Always runs (`if: always()`). Evaluates upstream results; reports success if code passed or if docs were skipped.
 
-#### 2. Tier 2: Exhaustive Compatibility Matrix (`.github/workflows/compatability_tests.yml`)
+#### 2. Tier 2: Exhaustive Compatibility Matrix (`.github/workflows/main.yml`)
 * **Triggers:**
   * `push` to `main` branch (every commit/merge into `main`).
   * `workflow_dispatch` with manual parameter inputs.
@@ -433,10 +434,10 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
   * Initialise `hendrikmuhs/ccache-action` across all runners.
   * Cache Armadillo installations per OS and version using `actions/cache`.
 
-#### 3. Code Quality Linter (`.github/workflows/linter.yml`)
-* **Triggers:** `pull_request`, `push` to `main`.
-* **Action:** Executes `pre-commit/action@v3.0.1` on Ubuntu runner.
-* **Coverage:** Validates C++, Python, whitespace, and British English spelling in a single pass.
+#### 3. Code Quality Linter (Integrated in `ci.yml`)
+* **Triggers:** `pull_request` (evaluated as a parallel check in `ci.yml`).
+* **Coverage:** Validates C++ formatting across tracked directories.
+* **Gate Enforcement:** Monitored directly by `ci-gate` to block unformatted pull requests.
 
 ---
 
@@ -449,7 +450,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 | **Incremental Rebuild Speed** | Touch leaf `.cpp` file and run `cmake --build build` | Incremental compilation completes in < 2 seconds with `ccache`. |
 | **Mise Test Task** | `mise run test` | Builds and executes all unit tests with 100% pass rate. |
 | **Pre-Commit Linter Execution** | `mise run lint` | Evaluates C++, Python, and spelling cleanly in < 2 seconds. |
-| **Mainline Trigger** | Push commit to `main` | Automatically triggers `compatability_tests.yml` across full matrix. |
+| **Mainline Trigger** | Push commit to `main` | Automatically triggers `main.yml` across full matrix. |
 
 ---
 
@@ -474,7 +475,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
   1. Add `mise.toml` defining standard developer tasks (`build`, `test`, `lint`, `format`, `dev`, `lint-d2`, `build-d2`).
   2. Add `CMakePresets.json` configuring Ninja, Release mode, and `ccache` for IDEs.
   3. Expand `.pre-commit-config.yaml` to include `clang-format`, `ruff`, and file hygiene hooks.
-  4. Update `.github/workflows/linter.yml` to use `pre-commit/action`.
+  4. Update `ci.yml` lint job to use `pre-commit/action`.
   5. Update `ci.yml` Ubuntu job to use symmetric CMake + Ninja + `ccache`, matching macOS.
   6. Decompose `src/RFL/core/CMakeLists.txt` into modular component targets (`rfl_geometry`, `rfl_mcmc`, `rfl_rng`).
   7. Add Precompiled Headers (PCH) for Armadillo and GSL in `CMakeLists.txt`.
@@ -483,7 +484,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 ### Phase 3: Dependency Decoupling with CMake FetchContent & System Packages
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#22](https://github.com/pauldruce/RFL/issues/22)
-* **Status:** 💡 Planned
+* **Status:** ✅ Completed
 * **Tasks:**
   1. Update `src/RFL/cmake/Armadillo.cmake` with `FetchContent` fallback from upstream GitLab repository.
   2. Replace manual Armadillo shell scripts in Tier 2 matrix with CMake FetchContent or system packages.
