@@ -120,6 +120,7 @@
     "nbformat",
     "ndarray",
     "ninja",
+    "NOHASHDIR",
     "noexcept",
     "noncommutative",
     "numpy",

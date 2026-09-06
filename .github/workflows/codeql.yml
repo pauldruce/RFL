@@ -27,7 +27,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: .github/filters.yaml
@@ -63,7 +63,7 @@ jobs:
         with:
           install-armadillo: 'true'
 
-      - name: Initialize CodeQL
+      - name: Initialise CodeQL
         uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
