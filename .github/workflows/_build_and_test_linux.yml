@@ -61,7 +61,10 @@ jobs:
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ccache-Linux-${{ inputs.build_type }}
+          key: ccache-${{ inputs.os }}-${{ inputs.build_type }}-${{ inputs.arma_version }}
+          restore-keys: |
+            ccache-${{ inputs.os }}-${{ inputs.build_type }}-
+            ccache-${{ inputs.os }}-
           max-size: 500M
 
       - name: Configure CMake
@@ -90,5 +93,5 @@ jobs:
         run: cmake --build build --config ${{ inputs.build_type }}
 
       - name: Test
-        run: ctest --test-dir build -C ${{ inputs.build_type }} --output-on-failure
+        run: ctest --test-dir build -C ${{ inputs.build_type }} --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure
 
