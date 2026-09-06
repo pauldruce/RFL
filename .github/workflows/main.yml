@@ -3,6 +3,8 @@ name: Mainline Verification
 on:
   push:
     branches: [ main ]
+  pull_request:
+    types: [ opened, labeled, synchronize ]
   workflow_dispatch:
 
 permissions:
@@ -14,6 +16,10 @@ concurrency:
 
 jobs:
   compat_linux:
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     name: "Linux (${{ matrix.os }}, Armadillo ${{ matrix.arma_version }})"
     strategy:
       fail-fast: false
@@ -27,6 +33,10 @@ jobs:
       install_system_armadillo: false
 
   compat_macos:
+    if: >
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     name: "macOS (${{ matrix.os }}, Armadillo ${{ matrix.arma_version }})"
     strategy:
       fail-fast: false

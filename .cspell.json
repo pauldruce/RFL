@@ -96,6 +96,7 @@
     "irng",
     "katex",
     "kron",
+    "labeled",
     "langevin",
     "lapack",
     "libarmadillo",
