@@ -62,7 +62,9 @@ jobs:
         run: |
           HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
           CMAKE_ARGS=(
-            -B build -S src/RFL -G Ninja
+            -B build
+            -S src/RFL
+            -G Ninja
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
             -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}"
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache

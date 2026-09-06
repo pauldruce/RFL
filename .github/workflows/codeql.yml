@@ -55,7 +55,9 @@ jobs:
       - name: Build C++ code
         if: matrix.language == 'c-cpp'
         run: |
-          cmake -B build -S src/RFL
+          cmake \
+            -B build \
+            -S src/RFL
           cmake --build build --target rfl_core
 
       - name: Perform CodeQL Analysis

@@ -61,7 +61,9 @@ jobs:
           CCACHE_COMPRESS: "1"
         run: |
           CMAKE_ARGS=(
-            -B build -S src/RFL -G Ninja
+            -B build
+            -S src/RFL
+            -G Ninja
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           )
