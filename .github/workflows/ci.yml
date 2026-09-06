@@ -26,22 +26,7 @@ jobs:
       - uses: dorny/paths-filter@v3
         id: filter
         with:
-          filters: |
-            docs:
-              - 'docs/**'
-              - '*.md'
-              - '.agents/**'
-              - 'research/**'
-              - 'vault/**'
-              - '.gitignore'
-            code:
-              - 'src/**'
-              - 'playground/**'
-              - 'CMakeLists.txt'
-              - 'third_party/**'
-              - '.clang-format'
-              - '.github/workflows/**'
-              - '.github/actions/**'
+          filters: .github/filters.yaml
 
   lint:
     name: "C++ Linter (${{ matrix.path }})"
