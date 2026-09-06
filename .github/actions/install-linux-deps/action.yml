@@ -15,12 +15,17 @@ runs:
       run: |
         sudo apt-get update -y
         PACKAGES=(
-          cmake ninja-build
-          libopenblas-dev liblapack-dev
-          libarpack2-dev libsuperlu-dev
+          cmake
+          ninja-build
+          libopenblas-dev
+          liblapack-dev
+          libarpack2-dev
+          libsuperlu-dev
           libgsl-dev
-          doxygen graphviz
-          libhdf5-dev libhdf5-serial-dev
+          doxygen
+          graphviz
+          libhdf5-dev
+          libhdf5-serial-dev
         )
         if [[ "${{ inputs.install-armadillo }}" == "true" ]]; then
           PACKAGES+=(libarmadillo-dev)

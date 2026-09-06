@@ -4,16 +4,16 @@ on:
   workflow_call:
     inputs:
       os:
-        description: 'Operating system runner (e.g. ubuntu-latest, ubuntu-22.04)'
+        description: 'Operating system runner (Allowed: ubuntu-latest, ubuntu-24.04, ubuntu-22.04)'
         type: string
         required: true
       build_type:
-        description: 'CMake build type (Debug, Release)'
+        description: 'CMake build type (Allowed: Release, Debug)'
         type: string
         required: false
         default: 'Release'
       arma_version:
-        description: 'Armadillo Git tag/version branch (e.g. 14.2.x)'
+        description: 'Armadillo Git tag/version branch (e.g. 11.4.x, 12.8.x, 14.2.x)'
         type: string
         required: false
         default: ''
@@ -31,6 +31,26 @@ jobs:
     name: "Linux (${{ inputs.os }}, ${{ inputs.build_type }})"
     runs-on: ${{ inputs.os }}
     steps:
+      - name: Validate inputs
+        shell: bash
+        run: |
+          ALLOWED_OS=("ubuntu-latest" "ubuntu-24.04" "ubuntu-22.04")
+          if [[ ! " ${ALLOWED_OS[*]} " =~ " ${{ inputs.os }} " ]]; then
+            echo "::error::Invalid os '${{ inputs.os }}'. Must be one of: ${ALLOWED_OS[*]}"
+            exit 1
+          fi
+
+          ALLOWED_BUILD_TYPES=("Release" "Debug")
+          if [[ ! " ${ALLOWED_BUILD_TYPES[*]} " =~ " ${{ inputs.build_type }} " ]]; then
+            echo "::error::Invalid build_type '${{ inputs.build_type }}'. Must be one of: ${ALLOWED_BUILD_TYPES[*]}"
+            exit 1
+          fi
+
+          if [ "${{ inputs.install_system_armadillo }}" != "true" ] && [ -z "${{ inputs.arma_version }}" ]; then
+            echo "::error::arma_version is required when install_system_armadillo is false"
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v7
 

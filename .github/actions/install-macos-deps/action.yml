@@ -15,11 +15,17 @@ runs:
       run: |
         brew update
         PACKAGES=(
-          cmake ninja
-          doxygen graphviz
-          arpack hdf5 libaec
-          openblas superlu
-          pkg-config gsl
+          cmake
+          ninja
+          doxygen
+          graphviz
+          arpack
+          hdf5
+          libaec
+          openblas
+          superlu
+          pkg-config
+          gsl
         )
         if [[ "${{ inputs.install-armadillo }}" == "true" ]]; then
           PACKAGES+=(armadillo)
