@@ -221,11 +221,11 @@ The new architecture must address these bottlenecks by defining clear operationa
 ```
 RFL/
 ├── .github/
-│       ├── ci.yml                 # Tier 1: Fast PR smoke gate (calls reusable workflows)
+│       ├── ci.yml                 # Tier 1: Fast PR smoke gate (lint + tests + gatekeeper)
 │       ├── main.yml               # Tier 2: Exhaustive compatibility matrix on push to main
 │       ├── _build_and_test_linux.yml # Reusable Linux build & test workflow
 │       ├── _build_and_test_macos.yml # Reusable macOS build & test workflow
-│       ├── linter.yml             # Code quality gate using pre-commit
+│       ├── codeql.yml             # Security analysis with paths-ignore filtering
 │       └── release.yml            # Automated wheel generation and PyPI distribution
 ├── cmake/                         # Modular CMake modules (Armadillo, FetchContent, Ccache, PCH)
 ├── src/RFL/
@@ -434,10 +434,10 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
   * Initialise `hendrikmuhs/ccache-action` across all runners.
   * Cache Armadillo installations per OS and version using `actions/cache`.
 
-#### 3. Code Quality Linter (`.github/workflows/linter.yml`)
-* **Triggers:** `pull_request`, `push` to `main`.
-* **Action:** Executes `pre-commit/action@v3.0.1` on Ubuntu runner.
-* **Coverage:** Validates C++, Python, whitespace, and British English spelling in a single pass.
+#### 3. Code Quality Linter (Integrated in `ci.yml`)
+* **Triggers:** `pull_request` (evaluated as a parallel check in `ci.yml`).
+* **Coverage:** Validates C++ formatting across tracked directories.
+* **Gate Enforcement:** Monitored directly by `ci-gate` to block unformatted pull requests.
 
 ---
 
@@ -475,7 +475,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
   1. Add `mise.toml` defining standard developer tasks (`build`, `test`, `lint`, `format`, `dev`, `lint-d2`, `build-d2`).
   2. Add `CMakePresets.json` configuring Ninja, Release mode, and `ccache` for IDEs.
   3. Expand `.pre-commit-config.yaml` to include `clang-format`, `ruff`, and file hygiene hooks.
-  4. Update `.github/workflows/linter.yml` to use `pre-commit/action`.
+  4. Update `ci.yml` lint job to use `pre-commit/action`.
   5. Update `ci.yml` Ubuntu job to use symmetric CMake + Ninja + `ccache`, matching macOS.
   6. Decompose `src/RFL/core/CMakeLists.txt` into modular component targets (`rfl_geometry`, `rfl_mcmc`, `rfl_rng`).
   7. Add Precompiled Headers (PCH) for Armadillo and GSL in `CMakeLists.txt`.

@@ -39,8 +39,30 @@ jobs:
               - 'playground/**'
               - 'CMakeLists.txt'
               - 'third_party/**'
+              - '.clang-format'
               - '.github/workflows/**'
               - '.github/actions/**'
+
+  lint:
+    name: "C++ Linter (${{ matrix.path }})"
+    needs: filter
+    if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        path:
+          - "src/RFL"
+          - "playground"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Run clang-format style check for ${{ matrix.path }}
+        uses: jidicula/clang-format-action@v4.18.0
+        with:
+          clang-format-version: "16"
+          check-path: ${{ matrix.path }}
 
   test_ubuntu:
     name: Ubuntu PR Smoke Test
@@ -62,18 +84,24 @@ jobs:
 
   ci-gate:
     name: CI Gatekeeper
-    needs: [filter, test_ubuntu, test_macos]
+    needs: [filter, lint, test_ubuntu, test_macos]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate results
         run: |
           echo "Filter result: ${{ needs.filter.result }}"
+          echo "Lint result: ${{ needs.lint.result }}"
           echo "Ubuntu test result: ${{ needs.test_ubuntu.result }}"
           echo "macOS test result: ${{ needs.test_macos.result }}"
 
           if [ "${{ needs.filter.result }}" = "failure" ] || [ "${{ needs.filter.result }}" = "cancelled" ]; then
             echo "❌ Path filtering job failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.lint.result }}" = "failure" ] || [ "${{ needs.lint.result }}" = "cancelled" ]; then
+            echo "❌ C++ linting failed or was cancelled."
             exit 1
           fi
 
