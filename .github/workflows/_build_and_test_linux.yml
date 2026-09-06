@@ -40,6 +40,16 @@ jobs:
             exit 1
           fi
 
+          if [ "${{ inputs.install_system_armadillo }}" = "true" ] && [ -n "${{ inputs.arma_version }}" ]; then
+            echo "::error::Conflicting inputs: arma_version ('${{ inputs.arma_version }}') cannot be set when install_system_armadillo is true. Set install_system_armadillo to false to test a specific Armadillo version via FetchContent."
+            exit 1
+          fi
+
+          if [ "${{ inputs.install_system_armadillo }}" != "true" ] && [ -z "${{ inputs.arma_version }}" ]; then
+            echo "::error::arma_version must be specified when install_system_armadillo is false."
+            exit 1
+          fi
+
       - name: Checkout repository
         uses: actions/checkout@v7
 
