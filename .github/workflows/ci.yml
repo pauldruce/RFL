@@ -32,7 +32,9 @@ jobs:
   lint:
     name: "C++ Linter (${{ matrix.path }})"
     needs: filter
-    if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
+    if: >-
+      needs.filter.outputs.code == 'true' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -53,7 +55,9 @@ jobs:
   test_ubuntu:
     name: Ubuntu PR Smoke Test
     needs: filter
-    if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
+    if: >-
+      needs.filter.outputs.code == 'true' ||
+      github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/_build_and_test_linux.yml
     with:
       os: ubuntu-latest
@@ -62,7 +66,9 @@ jobs:
   test_macos:
     name: macOS PR Smoke Test
     needs: filter
-    if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
+    if: >-
+      needs.filter.outputs.code == 'true' ||
+      github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/_build_and_test_macos.yml
     with:
       os: macos-latest
@@ -71,7 +77,12 @@ jobs:
   matrix_linux:
     name: "Matrix Linux"
     needs: filter
-    if: (needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch') && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    if: >-
+      (
+        needs.filter.outputs.code == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      ) &&
+      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -86,7 +97,12 @@ jobs:
   matrix_macos:
     name: "Matrix macOS"
     needs: filter
-    if: (needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch') && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    if: >-
+      (
+        needs.filter.outputs.code == 'true' ||
+        github.event_name == 'workflow_dispatch'
+      ) &&
+      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -113,32 +129,38 @@ jobs:
           echo "Linux matrix result: ${{ needs.matrix_linux.result }}"
           echo "macOS matrix result: ${{ needs.matrix_macos.result }}"
 
-          if [ "${{ needs.filter.result }}" = "failure" ] || [ "${{ needs.filter.result }}" = "cancelled" ]; then
+          if [ "${{ needs.filter.result }}" = "failure" ] || \
+             [ "${{ needs.filter.result }}" = "cancelled" ]; then
             echo "❌ Path filtering job failed or was cancelled."
             exit 1
           fi
 
-          if [ "${{ needs.lint.result }}" = "failure" ] || [ "${{ needs.lint.result }}" = "cancelled" ]; then
+          if [ "${{ needs.lint.result }}" = "failure" ] || \
+             [ "${{ needs.lint.result }}" = "cancelled" ]; then
             echo "❌ C++ linting failed or was cancelled."
             exit 1
           fi
 
-          if [ "${{ needs.test_ubuntu.result }}" = "failure" ] || [ "${{ needs.test_ubuntu.result }}" = "cancelled" ]; then
+          if [ "${{ needs.test_ubuntu.result }}" = "failure" ] || \
+             [ "${{ needs.test_ubuntu.result }}" = "cancelled" ]; then
             echo "❌ Ubuntu PR smoke test failed or was cancelled."
             exit 1
           fi
 
-          if [ "${{ needs.test_macos.result }}" = "failure" ] || [ "${{ needs.test_macos.result }}" = "cancelled" ]; then
+          if [ "${{ needs.test_macos.result }}" = "failure" ] || \
+             [ "${{ needs.test_macos.result }}" = "cancelled" ]; then
             echo "❌ macOS PR smoke test failed or was cancelled."
             exit 1
           fi
 
-          if [ "${{ needs.matrix_linux.result }}" = "failure" ] || [ "${{ needs.matrix_linux.result }}" = "cancelled" ]; then
+          if [ "${{ needs.matrix_linux.result }}" = "failure" ] || \
+             [ "${{ needs.matrix_linux.result }}" = "cancelled" ]; then
             echo "❌ Linux compatibility matrix failed or was cancelled."
             exit 1
           fi
 
-          if [ "${{ needs.matrix_macos.result }}" = "failure" ] || [ "${{ needs.matrix_macos.result }}" = "cancelled" ]; then
+          if [ "${{ needs.matrix_macos.result }}" = "failure" ] || \
+             [ "${{ needs.matrix_macos.result }}" = "cancelled" ]; then
             echo "❌ macOS compatibility matrix failed or was cancelled."
             exit 1
           fi
