@@ -13,17 +13,14 @@ runs:
     - name: Install macOS dependencies
       shell: bash
       run: |
-        brew update
+        export HOMEBREW_NO_AUTO_UPDATE=1
+        export HOMEBREW_NO_INSTALL_UPGRADE=1
+        export HOMEBREW_NO_BUILD_FROM_SOURCE=1
         PACKAGES=(
           cmake
           ninja
           doxygen
           graphviz
-          arpack
-          hdf5
-          libaec
-          openblas
-          superlu
           pkg-config
           gsl
         )

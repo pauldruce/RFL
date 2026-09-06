@@ -35,7 +35,10 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     needs: filter
-    if: needs.filter.outputs.code == 'true' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    if: >-
+      needs.filter.outputs.code == 'true' ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     permissions:
