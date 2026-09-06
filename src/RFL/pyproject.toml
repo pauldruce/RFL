@@ -40,7 +40,7 @@ CCACHE_PROGRAM = "OFF"
 
 [tool.cibuildwheel]
 build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
-skip = "pp* *-musllinux* *-win32 *i686"
+skip = "*-musllinux* *-win32 *i686"
 test-requires = ["pytest>=7.0", "numpy", "packaging"]
 test-command = "pytest {project}/src/RFL/python_bindings/tests"
 

@@ -60,7 +60,7 @@ jobs:
 
       - name: Cache vcpkg dependencies (Windows)
         if: runner.os == 'Windows'
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.VCPKG_INSTALLATION_ROOT || 'C:/vcpkg' }}/installed
@@ -71,7 +71,7 @@ jobs:
             vcpkg-${{ runner.os }}-x64-
 
       - name: Build and test wheels with cibuildwheel
-        uses: pypa/cibuildwheel@v4.2.0
+        uses: pypa/cibuildwheel@v4.2.1
         with:
           package-dir: src/RFL
         env:
