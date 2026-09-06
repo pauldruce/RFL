@@ -221,9 +221,10 @@ The new architecture must address these bottlenecks by defining clear operationa
 ```
 RFL/
 ├── .github/
-│   └── workflows/
-│       ├── ci.yml                 # Tier 1: Fast PR smoke gate (Ubuntu, macOS via CMake + ccache)
-│       ├── compatability_tests.yml# Tier 2: Exhaustive compatibility matrix on push to main
+│       ├── ci.yml                 # Tier 1: Fast PR smoke gate (calls reusable workflows)
+│       ├── main.yml               # Tier 2: Exhaustive compatibility matrix on push to main
+│       ├── _build_and_test_linux.yml # Reusable Linux build & test workflow
+│       ├── _build_and_test_macos.yml # Reusable macOS build & test workflow
 │       ├── linter.yml             # Code quality gate using pre-commit
 │       └── release.yml            # Automated wheel generation and PyPI distribution
 ├── cmake/                         # Modular CMake modules (Armadillo, FetchContent, Ccache, PCH)
@@ -421,7 +422,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
   * `test_macos`: Executes if `code == true`. Uses `brew install armadillo gsl`, `ccache`, Ninja, and CMake/CTest.
   * `ci-gate`: Always runs (`if: always()`). Evaluates upstream results; reports success if code passed or if docs were skipped.
 
-#### 2. Tier 2: Exhaustive Compatibility Matrix (`.github/workflows/compatability_tests.yml`)
+#### 2. Tier 2: Exhaustive Compatibility Matrix (`.github/workflows/main.yml`)
 * **Triggers:**
   * `push` to `main` branch (every commit/merge into `main`).
   * `workflow_dispatch` with manual parameter inputs.
@@ -449,7 +450,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 | **Incremental Rebuild Speed** | Touch leaf `.cpp` file and run `cmake --build build` | Incremental compilation completes in < 2 seconds with `ccache`. |
 | **Mise Test Task** | `mise run test` | Builds and executes all unit tests with 100% pass rate. |
 | **Pre-Commit Linter Execution** | `mise run lint` | Evaluates C++, Python, and spelling cleanly in < 2 seconds. |
-| **Mainline Trigger** | Push commit to `main` | Automatically triggers `compatability_tests.yml` across full matrix. |
+| **Mainline Trigger** | Push commit to `main` | Automatically triggers `main.yml` across full matrix. |
 
 ---
 

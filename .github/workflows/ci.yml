@@ -39,72 +39,26 @@ jobs:
               - 'playground/**'
               - 'CMakeLists.txt'
               - 'third_party/**'
-              - '.github/workflows/ci.yml'
-              - '.github/workflows/linter.yml'
+              - '.github/workflows/**'
+              - '.github/actions/**'
 
   test_ubuntu:
     name: Ubuntu PR Smoke Test
     needs: filter
     if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Install dependencies
-        uses: ./.github/actions/install-linux-deps
-        with:
-          install-armadillo: 'true'
-
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ runner.os }}-ubuntu-pr
-
-      - name: Configure CMake
-        run: |
-          cmake -B build -S src/RFL -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-      - name: Build
-        run: cmake --build build --config Release
-
-      - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure
+    uses: ./.github/workflows/_build_and_test_linux.yml
+    with:
+      os: ubuntu-latest
+      install_system_armadillo: true
 
   test_macos:
     name: macOS PR Smoke Test
     needs: filter
     if: needs.filter.outputs.code == 'true' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Install dependencies
-        uses: ./.github/actions/install-macos-deps
-        with:
-          install-armadillo: 'true'
-
-      - name: Set up ccache
-        uses: hendrikmuhs/ccache-action@v1.2
-        with:
-          key: ${{ runner.os }}-macos-pr
-
-      - name: Configure CMake
-        run: |
-          HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
-          cmake -B build -S src/RFL -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}" \
-            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
-
-      - name: Build
-        run: cmake --build build --config Release
-
-      - name: Test
-        run: ctest --test-dir build -C Release --output-on-failure
+    uses: ./.github/workflows/_build_and_test_macos.yml
+    with:
+      os: macos-latest
+      install_system_armadillo: true
 
   ci-gate:
     name: CI Gatekeeper

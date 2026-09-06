@@ -1,0 +1,40 @@
+name: Mainline Verification
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  compat_linux:
+    name: "Linux (${{ matrix.os }}, Armadillo ${{ matrix.arma_version }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-22.04]
+        arma_version: ["11.4.x", "12.8.x", "14.2.x"]
+    uses: ./.github/workflows/_build_and_test_linux.yml
+    with:
+      os: ${{ matrix.os }}
+      arma_version: ${{ matrix.arma_version }}
+      install_system_armadillo: false
+
+  compat_macos:
+    name: "macOS (${{ matrix.os }}, Armadillo ${{ matrix.arma_version }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, macos-15-intel, macos-14]
+        arma_version: ["11.4.x", "12.8.x", "14.2.x"]
+    uses: ./.github/workflows/_build_and_test_macos.yml
+    with:
+      os: ${{ matrix.os }}
+      arma_version: ${{ matrix.arma_version }}
+      install_system_armadillo: false
