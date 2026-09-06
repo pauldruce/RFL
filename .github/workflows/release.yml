@@ -48,12 +48,27 @@ jobs:
           - os: macos-14
             cibw_arch: arm64
             deployment_target: "14.0"
+          - os: windows-latest
+            cibw_arch: AMD64
+            deployment_target: ""
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Cache vcpkg dependencies (Windows)
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.VCPKG_INSTALLATION_ROOT || 'C:/vcpkg' }}/installed
+            ${{ env.VCPKG_INSTALLATION_ROOT || 'C:/vcpkg' }}/packages
+          key: vcpkg-${{ runner.os }}-x64-release-${{ hashFiles('src/RFL/pyproject.toml') }}
+          restore-keys: |
+            vcpkg-${{ runner.os }}-x64-release-
+            vcpkg-${{ runner.os }}-x64-
 
       - name: Build and test wheels with cibuildwheel
         uses: pypa/cibuildwheel@v4.2.0

@@ -107,7 +107,7 @@ Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `gsl`
 | **Linux** | `x86_64` | `manylinux_2_28` | glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8) | 3.9 – 3.13 |
 | **macOS (Apple Silicon)** | `arm64` | `macosx_14_0_arm64` | macOS ≥ 14.0 (Sonoma / Sequoia) | 3.9 – 3.13 |
 | **macOS (Intel)** | `x86_64` | `macosx_15_0_x86_64` | macOS ≥ 15.0 (Sequoia) | 3.9 – 3.13 |
-| **Windows** | `x86_64` | WSL2 | Ubuntu 22.04 on WSL2 (Native MSVC in v0.3.0) | 3.9 – 3.13 |
+| **Windows** | `x86_64` | `win_amd64` | Windows 10 / 11 / Server (Native MSVC / MinGW) | 3.9 – 3.13 |
 
 ### 2. C++ Source Builds & CMake `FetchContent` (Source Delivery)
 
@@ -132,6 +132,7 @@ To contribute to RFL or build the C++ library locally:
 
 * **macOS:** `brew install cmake gsl armadillo openblas`
 * **Ubuntu / Debian:** `sudo apt-get install cmake libgsl-dev libarmadillo-dev libopenblas-dev`
+* **Windows:** `vcpkg install gsl:x64-windows openblas:x64-windows armadillo:x64-windows`
 * **Other platforms:** Follow installation instructions provided by CMake, GSL, and Armadillo.
 
 ### 2. Build and Test
