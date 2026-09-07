@@ -24,8 +24,10 @@ if(MSVC)
     target_compile_definitions(rfl_legacy PUBLIC _USE_MATH_DEFINES NOMINMAX)
 endif()
 
-# Install static library and header files
-install(TARGETS rfl_legacy
-        DESTINATION lib/rfl_legacy/bin/${CMAKE_BUILD_TYPE}
-        PUBLIC_HEADER DESTINATION lib/rfl_legacy/include
-)
+if(NOT SKBUILD)
+    # Install static library and header files
+    install(TARGETS rfl_legacy
+            DESTINATION lib/rfl_legacy/bin/${CMAKE_BUILD_TYPE}
+            PUBLIC_HEADER DESTINATION lib/rfl_legacy/include
+    )
+endif()

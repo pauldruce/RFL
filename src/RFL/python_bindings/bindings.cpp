@@ -16,7 +16,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(rfl, m) {
+PYBIND11_MODULE(_rfl, m) {
   m.doc() = "Python bindings for the Random Fuzzy Library (RFL).";
   m.attr("__version__") = RFL_VERSION_STRING;
 
