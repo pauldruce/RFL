@@ -124,6 +124,7 @@
     "mcmc",
     "mdfile",
     "msvc",
+    "msvcp",
     "musllinux",
     "nbformat",
     "ndarray",
