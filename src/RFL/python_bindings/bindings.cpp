@@ -1,4 +1,7 @@
 // clang-format off
+#ifndef CARMA_ARMA_ALIEN_MEM_FUNCTIONS_SET
+#define CARMA_ARMA_ALIEN_MEM_FUNCTIONS_SET
+#endif
 #include <carma>
 #include <armadillo>
 // clang-format on

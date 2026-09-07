@@ -10,12 +10,17 @@
 using namespace std;
 using namespace arma;
 
-DiracOperator::DiracOperator(int p, int q, int dim)
-    : m_clifford(Clifford(p, q)), m_dim(dim) {
+// Validate matrix dimension before initialising m_clifford.
+// This fails fast and prevents heap allocations for invalid parameters.
+static int validateDim(int dim) {
   if (dim <= 0) {
     throw std::invalid_argument("Matrix dimension 'dim' must be strictly positive.");
   }
+  return dim;
+}
 
+DiracOperator::DiracOperator(int p, int q, int dim)
+    : m_dim(validateDim(dim)), m_clifford(Clifford(p, q)) {
   int n = p + q;
 
   vector<cx_mat> gamma = m_clifford.getGammaMatrices();

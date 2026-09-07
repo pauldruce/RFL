@@ -15,6 +15,8 @@ target_link_libraries(_rfl PRIVATE rfl_core carma::carma)
 
 # Pybind11 automatically requires C++11, but RFL needs C++17
 target_compile_features(_rfl PRIVATE cxx_std_17)
+set_target_properties(_rfl PROPERTIES DISABLE_PRECOMPILE_HEADERS ON)
+target_compile_definitions(_rfl PRIVATE CARMA_ARMA_ALIEN_MEM_FUNCTIONS_SET)
 
 if(DEFINED SKBUILD_PROJECT_VERSION_FULL)
     target_compile_definitions(_rfl PRIVATE RFL_VERSION_STRING="${SKBUILD_PROJECT_VERSION_FULL}")
