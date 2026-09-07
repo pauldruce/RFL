@@ -58,17 +58,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache vcpkg dependencies (Windows)
+      - name: Install Windows dependencies
         if: runner.os == 'Windows'
-        uses: actions/cache@v6
-        with:
-          path: |
-            ${{ env.VCPKG_INSTALLATION_ROOT || 'C:/vcpkg' }}/installed
-            ${{ env.VCPKG_INSTALLATION_ROOT || 'C:/vcpkg' }}/packages
-          key: vcpkg-${{ runner.os }}-x64-release-${{ hashFiles('src/RFL/pyproject.toml') }}
-          restore-keys: |
-            vcpkg-${{ runner.os }}-x64-release-
-            vcpkg-${{ runner.os }}-x64-
+        uses: ./.github/actions/install-windows-deps
 
       - name: Build and test wheels with cibuildwheel
         uses: pypa/cibuildwheel@v4.2.1

@@ -110,6 +110,8 @@ else()
 endif()
 option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" ${BUILD_PYTHON_BINDINGS_DEFAULT})
 if(BUILD_PYTHON_BINDINGS)
+    # Direct pybind11 to use modern FindPython3 (CMP0148).
+    set(PYBIND11_FINDPYTHON ON)
     include(FetchContent)
 
     # Fetch pybind11 first so carma detects the modern target and skips its legacy bundled submodule.
