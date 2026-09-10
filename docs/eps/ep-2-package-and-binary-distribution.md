@@ -38,8 +38,8 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ### 2.2 Goals
 * **Clean Target & Directory Standardisation:** Promote `new_RFL` to `core/` with target `rfl_core` (aliases: `RFL::core`, `RFL::rfl`), and archive `old_RFL` to `legacy/` (`rfl_legacy`).
-* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`) and macOS (`x86_64`, `arm64`) across Python 3.9–3.13 (`pip install pyrfl`).
-* **Hermetic Dynamic Library Vendoring:** Automatically vendor and bundle shared C++ runtime dependencies (`openblas`, `gsl`, `armadillo`) inside wheels via `auditwheel` and `delocate`.
+* **Multi-Platform Binary Wheels:** Provide precompiled, standalone Python wheels on PyPI for Linux (`manylinux_2_28`), macOS (`x86_64`, `arm64`), and Windows (`win_amd64`) across Python 3.9–3.13 (`pip install pyrfl`).
+* **Hermetic Dynamic Library Vendoring:** Automatically vendor and bundle shared C++ runtime dependencies (`openblas`, `gsl`, `armadillo`) inside wheels via `auditwheel`, `delocate`, and `delvewheel`.
 * **Zero-Secret CI/CD PyPI Publishing:** Implement automated PyPI deployment on version tag push using OpenID Connect (OIDC) Trusted Publishing.
 * **CMake In-Tree FetchContent Support:** Ensure external C++ codebases can integrate RFL seamlessly via standard `FetchContent`.
 * **Foundation for Package Managers:** Lay the ground for future CMake `install()` targets, CPack release archives, and community package managers (Homebrew, Conda-Forge).
@@ -63,8 +63,8 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | Requirement ID | Requirement Summary | Physical & Technical Invariant |
 | :--- | :--- | :--- |
 | **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
-| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28_x86_64`) and macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`) covering Python 3.9–3.13. |
-| **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) so wheels execute on clean systems. |
+| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28_x86_64`), macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`), and Windows (`win_amd64`) covering Python 3.9–3.13. |
+| **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) via `auditwheel`, `delocate`, and `delvewheel` so wheels execute on clean systems. |
 | **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
 | **REQ-PKG-05** | **Secure PyPI Publishing** | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |
 | **REQ-PKG-06** | **CMake FetchContent Support** | Export namespaced alias `RFL::core` and `RFL::rfl` in top-level CMake configuration. |
@@ -112,9 +112,10 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 | **Maintenance** | Low (System package updates) | High (Custom CMake build recipes) |
 | **Decision** | **Selected (Option 1)** | Rejected |
 
-*Rationale:* Installing `openblas`, `lapack`, `gsl`, and `armadillo` via `dnf` on Linux and `brew` on macOS provides fast, reliable CI builds.
-`auditwheel` and `delocate` automatically discover and vendor dynamic dependencies into the wheel.
+*Rationale:* Installing `openblas`, `lapack`, `gsl`, and `armadillo` via `dnf` on Linux, `brew` on macOS, and `vcpkg` on Windows provides fast, reliable CI builds.
+`auditwheel`, `delocate`, and `delvewheel` automatically discover and vendor dynamic dependencies into the wheel.
 On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silicon (`arm64`) and `15.0` on Intel (`x86_64`) to match Homebrew binary SDK baselines.
+On Windows, dynamic library discovery resolves via `%VCPKG_INSTALLATION_ROOT%/installed/x64-windows/bin`.
 
 ---
 
@@ -169,7 +170,7 @@ On macOS, `MACOSX_DEPLOYMENT_TARGET` is explicitly set to `14.0` on Apple Silico
 | Pipeline Stage | Job Name | Execution Environment | Deliverables & Verification |
 | :--- | :--- | :--- | :--- |
 | **1. Trigger** | `release` (published) or `workflow_dispatch` | GitHub Actions | Dispatches matrix jobs concurrently |
-| **2. Binary Wheels** | `build_wheels` | • Linux x86_64 (`manylinux_2_28`)<br/>• macOS x86_64 (`macos-13`)<br/>• macOS arm64 (`macos-14`) | Compiles wheels via `cibuildwheel` and executes `pytest` |
+| **2. Binary Wheels** | `build_wheels` | • Linux x86_64 (`manylinux_2_28`)<br/>• macOS x86_64 (`macos-15-intel`)<br/>• macOS arm64 (`macos-14`)<br/>• Windows x86_64 (`windows-latest`) | Compiles wheels via `cibuildwheel` and executes `pytest` |
 | **3. Source Dist** | `build_sdist` | Ubuntu latest | Generates canonical `.tar.gz` sdist |
 | **4. Asset Upload** | `upload_release_assets` | Ubuntu latest (on published release) | Attaches wheels and sdist to GitHub Release |
 | **5. PyPI Publish** | `publish_pypi` | Ubuntu latest (OIDC Trusted Publishing) | Publishes packages to PyPI index |

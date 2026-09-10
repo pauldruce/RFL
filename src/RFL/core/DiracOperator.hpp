@@ -171,10 +171,10 @@ public:
   void randomiseMatrices(const IRng& rng) const override;
 
 private:
-  // Clifford module for the Dirac operator.
-  Clifford m_clifford;
   // Matrix dimension of the H and L matrices.
   int m_dim;
+  // Clifford module for the Dirac operator.
+  Clifford m_clifford;
   // Total number of matrices, number of Hermitian matrices, and number of anti-Hermitian matrices.
   int m_num_matrices, m_num_herm, m_num_antiherm;
   // Dimension of gamma matrices.

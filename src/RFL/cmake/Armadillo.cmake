@@ -23,6 +23,7 @@ if(NOT TARGET Armadillo::Armadillo AND NOT TARGET armadillo)
         if(APPLE)
             set(ALLOW_OPENBLAS_MACOS ON CACHE BOOL "Allow detection of OpenBLAS on macOS" FORCE)
         endif()
+        set(OPENBLAS_PROVIDES_LAPACK OFF CACHE BOOL "Do not assume OpenBLAS provides LAPACK" FORCE)
 
         FetchContent_Declare(
             armadillo

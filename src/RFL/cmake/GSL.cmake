@@ -23,7 +23,7 @@ elseif(GSL_FOUND)
     endif()
     set(GSL_LIBRARIES GSL::gsl)
 else()
-    message(FATAL_ERROR "GNU Scientific Library (GSL) not found. Please install libgsl-dev (Linux) or brew install gsl (macOS).")
+    message(FATAL_ERROR "GNU Scientific Library (GSL) not found. Please install libgsl-dev (Linux), brew install gsl (macOS), or vcpkg install gsl (Windows).")
 endif()
 
 if(DEFINED GSL_INCLUDE_DIRS)

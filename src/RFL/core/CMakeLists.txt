@@ -29,20 +29,24 @@ target_sources(
 target_include_directories(rfl_core PUBLIC ${core_RFL_INCLUDE_DIR})
 target_link_libraries(rfl_core PUBLIC ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
 
-# Install static library files
-install(
-        TARGETS rfl_core
-        DESTINATION lib/rfl/bin/${CMAKE_BUILD_TYPE}
-)
-
-# Install include/header files.
-install(
-        DIRECTORY ${core_RFL_INCLUDE_DIR}/
-        DESTINATION lib/rfl/include
-        FILES_MATCHING PATTERN "*.hpp"
-        PATTERN "tests" EXCLUDE
-)
+if(MSVC)
+    target_compile_definitions(rfl_core PUBLIC _USE_MATH_DEFINES NOMINMAX)
+endif()
 
 if(NOT SKBUILD)
+    # Install static library files
+    install(
+            TARGETS rfl_core
+            DESTINATION lib/rfl/bin/${CMAKE_BUILD_TYPE}
+    )
+
+    # Install include/header files.
+    install(
+            DIRECTORY ${core_RFL_INCLUDE_DIR}/
+            DESTINATION lib/rfl/include
+            FILES_MATCHING PATTERN "*.hpp"
+            PATTERN "tests" EXCLUDE
+    )
+
     add_subdirectory(tests)
 endif()

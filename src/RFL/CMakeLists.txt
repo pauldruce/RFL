@@ -7,6 +7,23 @@ else()
     set(RFL_PROJECT_VERSION 0.1.0)
 endif()
 
+# Auto-detect vcpkg toolchain file on Windows if not explicitly specified.
+if(WIN32 AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+    set(_VCPKG_ROOT "")
+    if(DEFINED ENV{VCPKG_ROOT})
+        set(_VCPKG_ROOT "$ENV{VCPKG_ROOT}")
+    elseif(DEFINED ENV{VCPKG_INSTALLATION_ROOT})
+        set(_VCPKG_ROOT "$ENV{VCPKG_INSTALLATION_ROOT}")
+    endif()
+
+    set(_VCPKG_TOOLCHAIN "${_VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    if(EXISTS "${_VCPKG_TOOLCHAIN}")
+        set(CMAKE_TOOLCHAIN_FILE "${_VCPKG_TOOLCHAIN}" CACHE STRING "vcpkg toolchain file")
+    endif()
+    unset(_VCPKG_ROOT)
+    unset(_VCPKG_TOOLCHAIN)
+endif()
+
 project(
         RFL
         VERSION ${RFL_PROJECT_VERSION}
@@ -25,10 +42,15 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
         set_property(GLOBAL PROPERTY USE_FOLDERS ON)
         enable_testing()
 
-        add_compile_options(-Wall -Wextra -Wpedantic)
-        if(NOT SKBUILD)
-            add_compile_options(-fsanitize=address)
-            add_link_options(-fsanitize=address)
+        if(MSVC)
+            add_compile_options(/W4 /utf-8 /permissive-)
+            add_compile_definitions(_USE_MATH_DEFINES _CRT_SECURE_NO_WARNINGS NOMINMAX WIN32_LEAN_AND_MEAN)
+        else()
+            add_compile_options(-Wall -Wextra -Wpedantic)
+            if(NOT SKBUILD)
+                add_compile_options(-fsanitize=address)
+                add_link_options(-fsanitize=address)
+            endif()
         endif()
 endif()
 
@@ -88,7 +110,16 @@ else()
 endif()
 option(BUILD_PYTHON_BINDINGS "Build Python bindings via pybind11" ${BUILD_PYTHON_BINDINGS_DEFAULT})
 if(BUILD_PYTHON_BINDINGS)
+    # Direct pybind11 to use modern FindPython3 (CMP0148).
+    set(PYBIND11_FINDPYTHON ON)
     include(FetchContent)
+
+    # Fetch pybind11 first so carma detects the modern target and skips its legacy bundled submodule.
+    FetchContent_Declare(
+        pybind11
+        GIT_REPOSITORY https://github.com/pybind/pybind11.git
+        GIT_TAG        v2.13.1
+    )
 
     # Fetch carma (NumPy/Armadillo bridge)
     FetchContent_Declare(
@@ -96,14 +127,7 @@ if(BUILD_PYTHON_BINDINGS)
         GIT_REPOSITORY https://github.com/RUrlus/carma.git
         GIT_TAG        v0.8.0
     )
-
-    # Fetch pybind11
-    FetchContent_Declare(
-        pybind11
-        GIT_REPOSITORY https://github.com/pybind/pybind11.git
-        GIT_TAG        v2.13.1
-    )
-    FetchContent_MakeAvailable(carma pybind11)
+    FetchContent_MakeAvailable(pybind11 carma)
 
     add_subdirectory(python_bindings)
 endif()

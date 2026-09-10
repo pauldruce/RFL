@@ -1,4 +1,7 @@
 // clang-format off
+#ifndef CARMA_ARMA_ALIEN_MEM_FUNCTIONS_SET
+#define CARMA_ARMA_ALIEN_MEM_FUNCTIONS_SET
+#endif
 #include <carma>
 #include <armadillo>
 // clang-format on
@@ -16,7 +19,7 @@
 
 namespace py = pybind11;
 
-PYBIND11_MODULE(rfl, m) {
+PYBIND11_MODULE(_rfl, m) {
   m.doc() = "Python bindings for the Random Fuzzy Library (RFL).";
   m.attr("__version__") = RFL_VERSION_STRING;
 

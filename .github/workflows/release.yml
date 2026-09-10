@@ -48,6 +48,9 @@ jobs:
           - os: macos-14
             cibw_arch: arm64
             deployment_target: "14.0"
+          - os: windows-latest
+            cibw_arch: AMD64
+            deployment_target: ""
 
     steps:
       - name: Checkout repository
@@ -55,8 +58,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Windows dependencies
+        if: runner.os == 'Windows'
+        uses: ./.github/actions/install-windows-deps
+
       - name: Build and test wheels with cibuildwheel
-        uses: pypa/cibuildwheel@v4.2.0
+        uses: pypa/cibuildwheel@v4.2.1
         with:
           package-dir: src/RFL
         env:

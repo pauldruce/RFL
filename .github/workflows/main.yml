@@ -38,3 +38,16 @@ jobs:
       os: ${{ matrix.os }}
       arma_version: ${{ matrix.arma_version }}
       install_system_armadillo: false
+
+  compat_windows:
+    name: "Windows (${{ matrix.os }}, Armadillo ${{ matrix.arma_version }})"
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, windows-2022]
+        arma_version: ["11.4.x", "12.8.x", "14.2.x"]
+    uses: ./.github/workflows/_build_and_test_windows.yml
+    with:
+      os: ${{ matrix.os }}
+      arma_version: ${{ matrix.arma_version }}
+      install_system_armadillo: false
