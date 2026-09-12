@@ -33,12 +33,11 @@ runs:
         key: vcpkg-${{ runner.os }}-x64-${{ inputs.install-armadillo }}-${{ hashFiles('.github/actions/install-windows-deps/action.yml') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-x64-${{ inputs.install-armadillo }}-
-          vcpkg-${{ runner.os }}-x64-
 
     - name: Install dependencies via vcpkg
       shell: pwsh
       run: |
-        $packages = @("gsl:x64-windows", "openblas:x64-windows")
+        $packages = @("gsl:x64-windows", "openblas:x64-windows", "lapack-reference:x64-windows")
         if ("${{ inputs.install-armadillo }}" -eq "true") {
           $packages += "armadillo:x64-windows"
         }
