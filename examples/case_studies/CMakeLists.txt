@@ -1,4 +1,9 @@
-add_subdirectory(type_13_simulation)
+find_package(HDF5 QUIET)
+if(HDF5_FOUND)
+    add_subdirectory(type_13_simulation)
+else()
+    message(STATUS "HDF5 not found: skipping type_13_simulation case study")
+endif()
 
 add_executable(mauro_thesis_mmc mauro_thesis_mmc.cpp)
 target_include_directories(mauro_thesis_mmc PUBLIC ${legacy_RFL_INCLUDE_DIR})

@@ -50,7 +50,7 @@ int main() {
 
   auto action = make_unique<Action>(g_2, g_4);
   auto rng = make_unique<GslRng>(seed);
-  Metropolis metropolis(move(action), scale, num_steps, move(rng));
+  Metropolis metropolis(std::move(action), scale, num_steps, std::move(rng));
 
   double acceptance_rate = metropolis.updateDirac(*dirac);
   cout << "-> Acceptance Rate: " << fixed << setprecision(2) << (acceptance_rate * 100.0) << "%\n"

@@ -195,7 +195,7 @@ Documentation for the software architecture, release lifecycle, and controlled v
 - [Controlled Vocabulary & Glossary](docs/Glossary.md)
 - [Consuming RFL in Research](docs/Consumption_Guide.md)
 - [Enhancement Proposals](docs/eps/)
-- [v0.1.0 Release Notes](docs/releases/v0.1.0.md)
+- [Changelog & Releases](CHANGELOG.md)
 
 ---
 

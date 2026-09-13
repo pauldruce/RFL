@@ -27,12 +27,14 @@
     "color:[^;]+;",
     "-D[A-Za-z0-9_]+",
     "-W[A-Za-z0-9_-]+",
+    "-l[a-zA-Z0-9_]+",
     "[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+(?:@[v0-9.]+)?",
     "\\blib[a-z0-9_]+(?:-[a-z0-9]+)*\\b",
     "\\.[a-zA-Z0-9_]*config"
   ],
   "words": [
     "ARMA",
+    "ASAN",
     "Arma",
     "absdiff",
     "anticommutator",
@@ -42,6 +44,7 @@
     "arma",
     "armadillo",
     "arpack",
+    "asan",
     "auditwheel",
     "bibtex",
     "blas",

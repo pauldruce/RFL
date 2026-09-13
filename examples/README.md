@@ -1,29 +1,90 @@
 # Example Applications
 
-This directory contains example applications for the RFL library in C++ and Python.
+This directory contains standalone example applications and research case studies for the Random Fuzzy Library (RFL) in C++ and Python.
 
-## Directory Structure
+---
 
-- **`cpp/`**: Basic C++ API example. Initialises a Dirac operator, runs the Metropolis algorithm, and computes eigenvalues.
-- **`python/`**: Python API example. Demonstrates Python bindings, Metropolis sampling, and NumPy integration.
-- **`case_studies/`**: Specialised simulations, parameter tuning, and historical thesis models.
+## Directory Overview
 
-## Build and Execution
+| Directory | Language | Description | Key Targets / Entry Points |
+| :--- | :--- | :--- | :--- |
+| [`cpp/`](cpp/) | C++17 | Core C++ API example. Initialises a Dirac operator, executes Metropolis sampling, and computes eigenvalues. | `build/examples/cpp/main`<br>`examples/cpp/Makefile` |
+| [`python/`](python/) | Python | Python bindings example and interactive Jupyter notebook. Demonstrates NumPy integration and MCMC analysis. | `examples/python/main.py`<br>`examples/python/rfl_playground.ipynb` |
+| [`case_studies/`](case_studies/) | C++17 | Specialised research simulations, Markov chain parameter tuning, and historical thesis models. | `mauro_thesis_mmc`<br>`hmc_tuning`<br>`Type13Metropolis` |
 
-Build the examples using CMake in your build directory:
+---
+
+## 1. Cross-Platform CMake Workflow (Recommended)
+
+CMake builds all C++ examples together with the library:
 
 ```bash
-cmake --build .
-```
+# 1. Configure and build from repository root
+cmake -B build
+cmake --build build -j 4
 
-To run the basic C++ example:
-
-```bash
+# 2. Run the basic C++ example
 ./build/examples/cpp/main
+
+# 3. Run case study simulations
+./build/examples/case_studies/mauro_thesis_mmc
+./build/examples/case_studies/hmc_tuning
+./build/examples/case_studies/type_13_simulation/Type13Metropolis
 ```
 
-To run the Python example:
+---
+
+## 2. Makefile & Direct GCC Workflow (Linux & macOS)
+
+For Linux and Unix developers who prefer direct build workflows without CMake configuration:
+
+### Option A: Using the Provided Makefile
+Navigate to [`examples/cpp/`](cpp/) and use standard `make`:
 
 ```bash
+cd examples/cpp
+
+# Build and execute
+make run
+
+# Clean build artifacts
+make clean
+```
+
+### Option B: Direct GCC / Clang Command
+Once `librfl_core.a` is built in `build/src/core`, you can compile directly:
+
+```bash
+g++ -std=c++17 -O3 examples/cpp/main.cpp \
+    -Isrc/core \
+    -Lbuild/src/core \
+    -lrfl_core -larmadillo -lgsl -lgslcblas \
+    -o main_gcc
+
+./main_gcc
+```
+
+---
+
+## 3. Python & Jupyter Workflow
+
+### Option A: Standard Python CLI
+Install the local Python package in editable or standard mode, then run:
+
+```bash
+pip install .
 python3 examples/python/main.py
+```
+
+Or using `uv`:
+
+```bash
+uv run python examples/python/main.py
+```
+
+### Option B: Interactive Jupyter Notebook
+Explore Dirac spectra, Monte Carlo trajectories, and matrix properties interactively:
+
+```bash
+jupyter notebook examples/python/rfl_playground.ipynb
 ```
