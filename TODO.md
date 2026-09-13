@@ -17,4 +17,4 @@
 
 
 - [ ] Change core source code to use an include folder pattern, rather than
-  mix and match the srcs and headers. It's just extra work for no gain.
+  mix and match sources and headers. It's just extra work for no gain.

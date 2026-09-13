@@ -56,7 +56,7 @@ def fetch_github_generated_notes(tag: str, previous_tag: str | None) -> str | No
 
 
 def generate_notes_from_git_log(previous_tag: str | None) -> str:
-    """Generates categorized release notes from git commits when offline."""
+    """Generates categorised release notes from git commits when offline."""
     range_spec = f"{previous_tag}..HEAD" if previous_tag else "HEAD"
     cmd = ["git", "log", range_spec, "--oneline", "--no-merges"]
     try:

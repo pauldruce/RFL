@@ -3,7 +3,7 @@ find_package(Doxygen OPTIONAL_COMPONENTS dot)
 if(DOXYGEN_FOUND)
     set(DOXYGEN_GENERATE_HTML YES)
     set(DOXYGEN_HTML_OUTPUT
-            ${PROJECT_SOURCE_DIR}/RFL_docs)
+            ${PROJECT_BINARY_DIR}/docs)
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE
             "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
 

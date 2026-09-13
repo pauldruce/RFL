@@ -19,11 +19,11 @@ cmake --build .
 To run the basic C++ example:
 
 ```bash
-./src/RFL/examples/cpp/main
+./build/examples/cpp/main
 ```
 
 To run the Python example:
 
 ```bash
-python3 src/RFL/examples/python/main.py
+python3 examples/python/main.py
 ```

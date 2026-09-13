@@ -309,5 +309,5 @@ eigenvalues_array = np.array(eigenvalues_history)
 | **Phase 1** | **Value Semantics & Clean Types** | Remove `unique_ptr` container wrappers from `DiracOperator`; enforce strict `const` correctness; deprecate leaky `IDiracOperator` fat interface. |
 | **Phase 2** | **Action / Kernel Decoupling** | Extract $\Delta S$ trace formulas from `Metropolis.cpp` into `BarrettGlaserAction`; standardise `calculateDelta` and `calculateGradient`. |
 | **Phase 3** | **Modular Stepper & Observer API** | Implement `MetropolisSampler::sweep()` and `ISimulationObserver`; replace monolithic `Simulation` runner. |
-| **Phase 4** | **Python Bindings & NumPy Views** | Expose new stepper API and generator iterators in `src/RFL/python_bindings/bindings.cpp`. |
+| **Phase 4** | **Python Bindings & NumPy Views** | Expose new stepper API and generator iterators in `src/python_bindings/bindings.cpp`. |
 | **Phase 5** | **Observables & Advanced Solvers** | Implement integrated autocorrelation time estimator and Hybrid Monte Carlo (HMC) sampler using gradients. |
