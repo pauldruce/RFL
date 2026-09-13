@@ -84,7 +84,7 @@ jobs:
           $vcpkgToolchain = Join-Path $env:VCPKG_INSTALLATION_ROOT "scripts/buildsystems/vcpkg.cmake"
           $cmakeArgs = @(
             "-B", "build",
-            "-S", "src/RFL",
+            "-S", ".",
             "-G", "Ninja",
             "-DCMAKE_BUILD_TYPE=${{ inputs.build_type }}",
             "-DCMAKE_TOOLCHAIN_FILE=$vcpkgToolchain",

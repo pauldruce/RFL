@@ -75,7 +75,8 @@ jobs:
       fail-fast: false
       matrix:
         path:
-          - "src/RFL"
+          - "src"
+          - "examples"
           - "playground"
     steps:
       - name: Checkout repository

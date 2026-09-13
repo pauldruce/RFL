@@ -1,6 +1,6 @@
 # RFL Controlled Vocabulary & Glossary
 
-This document establishes the official **ASD-STE100 Controlled Vocabulary** for RFL. 
+This document establishes the official **ASD-STE100 Controlled Vocabulary** for RFL.
 
 ### The Core Principle: One Word, One Meaning
 > *Each approved term has exactly one defined meaning. Do not use synonyms for the same concept. Do not use the same word for different concepts.*

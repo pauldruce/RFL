@@ -6,7 +6,7 @@
 [![CI Checks](https://github.com/pauldruce/RFL/actions/workflows/ci.yml/badge.svg)](https://github.com/pauldruce/RFL/actions/workflows/ci.yml)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](https://pypi.org/project/pyrfl/)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C.svg?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/17)
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/src/RFL/examples/python/rfl_playground.ipynb)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/examples/python/rfl_playground.ipynb)
 
 > *"Continuous points are an approximation. Quantise spacetime with finite matrices."*
 
@@ -61,8 +61,8 @@ print(f"Spectrum range: [{np.min(eigenvals):.2f}, {np.max(eigenvals):.2f}]")
 ### 3. Interactive Playground
 
 Explore simulations interactively in the Jupyter notebook playground:
-* Run locally: [`src/RFL/examples/python/rfl_playground.ipynb`](src/RFL/examples/python/rfl_playground.ipynb)
-* Run in browser: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/src/RFL/examples/python/rfl_playground.ipynb)
+* Run locally: [`examples/python/rfl_playground.ipynb`](examples/python/rfl_playground.ipynb)
+* Run in browser: [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/examples/python/rfl_playground.ipynb)
 
 ---
 
@@ -140,7 +140,7 @@ To contribute to RFL or build the C++ library locally:
 ```bash
 git clone https://github.com/pauldruce/RFL.git
 cd RFL
-cmake -B build src/RFL
+cmake -B build
 cmake --build build --target all -j 4
 ctest --test-dir build -j 4 --output-on-failure
 ```

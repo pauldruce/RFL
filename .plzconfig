@@ -19,5 +19,3 @@ DefaultOptCppFlags = --std=c++17 -Wall -Wextra -Wpedantic
 [Plugin "python"]
 Target = //plugins:python
 TestRunner = pytest
-
-

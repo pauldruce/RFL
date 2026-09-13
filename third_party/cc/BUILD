@@ -5,4 +5,3 @@ github_repo(
     revision = "v1.15.0",
     strip_build = True,
 )
-

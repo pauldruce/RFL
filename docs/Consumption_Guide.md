@@ -25,14 +25,14 @@ pip install pyrfl
 ### Option B: Local Source Installation
 For research consumers compiling from a local Git clone:
 ```bash
-pip install src/RFL
+pip install .
 ```
-*(To update after modifying C++ source code: `pip install --force-reinstall --no-deps src/RFL`)*
+*(To update after modifying C++ source code: `pip install --force-reinstall --no-deps .`)*
 
 ### Option C: Editable Installation (For Active Development)
 For developers actively iterating on Python bindings and C++ code:
 ```bash
-pip install -e src/RFL
+pip install -e .
 ```
 
 ### Quick Python Usage Example
@@ -72,7 +72,7 @@ RFL requires `armadillo`, `gsl`, and `cmake`.
 From the root of the `RFL` repository:
 ```bash
 # 1. Configure and build
-cmake -B build src/RFL
+cmake -B build
 cmake --build build --target all -j 4
 
 # 2. Run all unit tests

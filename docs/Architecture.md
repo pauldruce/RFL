@@ -92,7 +92,7 @@ class DiracOperator {
 public:
   // Constructors
   DiracOperator(int p, int q, int matrix_dim);
-  
+
   // Rule of Zero / Five (Value semantics)
   DiracOperator(const DiracOperator& other) = default;
   DiracOperator(DiracOperator&& other) noexcept = default;
@@ -128,7 +128,7 @@ private:
   int m_matrix_dim{0};
   int m_gamma_dim{0};
   int m_num_matrices{0};
-  
+
   std::vector<int> m_epsilons;
   std::vector<arma::cx_mat> m_matrices;
   CliffordModule m_clifford;
@@ -170,7 +170,7 @@ public:
 private:
   double m_g2;
   double m_g4;
-  
+
   double deltaTrD2(const DiracOperator& dirac, int matrix_idx, int r, int c, const arma::cx_double& z) const;
   double deltaTrD4(const DiracOperator& dirac, int matrix_idx, int r, int c, const arma::cx_double& z) const;
 };

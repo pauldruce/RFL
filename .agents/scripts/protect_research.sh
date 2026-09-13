@@ -20,13 +20,13 @@ fi
 if [[ "$TOOL_NAME" == "run_command" ]]; then
   CWD=$(echo "$PAYLOAD" | jq -r '.toolCall.args.Cwd')
   CMD=$(echo "$PAYLOAD" | jq -r '.toolCall.args.CommandLine')
-  
+
   # Block if they are running the command from inside the research folder
   if [[ "$CWD" == "$WORKSPACE_ROOT/research"* ]]; then
     echo '{"decision": "deny", "reason": "SECURITY BLOCK: Running commands inside the /research directory is forbidden."}'
     exit 0
   fi
-  
+
   # Block if the command line references the research folder via relative or absolute paths
   # Matches: <absolute_workspace_root>/research, ./research, ../research, research/
   if echo "$CMD" | grep -qE "($WORKSPACE_ROOT/research|(^|[[:space:]])(\.\.?/)+research|(^|[[:space:]])research/)"; then

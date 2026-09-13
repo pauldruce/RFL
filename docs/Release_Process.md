@@ -156,7 +156,7 @@ When a bug fix patch (`vX.Y.1`) is needed while `main` develops future versions 
 ## 5. Testing the Release Pipeline & TestPyPI Qualification
 
 ### 5.1 Automated Pull Request Testing
-Any pull request that modifies `.github/workflows/release.yml`, `src/RFL/pyproject.toml`, or `src/RFL/python_bindings/**` automatically executes the complete packaging matrix. The workflow compiles all 18 binary wheels across Linux, macOS Apple Silicon, and macOS Intel, and executes the `pytest` test suite without publishing assets.
+Any pull request that modifies `.github/workflows/release.yml`, `pyproject.toml`, or `src/python_bindings/**` automatically executes the complete packaging matrix. The workflow compiles all 18 binary wheels across Linux, macOS Apple Silicon, and macOS Intel, and executes the `pytest` test suite without publishing assets.
 
 ### 5.2 TestPyPI Publication & Pre-Flight Qualification
 To publish packages to TestPyPI (`test.pypi.org`) for downstream verification before an official release, dispatch the release workflow with `publish_to_testpypi=true`:

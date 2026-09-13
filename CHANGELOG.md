@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * feat(packaging): dynamic PEP 440 pre-release versioning for PyPI release candidates by @pauldruce in [#41](https://github.com/pauldruce/RFL/pull/41)
 
 ### 🐛 Bug Fixes
+* fix(cmake): migrate CMakeLists.txt and pyproject.toml to root, standardise source layout in src/core, and isolate downstream consumer test targets ([#54](https://github.com/pauldruce/RFL/issues/54))
 * fix(ci,windows): install lapack in vcpkg and isolate armadillo cache keys by @pauldruce in [#50](https://github.com/pauldruce/RFL/pull/50)
 * fix(ci,cmake): support legacy dependencies under CMake 4.x and declutter step summary by @pauldruce in [#44](https://github.com/pauldruce/RFL/pull/44)
 * fix(ci): bump actions to Node 24 runtimes to eliminate deprecation warnings by @pauldruce in [#45](https://github.com/pauldruce/RFL/pull/45)

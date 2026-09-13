@@ -10,8 +10,11 @@ docs:
 
 code:
   - 'src/**'
+  - 'examples/**'
+  - 'cmake/**'
   - 'playground/**'
   - 'CMakeLists.txt'
+  - 'pyproject.toml'
   - 'scripts/**'
   - 'third_party/**'
   - '.clang-format'

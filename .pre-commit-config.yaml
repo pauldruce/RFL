@@ -16,6 +16,7 @@ repos:
     hooks:
       - id: cspell
         name: 'CSpell: Enforce Spelling Compliance'
+        files: '\.(cpp|hpp|h|c|py|md|cmake|txt)$'
 
   - repo: local
     hooks:
