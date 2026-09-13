@@ -3,7 +3,7 @@ name: CI Checks
 on:
   pull_request:
     branches: [ main ]
-    types: [ opened, labeled, unlabeled, synchronize, reopened ]
+    types: [ opened, labeled, unlabeled, synchronize, reopened, milestoned, demilestoned ]
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,41 @@ jobs:
         id: filter
         with:
           filters: .github/filters.yaml
+
+  check_milestone:
+    name: Milestone Verification
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Verify PR has assigned milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          MILESTONE="${{ github.event.pull_request.milestone.title }}"
+          if [ -z "$MILESTONE" ]; then
+            # Query live GitHub API in case milestone was attached immediately after PR creation
+            MILESTONE=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json milestone --jq '.milestone.title // empty' 2>/dev/null || true)
+          fi
+          if [ -z "$MILESTONE" ]; then
+            echo "::error::Pull Request #${{ github.event.pull_request.number }} does not have an assigned milestone. All PRs targeting main must belong to an active milestone."
+            exit 1
+          fi
+          echo "✅ Pull request is assigned to milestone: $MILESTONE"
+
+  validate_docs:
+    name: Documentation & Link Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate links and badges
+        run: python3 scripts/check_links.py
 
   lint:
     name: "C++ Linter (${{ matrix.path }})"
@@ -147,13 +182,15 @@ jobs:
 
   ci-gate:
     name: CI Gatekeeper
-    needs: [filter, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
+    needs: [filter, check_milestone, validate_docs, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Evaluate results
         run: |
           echo "Filter result: ${{ needs.filter.result }}"
+          echo "Milestone check result: ${{ needs.check_milestone.result }}"
+          echo "Documentation & link check result: ${{ needs.validate_docs.result }}"
           echo "Lint result: ${{ needs.lint.result }}"
           echo "Ubuntu smoke test result: ${{ needs.test_ubuntu.result }}"
           echo "macOS smoke test result: ${{ needs.test_macos.result }}"
@@ -165,6 +202,18 @@ jobs:
           if [ "${{ needs.filter.result }}" = "failure" ] || \
              [ "${{ needs.filter.result }}" = "cancelled" ]; then
             echo "❌ Path filtering job failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.check_milestone.result }}" = "failure" ] || \
+             [ "${{ needs.check_milestone.result }}" = "cancelled" ]; then
+            echo "❌ Milestone verification failed: pull request must have an assigned milestone."
+            exit 1
+          fi
+
+          if [ "${{ needs.validate_docs.result }}" = "failure" ] || \
+             [ "${{ needs.validate_docs.result }}" = "cancelled" ]; then
+            echo "❌ Documentation and link integrity validation failed or was cancelled."
             exit 1
           fi
 

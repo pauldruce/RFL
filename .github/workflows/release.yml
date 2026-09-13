@@ -31,8 +31,35 @@ permissions:
   contents: read
 
 jobs:
+  validate_release:
+    name: Validate Release & Changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Verify release tag and changelog integrity
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            TAG_NAME="${{ github.event.release.tag_name }}"
+            python3 scripts/verify_changelog.py --tag "$TAG_NAME"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" != "true" ]; then
+            TAG_NAME="${{ github.ref_name }}"
+            python3 scripts/verify_changelog.py --tag "$TAG_NAME"
+          else
+            echo "Skipping strict tag validation for event: ${{ github.event_name }}"
+          fi
+
   build_wheels:
     name: Wheel on ${{ matrix.os }} (${{ matrix.cibw_arch }})
+    needs: [validate_release]
     if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
     runs-on: ${{ matrix.os }}
     strategy:
@@ -79,6 +106,7 @@ jobs:
 
   build_sdist:
     name: Source distribution (sdist)
+    needs: [validate_release]
     if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
     runs-on: ubuntu-latest
     steps:

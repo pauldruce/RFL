@@ -8,3 +8,15 @@ run = "python3 scripts/check_d2_images.py"
 [tasks.build-d2]
 description = "Recompile all SVG diagrams from D2 sources"
 run = "python3 scripts/check_d2_images.py --fix"
+
+[tasks.check-links]
+description = "Validate internal documentation links and workflow badges"
+run = "python3 scripts/check_links.py"
+
+[tasks.changelog-preview]
+description = "Preview release notes and changelog diff for upcoming release"
+run = "python3 scripts/draft_changelog.py --preview"
+
+[tasks.changelog-write]
+description = "Update CHANGELOG.md locally with latest release notes"
+run = "python3 scripts/draft_changelog.py --write"

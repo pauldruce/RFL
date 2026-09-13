@@ -3,8 +3,32 @@ cmake_minimum_required(VERSION 3.20...3.31)
 
 if(DEFINED SKBUILD_PROJECT_VERSION)
     set(RFL_PROJECT_VERSION ${SKBUILD_PROJECT_VERSION})
+elseif(DEFINED RFL_PROJECT_VERSION)
+    # Passed explicitly via -DRFL_PROJECT_VERSION=<semver>
 else()
-    set(RFL_PROJECT_VERSION 0.1.0)
+    find_package(Git QUIET)
+    if(GIT_FOUND AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../.git")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe --tags --match "v[0-9]*" --always
+            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+            OUTPUT_VARIABLE _GIT_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(_GIT_VERSION MATCHES "^v?([0-9]+\\.[0-9]+\\.[0-9]+.*)")
+            set(RFL_PROJECT_VERSION "${CMAKE_MATCH_1}")
+        endif()
+    endif()
+
+    if(NOT DEFINED RFL_PROJECT_VERSION)
+        message(STATUS "No Git tag found. Setting project version to 0.0.0-devel.")
+        set(RFL_PROJECT_VERSION "0.0.0-devel")
+    endif()
+endif()
+
+string(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+" RFL_NUMERIC_VERSION "${RFL_PROJECT_VERSION}")
+if(NOT RFL_NUMERIC_VERSION)
+    set(RFL_NUMERIC_VERSION "0.0.0")
 endif()
 
 # Auto-detect vcpkg toolchain file on Windows if not explicitly specified.
@@ -26,10 +50,12 @@ endif()
 
 project(
         RFL
-        VERSION ${RFL_PROJECT_VERSION}
+        VERSION ${RFL_NUMERIC_VERSION}
         DESCRIPTION
         "Random Fuzzy Library (RFL) - A library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative geometries."
         LANGUAGES CXX)
+
+set(RFL_VERSION_STRING "${RFL_PROJECT_VERSION}")
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
