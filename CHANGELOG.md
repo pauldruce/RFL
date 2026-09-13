@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * fix(ci): bump actions to Node 24 runtimes to eliminate deprecation warnings by @pauldruce in [#45](https://github.com/pauldruce/RFL/pull/45)
 
 ### 🧰 Build & CI/CD Architecture
+* fix(ci,release): improve changelog PR detection and self-reference release PRs by @pauldruce in [#53](https://github.com/pauldruce/RFL/pull/53)
+* chore(release): prepare v0.2.0 release and CHANGELOG.md by @pauldruce in [#52](https://github.com/pauldruce/RFL/pull/52)
 * ci(deps): bump the github-actions group with 7 updates by @dependabot[bot] in [#37](https://github.com/pauldruce/RFL/pull/37)
 
 ### 📚 Documentation & Governance

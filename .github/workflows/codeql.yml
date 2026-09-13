@@ -18,27 +18,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  filter:
-    name: Path Filtering
-    runs-on: ubuntu-latest
-    outputs:
-      code: ${{ steps.filter.outputs.code }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - uses: dorny/paths-filter@v4
-        id: filter
-        with:
-          filters: .github/filters.yaml
-
   analyze:
     name: Analyze (${{ matrix.language }})
-    needs: filter
-    if: >-
-      needs.filter.outputs.code == 'true' ||
-      github.event_name == 'schedule' ||
-      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 360
     permissions:

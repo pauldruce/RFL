@@ -12,6 +12,7 @@ code:
   - 'src/**'
   - 'playground/**'
   - 'CMakeLists.txt'
+  - 'scripts/**'
   - 'third_party/**'
   - '.clang-format'
   - '.github/workflows/**'
