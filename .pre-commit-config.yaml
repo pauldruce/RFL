@@ -3,8 +3,25 @@
 # See https://pre-commit.com for more information
 # ==============================================================================
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+
   - repo: https://github.com/streetsidesoftware/cspell-cli
     rev: v8.17.1
     hooks:
       - id: cspell
         name: 'CSpell: Enforce Spelling Compliance'
+
+  - repo: local
+    hooks:
+      - id: check-links
+        name: 'Links & Badges: Enforce Documentation Integrity'
+        entry: python3 scripts/check_links.py
+        language: system
+        files: '\.md$'
+        pass_filenames: false

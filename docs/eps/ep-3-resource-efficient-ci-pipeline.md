@@ -2,7 +2,7 @@
 
 * **Title:** Unified Modern Build, Tooling & CI/CD Architecture
 * **Author:** Paul Druce
-* **Status:** Accepted (In Progress)
+* **Status:** Completed
 * **Target Versions:** RFL v0.2.0
 * **Date:** 2026-09-04
 
@@ -16,9 +16,9 @@ The table below tracks the status of each implementation phase:
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Tier 1 Fast PR Gate (Path filtering, dual-platform smoke tests, status gatekeeper) | `v0.2.0` | [#19](https://github.com/pauldruce/RFL/issues/19), [#23](https://github.com/pauldruce/RFL/issues/23), [PR #42](https://github.com/pauldruce/RFL/pull/42) | ✅ Completed |
-| **Phase 2** | Build & Tooling Consolidation (Single-source build, reproducible developer environment, automated code quality) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | 🔄 In Progress |
-| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22) | ✅ Completed |
-| **Phase 4** | Native Windows CI Runner, MSVC Verification & Binary Wheel Automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21) | 💡 Planned |
+| **Phase 2** | Build & Tooling Consolidation (Single-source build, reproducible environment, code quality) | `v0.2.0` | [#23](https://github.com/pauldruce/RFL/issues/23) | ✅ Completed (Core modular targets deferred to `v0.3.0`) |
+| **Phase 3** | Dependency Decoupling & Automated External Package Acquisition | `v0.2.0` | [#22](https://github.com/pauldruce/RFL/issues/22), [PR #43](https://github.com/pauldruce/RFL/pull/43) | ✅ Completed |
+| **Phase 4** | Native Windows CI Runner, MSVC Verification & Binary Wheel Automation | `v0.2.0` | [#21](https://github.com/pauldruce/RFL/issues/21), [PR #48](https://github.com/pauldruce/RFL/pull/48), [PR #50](https://github.com/pauldruce/RFL/pull/50) | ✅ Completed |
 
 ---
 
@@ -470,31 +470,28 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 ### Phase 2: Build Consolidation, Mise Orchestration & Code Quality
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#23](https://github.com/pauldruce/RFL/issues/23)
-* **Status:** 🔄 In Progress
-* **Tasks:**
-  1. Add `mise.toml` defining standard developer tasks (`build`, `test`, `lint`, `format`, `dev`, `lint-d2`, `build-d2`).
-  2. Add `CMakePresets.json` configuring Ninja, Release mode, and `ccache` for IDEs.
-  3. Expand `.pre-commit-config.yaml` to include `clang-format`, `ruff`, and file hygiene hooks.
-  4. Update `ci.yml` lint job to use `pre-commit/action`.
-  5. Update `ci.yml` Ubuntu job to use symmetric CMake + Ninja + `ccache`, matching macOS.
-  6. Decompose `src/RFL/core/CMakeLists.txt` into modular component targets (`rfl_geometry`, `rfl_mcmc`, `rfl_rng`).
-  7. Add Precompiled Headers (PCH) for Armadillo and GSL in `CMakeLists.txt`.
-  8. Retire and remove `BUILD.plz`, `.plzconfig`, and Please build rules.
+* **Status:** ✅ Completed (Core modular targets deferred to `v0.3.0`)
+* **Delivered Capabilities:**
+  1. Symmetric CMake, Ninja, and `ccache` execution across Linux and macOS in CI.
+  2. Integration of `clang-format` style check and `ci-gate` gatekeeper in `ci.yml`.
+  3. Pre-commit framework integration for spelling and link integrity.
+  4. Deferred fine-grained target decomposition (`rfl_geometry`, `rfl_mcmc`) and Precompiled Headers to `v0.3.0` alongside EP-1 architecture modernisation.
 
 ### Phase 3: Dependency Decoupling with CMake FetchContent & System Packages
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#22](https://github.com/pauldruce/RFL/issues/22)
 * **Status:** ✅ Completed
-* **Tasks:**
-  1. Update `src/RFL/cmake/Armadillo.cmake` with `FetchContent` fallback from upstream GitLab repository.
-  2. Replace manual Armadillo shell scripts in Tier 2 matrix with CMake FetchContent or system packages.
-  3. Remove `.github/actions/install-armadillo` composite action once decoupled.
+* **Delivered Capabilities:**
+  1. Updated `src/RFL/cmake/Armadillo.cmake` with `FetchContent` fallback from upstream GitLab repository.
+  2. Replaced manual Armadillo compilation scripts with CMake `FetchContent` and system packages.
+  3. Removed obsolete `.github/actions/install-armadillo` composite action and retired Please build modules.
 
 ### Phase 4: Native Windows MSVC CI Runner & Binary Wheel Automation
 * **Target Version:** `v0.2.0`
 * **GitHub Issue:** [#21](https://github.com/pauldruce/RFL/issues/21)
-* **Status:** 💡 Planned
-* **Tasks:**
-  1. Add `windows-latest` runner to Tier 2 matrix.
-  2. Configure MSVC compiler flags (`/std:c++17`, `/utf-8`, `/openmp`) and `/Z7` debug format in `CMakeLists.txt`.
-  3. Add Windows wheel compilation (`win_amd64`) to `.github/workflows/release.yml`.
+* **Status:** ✅ Completed
+* **Delivered Capabilities:**
+  1. Added `windows-latest` and `windows-2022` runners to CI matrix and PR smoke checks.
+  2. Configured MSVC compiler flags (`/W4`, `/utf-8`, `/permissive-`) and Windows definitions in `CMakeLists.txt`.
+  3. Added composite action `.github/actions/install-windows-deps` caching vcpkg packages (`gsl`, `openblas`, `lapack`).
+  4. Added Windows wheel compilation (`win_amd64`) via `cibuildwheel` and `delvewheel` in `.github/workflows/release.yml`.
