@@ -3,7 +3,7 @@ name: CI Checks
 on:
   pull_request:
     branches: [ main ]
-    types: [ opened, labeled, unlabeled, synchronize, reopened ]
+    types: [ opened, labeled, unlabeled, synchronize, reopened, milestoned, demilestoned ]
   workflow_dispatch:
 
 permissions:
@@ -35,12 +35,19 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
       - name: Verify PR has assigned milestone
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          if [ -z "${{ github.event.pull_request.milestone.title }}" ]; then
+          MILESTONE="${{ github.event.pull_request.milestone.title }}"
+          if [ -z "$MILESTONE" ]; then
+            # Query live GitHub API in case milestone was attached immediately after PR creation
+            MILESTONE=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json milestone --jq '.milestone.title // empty' 2>/dev/null || true)
+          fi
+          if [ -z "$MILESTONE" ]; then
             echo "::error::Pull Request #${{ github.event.pull_request.number }} does not have an assigned milestone. All PRs targeting main must belong to an active milestone."
             exit 1
           fi
-          echo "✅ Pull request is assigned to milestone: ${{ github.event.pull_request.milestone.title }}"
+          echo "✅ Pull request is assigned to milestone: $MILESTONE"
 
   validate_docs:
     name: Documentation & Link Integrity
