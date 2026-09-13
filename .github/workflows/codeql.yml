@@ -58,7 +58,7 @@ jobs:
         run: |
           cmake \
             -B build \
-            -S src/RFL
+            -S .
           cmake --build build --target rfl_core
 
       - name: Perform CodeQL Analysis
