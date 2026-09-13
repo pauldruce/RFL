@@ -1,40 +1,33 @@
-# RFL Documentation
+# RFL Source Tree
 
-This directory contains the source code for the original RFL library created by Mauro D'arcangelo and its modern
-implementation.
+This directory contains the legacy implementation and the modern C++ core of the Random Fuzzy Library (RFL).
 
-The aim is to deprecate Mauro's implementation (Original RFL) for version 1.0 of this project.
-The code will be preserved under a protected branch on this repository.
+Version 1.0 will deprecate the legacy code. A protected Git branch preserves this historical implementation for baseline comparison.
 
-## Original RFL
+## Legacy RFL
 
-The source code for the original library is in `./legacy`.
-The library defines two classes: `Cliff` and `Geom24`, defined in `legacy/include/Cliff.hpp` and `legacy/include/Geom24.hpp`,
-respectively.
+The legacy source code resides in `src/legacy/`. The library defines two primary classes in `src/legacy/include/`:
 
-- `Cliff` is responsible for creating the 'gamma matrices' for a specific Clifford module.
-  The general way to specify a Clifford module is by setting two positive integers $p$ and $q$.
-- `Geom24` is the main Class for this library. It is responsible for setting up and running the simulation.
+* `Cliff` (`Cliff.hpp`): Creates the gamma matrices for a specific Clifford module. Two positive integers, $p$ and $q$, define the Clifford signature.
+* `Geom24` (`Geom24.hpp`): Sets up and executes the simulation.
 
-The original RFL code inherently uses an action of the form:
+The legacy code evaluates the Barrett-Glaser action:
 
-$$S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$$
+$$S(D) = g_2 \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)$$
 
-where $g_2$ and $g_4$ are real numbers. This action is the origin of the name of the class `Geom24` as the action
-contains the quadratic ($D^2$) and quartic ($D^4$) traces of the Dirac operator.
+where $g_2, g_4 \in \mathbb{R}$. The class name `Geom24` originates from this action, because the action contains quadratic ($D^2$) and quartic ($D^4$) Dirac operator traces.
 
 ## Core RFL
 
-The modern implementation of RFL refactors the original RFL source code to make it modular and extensible without compromising
-performance.
-The modern source code is found in `./core`.
+The modern library implementation resides in `src/core/`. This modern codebase refactors the legacy code into modular, extensible components without compromising performance.
 
-This refactoring allows for better testing and more flexibility for library users.
-It is constantly being developed, and any improvements or enhancements are welcome. Please leave an issue on the GitHub
-repo.
+Key improvements include:
+* Value semantics and regular C++ types without hidden pointer ownership.
+* Decoupled geometry state, action functionals, and Markov chain steppers.
+* Strong type safety and standard C++17 conformance.
 
-The high performance that Mauro's original implementation strived to develop has been preserved.
-To ensure that this performance does not degrade, a unit test that captures the difference between the original and new
-implementations.
-This test requires that the new implementation is no more than 5% slower to run the same simulation in each
-implementation.
+To report bugs or propose enhancements, open a GitHub issue.
+
+### Performance Parity Test
+
+The core library preserves the high performance of the legacy implementation. A dedicated benchmark test (`src/core/tests/performance/tBenchmark.cpp`) compares execution times between both implementations. The test requires the modern code to run within 5% of the legacy execution time.

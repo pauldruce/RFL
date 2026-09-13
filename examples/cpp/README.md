@@ -2,13 +2,13 @@
 
 This directory contains a complete C++ application demonstrating how to consume the `RFL::core` library.
 
-The application initialises a Dirac operator with signature $(p=1, q=3)$, runs $100$ Metropolis Monte Carlo update steps with Barrett-Glaser parameters $(g_2=-1.0, g_4=1.0)$, and computes the eigenvalue spectrum.
+The application initialises a Dirac operator with signature $(p=1, q=3)$. It executes $100$ Metropolis update steps with parameters $(g_2=-1.0, g_4=1.0)$ and computes the eigenvalue spectrum.
 
 ---
 
 ## 1. Build and Run with CMake (Recommended)
 
-From the root directory of the repository:
+From the repository root directory:
 
 ```bash
 # Configure and build all examples
@@ -23,7 +23,7 @@ cmake --build build --target main
 
 ## 2. Build and Run with Makefile (Linux / Unix / macOS)
 
-A standalone `Makefile` is provided in this directory for direct compilation:
+This directory provides a standalone `Makefile` for direct compilation:
 
 ```bash
 cd examples/cpp
@@ -42,10 +42,10 @@ make clean
 
 ## 3. Compile and Link Directly with GCC or Clang
 
-You can compile and link `main.cpp` directly with `g++` or `clang++` without using CMake.
+Compile and link `main.cpp` directly with `g++` or `clang++` without CMake.
 
 ### Prerequisites
-* Ensure `gsl` and `armadillo` are installed on your system (`brew install gsl armadillo` on macOS, or `sudo apt-get install libgsl-dev libarmadillo-dev` on Debian/Ubuntu).
+* Install `gsl` and `armadillo` (`brew install gsl armadillo` on macOS, or `sudo apt-get install libgsl-dev libarmadillo-dev` on Debian/Ubuntu).
 * Build `librfl_core.a` once using CMake:
   ```bash
   cmake -B build
@@ -53,7 +53,7 @@ You can compile and link `main.cpp` directly with `g++` or `clang++` without usi
   ```
 
 ### Direct GCC Command
-From the root directory of the repository:
+From the repository root directory:
 
 ```bash
 g++ -std=c++17 -O3 examples/cpp/main.cpp \
@@ -66,7 +66,7 @@ g++ -std=c++17 -O3 examples/cpp/main.cpp \
 ```
 
 > [!NOTE]
-> If `librfl_core.a` was built with AddressSanitizer enabled (the default in non-Release developer builds), add `-fsanitize=address` to the compile and link flags:
+> When building `librfl_core.a` with AddressSanitizer enabled (`-DRFL_ENABLE_ASAN=ON`), pass `-fsanitize=address` to both compiler and linker flags:
 > ```bash
 > g++ -std=c++17 -fsanitize=address -O3 examples/cpp/main.cpp \
 >     -Isrc/core \
@@ -77,9 +77,9 @@ g++ -std=c++17 -O3 examples/cpp/main.cpp \
 
 ---
 
-## 3. Helper Script
+## 4. Helper Script
 
-For convenience, run the included shell script:
+For convenience, execute the included shell script:
 
 ```bash
 ./examples/cpp/compile_gcc.sh

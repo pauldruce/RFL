@@ -10,7 +10,7 @@
 
 > *"Continuous points are an approximation. Quantise spacetime with finite matrices."*
 
-RFL is a high-performance C++ scientific library with Python bindings for Markov Chain Monte Carlo (MCMC) simulations of **Finite Noncommutative Geometries (Finite NCGs)** and **Random Fuzzy Spaces**.
+RFL is a high-performance C++ scientific library with Python bindings. It provides Markov Chain Monte Carlo (MCMC) simulations of **Finite Noncommutative Geometries** and **Random Fuzzy Spaces**.
 
 It simulates the Barrett-Glaser spectral action:
 
@@ -22,7 +22,7 @@ where $g_2, g_4 \in \mathbb{R}$ and $D$ is a finite Dirac operator. See §[Backg
 
 ## Quick Start (Python)
 
-Precompiled binary wheels vendor dynamic linear algebra dependencies (`OpenBLAS`, `Armadillo`, `GSL`). No C++ compiler or local dependencies are required.
+Precompiled binary wheels vendor dynamic linear algebra dependencies (`OpenBLAS`, `Armadillo`, `GSL`). You do not need a C++ compiler or local dependencies.
 
 ### 1. Installation
 
@@ -75,7 +75,7 @@ include(FetchContent)
 FetchContent_Declare(
     RFL
     GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-    GIT_TAG        v0.1.0
+    GIT_TAG        v0.2.0
 )
 FetchContent_MakeAvailable(RFL)
 
@@ -111,7 +111,7 @@ Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `gsl`
 
 ### 2. C++ Source Builds & CMake `FetchContent` (Source Delivery)
 
-When compiling RFL from source or linking via CMake `FetchContent`, RFL compiles against local toolchains:
+When compiling RFL from source or linking with CMake `FetchContent`, RFL compiles against local toolchains:
 
 | Dependency | Minimum Version | Notes |
 | :--- | :--- | :--- |
@@ -149,6 +149,7 @@ ctest --test-dir build -j 4 --output-on-failure
 
 * `rfl_core` (aliases: `RFL::core`, `RFL::rfl`): The modern C++17 library.
 * `rfl_legacy` (alias: `RFL::legacy`): The preserved historical codebase for baseline comparison.
+* `rfl_cpp_example`: Basic C++ API example binary (`examples/cpp/`).
 * `playground`: Standalone C++ experimentation target.
 
 To inspect all available build targets:
@@ -170,26 +171,26 @@ RFL follows a **3-tier research-driven development workflow** to keep friction n
 ```
 
 ### 1. Requesting Small Features or Reporting Friction (GitHub Issues)
-When running research experiments (in Jupyter notebooks or scripts) and hitting a missing feature or bug:
+When running research experiments and encountering a missing feature or bug:
 * Open a quick **GitHub Issue** (e.g. `Clifford gamma matrices should be accessible directly in Python`).
 * Tag with `enhancement`, `bug`, or `research-need`.
 
 ### 2. Major Architecture & Physics Upgrades (Enhancement Proposals - EPs)
-When several related issues point to a major subsystem upgrade (such as Value Semantics or Fermion Pfaffian Actions):
+When related issues require a major architectural or physics upgrade:
 * Author an **Enhancement Proposal** in `docs/eps/` (e.g. [EP-1](docs/eps/ep-1-core-architecture-modernisation.md)).
 * EPs capture **Research Scenarios**, **Requirements & Invariants Table**, and **Architecture Decision Records (ADRs)** with explicit trade-offs.
-* EPs are committed in git alongside the code for permanent versioned traceability.
+* Commit EPs to Git alongside the code for permanent versioned traceability.
 
 ### 3. Milestone Scheduling & PR Delivery
 * When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.3.0: Core Modernisation (EP-1)`).
-* The EP delivery plan is converted into discrete GitHub Issues assigned to the milestone.
+* Convert the EP delivery plan into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 
 ---
 
 ## Documentation
 
-Documentation for the software architecture, release lifecycle, and controlled vocabulary is available in the `docs/` directory:
+Find documentation for the software architecture, release lifecycle, and controlled vocabulary in the `docs/` directory:
 - [Target Architecture Guide](docs/Architecture.md)
 - [Release Process & Notes Guide](docs/Release_Process.md)
 - [Controlled Vocabulary & Glossary](docs/Glossary.md)

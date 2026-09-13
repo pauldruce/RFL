@@ -1,12 +1,12 @@
 # Consuming RFL in Research Projects
 
-This guide explains how to install RFL locally on your machine and consume it across your research projects, Jupyter notebooks, and external simulations.
+This guide explains how to install RFL locally and consume it across research projects, Jupyter notebooks, and external simulations.
 
 ---
 
 ## 1. Python Package Installation
 
-RFL provides precompiled binary wheels on PyPI and supports local source builds via `pybind11` and `scikit-build-core`.
+RFL provides precompiled binary wheels on PyPI. It supports local source builds using `pybind11` and `scikit-build-core`.
 
 ### Option A: PyPI Binary Installation (Easiest / No C++ Setup Required)
 Install standalone precompiled wheels from PyPI:
@@ -20,6 +20,7 @@ pip install pyrfl
 > * **Linux (`x86_64`):** glibc ≥ 2.28 (Ubuntu ≥ 20.04/22.04, RHEL ≥ 8).
 > * **macOS (Apple Silicon `arm64`):** macOS ≥ 14.0 (Sonoma / Sequoia).
 > * **macOS (Intel `x86_64`):** macOS ≥ 15.0 (Sequoia).
+> * **Windows (`x86_64`):** Windows 10 / 11 / Server (Native MSVC / MinGW).
 > * **Python:** CPython 3.9 – 3.13.
 
 ### Option B: Local Source Installation
@@ -36,7 +37,7 @@ pip install -e .
 ```
 
 ### Quick Python Usage Example
-You can import and use `rfl` from any script or Jupyter notebook on your machine:
+Import and use `rfl` from any Python script or Jupyter notebook:
 
 ```python
 import rfl
@@ -66,7 +67,7 @@ print(f"Min: {np.min(eigenvals):.4f}, Max: {np.max(eigenvals):.4f}, Mean: {np.me
 RFL requires `armadillo`, `gsl`, and `cmake`.
 
 > [!TIP]
-> If Armadillo is not installed locally, CMake automatically downloads and builds it in-tree via `FetchContent` from upstream GitLab. GSL should be installed via your system package manager (`sudo apt-get install libgsl-dev` on Debian/Ubuntu, `brew install gsl` on macOS).
+> If Armadillo is not installed locally, CMake automatically downloads and builds it in-tree using `FetchContent`. You must install GSL with your system package manager (`sudo apt-get install libgsl-dev` on Debian/Ubuntu, `brew install gsl` on macOS).
 
 ### Build & Run Tests
 From the root of the `RFL` repository:
@@ -90,7 +91,7 @@ include(FetchContent)
 FetchContent_Declare(
     RFL
     GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-    GIT_TAG        v0.1.0
+    GIT_TAG        v0.2.0
 )
 FetchContent_MakeAvailable(RFL)
 
@@ -106,4 +107,4 @@ target_link_libraries(my_simulation PRIVATE RFL::core)
    #include "BarrettGlaser/Action.hpp"
    #include "GslRng.hpp"
    ```
-2. Link against `librfl.a`, `armadillo`, and `gsl`.
+2. Link against `librfl_core.a`, `armadillo`, and `gsl`.

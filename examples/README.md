@@ -36,9 +36,9 @@ cmake --build build -j 4
 
 ## 2. Makefile & Direct GCC Workflow (Linux & macOS)
 
-For Linux and Unix developers who prefer direct build workflows without CMake configuration:
+Linux and macOS developers can build examples directly without CMake:
 
-### Option A: Using the Provided Makefile
+### Option A: Use the Provided Makefile
 Navigate to [`examples/cpp/`](cpp/) and use standard `make`:
 
 ```bash
@@ -52,7 +52,7 @@ make clean
 ```
 
 ### Option B: Direct GCC / Clang Command
-Once `librfl_core.a` is built in `build/src/core`, you can compile directly:
+After compiling `librfl_core.a` in `build/src/core`, compile directly with `g++`:
 
 ```bash
 g++ -std=c++17 -O3 examples/cpp/main.cpp \
@@ -69,14 +69,14 @@ g++ -std=c++17 -O3 examples/cpp/main.cpp \
 ## 3. Python & Jupyter Workflow
 
 ### Option A: Standard Python CLI
-Install the local Python package in editable or standard mode, then run:
+Install the local Python package, then execute the example script:
 
 ```bash
 pip install .
 python3 examples/python/main.py
 ```
 
-Or using `uv`:
+Or run with `uv`:
 
 ```bash
 uv run python examples/python/main.py

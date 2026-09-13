@@ -1,11 +1,11 @@
-# Requirements
+# Scientific Requirements
 
-The API for this library needs to be flexible enough to be used for a variety of applications.
-As a handy guide, the following paper outlines some requirements:
-- Barrett, John W., and L Glaser. ‘Monte Carlo Simulations of Random Non-Commutative Geometries’. Journal of Physics A: Mathematical and Theoretical 49, no. 24 (17 June 2016): 245001. https://doi.org/10.1088/1751-8113/49/24/245001.
+The library API must provide flexibility for diverse research applications. The following paper outlines core mathematical requirements:
+* Barrett, John W., and Lisa Glaser. "Monte Carlo Simulations of Random Non-Commutative Geometries." *Journal of Physics A: Mathematical and Theoretical* 49, no. 24 (2016): 245001. [https://doi.org/10.1088/1751-8113/49/24/245001](https://doi.org/10.1088/1751-8113/49/24/245001).
 
-They are summarised below:
-1. The actions need to be 'spectral': we need $S(D) = \sum_i V(\lambda_i)$ for some potential function $V$, such that $V \ge b$ for some $b \in \mathbb{R}$, and $\lambda_i$ are the eigenvalues of the Dirac operator $D$.
-2. The actions need to asymptote to infinity: $S(D) = \sum V(D)$, where $V(x) \to \infty$ as $x \to \infty$.
-3. The ability to make measurements of 'observables'. Observables are functions of the Dirac operator. For Monte Carlo simulations, this evaluates ensemble averages: $\langle f \rangle_N = \frac{1}{N} \sum_{j=1}^N f(D_j)$, where $\{D_j\}$ is an ensemble of Dirac operators sampled from the simulation.
-4. The integrated autocorrelation of measured observables needs to be calculated.
+Core requirements include:
+
+1. **Spectral Actions:** Actions must be spectral: $S(D) = \sum_i V(\lambda_i)$ with bounded potential $V \ge b$ ($b \in \mathbb{R}$) and Dirac eigenvalues $\lambda_i$.
+2. **Asymptotic Growth:** The potential function must grow asymptotically to infinity: $V(x) \to \infty$ as $x \to \infty$.
+3. **Observable Measurement:** The library must measure observables $f(D)$. Monte Carlo simulations evaluate ensemble averages $\langle f \rangle_N = \frac{1}{N} \sum_{j=1}^N f(D_j)$ over sampled Dirac operators $\{D_j\}$.
+4. **Autocorrelation Analysis:** The library must calculate the integrated autocorrelation time for measured observables.

@@ -2,7 +2,7 @@
 
 ## 1. Vision & Core Philosophy
 
-`RFL` (Random Fuzzy Library) is a high-performance C++17/20 scientific library with native Python bindings designed for simulating and analysing **Finite Noncommutative Geometries (Finite NCGs)**, **Fuzzy Spaces**, and **Random Spectral Triples**.
+`RFL` (Random Fuzzy Library) is a high-performance C++ scientific library with native Python bindings. It simulates and analyses **Finite Noncommutative Geometries**, **Fuzzy Spaces**, and **Random Spectral Triples**.
 
 ### The Library Design Principle
 > *"Libraries provide mechanisms, vocabulary, and data structures; Applications provide policies, workflows, and orchestration."*
@@ -27,7 +27,7 @@
 | **Foundational Math** | High-performance matrix linear algebra and stochastic RNG | Armadillo (`arma::cx_mat`), BLAS, LAPACK, GSL RNG |
 
 ### Architectural Principles:
-* **Value Semantics & Regular Types:** Domain objects (`DiracOperator`, `CliffordModule`, `ActionConfig`) behave as regular C++ types: copyable, movable, default-constructible where sensible, with intuitive value equality and no nested pointer wrappers.
+* **Value Semantics & Regular Types:** Domain objects (`DiracOperator`, `CliffordModule`) behave as regular C++ types. They support copying, moving, value equality, and avoid nested pointer wrappers.
 * **Separation of State, Energy, and Algorithm:** The geometry state owns matrices, the action functional evaluates energy and derivatives, and samplers execute Markov transitions.
 * **Stepper / Iterator Pattern:** Callers retain 100% control over the execution loop for logging, checkpointing, and real-time visualisation.
 * **Static Polymorphism in Hot Loops:** Inner Markov sweeps use templates/concepts to enable compiler inlining, register allocation, and SIMD vectorisation.
@@ -294,7 +294,7 @@ eigenvalues_array = np.array(eigenvalues_history)
 1. **Stack Allocations in Hot Kernels:**
    Replace temporary dynamic allocations (e.g. `new double[2]`) in MCMC sweeps with `std::array<double, 2>`.
 2. **Contiguous Buffer for Clifford Products:**
-   The 4-matrix trace table $\Omega^{(4)}_{abcd} = \text{Tr}(\gamma_a \gamma_b \gamma_c \gamma_d)$ is precomputed during geometry initialisation into a flat contiguous `std::vector<std::complex<double>>` with index arithmetic:
+   Precompute the 4-matrix trace table $\Omega^{(4)}_{abcd} = \text{Tr}(\gamma_a \gamma_b \gamma_c \gamma_d)$ into a contiguous buffer with index arithmetic:
    $$\text{idx}(a, b, c, d) = a + N(b + N(c + N d))$$
 3. **OpenMP Parallelisation:**
    - Multi-chain simulation parallelism: Run $K$ independent Dirac Markov chains across threads without mutex locks (each chain has an independent RNG state).
