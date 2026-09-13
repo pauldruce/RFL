@@ -99,17 +99,28 @@ def generate_notes_from_git_log(previous_tag: str | None) -> str:
     return "\n".join(lines).strip()
 
 
-def format_release_block(tag: str, notes: str, release_date: str) -> str:
+def format_release_block(tag: str, notes: str, release_date: str, release_pr: int | None = None) -> str:
     """Formats the release block according to Keep a Changelog."""
     # Ensure tag header has [vX.Y.Z] format
     tag_clean = tag if tag.startswith("v") else f"v{tag}"
     header = f"## [{tag_clean}] - {release_date}"
 
+    notes_text = notes.strip()
+    if release_pr:
+        pr_entry = f"* chore(release): prepare {tag_clean} release and CHANGELOG.md in [#{release_pr}](https://github.com/pauldruce/RFL/pull/{release_pr})"
+        if "### 🧰 Build & CI/CD Architecture" in notes_text:
+            notes_text = notes_text.replace(
+                "### 🧰 Build & CI/CD Architecture",
+                f"### 🧰 Build & CI/CD Architecture\n{pr_entry}",
+            )
+        else:
+            notes_text += f"\n\n### 🧰 Build & CI/CD Architecture\n{pr_entry}"
+
     return (
         f"{header}\n\n"
         f"### Highlights & Breaking Changes\n"
         f"* Add release highlights and breaking changes here.\n\n"
-        f"{notes.strip()}\n"
+        f"{notes_text}\n"
     )
 
 
@@ -156,6 +167,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Draft release notes and update CHANGELOG.md")
     parser.add_argument("--tag", type=str, default="v0.2.0", help="Target release tag (e.g. v0.2.0)")
     parser.add_argument("--previous-tag", type=str, default=None, help="Previous release tag (default: latest git tag)")
+    parser.add_argument("--release-pr", type=int, default=None, help="Self-reference the release PR number in CHANGELOG.md")
     parser.add_argument("--date", type=str, default=None, help="Release date (default: today)")
     parser.add_argument("--preview", action="store_true", help="Preview output without modifying CHANGELOG.md")
     parser.add_argument("--write", action="store_true", help="Write release notes to CHANGELOG.md")
@@ -172,7 +184,7 @@ def main() -> int:
         print("ℹ️ GitHub API unavailable or returned empty. Falling back to local git log...", file=sys.stderr)
         notes = generate_notes_from_git_log(previous_tag)
 
-    block = format_release_block(tag, notes, release_date)
+    block = format_release_block(tag, notes, release_date, release_pr=args.release_pr)
 
     if args.preview or not args.write:
         print("=== RELEASE NOTES PREVIEW ===")
