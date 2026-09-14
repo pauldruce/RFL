@@ -1,5 +1,3 @@
-find_package(HDF5 REQUIRED)
-
 add_executable(Type13Metropolis Type13Metropolis.cpp
         EigenvalueRecorder.hpp
         EigenvalueRecorder.cpp)

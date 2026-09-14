@@ -21,7 +21,7 @@ jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 15
     permissions:
       security-events: write
       packages: read
@@ -47,6 +47,14 @@ jobs:
         with:
           install-armadillo: 'true'
 
+      - name: Configure CMake
+        if: matrix.language == 'c-cpp'
+        run: |
+          cmake \
+            -B build \
+            -S . \
+            -DCMAKE_BUILD_TYPE=Release
+
       - name: Initialise CodeQL
         uses: github/codeql-action/init@v4
         with:
@@ -56,10 +64,7 @@ jobs:
       - name: Build C++ code
         if: matrix.language == 'c-cpp'
         run: |
-          cmake \
-            -B build \
-            -S .
-          cmake --build build --target rfl_core
+          cmake --build build --target all -j 4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
