@@ -106,10 +106,7 @@ endif()
 # GSL is included with Armadillo above, but we need more.
 include(Armadillo)
 include(GSL)
-
-option(BUILD_TESTING "Build unit and performance test suites" ON)
-
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD AND BUILD_TESTING)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
     include(LoadGoogleTest)
 endif()
 
@@ -130,9 +127,7 @@ add_library(RFL::legacy ALIAS rfl_legacy)
 
 # Add tests if building tests.
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
-        if(BUILD_TESTING)
-            add_subdirectory(${legacy_RFL_SOURCE_DIR}/tests)
-        endif()
+        add_subdirectory(${legacy_RFL_SOURCE_DIR}/tests)
         option(RFL_BUILD_EXAMPLES "Build example applications" ON)
         if(RFL_BUILD_EXAMPLES)
             add_subdirectory(examples)

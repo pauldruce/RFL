@@ -49,7 +49,5 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
             PATTERN "tests" EXCLUDE
     )
 
-    if(BUILD_TESTING)
-        add_subdirectory(tests)
-    endif()
+    add_subdirectory(tests)
 endif()
