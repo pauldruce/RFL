@@ -30,7 +30,11 @@ def get_latest_stable_tag() -> str | None:
         return None
 
 
-def get_merged_prs_since(tag: str | None, excluded_prs: set[int] | None = None) -> dict[int, str]:
+def get_merged_prs_since(
+    tag: str | None,
+    excluded_prs: set[int] | None = None,
+    ignore_dependencies: bool = True,
+) -> dict[int, str]:
     """Finds all PR numbers and commit summaries merged since the given tag."""
     range_spec = f"{tag}..HEAD" if tag else "HEAD"
     prs: dict[int, str] = {}
@@ -51,14 +55,30 @@ def get_merged_prs_since(tag: str | None, excluded_prs: set[int] | None = None) 
             matches = re.findall(r"\(#(\d+)\)", line)
             if matches:
                 pr_num = int(matches[-1])
-                if pr_num not in excluded:
-                    prs[pr_num] = line
+                if pr_num in excluded:
+                    continue
+
+                # Strip short commit hash from the beginning of oneline output
+                summary = line.split(" ", 1)[1] if " " in line else line
+
+                # Automated dependency updates do not require manual changelog entries
+                if ignore_dependencies and summary.startswith(
+                    ("ci(deps):", "build(deps):", "chore(deps):", "deps:")
+                ):
+                    continue
+
+                prs[pr_num] = line
     except Exception as exc:
         print(f"⚠️ Warning: Could not extract git log: {exc}", file=sys.stderr)
     return prs
 
 
-def audit_changelog(tag: str, previous_tag: str | None = None, excluded_prs: set[int] | None = None) -> list[str]:
+def audit_changelog(
+    tag: str,
+    previous_tag: str | None = None,
+    excluded_prs: set[int] | None = None,
+    ignore_dependencies: bool = True,
+) -> list[str]:
     """Validates CHANGELOG.md against the specified tag and Git history."""
     errors: list[str] = []
 
@@ -109,7 +129,11 @@ def audit_changelog(tag: str, previous_tag: str | None = None, excluded_prs: set
     if effective_prev_tag == tag or effective_prev_tag == f"v{base_version}":
         effective_prev_tag = None
 
-    merged_prs = get_merged_prs_since(effective_prev_tag, excluded_prs=excluded_prs)
+    merged_prs = get_merged_prs_since(
+        effective_prev_tag,
+        excluded_prs=excluded_prs,
+        ignore_dependencies=ignore_dependencies,
+    )
     missing_prs: list[str] = []
     for pr_num, commit_line in merged_prs.items():
         # Check if #pr_num or /pull/pr_num appears in the section text
@@ -138,10 +162,21 @@ def main() -> int:
         default=[],
         help="PR number to exclude from verification (can be specified multiple times)",
     )
+    parser.add_argument(
+        "--include-deps",
+        action="store_true",
+        default=False,
+        help="Require automated dependency updates (ci(deps), build(deps)) in CHANGELOG.md audit",
+    )
 
     args = parser.parse_args()
 
-    errors = audit_changelog(args.tag, args.previous_tag, excluded_prs=set(args.exclude_pr))
+    errors = audit_changelog(
+        args.tag,
+        args.previous_tag,
+        excluded_prs=set(args.exclude_pr),
+        ignore_dependencies=not args.include_deps,
+    )
     if errors:
         print(f"❌ CHANGELOG.md verification failed for tag '{args.tag}':", file=sys.stderr)
         for err in errors:
