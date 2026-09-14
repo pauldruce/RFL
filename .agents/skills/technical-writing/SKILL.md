@@ -90,7 +90,7 @@ RFL strictly standardises on **British English**:
 ### Example 1: Code Docstrings
 * ❌ **Before:**
   ```cpp
-  // This method is utilized in order to carry out the calculation of the trace of the fourth power 
+  // This method is utilized in order to carry out the calculation of the trace of the fourth power
   // of the Dirac operator which is needed since we want to evaluate the Barrett-Glaser action.
   ```
 * ✅ **After (ASD-STE100 + British):**
@@ -106,7 +106,7 @@ RFL strictly standardises on **British English**:
 ### Example 2: Architecture Documentation
 * ❌ **Before:**
   ```markdown
-  Since the previous implementation was utilizing dynamic polymorphism with unique_ptr wrappers, 
+  Since the previous implementation was utilizing dynamic polymorphism with unique_ptr wrappers,
   in order to achieve optimal computational performance we are refactoring the state into regular value types.
   ```
 * ✅ **After (ASD-STE100 + British):**

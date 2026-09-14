@@ -5,21 +5,19 @@
   "ignorePaths": [
     "**/build/**",
     "**/cmake-build/**",
-    "**/plz-out/**",
-    "**/.plz-cache/**",
     "**/venv/**",
     "**/research/**",
-    "**/RFL_docs/**",
+    "**/.agents/**",
     "**/*.log",
     "**/*.ipynb",
     "**/.git/**",
-    "**/third_party/**",
-    "**/node_modules/**",
+    "**/OldCode/**",
     "**/*.png",
     "**/*.svg",
     "**/*.jpg",
     "**/*.puml",
     "**/*.d2",
+    "**/*.code-workspace",
     ".cspell.json"
   ],
   "ignoreRegExpList": [
@@ -29,13 +27,14 @@
     "color:[^;]+;",
     "-D[A-Za-z0-9_]+",
     "-W[A-Za-z0-9_-]+",
+    "-l[a-zA-Z0-9_]+",
     "[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+(?:@[v0-9.]+)?",
-    "compatability_tests\\.ya?ml",
     "\\blib[a-z0-9_]+(?:-[a-z0-9]+)*\\b",
     "\\.[a-zA-Z0-9_]*config"
   ],
   "words": [
     "ARMA",
+    "ASAN",
     "Arma",
     "absdiff",
     "anticommutator",
@@ -45,6 +44,7 @@
     "arma",
     "armadillo",
     "arpack",
+    "asan",
     "auditwheel",
     "bibtex",
     "blas",
@@ -95,6 +95,7 @@
     "gsl",
     "gslcblas",
     "gslrng",
+    "herm",
     "hermitianise",
     "hermiticity",
     "idiracoperator",
@@ -140,13 +141,12 @@
     "oneline",
     "openblas",
     "owndata",
+    "PARAMETERISED",
     "pauldruce",
     "pfaffian",
     "pfaffians",
     "pimpl",
     "pipefail",
-    "pleasew",
-    "preloadsubincludes",
     "proselint",
     "pybind",
     "pypa",
@@ -161,12 +161,8 @@
     "setuptools",
     "skbuild",
     "spacetime",
-    "srcs",
     "strequal",
     "subclassing",
-    "subincludes",
-    "subrepo",
-    "subrepos",
     "superlu",
     "taskfile",
     "testpypi",
@@ -190,7 +186,12 @@
     "widom",
     "wikilinks",
     "wpedantic",
-    "worktrees"
+    "worktrees",
+    "clion",
+    "demilestoned",
+    "fuzzyuser",
+    "milestoned",
+    "pycache"
   ],
   "flagWords": [
     "initialize",
@@ -223,15 +224,38 @@
     "colors",
     "center",
     "centers",
-    "modeling"
+    "modeling",
+    "utilize",
+    "utilized",
+    "utilizing",
+    "utilization",
+    "factorization",
+    "categorized",
+    "categorize",
+    "categorizing",
+    "categorization",
+    "diagonalize",
+    "diagonalized",
+    "diagonalizing",
+    "diagonalization"
   ],
   "overrides": [
+    {
+      "filename": "**/.clang-format",
+      "words": [
+        "Dont",
+        "Reflow"
+      ]
+    },
     {
       "filename": "**/docs/Glossary.md",
       "flagWords": []
     },
     {
-      "filename": "**/.agents/skills/technical-writing/SKILL.md",
+      "filename": [
+        "**/.agents/**",
+        ".agents/**"
+      ],
       "flagWords": []
     }
   ]

@@ -77,7 +77,7 @@ jobs:
         run: |
           CMAKE_ARGS=(
             -B build
-            -S src/RFL
+            -S .
             -G Ninja
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5

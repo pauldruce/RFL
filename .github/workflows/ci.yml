@@ -50,7 +50,7 @@ jobs:
           echo "✅ Pull request is assigned to milestone: $MILESTONE"
 
   validate_docs:
-    name: Documentation & Link Integrity
+    name: Documentation, Links & Spelling Integrity
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -64,6 +64,9 @@ jobs:
       - name: Validate links and badges
         run: python3 scripts/check_links.py
 
+      - name: Spell & British English Check (CSpell)
+        run: npx cspell lint --dot .
+
   lint:
     name: "C++ Linter (${{ matrix.path }})"
     needs: filter
@@ -75,7 +78,8 @@ jobs:
       fail-fast: false
       matrix:
         path:
-          - "src/RFL"
+          - "src"
+          - "examples"
           - "playground"
     steps:
       - name: Checkout repository

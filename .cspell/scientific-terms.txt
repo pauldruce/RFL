@@ -61,7 +61,7 @@ ranlxd
 recomputation
 subclassing
 
-# --- Build Systems (CMake & Please) ---
+# --- Build Systems (CMake) ---
 CMakeLists
 CPACK
 ctest
@@ -74,13 +74,7 @@ libgsl
 librfl
 MATHJAX
 MDFILE
-pleasew
-preloadsubincludes
 SKBUILD
-srcs
-subincludes
-subrepo
-subrepos
 UNDOC
 Wextra
 Wpedantic

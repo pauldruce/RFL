@@ -13,6 +13,10 @@ run = "python3 scripts/check_d2_images.py --fix"
 description = "Validate internal documentation links and workflow badges"
 run = "python3 scripts/check_links.py"
 
+[tasks.lint-spelling]
+description = "Check repository spelling and British English compliance with CSpell"
+run = "npx cspell lint --dot ."
+
 [tasks.changelog-preview]
 description = "Preview release notes and changelog diff for upcoming release"
 run = "python3 scripts/draft_changelog.py --preview"

@@ -1,4 +1,17 @@
-# RFL Playground
+# C++ Playground
 
-In this directory is a simple CMake target to test out plain C++ code.
-It's here to aid in the prototyping and exploration of C++ constructs and object-oriented programming paradigms.
+This directory provides a standalone CMake target (`playground`) for rapid C++ experimentation.
+Use this playground to prototype language features, test algorithms, and explore object-oriented designs.
+
+## Build and Run
+
+From the repository root directory:
+
+```bash
+# Build the playground executable
+cmake -B build
+cmake --build build --target playground
+
+# Run the executable
+./build/playground/cpp/playground
+```

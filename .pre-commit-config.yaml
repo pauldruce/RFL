@@ -16,6 +16,7 @@ repos:
     hooks:
       - id: cspell
         name: 'CSpell: Enforce Spelling Compliance'
+        args: [--dot]
 
   - repo: local
     hooks:

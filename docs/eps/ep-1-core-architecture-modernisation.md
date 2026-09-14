@@ -115,7 +115,7 @@ $$\alpha = \min\left(1, e^{-\Delta S_B} \cdot \left| \frac{\text{Pfaffian}(JD')}
 | :--- | :--- | :--- |
 | **Execution Speed for Pure Barrett-Glaser** | ✅ Maximum (Direct inlining, zero virtual dispatch) | ⚠️ Lower (virtual dispatch overhead across terms) |
 | **Numerical Stability for Fermions** | ✅ High (Computes Pfaffian ratio directly without log-divergences) | ⚠️ Moderate (Requires $-\ln|\text{Pf}|$ additive energy conversion) |
-| **Mathematical Alignment** | ✅ Matches exact factorization of path integral $\Delta S_B + \text{ratio}$ | ⚠️ Treats non-local Pfaffians as standard polynomial traces |
+| **Mathematical Alignment** | ✅ Matches exact factorisation of path integral $\Delta S_B + \text{ratio}$ | ⚠️ Treats non-local Pfaffians as standard polynomial traces |
 | **Design Complexity** | ✅ Simple, direct, easily testable | ❌ High (Polymorphic action container, composite delta dispatch) |
 | **Decision** | **Selected (Option 1)** | Deferred |
 

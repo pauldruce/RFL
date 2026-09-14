@@ -1,0 +1,53 @@
+add_library(rfl_core
+        IDiracOperator.hpp
+        IDiracOperatorDerivatives.cpp
+        IDiracOperatorDerivatives.hpp)
+
+set(rfl_core_HEADERS
+        BarrettGlaser/Action.hpp
+        BarrettGlaser/Hamiltonian.hpp
+        BarrettGlaser/Metropolis.hpp
+        Clifford.hpp
+        DiracOperator.hpp
+        GslRng.hpp
+        IAction.hpp
+        IAlgorithm.hpp
+        IRng.hpp
+        Simulation.hpp)
+
+target_sources(
+        rfl_core
+        PRIVATE
+        BarrettGlaser/Action.cpp
+        BarrettGlaser/Hamiltonian.cpp
+        BarrettGlaser/Metropolis.cpp
+        Clifford.cpp
+        DiracOperator.cpp
+        Simulation.cpp
+        PUBLIC ${rfl_core_HEADERS})
+
+target_include_directories(rfl_core PUBLIC ${core_RFL_INCLUDE_DIR})
+target_link_libraries(rfl_core PUBLIC ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
+target_compile_features(rfl_core PUBLIC cxx_std_17)
+
+if(MSVC)
+    target_compile_definitions(rfl_core PUBLIC _USE_MATH_DEFINES NOMINMAX)
+endif()
+
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
+    # Install static library files
+    install(
+            TARGETS rfl_core
+            DESTINATION lib/rfl/bin/${CMAKE_BUILD_TYPE}
+    )
+
+    # Install include/header files.
+    install(
+            DIRECTORY ${core_RFL_INCLUDE_DIR}/
+            DESTINATION lib/rfl/include
+            FILES_MATCHING PATTERN "*.hpp"
+            PATTERN "tests" EXCLUDE
+    )
+
+    add_subdirectory(tests)
+endif()

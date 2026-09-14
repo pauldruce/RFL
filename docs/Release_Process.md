@@ -6,8 +6,8 @@ This document establishes the official release lifecycle, pre-release checklist,
 
 ## 1. Release Philosophy & Governance
 
-1. **Semantic Versioning & Beta Lifecycle:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.1.0`).
-   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research and architectural modernisation phase. Under Semantic Versioning rules, minor version increments (`v0.1.0` → `v0.2.0`) may introduce breaking API changes or refactors while the architecture evolves toward `v1.0.0`.
+1. **Semantic Versioning & Beta Lifecycle:** Releases follow `vMAJOR.MINOR.PATCH` (e.g. `v0.2.0`).
+   - **Beta Development Phase (`v0.y.z`):** The library is currently in an active research phase. Minor version increments (`v0.1.0` → `v0.2.0`) may introduce breaking API changes before `v1.0.0`.
    - **Stable Production Phase (`v1.0.0+`):** After `v1.0.0`, breaking changes occur only across MAJOR version increments, with a formal deprecation period across MINOR releases.
 2. **Controlled Language (ASD-STE100 & British English):**
    - Release documentation must follow controlled vocabulary defined in [docs/Glossary.md](Glossary.md).
@@ -19,38 +19,38 @@ This document establishes the official release lifecycle, pre-release checklist,
 4. **Draft-First Review Gate:**
    - Always create releases and release candidates as **Drafts** first (`--draft`).
    - Review rendered release notes, breaking change warnings, and links in the GitHub UI before publishing.
-   - Transitioning from draft to published initiates the automated wheel build and PyPI distribution pipeline.
+   - Publishing initiates the automated wheel build and PyPI distribution pipeline.
 
 ---
 
 ## 2. Pre-Releases & Release Candidates (RCs)
 
-Following the convention of major scientific libraries (such as NumPy, SciPy, PyTorch, and Armadillo), significant releases use **Release Candidates** (e.g. `v0.1.0rc1`):
+Following major scientific library conventions (such as NumPy and SciPy), significant releases use **Release Candidates** (e.g. `v0.2.0rc1`):
 
 | Stage | Action | Command / Trigger | Automation & Verification |
 | :--- | :--- | :--- | :--- |
-| **1. Tag RC** | Create release candidate tag | `git tag v0.1.0rc1 && git push origin v0.1.0rc1` | Records candidate commit point |
-| **2. Draft Pre-Release** | Author notes for review | `gh release create v0.1.0rc1 --draft --prerelease` | Zero CI workflows triggered while in draft |
-| **3. Publish RC** | Trigger packaging pipeline | `gh release edit v0.1.0rc1 --draft=false` | Builds wheels, uploads assets, publishes pre-release to PyPI |
+| **1. Tag RC** | Create release candidate tag | `git tag v0.2.0rc1 && git push origin v0.2.0rc1` | Records candidate commit point |
+| **2. Draft Pre-Release** | Author notes for review | `gh release create v0.2.0rc1 --draft --prerelease` | Zero CI workflows triggered while in draft |
+| **3. Publish RC** | Trigger packaging pipeline | `gh release edit v0.2.0rc1 --draft=false` | Builds wheels, uploads assets, publishes pre-release to PyPI |
 | **4. Test & Qualify** | Testing period (24–72h) | `pip install --pre pyrfl` | Downstream verification on user machines |
-| **5. Resolve or Promote** | Fix defects or promote to final | `git tag v0.1.0 && gh release create v0.1.0` | Official release on PyPI and GitHub `Latest` tag |
+| **5. Resolve or Promote** | Fix defects or promote to final | `git tag v0.2.0 && gh release create v0.2.0` | Official release on PyPI and GitHub `Latest` tag |
 
 ### 2.1 How Pre-Releases Work Across Ecosystems
 
 1. **Naming Standard (PEP 440 & Git SemVer):**
-   - Use `vX.Y.Zrc1` (e.g. `v0.1.0rc1`).
+   - Use `vX.Y.Zrc1` (e.g. `v0.2.0rc1`).
    - This tag format is natively recognised by Git, GitHub, `pip`, and `scikit-build-core`.
 2. **GitHub Releases Behaviour:**
    - Pre-releases are flagged with `--prerelease` (or the "Set as a pre-release" checkbox).
    - GitHub displays a `Pre-release` badge and retains the previous release as `Latest`.
 3. **PyPI & `pip` Behaviour:**
-   - PyPI automatically marks `0.1.0rc1` as a pre-release.
-   - A standard `pip install pyrfl` will **never** install a pre-release by default.
-   - Downstream researchers must explicitly opt in with:
+   - PyPI automatically marks `0.2.0rc1` as a pre-release.
+   - Standard `pip install pyrfl` will never install a pre-release by default.
+   - Downstream researchers must explicitly opt in:
      ```bash
      pip install --pre pyrfl
      # or
-     pip install pyrfl==0.1.0rc1
+     pip install pyrfl==0.2.0rc1
      ```
 4. **C++ & CMake `FetchContent` Behaviour:**
    - Downstream C++ solvers test the release candidate by pinning the RC git tag:
@@ -58,7 +58,7 @@ Following the convention of major scientific libraries (such as NumPy, SciPy, Py
      FetchContent_Declare(
          RFL
          GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-         GIT_TAG        v0.1.0rc1
+         GIT_TAG        v0.2.0rc1
      )
      ```
 
@@ -68,31 +68,35 @@ Following the convention of major scientific libraries (such as NumPy, SciPy, Py
 
 ### Step 1: Pre-Release Checklist
 Before tagging any release or candidate:
-* Ensure all CI workflows on `main` are green.
+* Ensure all CI workflows on `main` pass.
 * Verify local builds and tests pass (`ctest`, `pytest`).
 
 ### Step 2: Milestone Triage & EP Status
-* Verify that all GitHub Issues and PRs for the milestone are merged and closed.
+* Verify that all GitHub issues and PRs for the milestone are merged and closed.
 * Update the relevant Enhancement Proposal in [docs/eps/](eps/) to reflect current milestone status.
 
 ### Step 3: Tag, Draft, and Publish a Release Candidate (`vX.Y.Zrc1`)
-1. Create and push the release candidate tag:
+1. Update `CHANGELOG.md` for the target version and verify with:
+   ```bash
+   python3 scripts/verify_changelog.py --tag vX.Y.Zrc1
+   ```
+2. Create and push the release candidate tag:
    ```bash
    git checkout main
    git pull origin main
    git tag vX.Y.Zrc1
    git push origin vX.Y.Zrc1
    ```
-2. Create the Draft Pre-Release using the committed release notes:
+3. Create the Draft Pre-Release on GitHub:
    ```bash
-   gh release create vX.Y.Zrc1 --draft --prerelease --title "vX.Y.Zrc1: Release Candidate 1" --notes-file docs/releases/vX.Y.Z.md
+   gh release create vX.Y.Zrc1 --draft --prerelease --title "vX.Y.Zrc1: Release Candidate 1" --generate-notes
    ```
-3. Review the rendered release notes in the GitHub Web UI.
-4. Publish the pre-release:
+4. Review the rendered release notes in the GitHub Web UI.
+5. Publish the pre-release:
    ```bash
    gh release edit vX.Y.Zrc1 --draft=false
    ```
-   The release workflow compiles wheels, packages `sdist`, attaches release assets, and uploads the pre-release to PyPI.
+   Publishing triggers wheel compilation, sdist packaging, and PyPI pre-release deployment.
 
 ### Step 4: Release Candidate Testing
 During the testing window (24–72 hours for `0.y.z` releases):
@@ -105,58 +109,61 @@ During the testing window (24–72 hours for `0.y.z` releases):
 2. **C++ CMake Integration:** Verify `FetchContent` in an external test project linking `RFL::core`.
 
 ### Step 5: Tag, Draft, and Publish Final Release (`vX.Y.Z`)
-When the release candidate is validated with zero critical defects:
-1. Tag the release commit:
+When the release candidate completes verification without critical defects:
+1. Verify `CHANGELOG.md` with:
+   ```bash
+   python3 scripts/verify_changelog.py --tag vX.Y.Z
+   ```
+2. Tag the release commit:
    ```bash
    git tag vX.Y.Z
    git push origin vX.Y.Z
    ```
-2. Create the Draft Release:
+3. Create the Draft Release on GitHub:
    ```bash
-   gh release create vX.Y.Z --draft --title "vX.Y.Z: <Release Title>" --notes-file docs/releases/vX.Y.Z.md
+   gh release create vX.Y.Z --draft --title "vX.Y.Z: Release Title" --generate-notes
    ```
-3. Review the rendered release notes in the GitHub Web UI.
-4. Publish the final release:
+4. Review rendered release notes in the GitHub Web UI.
+5. Publish the final release:
    ```bash
    gh release edit vX.Y.Z --draft=false
    ```
-   The final packages become the default on PyPI (`pip install pyrfl`), assets are attached to GitHub Releases, and the milestone is closed.
+   Publishing promotes packages to the PyPI default, attaches release assets, and closes the milestone.
 
 ---
 
-## 4. In-Tree Release Notes Storage (`docs/releases/`)
+## 4. Release History & Changelog Governance (`CHANGELOG.md`)
 
-Following scientific software conventions (NumPy, SciPy, Boost), all release notes are committed directly to the repository under **`docs/releases/vX.Y.Z.md`**.
+RFL maintains release notes and version history directly in **`CHANGELOG.md`** following the [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) specification.
 
-### 4.1 Canonical Template
-The single source of truth for authoring release notes is:
-📄 **[docs/release-note-template.md](release-note-template.md)**
+### 4.1 Automated Changelog Verification Gate
+The automated test script `scripts/verify_changelog.py` validates that:
+* Every release tag has a corresponding version section in `CHANGELOG.md`.
+* All pull requests merged since the previous release are documented.
+* No unresolved placeholder tokens (`TODO`, `TBD`) exist.
 
-To author release notes for a new version:
-1. Copy `docs/release-note-template.md` to `docs/releases/vX.Y.Z.md`.
-2. Populate the breaking changes alert box, highlights, and component changes.
-3. Commit `docs/releases/vX.Y.Z.md` on the release PR for peer review.
-4. Pass `--notes-file docs/releases/vX.Y.Z.md` when creating the GitHub Release.
+Run the verification gate locally:
+```bash
+python3 scripts/verify_changelog.py --tag vX.Y.Z
+```
 
 ### 4.2 Initial Release Baseline (`v0.1.0`)
-RFL versioning formally begins with **`v0.1.0`** as the initial packaged release with binary wheels and CMake target exports. Commits prior to `v0.1.0` represent unreleased prototype development recorded in git history.
+RFL versioning formally begins with `v0.1.0` as the initial packaged release with binary wheels and CMake target exports.
 
 ### 4.3 Patch Releases & Maintenance Branch Workflow
-
-When a bug fix patch (`vX.Y.1`) is needed while `main` develops future versions (`vX.(Y+1).0`), use the **Maintenance Branch Workflow**:
-
-1. **Fix on `main` First:** Always land bug fixes on `main` first via PR to prevent regressions in future versions.
-2. **Backport to Maintenance Branch:** Cherry-pick the bugfix commit to `maintenance/X.Y.x`.
-3. **Author Patch Release Notes:** Create `docs/releases/vX.Y.1.md` on the maintenance branch detailing the repaired issues. Patch releases must never contain breaking changes.
-4. **Tag & Publish:** Tag `vX.Y.1` from the maintenance branch and publish via `gh release create --notes-file docs/releases/vX.Y.1.md`.
-5. **Forward-Port Notes to `main`:** Merge or copy `docs/releases/vX.Y.1.md` into `main` so `main` retains the complete release history.
+When a bug fix patch (`vX.Y.1`) is needed while `main` develops future versions (`vX.(Y+1).0`), use the Maintenance Branch Workflow:
+1. **Fix on `main` First:** Land bug fixes on `main` through a pull request to prevent regressions.
+2. **Backport to Maintenance Branch:** Cherry-pick the bug fix commit to `maintenance/X.Y.x`.
+3. **Update Changelog:** Update `CHANGELOG.md` on the maintenance branch to document the repaired issues. Patch releases must never contain breaking changes.
+4. **Tag & Publish:** Tag `vX.Y.1` from the maintenance branch and publish using `gh release create`.
+5. **Forward-Port Notes to `main`:** Merge changelog updates back to `main` to retain full release history.
 
 ---
 
 ## 5. Testing the Release Pipeline & TestPyPI Qualification
 
 ### 5.1 Automated Pull Request Testing
-Any pull request that modifies `.github/workflows/release.yml`, `src/RFL/pyproject.toml`, or `src/RFL/python_bindings/**` automatically executes the complete packaging matrix. The workflow compiles all 18 binary wheels across Linux, macOS Apple Silicon, and macOS Intel, and executes the `pytest` test suite without publishing assets.
+Any pull request that modifies `.github/workflows/release.yml`, `pyproject.toml`, or `src/python_bindings/**` automatically executes the complete packaging matrix. The workflow compiles binary wheels across Linux, macOS, and Windows, and executes the `pytest` test suite without publishing assets.
 
 ### 5.2 TestPyPI Publication & Pre-Flight Qualification
 To publish packages to TestPyPI (`test.pypi.org`) for downstream verification before an official release, dispatch the release workflow with `publish_to_testpypi=true`:
