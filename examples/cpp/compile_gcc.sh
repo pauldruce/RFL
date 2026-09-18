@@ -22,12 +22,14 @@ if nm build/src/core/librfl_core.a 2>/dev/null | grep -q "___asan"; then
     SAN_FLAGS="-fsanitize=address"
 fi
 
+mkdir -p build/examples/cpp
+
 echo "Compiling examples/cpp/main.cpp using ${CXX}..."
 ${CXX} -std=c++17 ${SAN_FLAGS} -O3 examples/cpp/main.cpp \
     -Isrc/core \
     -Lbuild/src/core \
     -lrfl_core -larmadillo -lgsl -lgslcblas \
-    -o examples/cpp/main_gcc
+    -o build/examples/cpp/main_gcc
 
-echo "Running examples/cpp/main_gcc..."
-./examples/cpp/main_gcc
+echo "Running build/examples/cpp/main_gcc..."
+./build/examples/cpp/main_gcc

@@ -25,6 +25,6 @@ run: $(TARGET)
 	./$(TARGET)
 
 clean:
-	rm -f $(TARGET) main_gcc
+	rm -f $(TARGET) main_gcc $(REPO_ROOT)/build/examples/cpp/main_gcc
 
 .PHONY: all run clean

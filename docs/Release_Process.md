@@ -98,15 +98,29 @@ Before tagging any release or candidate:
    ```
    Publishing triggers wheel compilation, sdist packaging, and PyPI pre-release deployment.
 
-### Step 4: Release Candidate Testing
-During the testing window (24–72 hours for `0.y.z` releases):
-1. **Python Wheels:** Verify in a clean virtual environment:
-   ```bash
-   python -m venv test_env && source test_env/bin/activate
-   pip install --pre pyrfl
-   python -c "import rfl; print(rfl.__version__)"
-   ```
-2. **C++ CMake Integration:** Verify `FetchContent` in an external test project linking `RFL::core`.
+### Step 4: Pre-Release Qualification Protocol
+During the qualification window (24–72 hours for `0.y.z` releases), execute the automated qualification suite:
+
+```bash
+python3 scripts/qualify_release_candidate.py --tag vX.Y.ZrcN
+```
+
+The qualification suite executes three rigorous integration audits:
+
+1. **Task 1: PyPI Pre-Release Package Verification (`pyrfl`):**
+   * Installs the pre-release package from PyPI into a clean virtual environment (`pip install --pre pyrfl==X.Y.ZrcN`).
+   * Validates runtime version strings, Dirac operator initialisation, Metropolis Monte Carlo sweeps, and eigenvalue extraction.
+   * Executes the user-facing example application [`examples/python/main.py`](../examples/python/main.py) against the installed package.
+
+2. **Task 2: Downstream C++ Consumer Verification (`FetchContent`):**
+   * Configures an isolated downstream CMake project that consumes `RFL::core` via `FetchContent`.
+   * Verifies downstream target isolation: internal RFL test targets (`rfl_tests`, `rfl_performance_tests`, `googletest`) must not leak into consumer targets.
+   * Compiles and executes the consumer binary successfully.
+
+3. **Task 3: Local C++ Example Workflow Verification:**
+   * Compiles and executes all CMake example binaries (`main`, `mauro_thesis_mmc`, `hmc_tuning`).
+   * Tests the standalone Makefile workflow in `examples/cpp` (`make`, `make run`, `make clean`).
+   * Tests direct compiler compilation via [`examples/cpp/compile_gcc.sh`](../examples/cpp/compile_gcc.sh).
 
 ### Step 5: Tag, Draft, and Publish Final Release (`vX.Y.Z`)
 When the release candidate completes verification without critical defects:
