@@ -1,6 +1,6 @@
 # EP-4: Computational Physics Verification Suite & Scientific Validation Standards
 
-<!-- cspell:words Bonferroni GROMACS Higham PRNG Smirnov Wielandt Wilkinson Zenodo conftest significand unitaries -->
+<!-- cspell:words Bonferroni CmdStan Feynman GROMACS Hartree Hellmann Higham LAMMPS Liouville MILC OpenMM PRNG Psi4 PySCF Smirnov USQCD Wielandt Wilkinson Zenodo autodiff conftest microcanonical plaquette plaquettes pseudofermion significand symplectic unitaries -->
 
 * **Title:** Computational Physics Verification Suite & Scientific Validation Standards
 * **Author:** Paul Druce
@@ -51,7 +51,7 @@ $$
 To establish scientific validity, RFL must verify six fundamental pillars:
 1. **Axiomatic Geometric Invariants:** The assembled Dirac operator must satisfy all spectral triple axioms across all 8 KO dimensions. These axioms include Hermiticity, real structure relations ($J^2 = \epsilon', DJ = \epsilon JD, J\Gamma = \epsilon'' \Gamma J$), and chirality grading ($\{\Gamma, D\} = 0$).
 2. **Continuous Symmetries & Gauge Invariance:** The spectral action and eigenvalue spectra must be invariant under unitary transformations $D \to UDU^\dagger$ for $U \in \mathrm{U}(N)$.
-3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to $\mathcal{O}(h^2)$.
+3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants guarantee that the sampler experiences true physical potential energy and conservative forces rather than unphysical numerical drift.
 4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime with $g_4 = 0$, spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions of signature $(0, 1)$ must match exact Riemann-Hilbert solutions.
 5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalized folded split $\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
 6. **Metamorphic Invariants for Unsolved Regimes:** For general interactive potentials where exact analytical solutions do not exist, simulations must satisfy parameter rescaling and coupling monotonicity relations.
@@ -63,7 +63,7 @@ Researchers and peer reviewers can independently confirm that the software sampl
 * **Goal 1:** Verify the incremental action update $\Delta S$ (`delta24`) against full action evaluation to scale-aware precision.
 * **Goal 2:** Verify fundamental spectral triple axioms (Hermiticity, complete 8-fold KO real structure table, chirality) for all generated configurations.
 * **Goal 3:** Verify unitary gauge invariance ($U(N)$ symmetry) for action evaluations and eigenvalue spectra under random Haar unitary transformations.
-* **Goal 4:** Verify analytical action derivatives and variations against numerical central finite differences to $\mathcal{O}(h^2)$.
+* **Goal 4:** Verify analytical action derivatives and variations against numerical central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$.
 * **Goal 5:** Implement an automated Gaussian-limit test comparing MCMC eigenvalue moments to the exact Wigner semicircle self-convolution and Simulation-Based Calibration (SBC).
 * **Goal 6:** Validate 1-matrix models of signature $(0, 1)$ against exact analytical Riemann-Hilbert solutions from published literature.
 * **Goal 7:** Provide automated MCMC statistical diagnostics including integrated autocorrelation time $\tau_{\mathrm{int}}$ and rank-normalized folded split $\hat{R}$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$.
@@ -243,6 +243,101 @@ Tests must use a relative tolerance scaled by $\mathcal{O}(\epsilon_{\mathrm{mac
 | **REQ-008** | Unitary Action Invariance | $\le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ | $c_4 \approx 20$ |
 | **REQ-008b** | Weyl Eigenvalue Bound | $\le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ | $c_5 \approx 5$ |
 | **REQ-009** | Central Finite Difference | $\le c_6 \epsilon_{\mathrm{mach}}^{2/3} \lVert \nabla S \rVert$ | $c_6 \approx 50$ |
+
+### 3.4 Algorithmic Oracles & Verification Invariants in Scientific Computing
+
+#### 1. The Test Oracle Problem in Computational Physics
+Computational physics software often lacks an external ground-truth test oracle for general parameter regimes.
+For interactive multi-matrix models with $g_4 > 0$ and dimension $N > 1$, no closed-form analytical solutions exist.
+Standard unit testing cannot confirm whether an MCMC simulation samples the true physical distribution.
+To address this challenge, leading scientific software relies on relational metamorphic testing and algorithmic dual-path oracles.
+Two independent algorithms evaluate the same physical quantity through distinct mathematical formulations.
+Exact agreement between these independent pathways verifies algorithmic and physical correctness.
+
+#### 2. Internal Energy Invariant: Fast Local Updates vs Global Traces
+In statistical physics, the action $S(D)$ serves as the dimensionless potential energy of the noncommutative geometry.
+Metropolis-Hastings MCMC accepts or rejects candidate configurations based on the internal energy difference:
+
+
+$$
+\Delta S = S(D_f) - S(D_i)
+$$
+
+
+The transition probability follows the Boltzmann factor:
+
+
+$$
+P_{\mathrm{accept}} = \min\left(1, \, \mathrm{e}^{-\Delta S}\right)
+$$
+
+
+RFL evaluates this quantity through two independent computational pathways:
+* **Global Evaluation Path:** Reassembles the complete Dirac operator $D \in \mathbb{C}^{M \times M}$ and computes explicit matrix powers and traces in $\mathcal{O}(M^3)$ operations.
+* **Local Incremental Path (`delta24`):** Exploits single-element matrix variations. It evaluates $\Delta S$ in $\mathcal{O}(N)$ operations using precomputed Clifford trace tensors ($\Omega$ table).
+
+*Physical Failure Mode:*
+If a sign error or indexing flaw corrupts the precomputed $\Omega$ tensor, the program does not crash.
+All matrix configurations remain strictly Hermitian.
+However, the Metropolis filter evaluates an incorrect energy difference.
+The Markov chain drifts away from the true Boltzmann distribution $\mathrm{e}^{-S(D)}$ and samples an unphysical ensemble.
+Verifying REQ-001 guarantees that the local update exactly mirrors the global internal energy change.
+
+*Precedents in Major Scientific Software:*
+* **Lattice QCD (Grid, Chroma, USQCD, MILC):**
+  Lattice gauge updates evaluate the local action change using products of neighbouring link variables called staples.
+  Lattice QCD suites maintain regression tests comparing local single-link staple updates against full 4D lattice action recalculations.
+  They document this check as staple consistency or local-versus-global action invariance.
+* **Molecular Dynamics (GROMACS, LAMMPS):**
+  In microcanonical ($NVE$) ensembles, total energy $E = E_{\mathrm{kin}} + E_{\mathrm{pot}}$ is a conserved Hamiltonian invariant.
+  GROMACS validates integrators using the `physical_validation` framework.
+  The framework tracks energy drift against the shadow Hamiltonian to confirm physical correctness.
+
+#### 3. Derivative Invariants: Generalised Forces & Symplectic Consistency
+In physical dynamics, the negative gradient $-\nabla S$ represents the generalised force driving degrees of freedom.
+Hamiltonian Monte Carlo (HMC) and Langevin algorithms integrate Hamilton's equations of motion:
+
+
+$$
+\dot{p}_k = -\frac{\partial S}{\partial M_k}
+$$
+
+
+RFL verifies action gradients through two independent pathways:
+* **Analytical Path:** Evaluates symbolic matrix variations derived from trace cyclicity and noncommutative differential calculus.
+* **Numerical Finite-Difference Path:** Evaluates directional derivatives using central finite difference stencils:
+
+
+$$
+\left( \nabla S \right)_{IJ} \approx \frac{S(M_{IJ} + h) - S(M_{IJ} - h)}{2h}
+$$
+
+
+*Physical Failure Mode:*
+An error in analytical forces violates Liouville's theorem of phase space volume conservation.
+In HMC, trajectories fail energy conservation ($\Delta H \gg 0$), collapsing Metropolis acceptance rates.
+In Langevin simulations without acceptance steps, erroneous forces silently bias stationary expectation values.
+Verifying REQ-009 guarantees symplectic consistency and correct force fields before executing dynamical sampling.
+
+*Precedents in Major Scientific Software:*
+* **Stan (Bayesian Modelling & HMC):**
+  Stan provides an automated gradient verification diagnostic (`diagnose test=gradient`).
+  Stan evaluates algorithmic automatic differentiation against numerical finite differences across random parameter vectors.
+  Stan flags parameters exceeding a relative tolerance of $10^{-6}$ as algorithmic implementation bugs.
+* **Lattice QCD (USQCD, Grid):**
+  In dynamical pseudofermion simulations, the fermion force requires differentiating the inverted Dirac operator.
+  USQCD suites maintain dedicated fermion force tests (`Test_fermion_force`).
+  These tests integrate analytical forces along momentum trajectories and compare results against numerical action shifts.
+* **Quantum Chemistry (PySCF, Psi4):**
+  Analytical nuclear gradients derived from the Hellmann-Feynman theorem are verified against numerical finite-difference energy derivatives.
+  Every gradient module includes regression tests asserting agreement within $10^{-6}$ Hartree per Bohr.
+
+#### 4. Scientific Documentation & Recording Standards
+Leading scientific software projects document verification invariants through structured technical standards:
+* **Dual-Path Verification Tests:** Projects maintain automated regression tests executing both computational pathways in continuous integration.
+* **Explicit Precision Budgets:** Documentation justifies numerical tolerances using machine precision and condition numbers instead of arbitrary thresholds.
+* **Diagnostic Verification Tools:** Software exposes diagnostic commands (such as Stan's `test_grad` and GROMACS's `gmx check`) allowing users to verify algorithmic consistency.
+* **Theory-to-Code Traceability:** Technical documentation links code routines directly to underlying theoretical equations and literature citations.
 
 ---
 
