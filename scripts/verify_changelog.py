@@ -13,8 +13,8 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 
 
-def get_latest_stable_tag() -> str | None:
-    """Returns the most recent stable Git tag (vX.Y.Z)."""
+def get_latest_stable_tag(excluding_tag: str | None = None) -> str | None:
+    """Returns the most recent stable Git tag (vX.Y.Z), optionally excluding a tag."""
     try:
         res = subprocess.run(
             ["git", "tag", "--sort=-v:refname", "--list", "v[0-9]*"],
@@ -25,6 +25,9 @@ def get_latest_stable_tag() -> str | None:
         )
         tags = [t.strip() for t in res.stdout.splitlines() if t.strip()]
         stable_tags = [t for t in tags if re.match(r"^v[0-9]+\.[0-9]+\.[0-9]+$", t)]
+        if excluding_tag:
+            clean_ex = excluding_tag.split("rc")[0]
+            stable_tags = [t for t in stable_tags if t != excluding_tag and t != clean_ex]
         return stable_tags[0] if stable_tags else None
     except Exception:
         return None
@@ -124,10 +127,7 @@ def audit_changelog(
             errors.append(f"CHANGELOG.md section [{base_version}] contains unresolved placeholder: '{pattern.pattern}'")
 
     # 5. Check for missing PRs merged since previous tag
-    effective_prev_tag = previous_tag or get_latest_stable_tag()
-    # Don't compare against itself if the target tag is already the latest stable tag
-    if effective_prev_tag == tag or effective_prev_tag == f"v{base_version}":
-        effective_prev_tag = None
+    effective_prev_tag = previous_tag or get_latest_stable_tag(excluding_tag=tag)
 
     merged_prs = get_merged_prs_since(
         effective_prev_tag,

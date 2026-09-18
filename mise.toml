@@ -24,3 +24,11 @@ run = "python3 scripts/draft_changelog.py --preview"
 [tasks.changelog-write]
 description = "Update CHANGELOG.md locally with latest release notes"
 run = "python3 scripts/draft_changelog.py --write"
+
+[tasks.release-verify]
+description = "Verify release tag and CHANGELOG.md integrity"
+run = "python3 scripts/verify_changelog.py"
+
+[tasks.release-qualify]
+description = "Run pre-release qualification suite against PyPI, FetchContent, and local examples"
+run = "python3 scripts/qualify_release_candidate.py"

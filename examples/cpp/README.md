@@ -56,23 +56,25 @@ Compile and link `main.cpp` directly with `g++` or `clang++` without CMake.
 From the repository root directory:
 
 ```bash
+mkdir -p build/examples/cpp
 g++ -std=c++17 -O3 examples/cpp/main.cpp \
     -Isrc/core \
     -Lbuild/src/core \
     -lrfl_core -larmadillo -lgsl -lgslcblas \
-    -o main_gcc
+    -o build/examples/cpp/main_gcc
 
-./main_gcc
+./build/examples/cpp/main_gcc
 ```
 
 > [!NOTE]
 > When building `librfl_core.a` with AddressSanitizer enabled (`-DRFL_ENABLE_ASAN=ON`), pass `-fsanitize=address` to both compiler and linker flags:
 > ```bash
+> mkdir -p build/examples/cpp
 > g++ -std=c++17 -fsanitize=address -O3 examples/cpp/main.cpp \
 >     -Isrc/core \
 >     -Lbuild/src/core \
 >     -lrfl_core -larmadillo -lgsl -lgslcblas \
->     -o main_gcc
+>     -o build/examples/cpp/main_gcc
 > ```
 
 ---
