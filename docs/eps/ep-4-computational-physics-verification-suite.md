@@ -25,10 +25,10 @@ The table below tracks the status of each implementation phase:
 ## 2. Motivation, Goals & Non-Goals
 
 ### 2.1 Problem Statement & Research Context
-Computational physics software requires rigorous verification against exact mathematical theorems and physical limits.
-Standard unit tests only verify that code runs without runtime errors or crashes.
-However, unit tests do not prove mathematical or physical correctness.
-Markov Chain Monte Carlo (MCMC) algorithms can produce plausible numbers while silently violating geometric axioms or Boltzmann statistics.
+Computational physics software requires verification across both deterministic mathematics and statistical physics.
+Existing unit tests in RFL successfully verify local algebraic relations, Clifford anticommutator identities, and matrix symmetries.
+However, isolated unit tests cannot verify collective, asymptotic, or stochastic physical behaviour.
+Markov Chain Monte Carlo (MCMC) samplers can satisfy local algebraic checks while silently violating Boltzmann statistics, ergodicity, or limiting spectral theorems.
 
 Random Noncommutative Geometry studies quantum spaces through path integrals over Dirac operators.
 The partition function integrates over the space of Dirac operators in a finite spectral triple:
