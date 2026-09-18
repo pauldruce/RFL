@@ -18,7 +18,7 @@ The table below tracks the status of each implementation phase:
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Port `delta24` action tests; implement complete 8-fold KO spectral axioms; add unitary gauge invariance; add Gaussian limit checks. | `v0.3.0` | [#64](https://github.com/pauldruce/RFL/pull/64) | 💡 Draft |
-| **Phase 2** | Add 1-matrix Riemann-Hilbert tests; detailed balance flux checks; Simulation-Based Calibration; rank-normalized split-$\hat{R}$; Zenodo DOI. | `v0.4.0` | 💡 Planned | 💡 Draft |
+| **Phase 2** | Add 1-matrix Riemann-Hilbert tests; detailed balance flux checks; Simulation-Based Calibration; rank-normalized split $\hat{R}$; Zenodo DOI. | `v0.4.0` | 💡 Planned | 💡 Draft |
 
 ---
 
@@ -32,16 +32,28 @@ Markov Chain Monte Carlo (MCMC) algorithms can produce plausible numbers while s
 
 Random Noncommutative Geometry studies quantum spaces through path integrals over Dirac operators.
 The partition function integrates over the space of Dirac operators in a finite spectral triple:
-$$Z = \int \mathcal{D}D \, \mathrm{e}^{-S(D)}$$
+
+
+$$
+Z = \int \mathcal{D}D \, \mathrm{e}^{-S(D)}
+$$
+
+
 The Barrett-Glaser spectral action governs this ensemble:
-$$S(D) = g_2 \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)$$
+
+
+$$
+S(D) = g_2 \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)
+$$
+
+
 
 To establish scientific validity, RFL must verify six fundamental pillars:
 1. **Axiomatic Geometric Invariants:** The assembled Dirac operator must satisfy all spectral triple axioms across all 8 KO dimensions. These axioms include Hermiticity, real structure relations ($J^2 = \epsilon', DJ = \epsilon JD, J\Gamma = \epsilon'' \Gamma J$), and chirality grading ($\{\Gamma, D\} = 0$).
 2. **Continuous Symmetries & Gauge Invariance:** The spectral action and eigenvalue spectra must be invariant under unitary transformations $D \to UDU^\dagger$ for $U \in \mathrm{U}(N)$.
 3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to $\mathcal{O}(h^2)$.
-4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime ($g_4 = 0$), spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions ($(0, 1)$) must match exact Riemann-Hilbert solutions.
-5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalized folded split-$\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
+4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime with $g_4 = 0$, spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions of signature $(0, 1)$ must match exact Riemann-Hilbert solutions.
+5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalized folded split $\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
 6. **Metamorphic Invariants for Unsolved Regimes:** For general interactive potentials where exact analytical solutions do not exist, simulations must satisfy parameter rescaling and coupling monotonicity relations.
 
 Automating these checks ensures that RFL provides reliable, mathematically sound foundations for research.
@@ -53,8 +65,8 @@ Researchers and peer reviewers can independently confirm that the software sampl
 * **Goal 3:** Verify unitary gauge invariance ($U(N)$ symmetry) for action evaluations and eigenvalue spectra under random Haar unitary transformations.
 * **Goal 4:** Verify analytical action derivatives and variations against numerical central finite differences to $\mathcal{O}(h^2)$.
 * **Goal 5:** Implement an automated Gaussian-limit test comparing MCMC eigenvalue moments to the exact Wigner semicircle self-convolution and Simulation-Based Calibration (SBC).
-* **Goal 6:** Validate 1-matrix models ($(0, 1)$) against exact analytical Riemann-Hilbert solutions from published literature.
-* **Goal 7:** Provide automated MCMC statistical diagnostics including integrated autocorrelation time $\tau_{\mathrm{int}}$ and rank-normalized folded split-$\hat{R}$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$.
+* **Goal 6:** Validate 1-matrix models of signature $(0, 1)$ against exact analytical Riemann-Hilbert solutions from published literature.
+* **Goal 7:** Provide automated MCMC statistical diagnostics including integrated autocorrelation time $\tau_{\mathrm{int}}$ and rank-normalized folded split $\hat{R}$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$.
 
 ### 2.3 Non-Goals
 * Re-implementing external statistical packages inside RFL C++ core.
@@ -77,23 +89,23 @@ Researchers and peer reviewers can independently confirm that the software sampl
    The suite outputs statistical verification metrics and confirms detailed balance without requiring manual configuration.
 
 3. **Scenario 3 (Metamorphic Testing of Interactive Ensembles):**
-   A researcher executes simulations in parameter regimes with no analytical solution ($g_4 > 0, N > 1$).
+   A researcher executes simulations in parameter regimes with no analytical solution with $g_4 > 0$ and $N > 1$.
    The test suite checks parameter rescaling invariance and coupling monotonicity to ensure physical behaviour.
 
 ### 3.2 Functional Requirements & Invariants
 
 | Requirement ID | Requirement Summary | Physical & Mathematical Invariant | Target Tier |
 | :--- | :--- | :--- | :--- |
-| **REQ-001** | **Incremental Action Invariant** | $|(S_f - S_i) - \Delta S| \le c_1 M \epsilon_{\mathrm{mach}} (|S_f| + |S_i|) + 10^{-12}$ (Section 3.3). | Tier 1 (Smoke) |
-| **REQ-002** | **Dirac Hermiticity** | $\|D - D^\dagger\|_F \le c_2 (p+q) \epsilon_{\mathrm{mach}} \|D\|_F$ for assembled Dirac operators. | Tier 1 (Smoke) |
-| **REQ-003** | **Complete KO Real Structure** | $\|J^2 - \epsilon' I\|_F \le c_3 \epsilon_{\mathrm{mach}}$, $\|D J - \epsilon J D\|_F \le c_3 \epsilon_{\mathrm{mach}} \|D\|_F$, and $\|J \Gamma - \epsilon'' \Gamma J\|_F \le c_3 \epsilon_{\mathrm{mach}}$ across all 8 KO dimensions. | Tier 1 (Smoke) |
-| **REQ-004** | **Chirality & Spectral Anti-Symmetry** | $\|\Gamma D + D \Gamma\|_F \le 2 \epsilon_{\mathrm{mach}} \|D\|_F$ and $\{\lambda_i\} \equiv \{-\lambda_i\}$ to machine precision for even spectral triples. | Tier 1 (Smoke) |
+| **REQ-001** | **Incremental Action Invariant** | $\lvert (S_f - S_i) - \Delta S \rvert \le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert) + 10^{-12}$ (Section 3.3). | Tier 1 (Smoke) |
+| **REQ-002** | **Dirac Hermiticity** | $\lVert D - D^\dagger \rVert_F \le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ for assembled Dirac operators. | Tier 1 (Smoke) |
+| **REQ-003** | **Complete KO Real Structure** | $\lVert J^2 - \epsilon' I \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$, $\lVert D J - \epsilon J D \rVert_F \le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$, and $\lVert J \Gamma - \epsilon'' \Gamma J \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$ across all 8 KO dimensions. | Tier 1 (Smoke) |
+| **REQ-004** | **Chirality & Spectral Anti-Symmetry** | $\lVert \Gamma D + D \Gamma \rVert_F \le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ and $\{\lambda_i\} \equiv \{-\lambda_i\}$ to machine precision for even spectral triples. | Tier 1 (Smoke) |
 | **REQ-005** | **Gaussian Limit Moments** | MCMC eigenvalue moments match Wigner self-convolution within $3$ standard errors. | Tier 2 (Integration) |
 | **REQ-006** | **Detailed Balance** | Transition probabilities satisfy microscopic reversibility and coarse-grained state-flux balance $N_{A \to B} \approx N_{B \to A}$. | Tier 2 (Integration) |
-| **REQ-007** | **Chain Convergence** | Rank-normalized folded split-$\hat{R} < 1.05$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$ across independent chains. | Tier 3 (Validation) |
-| **REQ-008** | **Unitary Gauge Invariance** | $|S(U D U^\dagger) - S(D)| \le c_4 M^2 \epsilon_{\mathrm{mach}} |S(D)|$ and $\max_i |\lambda_i(U D U^\dagger) - \lambda_i(D)| \le c_5 M \epsilon_{\mathrm{mach}} \|D\|_2$ for Haar unitary $U \in \mathrm{U}(N)$. | Tier 1 (Smoke) |
-| **REQ-009** | **Action Derivatives** | Analytical matrix variations match central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \|\nabla S\|$ (Section 3.3). | Tier 1 (Smoke) |
-| **REQ-010** | **Simulation-Based Calibration** | Posterior rank statistics from Gaussian ensemble MCMC pass Kolmogorov-Smirnov uniformity test ($p > 0.01$). | Tier 3 (Validation) |
+| **REQ-007** | **Chain Convergence** | Rank-normalized folded split $\hat{R} < 1.05$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$ across independent chains. | Tier 3 (Validation) |
+| **REQ-008** | **Unitary Gauge Invariance** | $\lvert S(U D U^\dagger) - S(D) \rvert \le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ and $\max_i \lvert \lambda_i(U D U^\dagger) - \lambda_i(D) \rvert \le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ for Haar unitary $U \in \mathrm{U}(N)$. | Tier 1 (Smoke) |
+| **REQ-009** | **Action Derivatives** | Analytical matrix variations match central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$ (Section 3.3). | Tier 1 (Smoke) |
+| **REQ-010** | **Simulation-Based Calibration** | Posterior rank statistics from Gaussian ensemble MCMC pass Kolmogorov-Smirnov uniformity test with $p > 0.01$. | Tier 3 (Validation) |
 | **REQ-011** | **Metamorphic Invariants** | Rescaling $(g_2, g_4) \to (\alpha^{-2} g_2, \alpha^{-4} g_4)$ and monotonicity of $\langle \mathrm{Tr}(D^2) \rangle$ hold for general potentials. | Tier 2 (Integration) |
 
 ---
@@ -102,49 +114,121 @@ Researchers and peer reviewers can independently confirm that the software sampl
 
 Hardcoded absolute tolerances fail when matrix scale or dimensions change.
 Following LAPACK and Higham (2002), RFL grounds all tolerances in IEEE 754 double precision machine epsilon:
-$$\epsilon_{\mathrm{mach}} = 2^{-52} \approx 2.2204 \times 10^{-16}$$
+
+
+$$
+\epsilon_{\mathrm{mach}} = 2^{-52} \approx 2.2204 \times 10^{-16}
+$$
+
+
 and the Hilbert space dimension of the Dirac operator:
-$$M = \dim(D) = 2^{\lfloor (p+q)/2 \rfloor} N$$
+
+
+$$
+M = \dim(D) = 2^{\lfloor (p+q)/2 \rfloor} N
+$$
+
+
 
 #### 1. Structural Algebraic Invariants (REQ-002, REQ-003, REQ-004)
 The Dirac operator is assembled by summing $p+q$ Kronecker tensor products:
-$$D = \sum_{k=1}^{p+q} \gamma^k \otimes M_k$$
+
+
+$$
+D = \sum_{k=1}^{p+q} \gamma^k \otimes M_k
+$$
+
+
 Because $\gamma^k$ contains exact matrix elements in $\{0, \pm 1, \pm i\}$, errors arise only from floating-point additions.
 Summing $p+q \le 8$ terms accumulates at most $\mathcal{O}((p+q)\epsilon_{\mathrm{mach}})$ rounding error:
-$$\frac{\|D - D^\dagger\|_F}{\|D\|_F} \le c_2 (p+q) \epsilon_{\mathrm{mach}} \approx 10^{-14}$$
+
+
+$$
+\frac{\lVert D - D^\dagger \rVert_F}{\lVert D \rVert_F} \le c_2 (p+q) \epsilon_{\mathrm{mach}} \approx 10^{-14}
+$$
+
+
 Similarly, charge conjugation $J$ and grading $\Gamma$ represent signed index permutations.
 Matrix multiplication by these operators incurs zero cancellation and minimal floating-point error bounded by $c_3 \epsilon_{\mathrm{mach}} \|D\|_F$.
 
 #### 2. Catastrophic Cancellation in Action Differences (REQ-001)
 When updating a single matrix element, the full action evaluation computes:
-$$\Delta S_{\mathrm{full}} = S(D_f) - S(D_i)$$
+
+
+$$
+\Delta S_{\mathrm{full}} = S(D_f) - S(D_i)
+$$
+
+
 The action values $S(D_f)$ and $S(D_i)$ can exceed $10^4$.
 However, the single-element variation $\Delta S$ can be small ($\approx 10^{-2}$).
 Subtracting two large, nearly equal floating-point numbers causes catastrophic cancellation.
 The calculation loses $\log_{10}(|S| / |\Delta S|) \approx 6$ decimal digits of precision.
 In contrast, `delta24` computes $\Delta S$ directly from local matrix variations, avoiding subtraction.
 The discrepancy between `delta24` and $\Delta S_{\mathrm{full}}$ is bounded by the cancellation error of the full traces:
-$$|(S_f - S_i) - \Delta S| \le c_1 M \epsilon_{\mathrm{mach}} (|S_f| + |S_i|) + 10^{-12}$$
+
+
+$$
+\lvert (S_f - S_i) - \Delta S \rvert \le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert) + 10^{-12}
+$$
+
+
 For $M \approx 100$ and $|S| \approx 10^4$, this error is approximately $10^{-10}$ to $10^{-9}$.
 
 #### 3. Unitary Gauge & Spectral Invariance (REQ-008)
 Unitary transformation $D \to U D U^\dagger$ involves matrix multiplication.
 Numerical matrix multiplication of dimension $M$ incurs rounding error bounded by Wilkinson's theorem:
-$$\|fl(UDU^\dagger) - UDU^\dagger\|_F \le c M \epsilon_{\mathrm{mach}} \|D\|_F$$
-Trace evaluation of $(UDU^\dagger)^4$ accumulates additional error of order $M^2 \epsilon_{\mathrm{mach}} |S(D)|$.
+
+
+$$
+\lVert fl(UDU^\dagger) - UDU^\dagger \rVert_F \le c M \epsilon_{\mathrm{mach}} \lVert D \rVert_F
+$$
+
+
+Trace evaluation of $(UDU^\dagger)^4$ accumulates additional error of order $M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$.
 For eigenvalue spectra, the Hoffman-Wielandt and Weyl perturbation theorems bound eigenvalue drift by the operator 2-norm:
-$$|\lambda_i(U D U^\dagger) - \lambda_i(D)| \le \|fl(UDU^\dagger) - UDU^\dagger\|_2 \le c_5 M \epsilon_{\mathrm{mach}} \|D\|_2$$
+
+
+$$
+\lvert \lambda_i(U D U^\dagger) - \lambda_i(D) \rvert \le \lVert fl(UDU^\dagger) - UDU^\dagger \rVert_2 \le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2
+$$
+
+
 For $M \le 100$ and $\|D\|_2 \approx 10$, eigenvalue drift remains below $10^{-13}$.
 
 #### 4. Theoretical Bound for Central Finite Differences (REQ-009)
 Central finite difference approximations balance truncation error and floating-point cancellation:
-$$\frac{\partial S}{\partial M_{IJ}} \approx \frac{S(M_{IJ} + h) - S(M_{IJ} - h)}{2h}$$
+
+
+$$
+\frac{\partial S}{\partial M_{IJ}} \approx \frac{S(M_{IJ} + h) - S(M_{IJ} - h)}{2h}
+$$
+
+
 The total error is bounded by:
-$$\mathrm{Error}(h) \le \frac{h^2}{6} |S'''| + \frac{\epsilon_{\mathrm{mach}}}{h} |S|$$
+
+
+$$
+\mathrm{Error}(h) \le \frac{h^2}{6} \lvert S''' \rvert + \frac{\epsilon_{\mathrm{mach}}}{h} \lvert S \rvert
+$$
+
+
 Minimising this error yields the optimal step size:
-$$h^* = \left( \frac{3 \epsilon_{\mathrm{mach}} |S|}{|S'''|} \right)^{1/3} \approx \mathcal{O}(\epsilon_{\mathrm{mach}}^{1/3}) \approx 6 \times 10^{-6}$$
+
+
+$$
+h^* = \left( \frac{3 \epsilon_{\mathrm{mach}} \lvert S \rvert}{\lvert S''' \rvert} \right)^{1/3} \approx \mathcal{O}(\epsilon_{\mathrm{mach}}^{1/3}) \approx 6 \times 10^{-6}
+$$
+
+
 Evaluating at $h^*$ yields the minimum achievable error:
-$$\mathrm{Error}_{\mathrm{min}} \approx \mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) |S| \approx (2.22 \times 10^{-16})^{2/3} |S| \approx 3.6 \times 10^{-11} |S|$$
+
+
+$$
+\mathrm{Error}_{\mathrm{min}} \approx \mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lvert S \rvert \approx (2.22 \times 10^{-16})^{2/3} \lvert S \rvert \approx 3.6 \times 10^{-11} \lvert S \rvert
+$$
+
+
 Therefore, asserting tolerances tighter than $10^{-10}$ for finite differences in double precision is mathematically invalid.
 Tests must use a relative tolerance scaled by $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3})$.
 
@@ -152,13 +236,13 @@ Tests must use a relative tolerance scaled by $\mathcal{O}(\epsilon_{\mathrm{mac
 
 | Requirement ID | Error Bound Mechanism | Mathematical Error Bound | Empirical Constant |
 | :--- | :--- | :--- | :--- |
-| **REQ-001** | Trace Cancellation | $\le c_1 M \epsilon_{\mathrm{mach}} (|S_f| + |S_i|) + 10^{-12}$ | $c_1 \approx 10$ |
-| **REQ-002** | Additive Hermiticity | $\le c_2 (p+q) \epsilon_{\mathrm{mach}} \|D\|_F$ | $c_2 \approx 5$ |
-| **REQ-003** | Permutation Invariance | $\le c_3 \epsilon_{\mathrm{mach}} \|D\|_F$ | $c_3 \approx 5$ |
-| **REQ-004** | Sign Anti-commutation | $\le 2 \epsilon_{\mathrm{mach}} \|D\|_F$ | Exact |
-| **REQ-008** | Unitary Action Invariance | $\le c_4 M^2 \epsilon_{\mathrm{mach}} |S(D)|$ | $c_4 \approx 20$ |
-| **REQ-008b** | Weyl Eigenvalue Bound | $\le c_5 M \epsilon_{\mathrm{mach}} \|D\|_2$ | $c_5 \approx 5$ |
-| **REQ-009** | Central Finite Difference | $\le c_6 \epsilon_{\mathrm{mach}}^{2/3} \|\nabla S\|$ | $c_6 \approx 50$ |
+| **REQ-001** | Trace Cancellation | $\le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert) + 10^{-12}$ | $c_1 \approx 10$ |
+| **REQ-002** | Additive Hermiticity | $\le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | $c_2 \approx 5$ |
+| **REQ-003** | Permutation Invariance | $\le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | $c_3 \approx 5$ |
+| **REQ-004** | Sign Anti-commutation | $\le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | Exact |
+| **REQ-008** | Unitary Action Invariance | $\le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ | $c_4 \approx 20$ |
+| **REQ-008b** | Weyl Eigenvalue Bound | $\le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ | $c_5 \approx 5$ |
+| **REQ-009** | Central Finite Difference | $\le c_6 \epsilon_{\mathrm{mach}}^{2/3} \lVert \nabla S \rVert$ | $c_6 \approx 50$ |
 
 ---
 
@@ -190,8 +274,8 @@ Python tests in `tests/physics/` verify statistical distributions, moments, and 
 Following established practices in GROMACS and Stan:
 * **Tier 1 (Smoke / Deterministic Gate, < 2 minutes):** Executes on every commit and PR. Uses deterministic PRNG seeds to test algebraic identities, Hermiticity, gauge invariance, and finite differences.
 * **Tier 2 (Physics Integration Gate, ~3–5 minutes):** Executes on PR merge to `main`. Uses fixed seeds to test short MCMC chains, loose-tolerance Gaussian moments ($4\sigma$), and state-flux balance.
-* **Tier 3 (Scientific Validation Suite, Nightly / Release Gate, ~30–60 minutes):** Executes high-statistics runs, multi-chain split-$\hat{R}$, Riemann-Hilbert curve fits, and Simulation-Based Calibration.
-* **Flakiness Control Protocol:** Stochastic tests apply the Holm-Bonferroni correction to prevent false discovery inflation. If a stochastic test fails ($p < \alpha$), CI triggers an automated second run with an independent seed and double chain length before failing.
+* **Tier 3 (Scientific Validation Suite, Nightly / Release Gate, ~30–60 minutes):** Executes high-statistics runs, multi-chain split $\hat{R}$, Riemann-Hilbert curve fits, and Simulation-Based Calibration.
+* **Flakiness Control Protocol:** Stochastic tests apply the Holm-Bonferroni correction to prevent false discovery inflation. If a stochastic test fails with $p < \alpha$, CI triggers an automated second run with an independent seed and double chain length before failing.
 
 ---
 
@@ -248,7 +332,7 @@ tests/physics/
 | **Metamorphic Relations** | `pytest tests/physics/test_metamorphic_invariants.py` | Verifies parameter rescaling and coupling monotonicity (REQ-011). | Tier 2 (Merge Gate) |
 | **1-Matrix Benchmark** | `pytest tests/physics/test_riemann_hilbert_1matrix.py` | Verifies agreement with Riemann-Hilbert analytical solutions. | Tier 3 (Nightly) |
 | **MCMC Calibration (SBC)** | `pytest tests/physics/test_gaussian_sbc.py` | Verifies uniform posterior ranks in Gaussian ensembles (REQ-010). | Tier 3 (Nightly) |
-| **Chain Convergence** | `pytest tests/physics/test_chain_convergence.py` | Verifies rank-normalized split-$\hat{R} < 1.05$ and $\mathrm{ESS} \ge 400$ (REQ-007). | Tier 3 (Nightly) |
+| **Chain Convergence** | `pytest tests/physics/test_chain_convergence.py` | Verifies rank-normalized split $\hat{R} < 1.05$ and $\mathrm{ESS} \ge 400$ (REQ-007). | Tier 3 (Nightly) |
 
 ---
 
@@ -268,10 +352,10 @@ tests/physics/
 ### Phase 2: Statistical Rigour, Benchmarks & Open Science
 * **Target Version:** `v0.4.0`
 * **Tasks:**
-  1. Implement `tests/physics/test_riemann_hilbert_1matrix.py` verifying $(0, 1)$ spectral densities against exact analytical curves.
+  1. Implement `tests/physics/test_riemann_hilbert_1matrix.py` verifying signature $(0, 1)$ spectral densities against exact analytical curves.
   2. Implement `tests/physics/test_detailed_balance.py` testing microscopic reversibility and coarse-grained state-flux balance.
   3. Implement `tests/physics/test_gaussian_sbc.py` validating the MCMC sampler with Simulation-Based Calibration.
-  4. Implement rank-normalized folded split-$\hat{R}$ and $\mathrm{ESS}_{\mathrm{bulk}}$ diagnostics in Python analysis utilities.
+  4. Implement rank-normalized folded split $\hat{R}$ and $\mathrm{ESS}_{\mathrm{bulk}}$ diagnostics in Python analysis utilities.
   5. Implement `tests/physics/test_metamorphic_invariants.py` testing parameter rescaling and coupling monotonicity.
   6. Create benchmark scripts to recreate published matrix model scaling curves and archive golden reference datasets.
   7. Configure automated Zenodo DOI archiving upon GitHub release tags.
