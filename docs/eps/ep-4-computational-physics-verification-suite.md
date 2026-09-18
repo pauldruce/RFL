@@ -54,7 +54,7 @@ To establish scientific validity, RFL must verify six fundamental pillars:
 3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants guarantee that the sampler experiences true physical potential energy and conservative forces rather than unphysical numerical drift.
 4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime with $g_4 = 0$, spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions of signature $(0, 1)$ must match exact Riemann-Hilbert solutions.
 5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalized folded split $\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
-6. **Metamorphic Invariants for Unsolved Regimes:** For general interactive potentials where exact analytical solutions do not exist, simulations must satisfy parameter rescaling and coupling monotonicity relations.
+6. **Physical Scaling Invariants for General Regimes:** In interactive regimes without analytical solutions, simulations must satisfy exact parameter rescaling and coupling monotonicity laws.
 
 Automating these checks ensures that RFL provides reliable, mathematically sound foundations for research.
 Researchers and peer reviewers can independently confirm that the software samples the true physical distribution.
@@ -88,9 +88,9 @@ Researchers and peer reviewers can independently confirm that the software sampl
    The reviewer executes `pytest tests/physics/` or `ctest`.
    The suite outputs statistical verification metrics and confirms detailed balance without requiring manual configuration.
 
-3. **Scenario 3 (Metamorphic Testing of Interactive Ensembles):**
-   A researcher executes simulations in parameter regimes with no analytical solution with $g_4 > 0$ and $N > 1$.
-   The test suite checks parameter rescaling invariance and coupling monotonicity to ensure physical behaviour.
+3. **Scenario 3 (Verification in General Interactive Regimes):**
+   A researcher runs simulations in parameter regimes without analytical solutions with $g_4 > 0$ and $N > 1$.
+   The test suite verifies parameter rescaling invariance and coupling monotonicity to confirm physical behaviour.
 
 ### 3.2 Functional Requirements & Invariants
 
@@ -106,7 +106,7 @@ Researchers and peer reviewers can independently confirm that the software sampl
 | **REQ-008** | **Unitary Gauge Invariance** | $\lvert S(U D U^\dagger) - S(D) \rvert \le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ and $\max_i \lvert \lambda_i(U D U^\dagger) - \lambda_i(D) \rvert \le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ for Haar unitary $U \in \mathrm{U}(N)$. | Tier 1 (Smoke) |
 | **REQ-009** | **Action Derivatives** | Analytical matrix variations match central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$ (Section 3.3). | Tier 1 (Smoke) |
 | **REQ-010** | **Simulation-Based Calibration** | Posterior rank statistics from Gaussian ensemble MCMC pass Kolmogorov-Smirnov uniformity test with $p > 0.01$. | Tier 3 (Validation) |
-| **REQ-011** | **Metamorphic Invariants** | Rescaling $(g_2, g_4) \to (\alpha^{-2} g_2, \alpha^{-4} g_4)$ and monotonicity of $\langle \mathrm{Tr}(D^2) \rangle$ hold for general potentials. | Tier 2 (Integration) |
+| **REQ-011** | **Physical Scaling Laws** | Rescaling $(g_2, g_4) \to (\alpha^{-2} g_2, \alpha^{-4} g_4)$ and monotonicity of $\langle \mathrm{Tr}(D^2) \rangle$ hold for general potentials. | Tier 2 (Integration) |
 
 ---
 
@@ -244,14 +244,14 @@ Tests must use a relative tolerance scaled by $\mathcal{O}(\epsilon_{\mathrm{mac
 | **REQ-008b** | Weyl Eigenvalue Bound | $\le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ | $c_5 \approx 5$ |
 | **REQ-009** | Central Finite Difference | $\le c_6 \epsilon_{\mathrm{mach}}^{2/3} \lVert \nabla S \rVert$ | $c_6 \approx 50$ |
 
-### 3.4 Algorithmic Oracles & Verification Invariants in Scientific Computing
+### 3.4 Dual-Path Verification & Physical Invariants in Scientific Computing
 
-#### 1. The Test Oracle Problem in Computational Physics
-Computational physics software often lacks an external ground-truth test oracle for general parameter regimes.
-For interactive multi-matrix models with $g_4 > 0$ and dimension $N > 1$, no closed-form analytical solutions exist.
-Standard unit testing cannot confirm whether an MCMC simulation samples the true physical distribution.
-To address this challenge, leading scientific software relies on relational metamorphic testing and algorithmic dual-path oracles.
-Two independent algorithms evaluate the same physical quantity through distinct mathematical formulations.
+#### 1. Verification Without Analytical Solutions
+Computational physics software often lacks analytical solutions for general parameter regimes.
+Interactive multi-matrix models with $g_4 > 0$ and dimension $N > 1$ have no closed-form solutions.
+Standard unit tests cannot confirm whether an MCMC simulation samples the true physical distribution.
+To solve this problem, leading scientific codes use cross-path verification and physical scaling laws.
+Two independent algorithms compute the same physical quantity using different mathematical formulations.
 Exact agreement between these independent pathways verifies algorithmic and physical correctness.
 
 #### 2. Internal Energy Invariant: Fast Local Updates vs Global Traces
@@ -272,7 +272,7 @@ P_{\mathrm{accept}} = \min\left(1, \, \mathrm{e}^{-\Delta S}\right)
 $$
 
 
-RFL evaluates this quantity through two independent computational pathways:
+RFL computes this quantity through two independent pathways:
 * **Global Evaluation Path:** Reassembles the complete Dirac operator $D \in \mathbb{C}^{M \times M}$ and computes explicit matrix powers and traces in $\mathcal{O}(M^3)$ operations.
 * **Local Incremental Path (`delta24`):** Exploits single-element matrix variations. It evaluates $\Delta S$ in $\mathcal{O}(N)$ operations using precomputed Clifford trace tensors ($\Omega$ table).
 
@@ -303,8 +303,8 @@ $$
 $$
 
 
-RFL verifies action gradients through two independent pathways:
-* **Analytical Path:** Evaluates symbolic matrix variations derived from trace cyclicity and noncommutative differential calculus.
+RFL computes and verifies action gradients through two independent pathways:
+* **Analytical Path:** Calculates symbolic matrix variations derived from trace cyclicity and noncommutative differential calculus.
 * **Numerical Finite-Difference Path:** Evaluates directional derivatives using central finite difference stencils:
 
 
@@ -329,7 +329,7 @@ Verifying REQ-009 guarantees symplectic consistency and correct force fields bef
   USQCD suites maintain dedicated fermion force tests (`Test_fermion_force`).
   These tests integrate analytical forces along momentum trajectories and compare results against numerical action shifts.
 * **Quantum Chemistry (PySCF, Psi4):**
-  Analytical nuclear gradients derived from the Hellmann-Feynman theorem are verified against numerical finite-difference energy derivatives.
+  PySCF and Psi4 verify analytical Hellmann-Feynman gradients against numerical finite-difference energy derivatives.
   Every gradient module includes regression tests asserting agreement within $10^{-6}$ Hartree per Bohr.
 
 #### 4. Scientific Documentation & Recording Standards
@@ -409,7 +409,7 @@ tests/physics/
 ├── test_gaussian_sbc.py
 ├── test_riemann_hilbert_1matrix.py
 ├── test_detailed_balance.py
-└── test_metamorphic_invariants.py
+└── test_scaling_invariants.py
 ```
 
 ---
@@ -424,7 +424,7 @@ tests/physics/
 | **Derivative Consistency** | `pytest tests/physics/test_derivative_consistency.py` | Verifies variations match central finite differences (REQ-009). | Tier 1 (PR Gate) |
 | **Gaussian Limit** | `pytest tests/physics/test_gaussian_limit.py` | Verifies convergence to Wigner convolution law (REQ-005). | Tier 2 (Merge Gate) |
 | **Detailed Balance** | `pytest tests/physics/test_detailed_balance.py` | Verifies microscopic reversibility and state-flux balance (REQ-006). | Tier 2 (Merge Gate) |
-| **Metamorphic Relations** | `pytest tests/physics/test_metamorphic_invariants.py` | Verifies parameter rescaling and coupling monotonicity (REQ-011). | Tier 2 (Merge Gate) |
+| **Physical Scaling Laws** | `pytest tests/physics/test_scaling_invariants.py` | Verifies parameter rescaling and coupling monotonicity (REQ-011). | Tier 2 (Merge Gate) |
 | **1-Matrix Benchmark** | `pytest tests/physics/test_riemann_hilbert_1matrix.py` | Verifies agreement with Riemann-Hilbert analytical solutions. | Tier 3 (Nightly) |
 | **MCMC Calibration (SBC)** | `pytest tests/physics/test_gaussian_sbc.py` | Verifies uniform posterior ranks in Gaussian ensembles (REQ-010). | Tier 3 (Nightly) |
 | **Chain Convergence** | `pytest tests/physics/test_chain_convergence.py` | Verifies rank-normalized split $\hat{R} < 1.05$ and $\mathrm{ESS} \ge 400$ (REQ-007). | Tier 3 (Nightly) |
@@ -451,6 +451,6 @@ tests/physics/
   2. Implement `tests/physics/test_detailed_balance.py` testing microscopic reversibility and coarse-grained state-flux balance.
   3. Implement `tests/physics/test_gaussian_sbc.py` validating the MCMC sampler with Simulation-Based Calibration.
   4. Implement rank-normalized folded split $\hat{R}$ and $\mathrm{ESS}_{\mathrm{bulk}}$ diagnostics in Python analysis utilities.
-  5. Implement `tests/physics/test_metamorphic_invariants.py` testing parameter rescaling and coupling monotonicity.
+  5. Implement `tests/physics/test_scaling_invariants.py` to verify parameter rescaling and coupling monotonicity.
   6. Create benchmark scripts to recreate published matrix model scaling curves and archive golden reference datasets.
   7. Configure automated Zenodo DOI archiving upon GitHub release tags.
