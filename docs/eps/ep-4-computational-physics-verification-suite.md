@@ -56,6 +56,12 @@ To establish scientific validity, RFL must verify six fundamental pillars:
 5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalized folded split $\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
 6. **Physical Scaling Invariants for General Regimes:** In interactive regimes without analytical solutions, simulations must satisfy exact parameter rescaling and coupling monotonicity laws.
 
+#### The Unit-Test-First Principle for Physical Invariants
+Fast unit tests provide immediate deterministic feedback with zero stochastic flakiness.
+Whenever a physical invariant can be verified on a single configuration or state transition, developers must write a unit test.
+Single-step action updates, geometric axioms, gauge transformations, and finite-difference derivatives must execute as unit tests.
+Longer stochastic simulations must only test collective properties, ergodicity, and asymptotic distributions that unit tests cannot cover.
+
 Automating these checks ensures that RFL provides reliable, mathematically sound foundations for research.
 Researchers and peer reviewers can independently confirm that the software samples the true physical distribution.
 
@@ -334,6 +340,7 @@ Verifying REQ-009 guarantees symplectic consistency and correct force fields bef
 
 #### 4. Scientific Documentation & Recording Standards
 Leading scientific software projects document verification invariants through structured technical standards:
+* **Unit-Test-First Coverage:** Whenever an invariant can be tested deterministically on a single state, projects implement it as a fast unit test.
 * **Dual-Path Verification Tests:** Projects maintain automated regression tests executing both computational pathways in continuous integration.
 * **Explicit Precision Budgets:** Documentation justifies numerical tolerances using machine precision and condition numbers instead of arbitrary thresholds.
 * **Diagnostic Verification Tools:** Software exposes diagnostic commands (such as Stan's `test_grad` and GROMACS's `gmx check`) allowing users to verify algorithmic consistency.
@@ -367,7 +374,7 @@ Python tests in `tests/physics/` verify statistical distributions, moments, and 
 
 *Rationale:*
 Following established practices in GROMACS and Stan:
-* **Tier 1 (Smoke / Deterministic Gate, < 2 minutes):** Executes on every commit and PR. Uses deterministic PRNG seeds to test algebraic identities, Hermiticity, gauge invariance, and finite differences.
+* **Tier 1 (Smoke / Deterministic Gate, < 2 minutes):** Executes on every commit and PR. Enforces the unit-test-first policy. Tests all deterministic algebraic identities, Hermiticity, gauge invariance, and finite differences in fast unit tests.
 * **Tier 2 (Physics Integration Gate, ~3–5 minutes):** Executes on PR merge to `main`. Uses fixed seeds to test short MCMC chains, loose-tolerance Gaussian moments ($4\sigma$), and state-flux balance.
 * **Tier 3 (Scientific Validation Suite, Nightly / Release Gate, ~30–60 minutes):** Executes high-statistics runs, multi-chain split $\hat{R}$, Riemann-Hilbert curve fits, and Simulation-Based Calibration.
 * **Flakiness Control Protocol:** Stochastic tests apply the Holm-Bonferroni correction to prevent false discovery inflation. If a stochastic test fails with $p < \alpha$, CI triggers an automated second run with an independent seed and double chain length before failing.
