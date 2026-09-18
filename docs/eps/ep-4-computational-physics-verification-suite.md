@@ -1,6 +1,6 @@
 # EP-4: Computational Physics Verification Suite & Scientific Validation Standards
 
-<!-- cspell:words Bonferroni CmdStan Feynman GROMACS Hartree Hellmann Higham LAMMPS Liouville MILC OpenMM PRNG Psi4 PySCF Smirnov USQCD Wielandt Wilkinson Zenodo autodiff conftest microcanonical plaquette plaquettes pseudofermion significand symplectic unitaries -->
+<!-- cspell:words Betancourt Bonferroni Bürkner CmdStan Feynman Gelman GROMACS Hartree Hellmann Higham LAMMPS Liouville MILC Mobley OpenMM PRNG Psi4 PySCF Rubin SIAM Smirnov Talts USQCD Vehtari Wielandt Wilkinson Zenodo autodiff conftest microcanonical plaquette plaquettes pseudofermion quantiles significand symplectic unitaries widehat -->
 
 * **Title:** Computational Physics Verification Suite & Scientific Validation Standards
 * **Author:** Paul Druce
@@ -346,6 +346,101 @@ Leading scientific software projects document verification invariants through st
 * **Diagnostic Verification Tools:** Software exposes diagnostic commands (such as Stan's `test_grad` and GROMACS's `gmx check`) allowing users to verify algorithmic consistency.
 * **Theory-to-Code Traceability:** Technical documentation links code routines directly to underlying theoretical equations and literature citations.
 
+### 3.5 Statistical Convergence & Multi-Chain Diagnostics (REQ-007)
+
+#### 1. The Multi-Chain Requirement in Matrix Ensembles
+Markov Chain Monte Carlo simulations can easily produce misleading convergence signals.
+A single chain can remain trapped in a local energy minimum while appearing stable.
+To detect metastable trapping, simulations must run multiple independent chains initialised from dispersed starting states.
+RFL initialises $M \ge 4$ independent chains with random matrix configurations across the phase space.
+Convergence requires all chains to reach the same stationary Boltzmann distribution.
+
+#### 2. Classical Gelman-Rubin Diagnostic ($\hat{R}$)
+Gelman and Rubin (1992) introduced the potential scale reduction factor, $\hat{R}$.
+The metric compares the variance between independent chains to the variance within each chain.
+For $M$ chains of length $N$ sampling an observable $\theta$, the between-chain variance is:
+
+
+$$
+B = \frac{N}{M-1} \sum_{m=1}^M \left(\bar{\theta}_{m\cdot} - \bar{\theta}_{\cdot\cdot}\right)^2
+$$
+
+
+The average within-chain variance is:
+
+
+$$
+W = \frac{1}{M} \sum_{m=1}^M s_m^2, \qquad s_m^2 = \frac{1}{N-1} \sum_{n=1}^N \left(\theta_{mn} - \bar{\theta}_{m\cdot}\right)^2
+$$
+
+
+The marginal posterior variance estimate combines both variances:
+
+
+$$
+\widehat{\mathrm{Var}}(\theta) = \frac{N-1}{N} W + \frac{1}{N} B
+$$
+
+
+The classical potential scale reduction factor evaluates the ratio:
+
+
+$$
+\hat{R} = \sqrt{\frac{\widehat{\mathrm{Var}}(\theta)}{W}}
+$$
+
+
+If chains have not converged, between-chain variance remains large, yielding $\hat{R} \gg 1$.
+When all chains mix into the same stationary distribution, $B \approx 0$ and $\hat{R} \to 1$.
+
+#### 3. Modern Rank-Normalized Folded Split $\hat{R}$
+The classical $\hat{R}$ metric assumes Gaussian distributions and finite second moments.
+It fails when distributions have heavy tails or when chains differ only in spread.
+Vehtari et al. (2021) resolved these flaws with three enhancements:
+
+1. **Chain Splitting (Split $\hat{R}$):**
+   The algorithm splits each chain into two halves.
+   This doubles the number of chains to $2M$ and detects non-stationarity or initial burn-in drift.
+2. **Rank Normalisation:**
+   The algorithm pools all samples across chains and replaces raw values with their ranks $r_{mn}$.
+   It transforms ranks to standard normal quantiles:
+
+
+$$
+\tilde{\theta}_{mn} = \Phi^{-1}\left(\frac{r_{mn} - 3/8}{S + 1/4}\right)
+$$
+
+
+   where $S = 2MN$ is the total sample count.
+   This rank transformation makes the diagnostic robust against heavy-tailed eigenvalue distributions.
+3. **Folding (Folded $\hat{R}$):**
+   The algorithm calculates $\hat{R}$ on absolute deviations from the median:
+
+
+$$
+\theta^{\mathrm{fold}} = \lvert \theta - \mathrm{median}(\theta) \rvert
+$$
+
+
+   This transformation diagnoses localised scale differences when chain means match but chain variances differ.
+
+The final diagnostic takes the maximum across both rank-transformed and folded-rank evaluations:
+
+
+$$
+\hat{R} = \max\left(\hat{R}(\tilde{\theta}), \, \hat{R}(\tilde{\theta}^{\mathrm{fold}})\right)
+$$
+
+
+#### 4. Acceptance Criteria & Effective Sample Size (ESS)
+Historical studies accepted values below $\hat{R} < 1.1$.
+Modern computational standards established by Vehtari et al. (2021) and Stan require tighter limits:
+* **Threshold:** $\hat{R} < 1.05$ across all primary observables ($\mathrm{Tr}(D^2)$, $\mathrm{Tr}(D^4)$, and spectral radii).
+* **Effective Sample Size:** Bulk effective sample size $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$ across chains.
+
+In RFL (REQ-007), Tier 3 nightly validation executes 4 independent chains.
+Passing this test proves that the noncommutative geometry ensemble has equilibrated to the true Boltzmann distribution.
+
 ---
 
 ## 4. Architecture Decision Records (ADRs) & Trade-offs
@@ -461,3 +556,37 @@ tests/physics/
   5. Implement `tests/physics/test_scaling_invariants.py` to verify parameter rescaling and coupling monotonicity.
   6. Create benchmark scripts to recreate published matrix model scaling curves and archive golden reference datasets.
   7. Configure automated Zenodo DOI archiving upon GitHub release tags.
+
+---
+
+## 8. References & Scientific Standards
+
+1. **Barrett, J. W., & Glaser, L. (2016).**
+   Monte Carlo simulations of a noncommutative geometry.
+   *Journal of Physics A: Mathematical and Theoretical*, 49(24), 245001.
+   [DOI: 10.1088/1751-8113/49/24/245001](https://doi.org/10.1088/1751-8113/49/24/245001)
+
+2. **Gelman, A., & Rubin, D. B. (1992).**
+   Inference from iterative simulation using multiple sequences.
+   *Statistical Science*, 7(4), 457–472.
+   [DOI: 10.1214/ss/1177011136](https://doi.org/10.1214/ss/1177011136)
+
+3. **Higham, N. J. (2002).**
+   *Accuracy and Stability of Numerical Algorithms* (2nd ed.).
+   Society for Industrial and Applied Mathematics (SIAM).
+   [DOI: 10.1137/1.9780898718027](https://doi.org/10.1137/1.9780898718027)
+
+4. **Merz, P. T., Shirts, M. R., & Mobley, D. L. (2018).**
+   Testing physical validity of molecular simulation software.
+   *Journal of Chemical Theory and Computation*, 14(7), 3849–3858.
+   [DOI: 10.1021/acs.jctc.8b00244](https://doi.org/10.1021/acs.jctc.8b00244)
+
+5. **Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018).**
+   Validating Bayesian inference algorithms with simulation-based calibration.
+   *arXiv preprint arXiv:1804.06788*.
+   [arXiv:1804.06788](https://arxiv.org/abs/1804.06788)
+
+6. **Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021).**
+   Rank-normalization, folding, and localization: An improved $\widehat{R}$ for assessing convergence of MCMC.
+   *Bayesian Analysis*, 16(2), 667–718.
+   [DOI: 10.1214/20-BA1221](https://doi.org/10.1214/20-BA1221)
