@@ -1,2 +1,3 @@
 add_subdirectory(cpp)
 add_subdirectory(case_studies)
+add_subdirectory(downstream_canary)
