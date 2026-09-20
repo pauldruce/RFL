@@ -181,6 +181,7 @@ When related issues require a major architectural or physics upgrade:
 
 ### 3. Milestone Scheduling & PR Delivery
 * When an EP is approved, assign the issues to a **GitHub Milestone** (e.g. `v0.3.0: Core Modernisation (EP-1)`).
+* The active milestone phase sequence and component dependencies are tracked in **[ROADMAP.md](ROADMAP.md)**.
 * Convert the EP delivery plan into discrete GitHub Issues assigned to the milestone.
 * PRs reference their corresponding issue (`Closes #12`), enabling automatic milestone progress tracking and issue closure upon merge.
 
@@ -189,6 +190,7 @@ When related issues require a major architectural or physics upgrade:
 ## Documentation
 
 Find documentation for the software architecture, release lifecycle, and controlled vocabulary in the `docs/` directory:
+- [Development Roadmap](ROADMAP.md)
 - [Target Architecture Guide](docs/Architecture.md)
 - [Release Process & Notes Guide](docs/Release_Process.md)
 - [Controlled Vocabulary & Glossary](docs/Glossary.md)
