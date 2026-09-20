@@ -1,9 +1,9 @@
 # Random Fuzzy Library (RFL)
 
 [![PyPI version](https://img.shields.io/pypi/v/pyrfl.svg?color=blue&logo=pypi&logoColor=white)](https://pypi.org/project/pyrfl/)
-[![Python versions](https://img.shields.io/pypi/pyversions/pyrfl.svg?logo=python&logoColor=white)](https://pypi.org/project/pyrfl/)
+[![Python versions](https://img.shields.io/badge/python-3.9_%7C_3.10_%7C_3.11_%7C_3.12_%7C_3.13-blue.svg?logo=python&logoColor=white)](https://pypi.org/project/pyrfl/)
 [![GitHub Release](https://img.shields.io/github/v/release/pauldruce/RFL?color=informational&logo=github)](https://github.com/pauldruce/RFL/releases)
-[![CI Checks](https://github.com/pauldruce/RFL/actions/workflows/ci.yml/badge.svg)](https://github.com/pauldruce/RFL/actions/workflows/ci.yml)
+[![Mainline Verification](https://github.com/pauldruce/RFL/actions/workflows/main.yml/badge.svg)](https://github.com/pauldruce/RFL/actions/workflows/main.yml)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](https://pypi.org/project/pyrfl/)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C.svg?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/17)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/examples/python/rfl_playground.ipynb)
