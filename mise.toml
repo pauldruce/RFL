@@ -1,4 +1,7 @@
 [tools]
+uv = "latest"
+python = "3.12"
+node = "lts"
 "aqua:terrastruct/d2" = "0.8.2"
 
 [tasks.lint-d2]
@@ -15,7 +18,7 @@ run = "python3 scripts/check_links.py"
 
 [tasks.test-python]
 description = "Execute Python test suite using uv"
-run = "uv run pytest src/python_bindings/tests"
+run = "uv run --group test pytest src/python_bindings/tests"
 
 [tasks.test-cpp]
 description = "Build and execute C++ test suite using CTest"

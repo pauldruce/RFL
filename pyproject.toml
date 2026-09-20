@@ -41,6 +41,9 @@ dev = [
     { include-group = "test" },
 ]
 
+[tool.uv]
+default-groups = ["test"]
+
 [project.urls]
 Homepage = "https://github.com/pauldruce/RFL"
 Documentation = "https://github.com/pauldruce/RFL#documentation"
