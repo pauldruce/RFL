@@ -17,10 +17,13 @@ else()
             SOURCE_DIR ${RFL_SOURCE_DIR}
         )
     else()
+        if(NOT DEFINED RFL_GIT_TAG)
+            set(RFL_GIT_TAG main)
+        endif()
         FetchContent_Declare(
             rfl
             GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-            GIT_TAG main
+            GIT_TAG ${RFL_GIT_TAG}
         )
     endif()
     FetchContent_MakeAvailable(rfl)

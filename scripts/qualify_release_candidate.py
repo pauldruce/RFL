@@ -82,50 +82,20 @@ print(f"Verified pyrfl=={{rfl.__version__}}, eigenvalues={{len(eigenvalues)}}, a
 
 def qualify_fetchcontent(tag: str, scratch_dir: Path) -> tuple[bool, str]:
     """Validates downstream CMake consumption and target isolation via FetchContent."""
+    canary_source_dir = REPO_ROOT / "examples" / "downstream_canary"
     consumer_dir = scratch_dir / "consumer"
     if consumer_dir.exists():
         shutil.rmtree(consumer_dir)
-    consumer_dir.mkdir(parents=True, exist_ok=True)
 
-    cmakelists_content = f"""cmake_minimum_required(VERSION 3.22)
-project(ConsumerApp CXX)
-set(CMAKE_CXX_STANDARD 17)
+    # Use canonical in-tree downstream canary project
+    shutil.copytree(canary_source_dir, consumer_dir)
 
-include(FetchContent)
-FetchContent_Declare(
-    rfl
-    GIT_REPOSITORY https://github.com/pauldruce/RFL.git
-    GIT_TAG {tag}
-)
-FetchContent_MakeAvailable(rfl)
-
-add_executable(consumer_app main.cpp)
-target_link_libraries(consumer_app PRIVATE RFL::core)
-"""
-    (consumer_dir / "CMakeLists.txt").write_text(cmakelists_content, encoding="utf-8")
-
-    main_cpp_content = """#include "DiracOperator.hpp"
-#include "BarrettGlaser/Action.hpp"
-#include "BarrettGlaser/Metropolis.hpp"
-#include "GslRng.hpp"
-#include <iostream>
-#include <memory>
-
-int main() {
-    auto dirac = std::make_unique<DiracOperator>(1, 3, 6);
-    auto action = std::make_unique<Action>(-1.0, 1.0);
-    auto rng = std::make_unique<GslRng>(1234);
-    Metropolis metro(std::move(action), 0.05, 20, std::move(rng));
-    double acc = metro.updateDirac(*dirac);
-    std::cout << "Consumer App Metropolis Rate: " << acc * 100.0 << "%\\n";
-    return 0;
-}
-"""
-    (consumer_dir / "main.cpp").write_text(main_cpp_content, encoding="utf-8")
-
-    # 1. Configure CMake
+    # 1. Configure CMake with specified Git tag
     build_dir = consumer_dir / "build"
-    code, out, err = run_cmd(["cmake", "-B", str(build_dir), "-S", str(consumer_dir)], cwd=consumer_dir)
+    code, out, err = run_cmd(
+        ["cmake", "-B", str(build_dir), "-S", str(consumer_dir), f"-DRFL_GIT_TAG={tag}"],
+        cwd=consumer_dir,
+    )
     if code != 0:
         return False, f"Consumer CMake configure failed: {err.strip()}"
 
@@ -143,16 +113,16 @@ int main() {
 
     # 3. Build consumer application
     code, out, err = run_cmd(
-        ["cmake", "--build", str(build_dir), "--target", "consumer_app"],
+        ["cmake", "--build", str(build_dir), "--target", "downstream_canary"],
         cwd=consumer_dir,
     )
     if code != 0:
         return False, f"Consumer CMake build failed: {err.strip()}"
 
     # 4. Run consumer application
-    binary_path = build_dir / "consumer_app"
+    binary_path = build_dir / "downstream_canary"
     if not binary_path.exists():
-        binary_path = build_dir / "consumer_app.exe"
+        binary_path = build_dir / "downstream_canary.exe"
 
     code, out, err = run_cmd([str(binary_path)], cwd=consumer_dir)
     if code != 0:
