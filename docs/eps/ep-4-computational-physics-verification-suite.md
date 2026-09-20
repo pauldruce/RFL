@@ -155,7 +155,7 @@ $$
 
 
 Similarly, charge conjugation $J$ and grading $\Gamma$ represent signed index permutations.
-Matrix multiplication by these operators incurs zero cancellation and minimal floating-point error bounded by $c_3 \epsilon_{\mathrm{mach}} \|D\|_F$.
+Matrix multiplication by these operators incurs zero cancellation and minimal floating-point error bounded by $c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$.
 
 #### 2. Catastrophic Cancellation in Action Differences (REQ-001)
 When updating a single matrix element, the full action evaluation computes:
@@ -169,7 +169,7 @@ $$
 The action values $S(D_f)$ and $S(D_i)$ can exceed $10^4$.
 However, the single-element variation $\Delta S$ can be small ($\approx 10^{-2}$).
 Subtracting two large, nearly equal floating-point numbers causes catastrophic cancellation.
-The calculation loses $\log_{10}(|S| / |\Delta S|) \approx 6$ decimal digits of precision.
+The calculation loses $\log_{10}(\lvert S \rvert / \lvert \Delta S \rvert) \approx 6$ decimal digits of precision.
 In contrast, `delta24` computes $\Delta S$ directly from local matrix variations, avoiding subtraction.
 The discrepancy between `delta24` and $\Delta S_{\mathrm{full}}$ is bounded by the cancellation error of the full traces:
 
@@ -179,7 +179,7 @@ $$
 $$
 
 
-For $M \approx 100$ and $|S| \approx 10^4$, this error is approximately $10^{-10}$ to $10^{-9}$.
+For $M \approx 100$ and $\lvert S \rvert \approx 10^4$, this error is approximately $10^{-10}$ to $10^{-9}$.
 
 #### 3. Unitary Gauge & Spectral Invariance (REQ-008)
 Unitary transformation $D \to U D U^\dagger$ involves matrix multiplication.
@@ -200,7 +200,7 @@ $$
 $$
 
 
-For $M \le 100$ and $\|D\|_2 \approx 10$, eigenvalue drift remains below $10^{-13}$.
+For $M \le 100$ and $\lVert D \rVert_2 \approx 10$, eigenvalue drift remains below $10^{-13}$.
 
 #### 4. Theoretical Bound for Central Finite Differences (REQ-009)
 Central finite difference approximations balance truncation error and floating-point cancellation:
@@ -355,7 +355,7 @@ To detect metastable trapping, simulations must run multiple independent chains 
 RFL initialises $M \ge 4$ independent chains with random matrix configurations across the phase space.
 Convergence requires all chains to reach the same stationary Boltzmann distribution.
 
-#### 2. Classical Gelman-Rubin Diagnostic ($\hat{R}$)
+#### 2. Classical Gelman-Rubin Diagnostic (R-hat)
 Gelman and Rubin (1992) introduced the potential scale reduction factor, $\hat{R}$.
 The metric compares the variance between independent chains to the variance within each chain.
 For $M$ chains of length $N$ sampling an observable $\theta$, the between-chain variance is:
@@ -393,17 +393,18 @@ $$
 If chains have not converged, between-chain variance remains large, yielding $\hat{R} \gg 1$.
 When all chains mix into the same stationary distribution, $B \approx 0$ and $\hat{R} \to 1$.
 
-#### 3. Modern Rank-Normalized Folded Split $\hat{R}$
+#### 3. Modern Rank-Normalized Folded Split R-hat
 The classical $\hat{R}$ metric assumes Gaussian distributions and finite second moments.
 It fails when distributions have heavy tails or when chains differ only in spread.
 Vehtari et al. (2021) resolved these flaws with three enhancements:
 
-1. **Chain Splitting (Split $\hat{R}$):**
-   The algorithm splits each chain into two halves.
-   This doubles the number of chains to $2M$ and detects non-stationarity or initial burn-in drift.
-2. **Rank Normalisation:**
-   The algorithm pools all samples across chains and replaces raw values with their ranks $r_{mn}$.
-   It transforms ranks to standard normal quantiles:
+**Enhancement 1: Chain Splitting (Split R-hat)**
+The algorithm splits each chain into two halves.
+This doubles the number of chains to $2M$ and detects non-stationarity or initial burn-in drift.
+
+**Enhancement 2: Rank Normalisation**
+The algorithm pools all samples across chains and replaces raw values with their ranks $r_{mn}$.
+It transforms ranks to standard normal quantiles:
 
 
 $$
@@ -411,10 +412,11 @@ $$
 $$
 
 
-   where $S = 2MN$ is the total sample count.
-   This rank transformation makes the diagnostic robust against heavy-tailed eigenvalue distributions.
-3. **Folding (Folded $\hat{R}$):**
-   The algorithm calculates $\hat{R}$ on absolute deviations from the median:
+where $S = 2MN$ is the total sample count.
+This rank transformation makes the diagnostic robust against heavy-tailed eigenvalue distributions.
+
+**Enhancement 3: Folding (Folded R-hat)**
+The algorithm calculates $\hat{R}$ on absolute deviations from the median:
 
 
 $$
@@ -422,7 +424,7 @@ $$
 $$
 
 
-   This transformation diagnoses localised scale differences when chain means match but chain variances differ.
+This transformation diagnoses localised scale differences when chain means match but chain variances differ.
 
 The final diagnostic takes the maximum across both rank-transformed and folded-rank evaluations:
 
@@ -587,6 +589,6 @@ tests/physics/
    [arXiv:1804.06788](https://arxiv.org/abs/1804.06788)
 
 6. **Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021).**
-   Rank-normalization, folding, and localization: An improved $\widehat{R}$ for assessing convergence of MCMC.
+   Rank-normalization, folding, and localization: An improved $\hat{R}$ for assessing convergence of MCMC.
    *Bayesian Analysis*, 16(2), 667–718.
    [DOI: 10.1214/20-BA1221](https://doi.org/10.1214/20-BA1221)
