@@ -4,7 +4,7 @@
 
 * **Title:** Computational Physics Verification Suite & Scientific Validation Standards
 * **Author:** Paul Druce
-* **Status:** Draft
+* **Status:** Accepted (In Progress)
 * **Target Versions:** RFL v0.3.0 (Phase 1), v0.4.0 (Phase 2)
 * **Date:** 2026-09-17
 
@@ -17,7 +17,7 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Port `delta24` action tests; implement complete 8-fold KO spectral axioms; add unitary gauge invariance; add Gaussian limit checks. | `v0.3.0` | [#64](https://github.com/pauldruce/RFL/pull/64) | 💡 Draft |
+| **Phase 1** | Port `delta24` action tests; implement complete 8-fold KO spectral axioms; add unitary gauge invariance; add Gaussian limit checks. | `v0.3.0` | [#69](https://github.com/pauldruce/RFL/issues/69) | ⏳ Scheduled |
 | **Phase 2** | Add 1-matrix Riemann-Hilbert tests; detailed balance flux checks; Simulation-Based Calibration; rank-normalised split $\hat{R}$; Zenodo DOI. | `v0.4.0` | 💡 Planned | 💡 Draft |
 
 ---
@@ -579,6 +579,7 @@ tests/physics/
 
 ### Phase 1: Core Algebraic & Limiting Physics Verification
 * **Target Version:** `v0.3.0`
+* **GitHub Issue:** [#69](https://github.com/pauldruce/RFL/issues/69)
 * **Alignment:** Implemented alongside [EP-1](ep-1-core-architecture-modernisation.md) architecture modernisation.
 * **Tasks:**
   1. Create `src/core/tests/tDelta.cpp` testing `delta24` across all Clifford types $(p, q)$ with $p+q \le 4$.
