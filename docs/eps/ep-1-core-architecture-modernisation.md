@@ -2,15 +2,28 @@
 
 * **Title:** Research-Driven Architecture Modernisation for RFL
 * **Author:** Paul Druce
-* **Status:** In Discussion
+* **Status:** Accepted (In Progress)
 * **Target Version:** RFL v0.3.0
 * **Date:** 2026-08-30
 
 ---
 
-## 1. Motivation, Goals & Non-Goals
+## 1. Multi-Phase Implementation Tracker
 
-### 1.1 Problem Statement & Research Context
+This proposal spans the `v0.3.0` milestone.
+The table below tracks the status of each implementation phase:
+
+| Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Phase 1** | Refactor `DiracOperator` into a regular value type with strict `const` correctness (ADR-1) | `v0.3.0` | [#12](https://github.com/pauldruce/RFL/issues/12) | ⏳ Scheduled |
+| **Phase 2** | Extract analytic trace variations and gradients into dedicated `BarrettGlaserAction` (ADR-3) | `v0.3.0` | [#14](https://github.com/pauldruce/RFL/issues/14) | ⏳ Scheduled |
+| **Phase 3** | Decouple simulation execution with non-blocking Stepper & Observer API and dual-averaging (ADR-2) | `v0.3.0` | [#13](https://github.com/pauldruce/RFL/issues/13) | ⏳ Scheduled |
+
+---
+
+## 2. Motivation, Goals & Non-Goals
+
+### 2.1 Problem Statement & Research Context
 `RFL` was created to study **Finite Noncommutative Geometries (Random Fuzzy Spaces)** and **Spectral Triples** via Monte Carlo simulations. The core mathematical framework is governed by the Barrett-Glaser action (Barrett & Glaser 2016):
 
 $$S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$$
@@ -24,27 +37,27 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 2. **Entangled Physics & Sampling:** The analytical trace variation formulas $\Delta \text{Tr}(D^2)$ and $\Delta \text{Tr}(D^4)$ are embedded directly inside `Metropolis.cpp`. This prevents reusing the same physics for Hybrid Monte Carlo (HMC) or new multi-term action potentials ($S_6, \text{Pfaffian}$).
 3. **Leaky Interface & Const Violation:** The legacy `IDiracOperator` interface exposes private precomputed lookup tables (`getOmegaTable4()`) and breaks `const`-correctness by returning mutable matrix references from `const` member functions to allow MCMC mutation.
 
-### 1.2 Goals
+### 2.2 Goals
 * **Research-Centric Workflow:** Provide a non-blocking **Stepper & Observer API** that allows researchers in C++ and Python to step through Markov sweeps, stream eigenvalue spectra, and measure integrated autocorrelation times $\tau_{\text{int}}$.
 * **Modular Physics Engine:** Decouple the **Dirac State** (geometry), **Action** (energy & variations), and **Samplers** (MCMC / HMC algorithms).
 * **Value Semantics & Memory Safety:** Transform `DiracOperator` into a clean, regular C++ value type (copyable, movable, strict `const` correctness, zero redundant heap wrappers).
 * **Zero-Copy Python Interoperability:** Expose native Armadillo matrices and eigenvalue vectors directly to NumPy without memory copying.
 * **Extensibility for Emerging Literature:** Ensure seamless addition of future physical models (e.g. Fermion Pfaffian effective actions, product geometries, HMC gradients).
 
-### 1.3 Non-Goals
+### 2.3 Non-Goals
 * Distributed MPI cluster scaling (single-node multi-threading via OpenMP is sufficient for current matrix sizes $N \le 256$).
 * General-purpose symbolic algebra (RFL is focused purely on numerical spectral geometry).
 
 ---
 
-## 2. Research Workflows & Scientific Requirements
+## 3. Research Workflows & Scientific Requirements
 
-### 2.1 Core Research Scenarios
+### 3.1 Core Research Scenarios
 1. **Scenario 1 (Interactive Exploration in Python):** A researcher sets up a spectral triple $(p, q, N)$ in a Jupyter notebook, runs 500 thermalisation sweeps with automated dual-averaging step-size tuning, and plots the real-time eigenvalue density $\rho(\lambda)$.
 2. **Scenario 2 (Automated Batch Sampling & Statistics):** An automated batch script executes 100,000 production sweeps across a parameter grid $(g_2, g_4)$, recording eigenvalue spectra every 10 sweeps to compute the spectral dimension $d_{\text{spec}}$ and edge eigenvalue statistics (e.g. comparing largest eigenvalue fluctuations against the [Tracy–Widom distribution](https://en.wikipedia.org/wiki/Tracy%E2%80%93Widom_distribution)).
 3. **Scenario 3 (Extending Physics Actions):** A theorist implements a new action potential $S(D) = S_{\text{BG}}(D) - \ln \text{Pf}(JD)$ by subclassing or providing a new Action policy without modifying any Monte Carlo sampler code.
 
-### 2.2 Functional Requirements & Invariants
+### 3.2 Functional Requirements & Invariants
 
 | Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
 | :--- | :--- | :--- |
@@ -58,9 +71,9 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 
 ---
 
-## 3. Architecture Decision Records (ADRs) & Trade-offs
+## 4. Architecture Decision Records (ADRs) & Trade-offs
 
-### 3.1 ADR-1: Object Model & State Representation
+### 4.1 ADR-1: Object Model & State Representation
 
 | Criteria | Option A: Legacy Dynamic Interfaces (`IDiracOperator*`) | Option B: Regular Value Type (`DiracOperator`) | Option C: Opaque Handle / PIMPL |
 | :--- | :--- | :--- | :--- |
@@ -74,7 +87,7 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 
 ---
 
-### 3.2 ADR-2: Simulation Execution & Orchestration
+### 4.2 ADR-2: Simulation Execution & Orchestration
 
 | Criteria | Option A: Monolithic Runner (`Simulation::run()`) | Option B: Stepper + Observer Pattern | Option C: Reactive / Coroutine Stream |
 | :--- | :--- | :--- | :--- |
@@ -88,7 +101,7 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 
 ---
 
-### 3.3 ADR-3: Action & Variation Architecture
+### 4.3 ADR-3: Action & Variation Architecture
 
 | Criteria | Option A: Embedded in Sampler (Legacy) | Option B: Physics Action with Analytic Variations | Option C: Automatic Differentiation (AD) |
 | :--- | :--- | :--- | :--- |
@@ -101,7 +114,7 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 
 ---
 
-### 3.4 ADR-4: Action Extensibility for Fermionic Pfaffians & Multi-Term Models
+### 4.4 ADR-4: Action Extensibility for Fermionic Pfaffians & Multi-Term Models
 
 In the literature (Barrett 2024), adding fermions modifies the partition function via the Grassmann integral:
 
@@ -123,6 +136,6 @@ $$\alpha = \min\left(1, e^{-\Delta S_B} \cdot \left| \frac{\text{Pfaffian}(JD')}
 
 ---
 
-## 4. Target Architecture & Component Design
+## 5. Target Architecture & Component Design
 
 *(Currently in collaborative discussion — component APIs and directory organisation will be finalised next.)*
