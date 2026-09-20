@@ -165,7 +165,7 @@ def qualify_examples() -> tuple[bool, str]:
     """Validates local CMake, Makefile, and direct compiler example workflows."""
     # 1. CMake example targets
     code, out, err = run_cmd(
-        ["cmake", "--build", "build", "--target", "main", "mauro_thesis_mmc", "hmc_tuning"],
+        ["cmake", "--build", "build", "--target", "main", "mauro_thesis_mmc", "hmc_tuning", "downstream_canary"],
         cwd=REPO_ROOT,
     )
     if code != 0:
@@ -175,6 +175,7 @@ def qualify_examples() -> tuple[bool, str]:
         REPO_ROOT / "build" / "examples" / "cpp" / "main",
         REPO_ROOT / "build" / "examples" / "case_studies" / "mauro_thesis_mmc" / "mauro_thesis_mmc",
         REPO_ROOT / "build" / "examples" / "case_studies" / "hmc_tuning" / "hmc_tuning",
+        REPO_ROOT / "build" / "examples" / "downstream_canary" / "downstream_canary",
     ]:
         target_bin = candidate_path
         if not target_bin.exists():

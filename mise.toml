@@ -13,6 +13,14 @@ run = "python3 scripts/check_d2_images.py --fix"
 description = "Validate internal documentation links and workflow badges"
 run = "python3 scripts/check_links.py"
 
+[tasks.test-python]
+description = "Execute Python test suite using uv"
+run = "uv run pytest src/python_bindings/tests"
+
+[tasks.test-cpp]
+description = "Build and execute C++ test suite using CTest"
+run = "cmake --build build -j8 && ctest --test-dir build --output-on-failure"
+
 [tasks.lint-spelling]
 description = "Check repository spelling and British English compliance with CSpell"
 run = "npx cspell lint --dot ."

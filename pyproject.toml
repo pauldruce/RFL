@@ -27,8 +27,19 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = ["pytest", "packaging"]
 dev = ["jupyter", "nbformat"]
+
+[dependency-groups]
+test = [
+    "pytest>=7.0",
+    "packaging",
+]
+dev = [
+    "jupyter",
+    "nbformat",
+    { include-group = "test" },
+]
 
 [project.urls]
 Homepage = "https://github.com/pauldruce/RFL"
