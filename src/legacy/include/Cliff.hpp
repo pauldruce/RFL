@@ -1,5 +1,5 @@
-#ifndef RFL_CLIFFORD_HPP
-#define RFL_CLIFFORD_HPP
+#ifndef RFL_LEGACY_CLIFF_HPP
+#define RFL_LEGACY_CLIFF_HPP
 
 #include <armadillo>
 #include <vector>
@@ -63,4 +63,4 @@ std::ostream& operator<<(std::ostream& out, const Cliff& C);
 
 //static bool areHermitian(const arma::cx_mat& m_1, const arma::cx_mat& m_2);
 
-#endif
+#endif// RFL_LEGACY_CLIFF_HPP

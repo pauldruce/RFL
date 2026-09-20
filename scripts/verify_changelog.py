@@ -35,11 +35,12 @@ def get_latest_stable_tag(excluding_tag: str | None = None) -> str | None:
 
 def get_merged_prs_since(
     tag: str | None,
+    end_ref: str = "HEAD",
     excluded_prs: set[int] | None = None,
     ignore_dependencies: bool = True,
 ) -> dict[int, str]:
-    """Finds all PR numbers and commit summaries merged since the given tag."""
-    range_spec = f"{tag}..HEAD" if tag else "HEAD"
+    """Finds all PR numbers and commit summaries merged between tag and end_ref."""
+    range_spec = f"{tag}..{end_ref}" if tag else end_ref
     prs: dict[int, str] = {}
     excluded = excluded_prs or set()
     try:
@@ -79,6 +80,7 @@ def get_merged_prs_since(
 def audit_changelog(
     tag: str,
     previous_tag: str | None = None,
+    until_ref: str | None = None,
     excluded_prs: set[int] | None = None,
     ignore_dependencies: bool = True,
 ) -> list[str]:
@@ -129,8 +131,21 @@ def audit_changelog(
     # 5. Check for missing PRs merged since previous tag
     effective_prev_tag = previous_tag or get_latest_stable_tag(excluding_tag=tag)
 
+    if until_ref:
+        effective_until = until_ref
+    else:
+        # If tag exists as a git ref (e.g. verifying an existing release), verify up to that tag.
+        # Otherwise default to HEAD (e.g. verifying unreleased changes for a prospective tag).
+        tag_exists = subprocess.run(
+            ["git", "rev-parse", "--verify", "--quiet", tag],
+            cwd=REPO_ROOT,
+            capture_output=True,
+        ).returncode == 0
+        effective_until = tag if tag_exists else "HEAD"
+
     merged_prs = get_merged_prs_since(
         effective_prev_tag,
+        end_ref=effective_until,
         excluded_prs=excluded_prs,
         ignore_dependencies=ignore_dependencies,
     )
@@ -143,7 +158,7 @@ def audit_changelog(
 
     if missing_prs:
         errors.append(
-            f"CHANGELOG.md section [{base_version}] is missing {len(missing_prs)} merged PR(s) since {effective_prev_tag or 'initial commit'}:\n"
+            f"CHANGELOG.md section [{base_version}] is missing {len(missing_prs)} merged PR(s) between {effective_prev_tag or 'initial commit'} and {effective_until}:\n"
             + "\n".join(f"    - {item}" for item in missing_prs)
             + "\n    Tip: Self-reference all release and chore PRs in CHANGELOG.md (e.g. [#<pr>](https://github.com/pauldruce/RFL/pull/<pr>))."
         )
@@ -153,8 +168,14 @@ def audit_changelog(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Audit CHANGELOG.md for tag and PR completeness")
-    parser.add_argument("--tag", type=str, required=True, help="Release tag to verify (e.g. v0.2.0 or v0.2.0rc1)")
+    parser.add_argument("--tag", type=str, default=None, help="Release tag to verify (default: latest stable tag)")
     parser.add_argument("--previous-tag", type=str, default=None, help="Previous release tag (default: latest stable tag)")
+    parser.add_argument(
+        "--until",
+        type=str,
+        default=None,
+        help="Git ref up to which commits should be verified (default: tag if it exists in git, otherwise HEAD)",
+    )
     parser.add_argument(
         "--exclude-pr",
         type=int,
@@ -171,19 +192,25 @@ def main() -> int:
 
     args = parser.parse_args()
 
+    tag_to_verify = args.tag or get_latest_stable_tag()
+    if not tag_to_verify:
+        print("❌ Error: No Git tag specified and no stable release tags found.", file=sys.stderr)
+        return 1
+
     errors = audit_changelog(
-        args.tag,
+        tag_to_verify,
         args.previous_tag,
+        until_ref=args.until,
         excluded_prs=set(args.exclude_pr),
         ignore_dependencies=not args.include_deps,
     )
     if errors:
-        print(f"❌ CHANGELOG.md verification failed for tag '{args.tag}':", file=sys.stderr)
+        print(f"❌ CHANGELOG.md verification failed for tag '{tag_to_verify}':", file=sys.stderr)
         for err in errors:
             print(f"  - {err}", file=sys.stderr)
         return 1
 
-    print(f"✅ CHANGELOG.md verified successfully for release tag '{args.tag}'.")
+    print(f"✅ CHANGELOG.md verified successfully for release tag '{tag_to_verify}'.")
     return 0
 
 

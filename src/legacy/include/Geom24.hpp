@@ -1,5 +1,5 @@
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
+#ifndef RFL_LEGACY_GEOMETRY_HPP
+#define RFL_LEGACY_GEOMETRY_HPP
 
 #include <armadillo>
 #include <gsl/gsl_rng.h>
@@ -199,4 +199,4 @@ std::ostream& operator<<(std::ostream& out, const Geom24& C);
 
 arma::cx_mat herm_der(const arma::cx_mat&);
 
-#endif
+#endif// RFL_LEGACY_GEOMETRY_HPP

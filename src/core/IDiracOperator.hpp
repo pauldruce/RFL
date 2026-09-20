@@ -2,8 +2,8 @@
 // Created by Paul Druce on 16/11/2023.
 //
 
-#ifndef IDIRACOPERATOR_HPP
-#define IDIRACOPERATOR_HPP
+#ifndef RFL_CORE_IDIRACOPERATOR_HPP
+#define RFL_CORE_IDIRACOPERATOR_HPP
 
 #include "IRng.hpp"
 #include <armadillo>
@@ -143,4 +143,4 @@ public:
    */
   virtual std::vector<arma::cx_double>& getOmegaTable4() const = 0;
 };
-#endif//IDIRACOPERATOR_HPP
+#endif// RFL_CORE_IDIRACOPERATOR_HPP

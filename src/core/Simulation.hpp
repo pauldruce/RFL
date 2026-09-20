@@ -2,8 +2,8 @@
 // Created by Paul Druce on 07/12/2022.
 //
 
-#ifndef RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_
-#define RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_
+#ifndef RFL_CORE_SIMULATION_HPP
+#define RFL_CORE_SIMULATION_HPP
 
 #include "DiracOperator.hpp"
 #include "IAlgorithm.hpp"
@@ -53,4 +53,4 @@ private:
   std::unique_ptr<IAlgorithm> m_algorithm;
 };
 
-#endif//RFL_RFL_SOURCE_NEW_SOURCE_SIMULATION_HPP_
+#endif// RFL_CORE_SIMULATION_HPP
