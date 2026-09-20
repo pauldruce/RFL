@@ -14,7 +14,7 @@ This historical simulation reproduces Barrett-Glaser MCMC updates on $(2, 0)$ ge
 * **Build Target:** `mauro_thesis_mmc`
 * **Run Command:**
   ```bash
-  ./build/examples/case_studies/mauro_thesis_mmc
+  ./build/examples/case_studies/mauro_thesis_mmc/mauro_thesis_mmc
   ```
 
 ---
@@ -25,7 +25,7 @@ This simulation demonstrates dual-averaging step-size ($\mathrm{d}t$) adaptation
 * **Build Target:** `hmc_tuning`
 * **Run Command:**
   ```bash
-  ./build/examples/case_studies/hmc_tuning
+  ./build/examples/case_studies/hmc_tuning/hmc_tuning
   ```
 * **Output:** Generates `example_S.txt` (action trajectory) and `example_HL.txt` (energy diagnostics).
 

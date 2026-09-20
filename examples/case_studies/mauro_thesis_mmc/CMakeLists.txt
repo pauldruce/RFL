@@ -1,0 +1,3 @@
+add_executable(mauro_thesis_mmc mauro_thesis_mmc.cpp)
+target_include_directories(mauro_thesis_mmc PUBLIC ${legacy_RFL_INCLUDE_DIR})
+target_link_libraries(mauro_thesis_mmc PRIVATE rfl_legacy)

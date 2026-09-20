@@ -27,8 +27,8 @@ cmake --build build -j 4
 ./build/examples/cpp/main
 
 # 3. Run case study simulations
-./build/examples/case_studies/mauro_thesis_mmc
-./build/examples/case_studies/hmc_tuning
+./build/examples/case_studies/mauro_thesis_mmc/mauro_thesis_mmc
+./build/examples/case_studies/hmc_tuning/hmc_tuning
 ./build/examples/case_studies/type_13_simulation/Type13Metropolis
 ```
 

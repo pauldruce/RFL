@@ -171,13 +171,18 @@ def qualify_examples() -> tuple[bool, str]:
     if code != 0:
         return False, f"CMake example targets failed to build: {err.strip()}"
 
-    for target_bin in [
+    for candidate_path in [
         REPO_ROOT / "build" / "examples" / "cpp" / "main",
-        REPO_ROOT / "build" / "examples" / "case_studies" / "mauro_thesis_mmc",
-        REPO_ROOT / "build" / "examples" / "case_studies" / "hmc_tuning",
+        REPO_ROOT / "build" / "examples" / "case_studies" / "mauro_thesis_mmc" / "mauro_thesis_mmc",
+        REPO_ROOT / "build" / "examples" / "case_studies" / "hmc_tuning" / "hmc_tuning",
     ]:
+        target_bin = candidate_path
         if not target_bin.exists():
             target_bin = target_bin.with_suffix(".exe")
+        if not target_bin.exists():
+            flat_candidate = candidate_path.parent.parent / candidate_path.name
+            if flat_candidate.exists() or flat_candidate.with_suffix(".exe").exists():
+                target_bin = flat_candidate if flat_candidate.exists() else flat_candidate.with_suffix(".exe")
         # Run within target directory so generated files (e.g. example_S.txt) stay within build/
         code, out, err = run_cmd([str(target_bin)], cwd=target_bin.parent)
         if code != 0:
