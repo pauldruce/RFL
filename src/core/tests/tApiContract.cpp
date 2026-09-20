@@ -129,7 +129,7 @@ static_assert(std::is_same_v<decltype(&Simulation::run), double (Simulation::*)(
 static_assert(std::is_same_v<decltype(&Simulation::getDiracOperator), const DiracOperator& (Simulation::*)() const>,
               "Simulation::getDiracOperator must return const DiracOperator& and be const.");
 
-} // namespace
+}// namespace
 
 // ============================================================================
 // Runtime Sanity Tests
