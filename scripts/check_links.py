@@ -99,8 +99,15 @@ def check_markdown_file(file_path: Path) -> list[str]:
 
 def main() -> int:
     """Scans all Markdown files in the repository."""
-    md_files = [REPO_ROOT / "README.md", REPO_ROOT / "TODO.md"]
+    md_files = [
+        REPO_ROOT / "README.md",
+        REPO_ROOT / "CHANGELOG.md",
+        REPO_ROOT / "ROADMAP.md",
+        REPO_ROOT / "AGENTS.md",
+    ]
     for path in (REPO_ROOT / "docs").rglob("*.md"):
+        md_files.append(path)
+    for path in (REPO_ROOT / "examples").rglob("*.md"):
         md_files.append(path)
 
     all_errors: list[str] = []

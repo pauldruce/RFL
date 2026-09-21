@@ -14,7 +14,7 @@
 #include "GslRng.hpp"
 
 #ifndef RFL_VERSION_STRING
-#define RFL_VERSION_STRING "0.1.0"
+#define RFL_VERSION_STRING "0.0.0-devel"
 #endif
 
 namespace py = pybind11;

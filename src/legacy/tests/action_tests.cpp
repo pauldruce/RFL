@@ -41,35 +41,3 @@ TEST(ActionTests, DifferenceIsSmall) {
     CompareActions(d.p, d.q, d.dim, d.g2);
   }
 }
-
-//! PARAMETERISED TESTING USING GTEST
-//
-//typedef struct ActionParameters
-//{
-//   int p;
-//   int q;
-//   int dim;
-//   double g2;
-//} ActionParameters;
-//
-//class ActionTests : public ::testing::TestWithParam<ActionParameters>
-//{
-//};
-//
-//TEST_P(ActionTests, DifferenceIsSmall)
-//{
-//   ActionParameters action_params = GetParam();
-//   CompareActions(action_params.p, action_params.q, action_params.dim, action_params.g2);
-//}
-//
-//const ActionParameters testing_params[] =
-//    {
-//        {1, 1, 5, -3.0},
-//        {2, 2, 6, -2.2},
-//        {1, 2, 7, -0.5},
-//        {2, 1, 4, -0.1},
-//        {0, 5, 4, -2.8}};
-//
-//INSTANTIATE_TEST_SUITE_P(ActionTestInstantiated,
-//                         ActionTests,
-//                         testing::ValuesIn(testing_params));
