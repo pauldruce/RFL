@@ -5,6 +5,7 @@ ccache = "latest"
 python = "3.12"
 uv = "latest"
 node = "lts"
+"aqua:mbroome/clang-format" = "16.0.6"
 "aqua:terrastruct/d2" = "0.8.2"
 
 [tasks.build]
@@ -23,6 +24,18 @@ run = "uv run --group test pytest src/python_bindings/tests"
 description = "Execute both C++ and Python test suites"
 depends = ["test-cpp", "test-python"]
 
+[tasks.lint-cpp]
+description = "Check C++ source formatting against clang-format 16"
+run = "clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.hpp' '*.h')"
+
+[tasks.fmt]
+description = "Format all C++ source files using clang-format 16"
+run = "clang-format -i $(git ls-files '*.cpp' '*.hpp' '*.h')"
+
+[tasks.lint-spelling]
+description = "Check repository spelling and British English compliance with CSpell"
+run = "npx cspell lint --dot ."
+
 [tasks.check-links]
 description = "Validate internal documentation links and workflow badges"
 run = "python3 scripts/check_links.py"
@@ -35,9 +48,9 @@ run = "python3 scripts/check_d2_images.py"
 description = "Recompile all SVG diagrams from D2 sources"
 run = "python3 scripts/check_d2_images.py --fix"
 
-[tasks.lint-spelling]
-description = "Check repository spelling and British English compliance with CSpell"
-run = "npx cspell lint --dot ."
+[tasks.lint]
+description = "Execute all linting checks (C++, spelling, links, D2)"
+depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2"]
 
 [tasks.changelog-preview]
 description = "Preview release notes and changelog diff for upcoming release"
