@@ -45,7 +45,7 @@ make clean
 Compile and link `main.cpp` directly with `g++` or `clang++` without CMake.
 
 ### Prerequisites
-* Install `gsl` and `armadillo` (`brew install gsl armadillo` on macOS, or `sudo apt-get install libgsl-dev libarmadillo-dev` on Debian/Ubuntu).
+* Install `armadillo` (`brew install armadillo` on macOS, or `sudo apt-get install libarmadillo-dev` on Debian/Ubuntu).
 * Build `librfl_core.a` once using CMake:
   ```bash
   cmake -B build
@@ -60,7 +60,7 @@ mkdir -p build/examples/cpp
 g++ -std=c++17 -O3 examples/cpp/main.cpp \
     -Isrc/core \
     -Lbuild/src/core \
-    -lrfl_core -larmadillo -lgsl -lgslcblas \
+    -lrfl_core -larmadillo \
     -o build/examples/cpp/main_gcc
 
 ./build/examples/cpp/main_gcc
@@ -73,7 +73,7 @@ g++ -std=c++17 -O3 examples/cpp/main.cpp \
 > g++ -std=c++17 -fsanitize=address -O3 examples/cpp/main.cpp \
 >     -Isrc/core \
 >     -Lbuild/src/core \
->     -lrfl_core -larmadillo -lgsl -lgslcblas \
+>     -lrfl_core -larmadillo \
 >     -o build/examples/cpp/main_gcc
 > ```
 

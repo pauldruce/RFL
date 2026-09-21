@@ -26,4 +26,4 @@ target_link_libraries(my_simulation PRIVATE RFL::core)
 
 ## Target Guarantees
 * **Target Alias:** Linking `RFL::core` provides transitive include paths for all public headers.
-* **Transitive Dependencies:** External consumers do not need manual include configurations for Armadillo or GSL.
+* **Transitive Dependencies:** External consumers do not need manual include configurations for Armadillo (GSL is not required for `rfl_core`).

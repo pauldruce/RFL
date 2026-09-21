@@ -6,6 +6,10 @@ inputs:
     description: 'Install system Armadillo package (libarmadillo-dev)'
     required: false
     default: 'false'
+  install-gsl:
+    description: 'Install system GSL package (libgsl-dev) for legacy support'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -21,7 +25,6 @@ runs:
           liblapack-dev
           libarpack2-dev
           libsuperlu-dev
-          libgsl-dev
           doxygen
           graphviz
           libhdf5-dev
@@ -29,6 +32,9 @@ runs:
         )
         if [[ "${{ inputs.install-armadillo }}" == "true" ]]; then
           PACKAGES+=(libarmadillo-dev)
+        fi
+        if [[ "${{ inputs.install-gsl }}" == "true" ]]; then
+          PACKAGES+=(libgsl-dev)
         fi
         sudo apt-get install -y "${PACKAGES[@]}"
         # Ubuntu's libhdf5-serial-dev installs libraries into a serial subdirectory.

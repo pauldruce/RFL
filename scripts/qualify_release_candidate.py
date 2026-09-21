@@ -134,19 +134,29 @@ def qualify_fetchcontent(tag: str, scratch_dir: Path) -> tuple[bool, str]:
 def qualify_examples() -> tuple[bool, str]:
     """Validates local CMake, Makefile, and direct compiler example workflows."""
     # 1. CMake example targets
+    example_targets = ["main", "downstream_canary"]
+    candidates = [
+        REPO_ROOT / "build" / "examples" / "cpp" / "main",
+        REPO_ROOT / "build" / "examples" / "downstream_canary" / "downstream_canary",
+    ]
+
+    # Detect whether optional legacy targets exist (requires GSL)
+    code_check, help_out, _ = run_cmd(["cmake", "--build", "build", "--target", "help"], cwd=REPO_ROOT)
+    if code_check == 0 and "mauro_thesis_mmc" in help_out:
+        example_targets.extend(["mauro_thesis_mmc", "hmc_tuning"])
+        candidates.extend([
+            REPO_ROOT / "build" / "examples" / "case_studies" / "mauro_thesis_mmc" / "mauro_thesis_mmc",
+            REPO_ROOT / "build" / "examples" / "case_studies" / "hmc_tuning" / "hmc_tuning",
+        ])
+
     code, out, err = run_cmd(
-        ["cmake", "--build", "build", "--target", "main", "mauro_thesis_mmc", "hmc_tuning", "downstream_canary"],
+        ["cmake", "--build", "build", "--target"] + example_targets,
         cwd=REPO_ROOT,
     )
     if code != 0:
         return False, f"CMake example targets failed to build: {err.strip()}"
 
-    for candidate_path in [
-        REPO_ROOT / "build" / "examples" / "cpp" / "main",
-        REPO_ROOT / "build" / "examples" / "case_studies" / "mauro_thesis_mmc" / "mauro_thesis_mmc",
-        REPO_ROOT / "build" / "examples" / "case_studies" / "hmc_tuning" / "hmc_tuning",
-        REPO_ROOT / "build" / "examples" / "downstream_canary" / "downstream_canary",
-    ]:
+    for candidate_path in candidates:
         target_bin = candidate_path
         if not target_bin.exists():
             target_bin = target_bin.with_suffix(".exe")

@@ -24,7 +24,7 @@
 | **Research & Exploration** | User API, interactive exploration, telemetry sinks | `pyrfl` Python module, `ISimulationObserver`, `EigenvalueRecorder` |
 | **Sampling & Optimisation** | Markov chain steppers, step calibration | `MetropolisSampler`, `DualAveraging`, symplectic integrators |
 | **Noncommutative Geometry** | Matrix spectral state, Clifford algebra representations | `DiracOperator`, `CliffordModule`, `OmegaTable` |
-| **Foundational Math** | High-performance matrix linear algebra and stochastic RNG | Armadillo (`arma::cx_mat`), BLAS, LAPACK, GSL RNG |
+| **Foundational Math** | High-performance matrix linear algebra and stochastic RNG | Armadillo (`arma::cx_mat`), BLAS, LAPACK, C++17 `<random>` (`StdRng`) |
 
 ### Architectural Principles:
 * **Value Semantics & Regular Types:** Domain objects (`DiracOperator`, `CliffordModule`) behave as regular C++ types. They support copying, moving, value equality, and avoid nested pointer wrappers.
@@ -239,7 +239,7 @@ private:
 // Caller maintains full control of the experiment loop
 rfl::DiracOperator dirac(1, 3, 10);
 rfl::BarrettGlaserAction action(-1.5, 1.0);
-rfl::MetropolisSampler sampler(action, 0.05, std::make_shared<rfl::GslRng>(42));
+rfl::MetropolisSampler sampler(action, 0.05, std::make_shared<rfl::StdRng>(42));
 
 // Attach observer for automated recording
 auto recorder = std::make_shared<rfl::EigenvalueRecorder>(/*interval=*/10);
@@ -256,6 +256,33 @@ for (int sweep = 0; sweep < 2000; ++sweep) {
 }
 ```
 
+### 5.3 Random Number Generation & Sampling Engine Architecture
+
+Random number generation is critical to Markov Chain Monte Carlo performance.
+
+#### Current Architecture (`IRng` & `StdRng`)
+* **`IRng` Interface:** A lightweight abstract base class defining `virtual double getUniform() const` and `virtual double getGaussian(double sigma) const`.
+* **`StdRng` Implementation:** Uses standard C++ `<random>` with 64-bit Mersenne Twister (`std::mt19937_64`), `std::uniform_real_distribution<double>`, and `std::normal_distribution<double>`. This eliminated all external dependencies on the GNU Scientific Library (GSL) and removed copyleft constraints from binary wheels.
+
+#### Trade-Offs & Future Optimisation Strategy
+1. **Virtual Call Overhead:**
+   * Calling `getUniform()` via `IRng` requires dynamic dispatch through a vtable. In tight MCMC inner loops evaluated millions of times, virtual dispatch prevents compiler inlining, instruction reordering, and vectorisation.
+2. **Policy-Based Templated Sampler (Planned Evolution for Phase 2 / v0.4.0):**
+   * Future sampler modernisation (`MetropolisSampler`, `HmcSampler`) will support policy-based template design:
+     ```cpp
+     template <typename Rng = StdRng>
+     class MetropolisSampler {
+     public:
+       explicit MetropolisSampler(BarrettGlaserAction action, double scale, Rng rng = Rng{});
+       // ...
+     private:
+       Rng m_rng;
+     };
+     ```
+   * This preserves testability and determinism via seed initialisation while enabling the compiler to completely inline the random engine into the inner simulation loop without vtable overhead.
+3. **Python API Encapsulation:**
+   * Python bindings do not expose the internal C++ `IRng` polymorphism. Python users configure randomness cleanly by passing integer seeds (`seed: int = 42`) directly to samplers. Python-side analysis continues to leverage `numpy.random.default_rng()`.
+
 ---
 
 ## 6. Python API & Ecosystem Interop
@@ -269,7 +296,7 @@ import numpy as np
 # 1. Initialise spectral geometry and physics action
 dirac = rfl.DiracOperator(p=1, q=3, matrix_dim=10)
 action = rfl.BarrettGlaserAction(g2=-2.0, g4=1.0)
-rng = rfl.GslRng(seed=12345)
+rng = rfl.StdRng(seed=12345)
 sampler = rfl.MetropolisSampler(action=action, scale=0.05, rng=rng)
 
 # 2. Thermalise

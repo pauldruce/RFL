@@ -6,6 +6,10 @@ inputs:
     description: 'Install Armadillo via Homebrew'
     required: false
     default: 'false'
+  install-gsl:
+    description: 'Install GSL via Homebrew for legacy support'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -22,9 +26,11 @@ runs:
           doxygen
           graphviz
           pkg-config
-          gsl
         )
         if [[ "${{ inputs.install-armadillo }}" == "true" ]]; then
           PACKAGES+=(armadillo)
+        fi
+        if [[ "${{ inputs.install-gsl }}" == "true" ]]; then
+          PACKAGES+=(gsl)
         fi
         brew install --overwrite "${PACKAGES[@]}" || true

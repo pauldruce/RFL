@@ -58,7 +58,7 @@ After compiling `librfl_core.a` in `build/src/core`, compile directly with `g++`
 g++ -std=c++17 -O3 examples/cpp/main.cpp \
     -Isrc/core \
     -Lbuild/src/core \
-    -lrfl_core -larmadillo -lgsl -lgslcblas \
+    -lrfl_core -larmadillo \
     -o main_gcc
 
 ./main_gcc

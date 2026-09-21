@@ -3,7 +3,7 @@
 //
 #include "../BarrettGlaser/Action.hpp"
 #include "../DiracOperator.hpp"
-#include "../GslRng.hpp"
+#include "../StdRng.hpp"
 #include <gtest/gtest.h>
 
 static void CompareActions(const int p, const int q, const int dim, const double g_2) {
@@ -12,7 +12,7 @@ static void CompareActions(const int p, const int q, const int dim, const double
   const DiracOperator dirac(p, q, dim);
 
   for (int i = 0; i < num_of_test_repeats; ++i) {
-    const GslRng rng;
+    const StdRng rng;
     dirac.randomiseMatrices(rng);
     const double d_2 = dirac.getMatrixDimension() * dirac.getMatrixDimension();
 

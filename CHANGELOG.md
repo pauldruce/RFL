@@ -4,6 +4,31 @@ All notable changes to the Random Fuzzy Library (RFL) are documented in this fil
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [v0.3.0] - Unreleased
+
+### Highlights & Breaking Changes
+* **Breaking Change (Core GSL Removal & `StdRng`):** Replaced GNU Scientific Library (GSL) in `rfl_core` with standard C++ `StdRng` based on `std::mt19937_64`. GSL is now optional and isolated strictly to historical `rfl_legacy` builds ([#67](https://github.com/pauldruce/RFL/issues/67)).
+* **PyPI Wheel Decoupling:** Stripped `libgsl` dependency and copyleft constraints from precompiled binary Python wheels (`cibuildwheel`) and CI runner workflows ([#67](https://github.com/pauldruce/RFL/issues/67)).
+* **Formal BSD-3-Clause Licencing:** Added repository root `LICENSE` (BSD-3-Clause) and declared PEP 639 `license = "BSD-3-Clause"` in `pyproject.toml` ([#67](https://github.com/pauldruce/RFL/issues/67)).
+* **Academic Citation Metadata:** Added root `CITATION.cff` conforming to Citation File Format 1.2.0 for 1-click citation export on GitHub, Zenodo, and Google Scholar ([#67](https://github.com/pauldruce/RFL/issues/67)).
+* **API Contract & Surface Testing:** Enforced compile-time C++ contract tests and runtime Python API surface verification ([#74](https://github.com/pauldruce/RFL/pull/74)).
+* **Codebase Cleanliness & Modern Tooling:** Fixed header guard collisions, removed dead commented legacy tests, and repaired verification scripts ([#75](https://github.com/pauldruce/RFL/pull/75)).
+
+### 🚀 Features & Enhancements
+* refactor(core): replace GSL with standard C++ random engine and adopt BSD-3-Clause licence ([#67](https://github.com/pauldruce/RFL/issues/67))
+* test(api): establish compile-time C++ contract tests and Python API surface assurance by @pauldruce in [#74](https://github.com/pauldruce/RFL/pull/74)
+
+### 🐛 Bug Fixes
+* fix(ci,windows): resolve concurrent vcpkg z-applocal DLL copying race condition by @pauldruce in [#73](https://github.com/pauldruce/RFL/pull/73)
+* fix(ci): repair status badges in README and declare packaging classifiers by @pauldruce in [#65](https://github.com/pauldruce/RFL/pull/65)
+
+### 🧰 Build & CI/CD Architecture
+* chore(clean): fix header guard collisions, clean commented legacy tests, and repair verification scripts by @pauldruce in [#75](https://github.com/pauldruce/RFL/pull/75)
+
+### 📚 Documentation & Governance
+* docs(roadmap): establish v0.3.0 release roadmap, issue tracking, and EP alignment by @pauldruce in [#72](https://github.com/pauldruce/RFL/pull/72)
+* docs(eps): propose EP-4 computational physics verification suite by @pauldruce in [#64](https://github.com/pauldruce/RFL/pull/64)
+
 ## [v0.2.0] - 2026-09-13
 
 ### Highlights & Breaking Changes

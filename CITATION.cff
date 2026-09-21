@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it using the metadata from this file."
+type: software
+title: "Random Fuzzy Library (RFL)"
+abstract: "A high-performance C++ and Python scientific library for Markov Chain Monte Carlo simulations of Finite Random Non-commutative Geometries."
+authors:
+  - family-names: "Druce"
+    given-names: "Paul"
+  - family-names: "D'Arcangelo"
+    given-names: "Mauro"
+repository-code: "https://github.com/pauldruce/RFL"
+url: "https://github.com/pauldruce/RFL"
+license: "BSD-3-Clause"
+keywords:
+  - "noncommutative geometry"
+  - "random matrix theory"
+  - "monte carlo"
+  - "quantum gravity"
+  - "fuzzy spaces"
+  - "spectral triples"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Barrett"
+      given-names: "John W."
+    - family-names: "Druce"
+      given-names: "Paul"
+    - family-names: "Glaser"
+      given-names: "Lisa"
+  title: "Spectral estimators for finite non-commutative geometries"
+  journal: "Journal of Physics A: Mathematical and Theoretical"
+  volume: 52
+  issue: 27
+  year: 2019
+  start: 275203
+  doi: "10.1088/1751-8121/ab22f8"
+references:
+  - type: article
+    authors:
+      - family-names: "Barrett"
+        given-names: "John W."
+      - family-names: "Glaser"
+        given-names: "Lisa"
+    title: "Monte Carlo simulations of random non-commutative geometries"
+    journal: "Journal of Physics A: Mathematical and Theoretical"
+    volume: 49
+    issue: 24
+    year: 2016
+    start: 245001
+    doi: "10.1088/1751-8113/49/24/245001"

@@ -1,5 +1,5 @@
 if(NOT TARGET GSL::gsl)
-    find_package(GSL REQUIRED)
+    find_package(GSL QUIET)
 endif()
 
 if(TARGET GSL::gsl)
@@ -23,9 +23,9 @@ elseif(GSL_FOUND)
     endif()
     set(GSL_LIBRARIES GSL::gsl)
 else()
-    message(FATAL_ERROR "GNU Scientific Library (GSL) not found. Please install libgsl-dev (Linux), brew install gsl (macOS), or vcpkg install gsl (Windows).")
+    set(GSL_FOUND FALSE)
 endif()
 
-if(DEFINED GSL_INCLUDE_DIRS)
+if(GSL_FOUND AND DEFINED GSL_INCLUDE_DIRS)
     include_directories(${GSL_INCLUDE_DIRS})
 endif()

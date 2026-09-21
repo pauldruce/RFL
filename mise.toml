@@ -5,7 +5,7 @@ ccache = "latest"
 python = "3.12"
 uv = "latest"
 node = "lts"
-"aqua:mbroome/clang-format" = "16.0.6"
+"clang-format" = "16.0.6"
 "aqua:terrastruct/d2" = "0.8.2"
 
 [tasks.build]

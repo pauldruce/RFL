@@ -8,7 +8,7 @@
 #include "BarrettGlaser/Metropolis.hpp"
 #include "Clifford.hpp"
 #include "DiracOperator.hpp"
-#include "GslRng.hpp"
+#include "StdRng.hpp"
 
 using namespace std;
 using namespace arma;
@@ -49,7 +49,7 @@ int main() {
   cout << "Running Metropolis Algorithm (g_2=" << g_2 << ", g_4=" << g_4 << ", steps=" << num_steps << ")..." << endl;
 
   auto action = make_unique<Action>(g_2, g_4);
-  auto rng = make_unique<GslRng>(seed);
+  auto rng = make_unique<StdRng>(seed);
   Metropolis metropolis(std::move(action), scale, num_steps, std::move(rng));
 
   double acceptance_rate = metropolis.updateDirac(*dirac);

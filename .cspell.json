@@ -40,6 +40,7 @@
     "anticommutator",
     "antiherm",
     "antilinear",
+    "applocal",
     "archs",
     "arma",
     "armadillo",
@@ -128,6 +129,7 @@
     "matplotlib",
     "mcmc",
     "mdfile",
+    "Mersenne",
     "msvc",
     "msvcp",
     "musllinux",
@@ -164,6 +166,8 @@
     "skbuild",
     "spacetime",
     "strequal",
+    "stdrng",
+    "STDRNG",
     "subclassing",
     "superlu",
     "taskfile",
@@ -193,7 +197,8 @@
     "demilestoned",
     "fuzzyuser",
     "milestoned",
-    "pycache"
+    "pycache",
+    "zenodo"
   ],
   "flagWords": [
     "initialize",

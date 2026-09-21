@@ -6,8 +6,8 @@
 #include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
 #include "EigenvalueRecorder.hpp"
-#include "GslRng.hpp"
 #include "Simulation.hpp"
+#include "StdRng.hpp"
 #include <iomanip>
 
 using namespace arma;
@@ -24,7 +24,7 @@ int main() {
   // Initialise Dirac operator and action parameters.
   double metropolisScale = 0.2;
   int iter = 10;
-  auto rng = std::make_unique<GslRng>();
+  auto rng = std::make_unique<StdRng>();
   auto dirac = std::make_unique<DiracOperator>(1, 3, 10);
 
   auto g2 = -2.7;

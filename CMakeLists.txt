@@ -106,17 +106,22 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
     endif()
 endif()
 
-# GSL is included with Armadillo above, but we need more.
+# Armadillo is required for core matrix operations. GSL is optional for legacy code.
 include(Armadillo)
 include(GSL)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
     include(LoadGoogleTest)
 endif()
 
-# Build legacy RFL library
-set(legacy_RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/legacy")
-set(legacy_RFL_INCLUDE_DIR "${legacy_RFL_SOURCE_DIR}/include")
-add_subdirectory(${legacy_RFL_SOURCE_DIR}/source)
+# Build legacy RFL library if GSL is available
+if(GSL_FOUND)
+    set(legacy_RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/legacy")
+    set(legacy_RFL_INCLUDE_DIR "${legacy_RFL_SOURCE_DIR}/include")
+    add_subdirectory(${legacy_RFL_SOURCE_DIR}/source)
+    add_library(RFL::legacy ALIAS rfl_legacy)
+else()
+    message(STATUS "GNU Scientific Library (GSL) not found. Skipping legacy target (rfl_legacy). Modern rfl_core remains fully functional.")
+endif()
 
 # Add core RFL library
 set(core_RFL_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/core")
@@ -126,14 +131,16 @@ add_subdirectory(${core_RFL_SOURCE_DIR})
 # Add aliases for consumers
 add_library(RFL::core ALIAS rfl_core)
 add_library(RFL::rfl ALIAS rfl_core)
-add_library(RFL::legacy ALIAS rfl_legacy)
 
 # Add tests if building tests.
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND NOT SKBUILD)
-        add_subdirectory(${legacy_RFL_SOURCE_DIR}/tests)
+        if(GSL_FOUND)
+            add_subdirectory(${legacy_RFL_SOURCE_DIR}/tests)
+        endif()
         option(RFL_BUILD_EXAMPLES "Build example applications" ON)
         if(RFL_BUILD_EXAMPLES)
             add_subdirectory(examples)
+            add_subdirectory(playground)
         endif()
 endif()
 

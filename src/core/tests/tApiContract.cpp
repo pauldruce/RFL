@@ -6,12 +6,12 @@
 #include "BarrettGlaser/Action.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
-#include "GslRng.hpp"
 #include "IAction.hpp"
 #include "IAlgorithm.hpp"
 #include "IDiracOperator.hpp"
 #include "IRng.hpp"
 #include "Simulation.hpp"
+#include "StdRng.hpp"
 #include <armadillo>
 #include <gtest/gtest.h>
 #include <memory>
@@ -87,18 +87,21 @@ static_assert(std::is_same_v<decltype(&Action::calculateS), double (Action::*)(c
               "Action::calculateS must accept const IDiracOperator&, return double, and be const.");
 
 // ============================================================================
-// GslRng Contract Assertions
+// StdRng Contract Assertions
 // ============================================================================
-static_assert(std::is_base_of_v<IRng, GslRng>, "GslRng must inherit from IRng.");
-static_assert(std::is_final_v<GslRng>, "GslRng must be declared final.");
-static_assert(std::is_default_constructible_v<GslRng>, "GslRng must be default-constructible.");
-static_assert(std::is_constructible_v<GslRng, const unsigned long>, "GslRng must be constructible from seed.");
+static_assert(std::is_base_of_v<IRng, StdRng>, "StdRng must inherit from IRng.");
+static_assert(std::is_final_v<StdRng>, "StdRng must be declared final.");
+static_assert(std::is_default_constructible_v<StdRng>, "StdRng must be default-constructible.");
+static_assert(std::is_constructible_v<StdRng, const uint64_t>, "StdRng must be constructible from 64-bit seed.");
 
-static_assert(std::is_same_v<decltype(&GslRng::getGaussian), double (GslRng::*)(const double) const>,
-              "GslRng::getGaussian must accept sigma, return double, and be const.");
+static_assert(std::is_same_v<decltype(&StdRng::getGaussian), double (StdRng::*)(const double) const>,
+              "StdRng::getGaussian must accept sigma, return double, and be const.");
 
-static_assert(std::is_same_v<decltype(&GslRng::getUniform), double (GslRng::*)() const>,
-              "GslRng::getUniform must return double and be const.");
+static_assert(std::is_same_v<decltype(&StdRng::getUniform), double (StdRng::*)() const>,
+              "StdRng::getUniform must return double and be const.");
+
+static_assert(std::is_same_v<decltype(&StdRng::getUniformInt), uint64_t (StdRng::*)(const uint64_t, const uint64_t) const>,
+              "StdRng::getUniformInt must accept (min, max), return uint64_t, and be const.");
 
 // ============================================================================
 // Metropolis Contract Assertions
@@ -152,15 +155,15 @@ TEST(ApiContractTest, EnduringPublicContractSanity) {
   double s = action.calculateS(dirac);
   EXPECT_TRUE(std::isfinite(s));
 
-  // Verify GslRng runtime instantiation.
-  GslRng rng(42UL);
+  // Verify StdRng runtime instantiation.
+  StdRng rng(42UL);
   double u = rng.getUniform();
   EXPECT_GE(u, 0.0);
   EXPECT_LT(u, 1.0);
 
   // Verify Metropolis and Simulation assembly.
   auto act_ptr = std::make_unique<Action>(-2.0, 1.0);
-  auto rng_ptr = std::make_unique<GslRng>(42UL);
+  auto rng_ptr = std::make_unique<StdRng>(42UL);
   auto metro = std::make_unique<Metropolis>(std::move(act_ptr), 0.1, 1, std::move(rng_ptr));
   auto dirac_ptr = std::make_unique<DiracOperator>(1, 3, 6);
 

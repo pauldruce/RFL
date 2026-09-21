@@ -4,12 +4,12 @@
 
 #include "../BarrettGlaser/Metropolis.hpp"
 #include "../DiracOperator.hpp"
-#include "../GslRng.hpp"
+#include "../StdRng.hpp"
 #include <gtest/gtest.h>
 
 TEST(MetropolisTests, ConstructorDoesNotThrow) {
   // TODO: Add unit tests for randomised state sampling.
-  auto rng = std::make_unique<GslRng>();
+  auto rng = std::make_unique<StdRng>();
   constexpr double scale = 0.1;
   constexpr int num_steps = 20;
   auto action = std::make_unique<Action>(1.0, 1.0);
@@ -19,7 +19,7 @@ TEST(MetropolisTests, ConstructorDoesNotThrow) {
 }
 
 TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
-  auto rng = std::make_unique<GslRng>();
+  auto rng = std::make_unique<StdRng>();
   constexpr double scale = 0.2;
   constexpr int num_steps = 20;
   auto action = std::make_unique<Action>(1.0, 1.0);

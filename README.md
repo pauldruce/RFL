@@ -4,6 +4,7 @@
 [![Python versions](https://img.shields.io/badge/python-3.9_%7C_3.10_%7C_3.11_%7C_3.12_%7C_3.13-blue.svg?logo=python&logoColor=white)](https://pypi.org/project/pyrfl/)
 [![Platforms](https://img.shields.io/badge/platforms-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)](https://pypi.org/project/pyrfl/)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C.svg?logo=c%2B%2B)](https://en.cppreference.com/w/cpp/17)
+[![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)](LICENSE)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/pauldruce/RFL/blob/main/examples/python/rfl_playground.ipynb)
 
 > *"Continuous points are an approximation. Quantise spacetime with finite matrices."*
@@ -20,7 +21,7 @@ where $g_2, g_4 \in \mathbb{R}$ and $D$ is a finite Dirac operator. See §[Backg
 
 ## Quick Start (Python)
 
-Precompiled binary wheels vendor dynamic linear algebra dependencies (`OpenBLAS`, `Armadillo`, `GSL`). You do not need a C++ compiler or local dependencies.
+Precompiled binary wheels vendor dynamic linear algebra dependencies (`OpenBLAS`, `Armadillo`). You do not need a C++ compiler or local dependencies.
 
 ### 1. Installation
 
@@ -87,7 +88,7 @@ Include the headers in your C++ code:
 #include "DiracOperator.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
 #include "BarrettGlaser/Action.hpp"
-#include "GslRng.hpp"
+#include "StdRng.hpp"
 ```
 
 ---
@@ -98,7 +99,7 @@ RFL supports two delivery methods:
 
 ### 1. Precompiled Python Wheels (Binary Delivery)
 
-Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `gsl`, `armadillo`) directly inside the package:
+Precompiled wheels vendor dynamic linear algebra dependencies (`openblas`, `armadillo`) directly inside the package:
 
 | Platform | Architecture | Package Standard | Minimum OS Baseline | Python Coverage |
 | :--- | :--- | :--- | :--- | :--- |
@@ -117,7 +118,7 @@ When compiling RFL from source or linking with CMake `FetchContent`, RFL compile
 | **Compilers** | **GCC ≥ 10, Clang ≥ 11, Apple Clang ≥ 13, MSVC ≥ 2019** | Conforming C++17 compilers |
 | **CMake** | **≥ 3.20** | Modern target export and `FetchContent` syntax |
 | **Armadillo** | **≥ 11.4.0** | High-performance matrix mathematics |
-| **GSL** | **≥ 2.6** | GNU Scientific Library random number generators |
+| **GSL** *(optional)* | **≥ 2.6** | GNU Scientific Library (only needed for legacy RFL code) |
 | **BLAS / LAPACK** | **OpenBLAS / Accelerate / MKL** | Linear algebra backend for Armadillo |
 
 ---
@@ -128,10 +129,10 @@ To contribute to RFL or build the C++ library locally:
 
 ### 1. Install Dependencies
 
-* **macOS:** `brew install cmake gsl armadillo openblas`
-* **Ubuntu / Debian:** `sudo apt-get install cmake libgsl-dev libarmadillo-dev libopenblas-dev`
-* **Windows:** `vcpkg install gsl:x64-windows openblas:x64-windows armadillo:x64-windows`
-* **Other platforms:** Follow installation instructions provided by CMake, GSL, and Armadillo.
+* **macOS:** `brew install cmake armadillo openblas` *(optional: `gsl` for legacy code)*
+* **Ubuntu / Debian:** `sudo apt-get install cmake libarmadillo-dev libopenblas-dev` *(optional: `libgsl-dev` for legacy code)*
+* **Windows:** `vcpkg install openblas:x64-windows armadillo:x64-windows` *(optional: `gsl:x64-windows` for legacy code)*
+* **Other platforms:** Follow installation instructions provided by CMake and Armadillo.
 
 ### 2. Build and Test
 
@@ -236,3 +237,10 @@ Random Finite NCGs are an active area of academic research in Quantum Gravity an
   doi = {10.1088/1751-8121/ab22f8}
 }
 ```
+
+---
+
+## License
+
+RFL is open-source software licensed under the [BSD-3-Clause License](LICENSE).  
+Copyright (c) 2023–2026, Paul Druce and Mauro D'Arcangelo. All rights reserved.

@@ -9,11 +9,11 @@ set(rfl_core_HEADERS
         BarrettGlaser/Metropolis.hpp
         Clifford.hpp
         DiracOperator.hpp
-        GslRng.hpp
         IAction.hpp
         IAlgorithm.hpp
         IRng.hpp
-        Simulation.hpp)
+        Simulation.hpp
+        StdRng.hpp)
 
 target_sources(
         rfl_core
@@ -27,7 +27,7 @@ target_sources(
         PUBLIC ${rfl_core_HEADERS})
 
 target_include_directories(rfl_core PUBLIC ${core_RFL_INCLUDE_DIR})
-target_link_libraries(rfl_core PUBLIC ${ARMADILLO_LIBRARIES} ${GSL_LIBRARIES})
+target_link_libraries(rfl_core PUBLIC ${ARMADILLO_LIBRARIES})
 target_compile_features(rfl_core PUBLIC cxx_std_17)
 
 if(MSVC)
