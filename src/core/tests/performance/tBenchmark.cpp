@@ -10,12 +10,12 @@
 #include <gsl/gsl_rng.h>
 #include <iostream>
 
-// New RFL implementation
+// Modern rfl_core implementation
 #include "BarrettGlaser/Action.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
-#include "GslRng.hpp"
 #include "Simulation.hpp"
+#include "StdRng.hpp"
 
 // Benchmark timing utilities
 #include <chrono>
@@ -30,7 +30,7 @@ constexpr int NUM_ITERATIONS = 5;
 constexpr double MAX_FRACTION_DIFF = 2.0;
 
 void NewMethod() {
-  auto rng = std::make_unique<GslRng>();
+  auto rng = std::make_unique<StdRng>();
   auto dirac = std::make_unique<DiracOperator>(P, Q, MATRIX_DIM);
   auto action = std::make_unique<Action>(G_2, 1.0);
   auto metropolis = std::make_unique<Metropolis>(std::move(action), SCALE, NUM_STEPS, std::move(rng));

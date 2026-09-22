@@ -165,7 +165,7 @@ def update_changelog_file(release_block: str, tag: str) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Draft release notes and update CHANGELOG.md")
-    parser.add_argument("--tag", type=str, default="v0.2.0", help="Target release tag (e.g. v0.2.0)")
+    parser.add_argument("--tag", type=str, default="v0.3.0", help="Target release tag (e.g. v0.3.0)")
     parser.add_argument("--previous-tag", type=str, default=None, help="Previous release tag (default: latest git tag)")
     parser.add_argument("--release-pr", type=int, default=None, help="Self-reference the release PR number in CHANGELOG.md")
     parser.add_argument("--date", type=str, default=None, help="Release date (default: today)")

@@ -6,7 +6,7 @@ REPO_ROOT ?= ../..
 
 INCLUDES = -I$(REPO_ROOT)/src/core
 LDFLAGS = -L$(REPO_ROOT)/build/src/core
-LDLIBS = -lrfl_core -larmadillo -lgsl -lgslcblas
+LDLIBS = -lrfl_core -larmadillo
 
 TARGET = main
 SRC = main.cpp

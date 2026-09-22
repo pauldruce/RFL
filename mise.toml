@@ -5,7 +5,7 @@ ccache = "latest"
 python = "3.12"
 uv = "latest"
 node = "lts"
-"aqua:mbroome/clang-format" = "16.0.6"
+"clang-format" = "16.0.6"
 "aqua:terrastruct/d2" = "0.8.2"
 
 [tasks.build]
@@ -51,6 +51,11 @@ run = "python3 scripts/check_d2_images.py --fix"
 [tasks.lint]
 description = "Execute all linting checks (C++, spelling, links, D2)"
 depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2"]
+
+[tasks.pre-push]
+description = "Execute pre-push verification suite (linting and test suites)"
+depends = ["lint", "test"]
+
 
 [tasks.changelog-preview]
 description = "Preview release notes and changelog diff for upcoming release"

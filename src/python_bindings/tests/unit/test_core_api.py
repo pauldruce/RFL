@@ -32,10 +32,11 @@ def test_action():
     assert isinstance(s, float)
 
 
-def test_gsl_rng():
-    """Verify GSL random number generator initialisation."""
-    rng = rfl.GslRng(42)
+def test_std_rng():
+    """Verify standard C++ random number generator initialisation."""
+    rng = rfl.StdRng(42)
     assert rng is not None
+    assert 0.0 <= rng.get_uniform() < 1.0
 
 
 def test_metropolis():

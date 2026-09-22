@@ -28,7 +28,7 @@ echo "Compiling examples/cpp/main.cpp using ${CXX}..."
 ${CXX} -std=c++17 ${SAN_FLAGS} -O3 examples/cpp/main.cpp \
     -Isrc/core \
     -Lbuild/src/core \
-    -lrfl_core -larmadillo -lgsl -lgslcblas \
+    -lrfl_core -larmadillo \
     -o build/examples/cpp/main_gcc
 
 echo "Running build/examples/cpp/main_gcc..."

@@ -64,10 +64,10 @@ print(f"Min: {np.min(eigenvals):.4f}, Max: {np.max(eigenvals):.4f}, Mean: {np.me
 
 ## 2. Building & Testing C++ Core
 
-RFL requires `armadillo`, `gsl`, and `cmake`.
+RFL requires `armadillo` and `cmake` (GSL is optional for legacy code only).
 
 > [!TIP]
-> If Armadillo is not installed locally, CMake automatically downloads and builds it in-tree using `FetchContent`. You must install GSL with your system package manager (`sudo apt-get install libgsl-dev` on Debian/Ubuntu, `brew install gsl` on macOS).
+> If Armadillo is not installed locally, CMake automatically downloads and builds it in-tree using `FetchContent`. GSL is optional and only required if building historical legacy targets (`sudo apt-get install libgsl-dev` on Debian/Ubuntu, `brew install gsl` on macOS).
 
 ### Build & Run Tests
 From the root of the `RFL` repository:
@@ -105,6 +105,6 @@ target_link_libraries(my_simulation PRIVATE RFL::core)
    #include "DiracOperator.hpp"
    #include "BarrettGlaser/Metropolis.hpp"
    #include "BarrettGlaser/Action.hpp"
-   #include "GslRng.hpp"
+   #include "StdRng.hpp"
    ```
-2. Link against `librfl_core.a`, `armadillo`, and `gsl`.
+2. Link against `librfl_core.a` and `armadillo` (`gsl` is no longer required for `rfl_core`).

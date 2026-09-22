@@ -1,10 +1,24 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Pre-push Hook: Intercepts Git Tag pushes and validates CHANGELOG.md integrity
+# Pre-push Hook: Executes mise pre-push verification and checks release tags
 # ==============================================================================
 set -euo pipefail
 
-# Read standard input: <local_ref> <local_sha> <remote_ref> <remote_sha>
+# 1. Execute pre-push validation suite via mise
+if [ "${RFL_SKIP_PRE_PUSH:-0}" != "1" ]; then
+    echo "🚀 Running pre-push verification suite via mise..."
+    if command -v mise >/dev/null 2>&1; then
+        mise run pre-push
+    elif [ -x "$HOME/.local/bin/mise" ]; then
+        "$HOME/.local/bin/mise" run pre-push
+    else
+        echo "⚠️ mise not found in PATH; executing fallback test suite..."
+        ctest --test-dir build --output-on-failure
+        uv run --group test pytest src/python_bindings/tests
+    fi
+fi
+
+# 2. Read standard input: <local_ref> <local_sha> <remote_ref> <remote_sha>
 while read -r local_ref local_sha remote_ref remote_sha; do
     case "$remote_ref" in
         refs/tags/v*)

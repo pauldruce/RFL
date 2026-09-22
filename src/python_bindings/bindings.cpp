@@ -11,7 +11,7 @@
 #include "BarrettGlaser/Metropolis.hpp"
 #include "Clifford.hpp"
 #include "DiracOperator.hpp"
-#include "GslRng.hpp"
+#include "StdRng.hpp"
 
 #ifndef RFL_VERSION_STRING
 #define RFL_VERSION_STRING "0.0.0-devel"
@@ -42,13 +42,20 @@ PYBIND11_MODULE(_rfl, m) {
       .def("set_params", &Action::setParams)
       .def("calculate_s", &Action::calculateS);
 
-  py::class_<GslRng>(m, "GslRng")
-      .def(py::init<unsigned long>(), py::arg("seed"));
+  py::class_<StdRng>(m, "StdRng")
+      .def(py::init<>(), "Construct an unseeded StdRng engine.")
+      .def(py::init<uint64_t>(), py::arg("seed"), "Construct a seeded StdRng engine.")
+      .def("get_uniform", &StdRng::getUniform, "Draw uniform random number in [0, 1).")
+      .def("get_gaussian", &StdRng::getGaussian, py::arg("sigma"), "Draw Gaussian random variable.")
+      .def("get_uniform_int", &StdRng::getUniformInt, py::arg("min"), py::arg("max"), "Draw discrete uniform integer in [min, max].");
+
+  // Backwards compatibility alias for deprecated GslRng
+  m.attr("GslRng") = m.attr("StdRng");
 
   py::class_<Metropolis>(m, "Metropolis")
-      .def(py::init([](double g_2, double g_4, double scale, int num_steps, unsigned long seed) {
+      .def(py::init([](double g_2, double g_4, double scale, int num_steps, uint64_t seed) {
              auto action = std::make_unique<Action>(g_2, g_4);
-             auto rng = std::make_unique<GslRng>(seed);
+             auto rng = std::make_unique<StdRng>(seed);
              return std::make_unique<Metropolis>(std::move(action), scale, num_steps, std::move(rng));
            }),
            py::arg("g_2"), py::arg("g_4"), py::arg("scale"), py::arg("num_steps"), py::arg("seed"))

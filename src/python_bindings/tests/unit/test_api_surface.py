@@ -11,6 +11,7 @@ EXPECTED_PUBLIC_SYMBOLS = {
     "GslRng",
     "IDiracOperator",
     "Metropolis",
+    "StdRng",
     "__version__",
     "get_max_clifford_mode",
     "set_max_clifford_mode",
@@ -90,13 +91,35 @@ def test_action_surface():
     assert isinstance(value, float)
 
 
-def test_gsl_rng_surface():
-    """Verify GslRng constructor signature and initialisation."""
-    doc = rfl.GslRng.__init__.__doc__ or ""
+def test_std_rng_surface():
+    """Verify StdRng and alias GslRng constructor signatures and sampling methods."""
+    doc = rfl.StdRng.__init__.__doc__ or ""
     assert "seed: int" in doc
 
-    rng = rfl.GslRng(seed=12345)
+    # Seeded instantiation
+    rng = rfl.StdRng(seed=12345)
     assert rng is not None
+
+    # Unseeded instantiation
+    unseeded = rfl.StdRng()
+    assert unseeded is not None
+
+    # Sampling method checks
+    u = rng.get_uniform()
+    assert isinstance(u, float)
+    assert 0.0 <= u < 1.0
+
+    g = rng.get_gaussian(sigma=1.0)
+    assert isinstance(g, float)
+
+    k = rng.get_uniform_int(min=1, max=10)
+    assert isinstance(k, int)
+    assert 1 <= k <= 10
+
+    # Backwards compatibility alias check
+    assert rfl.GslRng is rfl.StdRng
+    compat_rng = rfl.GslRng(seed=42)
+    assert compat_rng is not None
 
 
 def test_metropolis_surface():

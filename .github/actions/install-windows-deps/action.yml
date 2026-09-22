@@ -6,6 +6,10 @@ inputs:
     description: 'Install Armadillo via vcpkg'
     required: false
     default: 'false'
+  install-gsl:
+    description: 'Install GSL via vcpkg for legacy support'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -37,9 +41,12 @@ runs:
     - name: Install dependencies via vcpkg
       shell: pwsh
       run: |
-        $packages = @("gsl:x64-windows", "openblas:x64-windows", "lapack-reference:x64-windows")
+        $packages = @("openblas:x64-windows", "lapack-reference:x64-windows")
         if ("${{ inputs.install-armadillo }}" -eq "true") {
           $packages += "armadillo:x64-windows"
+        }
+        if ("${{ inputs.install-gsl }}" -eq "true") {
+          $packages += "gsl:x64-windows"
         }
         & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install @packages
         $binPath = Join-Path $env:VCPKG_INSTALLATION_ROOT "installed\x64-windows\bin"
