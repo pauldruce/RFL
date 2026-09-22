@@ -18,22 +18,6 @@ keywords:
   - "quantum gravity"
   - "fuzzy spaces"
   - "spectral triples"
-preferred-citation:
-  type: article
-  authors:
-    - family-names: "Barrett"
-      given-names: "John W."
-    - family-names: "Druce"
-      given-names: "Paul"
-    - family-names: "Glaser"
-      given-names: "Lisa"
-  title: "Spectral estimators for finite non-commutative geometries"
-  journal: "Journal of Physics A: Mathematical and Theoretical"
-  volume: 52
-  issue: 27
-  year: 2019
-  start: 275203
-  doi: "10.1088/1751-8121/ab22f8"
 references:
   - type: article
     authors:
@@ -48,3 +32,27 @@ references:
     year: 2016
     start: 245001
     doi: "10.1088/1751-8113/49/24/245001"
+  - type: article
+    authors:
+      - family-names: "Barrett"
+        given-names: "John W."
+      - family-names: "Druce"
+        given-names: "Paul"
+      - family-names: "Glaser"
+        given-names: "Lisa"
+    title: "Spectral estimators for finite non-commutative geometries"
+    journal: "Journal of Physics A: Mathematical and Theoretical"
+    volume: 52
+    issue: 27
+    year: 2019
+    start: 275203
+    doi: "10.1088/1751-8121/ab22f8"
+  - type: thesis
+    authors:
+      - family-names: "D'Arcangelo"
+        given-names: "Mauro"
+    title: "Random Noncommutative Geometries and Finite Spectral Triples"
+    thesis-type: "PhD thesis"
+    institution:
+      name: "University of Nottingham"
+    year: 2021
