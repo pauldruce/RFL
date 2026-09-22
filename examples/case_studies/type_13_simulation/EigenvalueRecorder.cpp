@@ -51,7 +51,7 @@ static std::string create_eigenvalues_dir(const diracData& data, const std::stri
   ss << "eigenvalues_" << data.p << "_" << data.q << "_N_" << data.matrixSize << "/";
   auto eigenvalues_folder = outputDirectoryPath + ss.str();
   if (!fs::exists(eigenvalues_folder)) {
-    fs::create_directory(eigenvalues_folder);
+    fs::create_directories(eigenvalues_folder);
   }
   return eigenvalues_folder;
 }
@@ -62,7 +62,7 @@ static std::string create_output_dir(const diracData& data, const std::string& o
   // Create output directory if needed.
   const auto output_path = outputRootPath + "/output/";
   if (!fs::exists(output_path)) {
-    fs::create_directory(output_path);
+    fs::create_directories(output_path);
   }
 
   // Create geometry type directory if needed.
@@ -71,7 +71,7 @@ static std::string create_output_dir(const diracData& data, const std::string& o
   ss << output_path << "Type" << data.p << data.q << "/";
   const std::string diracTypeDir = ss.str();
   if (!fs::exists(diracTypeDir)) {
-    fs::create_directory(diracTypeDir);
+    fs::create_directories(diracTypeDir);
   }
   return ss.str();
 }
@@ -90,10 +90,10 @@ void EigenvalueRecorder::recordEigenvalues(int diracId) const {
   auto outputRootPathEnv = std::getenv("RFL_OUTPUT_DIR");
   std::string outputRootPath = outputRootPathEnv ? outputRootPathEnv : "";
   if (outputRootPath.empty()) {
-    outputRootPath = "/tmp/RFL";
+    outputRootPath = (fs::temp_directory_path() / "RFL").string();
   }
   if (!fs::exists(outputRootPath)) {
-    fs::create_directory(outputRootPath);
+    fs::create_directories(outputRootPath);
   }
   auto outputDirectoryPath = create_output_dir(data, outputRootPath);
   auto eigenvaluesOutputPath = create_eigenvalues_dir(data, outputDirectoryPath);

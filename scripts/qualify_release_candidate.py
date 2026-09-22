@@ -14,6 +14,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tag_resolver import resolve_latest_tag
+
 
 def run_cmd(cmd: list[str], cwd: Path | None = None, env: dict[str, str] | None = None) -> tuple[int, str, str]:
     """Runs a shell command and returns returncode, stdout, and stderr."""
@@ -189,22 +192,6 @@ def qualify_examples() -> tuple[bool, str]:
     return True, "All example workflows (CMake, Makefile, direct compiler) passed."
 
 
-def get_latest_git_tag() -> str | None:
-    """Returns the most recent Git release tag."""
-    try:
-        res = subprocess.run(
-            ["git", "tag", "--sort=-v:refname", "--list", "v[0-9]*"],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        tags = [t.strip() for t in res.stdout.splitlines() if t.strip()]
-        return tags[0] if tags else None
-    except Exception:
-        return None
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description="Pre-Release Qualification Test Suite for RFL")
     parser.add_argument(
@@ -245,7 +232,7 @@ def main() -> int:
     )
 
     args = parser.parse_args()
-    tag = args.tag or get_latest_git_tag()
+    tag = args.tag or resolve_latest_tag()
     if not tag:
         print("❌ Error: No release tag specified or found in Git history.", file=sys.stderr)
         return 1
