@@ -2,7 +2,10 @@
 // Created by Paul Druce on 09/12/2022.
 //
 #include "Geom24.hpp"
+#include <cstdlib>
 #include <ctime>
+#include <filesystem>
+#include <fstream>
 #include <gsl/gsl_rng.h>
 #include <iostream>
 
@@ -16,9 +19,16 @@ int main() {
 
   Geom24 G(2, 0, 10, -2.7);
 
+  // Determine output directory from environment or default to current directory.
+  const char* out_env = std::getenv("RFL_OUTPUT_DIR");
+  std::filesystem::path out_dir = (out_env && *out_env) ? std::filesystem::path(out_env) : std::filesystem::current_path();
+  if (!std::filesystem::exists(out_dir)) {
+    std::filesystem::create_directories(out_dir);
+  }
+
   // Open output files.
-  ofstream out_S("example_S.txt");
-  ofstream out_HL("example_HL.txt");
+  ofstream out_S(out_dir / "example_S.txt");
+  ofstream out_HL(out_dir / "example_HL.txt");
 
   // Tune step scale with dual-averaging.
   double tgt = 0.8; // Target acceptance rate.

@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Codebase Cleanliness & Modern Tooling:** Fixed header guard collisions, removed dead commented legacy tests, and repaired verification scripts ([#75](https://github.com/pauldruce/RFL/pull/75)).
 
 ### 🚀 Features & Enhancements
-* refactor(core): replace GSL with standard C++ random engine and adopt BSD-3-Clause licence ([#67](https://github.com/pauldruce/RFL/issues/67))
+* refactor(core): replace GSL with standard C++ random engine and adopt BSD-3-Clause licence ([#67](https://github.com/pauldruce/RFL/issues/67)) by @pauldruce in [#77](https://github.com/pauldruce/RFL/pull/77)
 * test(api): establish compile-time C++ contract tests and Python API surface assurance by @pauldruce in [#74](https://github.com/pauldruce/RFL/pull/74)
 
 ### 🐛 Bug Fixes
@@ -80,3 +80,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Restructured codebase into `src/RFL/core` (`RFL::core`) and `src/RFL/legacy` (`RFL::legacy`).
 * Established the Enhancement Proposal (EP) framework with EP-1 and EP-2.
 * Standardised technical documentation and C++ docstrings using ASD-STE100 and British English.
+
+[v0.3.0]: https://github.com/pauldruce/RFL/compare/v0.2.0...HEAD
+[v0.2.0]: https://github.com/pauldruce/RFL/compare/v0.1.0...v0.2.0
+[v0.1.0]: https://github.com/pauldruce/RFL/releases/tag/v0.1.0

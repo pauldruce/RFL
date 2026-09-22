@@ -14,25 +14,8 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 
-
-def get_latest_git_tag(include_prereleases: bool = False) -> str | None:
-    """Returns the most recent Git release tag (defaulting to stable tags)."""
-    try:
-        res = subprocess.run(
-            ["git", "tag", "--sort=-v:refname", "--list", "v[0-9]*"],
-            cwd=REPO_ROOT,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        tags = [t.strip() for t in res.stdout.splitlines() if t.strip()]
-        if not include_prereleases:
-            stable_tags = [t for t in tags if re.match(r"^v[0-9]+\.[0-9]+\.[0-9]+$", t)]
-            if stable_tags:
-                return stable_tags[0]
-        return tags[0] if tags else None
-    except Exception:
-        return None
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from tag_resolver import resolve_latest_stable_tag
 
 
 def fetch_github_generated_notes(tag: str, previous_tag: str | None) -> str | None:
@@ -175,7 +158,7 @@ def main() -> int:
     args = parser.parse_args()
 
     tag = args.tag
-    previous_tag = args.previous_tag or get_latest_git_tag()
+    previous_tag = args.previous_tag or resolve_latest_stable_tag()
     release_date = args.date or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
 
     # Fetch notes
