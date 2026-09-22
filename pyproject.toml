@@ -28,7 +28,7 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest", "packaging"]
+test = ["pytest>=7.0", "packaging"]
 dev = ["jupyter", "nbformat"]
 
 [dependency-groups]

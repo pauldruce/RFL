@@ -10,7 +10,7 @@
 #include <gsl/gsl_rng.h>
 #include <iostream>
 
-// New RFL implementation
+// Modern rfl_core implementation
 #include "BarrettGlaser/Action.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"

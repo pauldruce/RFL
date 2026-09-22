@@ -79,14 +79,12 @@ private:
                  const int& column_index,
                  const arma::cx_double& z) const;
 
-  // TODO: Move to DiracOperator or make static.
   static double delta2(const IDiracOperator& dirac,
                        const int& x,
                        const int& row_index,
                        const int& column_index,
                        const arma::cx_double& z);
 
-  // TODO: Move to DiracOperator or make static.
   static double delta4(const IDiracOperator& dirac,
                        const int& x,
                        const int& row_index,

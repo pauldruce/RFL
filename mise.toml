@@ -52,6 +52,11 @@ run = "python3 scripts/check_d2_images.py --fix"
 description = "Execute all linting checks (C++, spelling, links, D2)"
 depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2"]
 
+[tasks.pre-push]
+description = "Execute pre-push verification suite (linting and test suites)"
+depends = ["lint", "test"]
+
+
 [tasks.changelog-preview]
 description = "Preview release notes and changelog diff for upcoming release"
 run = "python3 scripts/draft_changelog.py --preview"

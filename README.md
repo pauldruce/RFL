@@ -157,6 +157,15 @@ To inspect all available build targets:
 cmake --build build --target help
 ```
 
+### 4. Developer Automation with Mise
+
+RFL provides task automation using [mise](https://mise.jdx.dev/):
+
+* `mise run build` - Configure and build all C++ targets
+* `mise run test` - Execute both C++ (CTest) and Python (pytest) test suites
+* `mise run lint` - Execute code formatting, spell checking, markdown links, and D2 diagram validation
+* `mise run pre-push` - Execute complete pre-push verification suite (linting and test suites)
+
 ---
 
 ## Development & Feature Request Workflow
