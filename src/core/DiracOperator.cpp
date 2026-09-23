@@ -38,7 +38,7 @@ DiracOperator::DiracOperator(int p, int q, int dim)
     anti.emplace_back(cx_double(0, 1) * gamma[p + i]);
   }
 
-  int count = (int)pow(2, n);
+  const int count = 1 << n;
   // The outer loop runs 2^n times for all possible subsets.
   // Variable i acts as a binary counter.
   for (int i = 0; i < count; i++) {
@@ -53,7 +53,7 @@ DiracOperator::DiracOperator(int p, int q, int dim)
     }
 
     // Calculate and store the product for odd numbers of gamma matrices.
-    int k = (int)vec.size();
+    const int k = static_cast<int>(vec.size());
     if (k % 2 && k != 1) {
       vector<int>::const_iterator begin(vec.begin());
       cx_mat mat = gamma.at(*begin);
@@ -74,8 +74,8 @@ DiracOperator::DiracOperator(int p, int q, int dim)
     }
   }
 
-  this->m_num_herm = (int)herm.size();
-  this->m_num_antiherm = (int)anti.size();
+  this->m_num_herm = static_cast<int>(herm.size());
+  this->m_num_antiherm = static_cast<int>(anti.size());
   this->m_num_matrices = m_num_herm + m_num_antiherm;
 
   this->m_omegas = std::make_unique<std::vector<cx_mat>>(m_num_matrices);
@@ -135,7 +135,7 @@ static vector<int> baseConversion(int dec, const int& base, const int& max) {
     dec /= base;
   }
 
-  for (int i = (int)rem.size(); i < max; i++)
+  for (int i = static_cast<int>(rem.size()); i < max; i++)
     rem.push_back(0);
 
   reverse(rem.begin(), rem.end());
@@ -185,7 +185,7 @@ vector<cx_mat> DiracOperator::getAntiHermitianMatrices() const {
 }
 
 void DiracOperator::printOmegaTable4() const {
-  const int n = (int)pow(m_num_matrices, 4);
+  const int n = m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices;
 
   for (int i = 0; i < n; ++i) {
     cx_double z = (*m_omega_table_4)[i];

@@ -60,7 +60,7 @@ public:
    * @param max Upper bound (inclusive).
    * @return Uniform random integer in [min, max].
    */
-  uint64_t getUniformInt(const uint64_t min, const uint64_t max) const {
+  uint64_t getUniformInt(const uint64_t min, const uint64_t max) const override {
     std::uniform_int_distribution<uint64_t> dist(min, max);
     return dist(m_engine);
   }

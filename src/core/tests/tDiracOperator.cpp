@@ -109,8 +109,8 @@ TEST(DiracOperatorTests, GetEigenvalues) {
     eigenvalues = arma::sort(eigenvalues);
     expected_eigenvalues = arma::sort(expected_eigenvalues);
 
-    for (unsigned i = 0; i < (unsigned)eigenvalues.n_elem; i++) {
-      EXPECT_FLOAT_EQ(eigenvalues[i], expected_eigenvalues[i]);
+    for (arma::uword i = 0; i < eigenvalues.n_elem; ++i) {
+      EXPECT_DOUBLE_EQ(eigenvalues[i], expected_eigenvalues[i]);
     }
   }
 }

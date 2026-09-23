@@ -34,6 +34,12 @@ static_assert(std::has_virtual_destructor_v<IAlgorithm>, "IAlgorithm must define
 
 static_assert(std::is_abstract_v<IRng>, "IRng must be an abstract base interface.");
 static_assert(std::has_virtual_destructor_v<IRng>, "IRng must define a virtual destructor.");
+static_assert(std::is_same_v<decltype(&IRng::getGaussian), double (IRng::*)(double) const>,
+              "IRng::getGaussian must accept sigma, return double, and be const.");
+static_assert(std::is_same_v<decltype(&IRng::getUniform), double (IRng::*)() const>,
+              "IRng::getUniform must return double and be const.");
+static_assert(std::is_same_v<decltype(&IRng::getUniformInt), uint64_t (IRng::*)(uint64_t, uint64_t) const>,
+              "IRng::getUniformInt must accept (min, max), return uint64_t, and be const.");
 
 // ============================================================================
 // DiracOperator Contract Assertions
