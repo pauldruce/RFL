@@ -360,9 +360,9 @@ double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
   const auto mat_dim = dirac.getMatrixDimension();
 
   // Propose matrix element update.
-  const int x = (int)(num_matrices * m_rng->getUniform());
-  const int row_index = (int)(mat_dim * m_rng->getUniform());
-  const int column_index = (int)(mat_dim * m_rng->getUniform());
+  const int x = static_cast<int>(m_rng->getUniformInt(0, num_matrices - 1));
+  const int row_index = static_cast<int>(m_rng->getUniformInt(0, mat_dim - 1));
+  const int column_index = static_cast<int>(m_rng->getUniformInt(0, mat_dim - 1));
 
   double re = 0;
   cx_double z;
@@ -432,9 +432,9 @@ double Metropolis::runCore(const IDiracOperator& dirac,
   const auto mat_dim = dirac.getMatrixDimension();
 
   // Propose matrix element update.
-  const int x = (int)(num_matrices * m_rng->getUniform());
-  const int row_index = (int)(mat_dim * m_rng->getUniform());
-  const int column_index = (int)(mat_dim * m_rng->getUniform());
+  const int x = static_cast<int>(m_rng->getUniformInt(0, num_matrices - 1));
+  const int row_index = static_cast<int>(m_rng->getUniformInt(0, mat_dim - 1));
+  const int column_index = static_cast<int>(m_rng->getUniformInt(0, mat_dim - 1));
   double re = 0;
   cx_double z;
   if (row_index != column_index) {

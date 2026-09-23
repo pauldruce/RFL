@@ -2,7 +2,7 @@
 
 > [!IMPORTANT]
 > **Active Milestone:** `v0.3.0` (Core Modernisation & Scientific Verification)  
-> **Current Focus:** `Phase 0: Pre-flight & Baseline Assurance`  
+> **Current Focus:** `Phase 1: Core Mathematical Foundation`  
 > **Milestone Tracker:** [Issue #71](https://github.com/pauldruce/RFL/issues/71) | [GitHub Project Board](https://github.com/users/pauldruce/projects/1)
 
 This document defines the release roadmap, execution order, and component dependencies for the Random Fuzzy Library (RFL).
@@ -60,8 +60,8 @@ Phase 5: Documentation, Profiling & Release Qualification
 
 | Phase | Component | Issues & Deliverables | Dependencies | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 0** | **Pre-flight & Quality Assurance** | • [#62](https://github.com/pauldruce/RFL/issues/62): Fix Windows parallel DLL file collisions<br/>• [#56](https://github.com/pauldruce/RFL/issues/56): Compile-time C++ contract and Python API surface tests<br/>• [#67](https://github.com/pauldruce/RFL/issues/67): Implement `StdRng`, remove GSL, add BSD-3-Clause `LICENSE` & `CITATION.cff`<br/>• [#49](https://github.com/pauldruce/RFL/issues/49): Address MSVC conversion warnings and uniform discrete sampling | None | 🔄 In Progress |
-| **Phase 1** | **Core Mathematical Foundation** | • [#46](https://github.com/pauldruce/RFL/issues/46): Optimise `DiracOperator` omega table initialisation<br/>• [#12](https://github.com/pauldruce/RFL/issues/12): Refactor `DiracOperator` into regular value type with strict `const` correctness<br/>• [#14](https://github.com/pauldruce/RFL/issues/14): Extract analytic trace variations into `BarrettGlaserAction`<br/>• Port `src/core/tests/tDelta.cpp` unit tests | Phase 0 | ⏳ Scheduled |
+| **Phase 0** | **Pre-flight & Quality Assurance** | • [#62](https://github.com/pauldruce/RFL/issues/62): Fix Windows parallel DLL file collisions<br/>• [#56](https://github.com/pauldruce/RFL/issues/56): Compile-time C++ contract and Python API surface tests<br/>• [#67](https://github.com/pauldruce/RFL/issues/67): Implement `StdRng`, remove GSL, add BSD-3-Clause `LICENSE` & `CITATION.cff`<br/>• [#49](https://github.com/pauldruce/RFL/issues/49): Address MSVC conversion warnings and uniform discrete sampling | None | ✅ Completed |
+| **Phase 1** | **Core Mathematical Foundation** | • [#46](https://github.com/pauldruce/RFL/issues/46): Optimise `DiracOperator` omega table initialisation<br/>• [#12](https://github.com/pauldruce/RFL/issues/12): Refactor `DiracOperator` into regular value type with strict `const` correctness<br/>• [#14](https://github.com/pauldruce/RFL/issues/14): Extract analytic trace variations into `BarrettGlaserAction`<br/>• Port `src/core/tests/tDelta.cpp` unit tests | Phase 0 | 🔄 In Progress |
 | **Phase 2** | **Sampler Decoupling & Stepper API** | • [#59](https://github.com/pauldruce/RFL/issues/59): Eliminate raw pointer members in `Metropolis` and `Hamiltonian`<br/>• [#13](https://github.com/pauldruce/RFL/issues/13): Implement `MetropolisSampler` stepper, `ISimulationObserver`, and dual-averaging step calibration | Phase 1 | ⏳ Scheduled |
 | **Phase 3** | **Scientific Verification Suite** | • [#69](https://github.com/pauldruce/RFL/issues/69): Implement EP-4 Phase 1 test suite (Hermiticity, 8-fold KO table, chirality, Haar gauge invariance, finite differences, Gaussian limit moments, CI tiers) | Phase 2 | ⏳ Scheduled |
 | **Phase 4** | **Build & Package Distribution** | • [#60](https://github.com/pauldruce/RFL/issues/60): Migrate headers to canonical `include/rfl/` structure<br/>• [#70](https://github.com/pauldruce/RFL/issues/70): Modularise CMake targets and add Precompiled Headers<br/>• [#3](https://github.com/pauldruce/RFL/issues/3): CMake `install()` rules, `RFLConfig.cmake`, and CPack binary packaging | Phase 1 | ⏳ Scheduled |
