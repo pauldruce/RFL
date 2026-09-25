@@ -4,6 +4,8 @@
 
 #include "../DiracOperator.hpp"
 #include <gtest/gtest.h>
+#include <thread>
+#include <vector>
 
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
   for (int p = 0; p < 5; p++) {
@@ -177,5 +179,75 @@ TEST(DiracOperatorTests, GetAntiHermitianMatricesReturnsAntiHermitianMatrices) {
       EXPECT_TRUE(!matrix.is_hermitian())
           << "For Dirac operator parameters (p,q)=(" << p << "," << q << ") dim=" << dim;
     }
+  }
+}
+
+TEST(DiracOperatorTests, OmegaTable4LazyInitialisationAndCyclicity) {
+  const DiracOperator dirac(1, 2, 4);
+  const int n_mat = dirac.getNumMatrices();
+  const size_t expected_size = static_cast<size_t>(n_mat * n_mat * n_mat * n_mat);
+
+  // Lazy retrieval initializes the table on demand.
+  const auto& table1 = dirac.getOmegaTable4();
+  EXPECT_EQ(table1.size(), expected_size);
+
+  // Subsequent call returns the identical cached container instance.
+  const auto& table2 = dirac.getOmegaTable4();
+  EXPECT_EQ(&table1, &table2);
+
+  // Cyclic trace invariance: Tr(A * B * C * D) == Tr(D * A * B * C) for all matrix indices.
+  for (int i = 0; i < n_mat; ++i) {
+    for (int j = 0; j < n_mat; ++j) {
+      for (int k = 0; k < n_mat; ++k) {
+        for (int l = 0; l < n_mat; ++l) {
+          const auto index_canonical = l + n_mat * (k + n_mat * (j + n_mat * i));
+          const auto index_rotated = k + n_mat * (j + n_mat * (i + n_mat * l));
+          const auto diff = std::abs(table1[index_canonical] - table1[index_rotated]);
+          EXPECT_LT(diff, 1e-12)
+              << "Cyclic trace invariance failed at indices (" << i << "," << j << "," << k << "," << l << ")";
+        }
+      }
+    }
+  }
+}
+
+TEST(DiracOperatorTests, CopyConstructorPreservesLazyState) {
+  const DiracOperator uninitialised_dirac(1, 2, 4);
+  const DiracOperator copied_uninitialised = uninitialised_dirac;
+
+  // Verify copied uninitialised instance lazily populates on first request.
+  const auto& table_copied = copied_uninitialised.getOmegaTable4();
+  EXPECT_EQ(table_copied.size(), 4 * 4 * 4 * 4);
+
+  // Verify copy from an already initialised DiracOperator carries populated table.
+  const DiracOperator copied_initialised = copied_uninitialised;
+  const auto& table_from_initialised = copied_initialised.getOmegaTable4();
+  EXPECT_EQ(table_from_initialised.size(), 4 * 4 * 4 * 4);
+  EXPECT_EQ(table_from_initialised, table_copied);
+}
+
+TEST(DiracOperatorTests, ConcurrentLazyInitialisationIsThreadSafe) {
+  const DiracOperator dirac(1, 2, 4);
+  constexpr int num_threads = 8;
+  std::vector<std::thread> threads;
+  threads.reserve(num_threads);
+
+  std::vector<const std::vector<arma::cx_double>*> results(num_threads, nullptr);
+
+  for (int i = 0; i < num_threads; ++i) {
+    threads.emplace_back([&dirac, &results, i]() {
+      results[i] = &dirac.getOmegaTable4();
+    });
+  }
+
+  for (auto& t : threads) {
+    t.join();
+  }
+
+  const size_t expected_size = 4 * 4 * 4 * 4;
+  for (int i = 0; i < num_threads; ++i) {
+    ASSERT_NE(results[i], nullptr);
+    EXPECT_EQ(results[i]->size(), expected_size);
+    EXPECT_EQ(results[i], results[0]);
   }
 }
