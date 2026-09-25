@@ -156,7 +156,12 @@ public:
   /**
    * Returns a reference to the four-product table of omega matrices.
    */
-  std::vector<arma::cx_double>& getOmegaTable4() const override { return *m_omega_table_4; }
+  std::vector<arma::cx_double>& getOmegaTable4() const override {
+    if (!m_omega_table_4) {
+      initOmegaTable4();
+    }
+    return *m_omega_table_4;
+  }
 
   /**
    * Prints the four-product table of omega matrices to standard output.
@@ -187,10 +192,10 @@ private:
   std::unique_ptr<std::vector<arma::cx_mat>> m_omegas;
   // Sign vector: +1 for Hermitian (H), -1 for anti-Hermitian (L).
   std::unique_ptr<std::vector<int>> m_epsilons;
-  // Four-product table for omega matrices.
-  std::unique_ptr<std::vector<arma::cx_double>> m_omega_table_4{};
+  // Four-product table for omega matrices (lazily initialised on demand).
+  mutable std::unique_ptr<std::vector<arma::cx_double>> m_omega_table_4{};
 
-  void initOmegaTable4();
+  void initOmegaTable4() const;
   double computeA4(const int& i_1, const int& i_2, const int& i_3, const int& i_4) const;
   double computeA2(const int& i_1, const int& i_2) const;
   double computeA(const int& i) const;

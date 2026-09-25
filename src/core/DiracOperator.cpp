@@ -86,8 +86,6 @@ DiracOperator::DiracOperator(int p, int q, int dim)
     (*m_omegas)[m_num_herm + i] = anti[i];
   }
 
-  initOmegaTable4();
-
   // Allocate and initialise H and L matrices to identity.
   m_matrices = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
   m_momenta = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
@@ -108,7 +106,7 @@ DiracOperator::DiracOperator(const DiracOperator& original)
     : m_clifford(original.m_clifford) {
   // Copy all state from the original DiracOperator.
   this->m_dim = original.m_dim;
-  this->m_num_matrices = original.m_num_herm;
+  this->m_num_matrices = original.m_num_matrices;
   this->m_num_herm = original.m_num_herm;
   this->m_num_antiherm = original.m_num_antiherm;
   this->m_gamma_dim = original.m_gamma_dim;
@@ -116,7 +114,11 @@ DiracOperator::DiracOperator(const DiracOperator& original)
   this->m_momenta = std::make_unique<std::vector<arma::cx_mat>>(*original.m_momenta);
   this->m_omegas = std::make_unique<std::vector<cx_mat>>(*original.m_omegas);
   this->m_epsilons = std::make_unique<std::vector<int>>(*original.m_epsilons);
-  this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
+  if (original.m_omega_table_4) {
+    this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
+  } else {
+    this->m_omega_table_4 = nullptr;
+  }
 }
 
 /**
@@ -185,6 +187,9 @@ vector<cx_mat> DiracOperator::getAntiHermitianMatrices() const {
 }
 
 void DiracOperator::printOmegaTable4() const {
+  if (!m_omega_table_4) {
+    initOmegaTable4();
+  }
   const int n = m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices;
 
   for (int i = 0; i < n; ++i) {
@@ -206,18 +211,30 @@ void DiracOperator::printOmegaTable4() const {
   }
 }
 
-void DiracOperator::initOmegaTable4() {
-  this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices);
+void DiracOperator::initOmegaTable4() const {
+  if (m_omega_table_4) {
+    return;
+  }
+
+  const int total_entries = m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices;
+  auto table = std::make_unique<std::vector<cx_double>>(total_entries);
 
   for (int i = 0; i < m_num_matrices; ++i) {
+    const auto& omega_i = (*m_omegas)[i];
     for (int j = 0; j < m_num_matrices; ++j) {
+      const cx_mat omega_ij = omega_i * (*m_omegas)[j];
+      const int base_j = m_num_matrices * (j + m_num_matrices * i);
       for (int k = 0; k < m_num_matrices; ++k) {
-        for (int l = 0; l < m_num_matrices; ++l)
-          (*m_omega_table_4)[l + m_num_matrices * (k + m_num_matrices * (j + m_num_matrices * i))] = trace(
-              (*m_omegas)[i] * (*m_omegas)[j] * (*m_omegas)[k] * (*m_omegas)[l]);
+        const cx_mat omega_ijk = omega_ij * (*m_omegas)[k];
+        const int base_k = m_num_matrices * (k + base_j);
+        for (int l = 0; l < m_num_matrices; ++l) {
+          (*table)[l + base_k] = trace(omega_ijk * (*m_omegas)[l]);
+        }
       }
     }
   }
+
+  this->m_omega_table_4 = std::move(table);
 }
 
 cx_mat DiracOperator::derDirac24(const int& k, const bool& herm, const double g_2) const {
