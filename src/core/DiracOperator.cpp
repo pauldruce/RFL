@@ -116,6 +116,7 @@ DiracOperator::DiracOperator(const DiracOperator& original)
   this->m_epsilons = std::make_unique<std::vector<int>>(*original.m_epsilons);
   if (original.m_omega_table_4) {
     this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
+    std::call_once(this->m_omega_table_flag, []() {});
   } else {
     this->m_omega_table_4 = nullptr;
   }
@@ -187,9 +188,7 @@ vector<cx_mat> DiracOperator::getAntiHermitianMatrices() const {
 }
 
 void DiracOperator::printOmegaTable4() const {
-  if (!m_omega_table_4) {
-    initOmegaTable4();
-  }
+  std::call_once(m_omega_table_flag, [this]() { initOmegaTable4(); });
   const int n = m_num_matrices * m_num_matrices * m_num_matrices * m_num_matrices;
 
   for (int i = 0; i < n; ++i) {

@@ -4,6 +4,8 @@
 
 #include "../DiracOperator.hpp"
 #include <gtest/gtest.h>
+#include <thread>
+#include <vector>
 
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
   for (int p = 0; p < 5; p++) {
@@ -222,4 +224,30 @@ TEST(DiracOperatorTests, CopyConstructorPreservesLazyState) {
   const auto& table_from_initialised = copied_initialised.getOmegaTable4();
   EXPECT_EQ(table_from_initialised.size(), 4 * 4 * 4 * 4);
   EXPECT_EQ(table_from_initialised, table_copied);
+}
+
+TEST(DiracOperatorTests, ConcurrentLazyInitialisationIsThreadSafe) {
+  const DiracOperator dirac(1, 2, 4);
+  constexpr int num_threads = 8;
+  std::vector<std::thread> threads;
+  threads.reserve(num_threads);
+
+  std::vector<const std::vector<arma::cx_double>*> results(num_threads, nullptr);
+
+  for (int i = 0; i < num_threads; ++i) {
+    threads.emplace_back([&dirac, &results, i]() {
+      results[i] = &dirac.getOmegaTable4();
+    });
+  }
+
+  for (auto& t : threads) {
+    t.join();
+  }
+
+  const size_t expected_size = 4 * 4 * 4 * 4;
+  for (int i = 0; i < num_threads; ++i) {
+    ASSERT_NE(results[i], nullptr);
+    EXPECT_EQ(results[i]->size(), expected_size);
+    EXPECT_EQ(results[i], results[0]);
+  }
 }

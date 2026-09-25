@@ -10,6 +10,7 @@
 #include "IRng.hpp"
 #include <armadillo>
 #include <memory>
+#include <mutex>
 
 /**
  * @class DiracOperator
@@ -157,9 +158,7 @@ public:
    * Returns a reference to the four-product table of omega matrices.
    */
   std::vector<arma::cx_double>& getOmegaTable4() const override {
-    if (!m_omega_table_4) {
-      initOmegaTable4();
-    }
+    std::call_once(m_omega_table_flag, [this]() { initOmegaTable4(); });
     return *m_omega_table_4;
   }
 
@@ -194,6 +193,8 @@ private:
   std::unique_ptr<std::vector<int>> m_epsilons;
   // Four-product table for omega matrices (lazily initialised on demand).
   mutable std::unique_ptr<std::vector<arma::cx_double>> m_omega_table_4{};
+  // Flag ensuring thread-safe lazy initialisation of m_omega_table_4.
+  mutable std::once_flag m_omega_table_flag{};
 
   void initOmegaTable4() const;
   double computeA4(const int& i_1, const int& i_2, const int& i_3, const int& i_4) const;
