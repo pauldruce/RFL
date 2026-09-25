@@ -38,6 +38,34 @@ public:
   DiracOperator(const DiracOperator& original);
 
   /**
+   * Move constructor for DiracOperator.
+   *
+   * @param other DiracOperator object to move.
+   */
+  DiracOperator(DiracOperator&& other) noexcept;
+
+  /**
+   * Copy assignment operator for DiracOperator.
+   *
+   * @param original DiracOperator object to copy.
+   * @return Reference to this DiracOperator.
+   */
+  DiracOperator& operator=(const DiracOperator& original);
+
+  /**
+   * Move assignment operator for DiracOperator.
+   *
+   * @param other DiracOperator object to move.
+   * @return Reference to this DiracOperator.
+   */
+  DiracOperator& operator=(DiracOperator&& other) noexcept;
+
+  /**
+   * Virtual destructor for DiracOperator.
+   */
+  ~DiracOperator() override = default;
+
+  /**
    * Returns the signature of the Dirac operator as a pair (p,q).
    *
    * @return std::pair<int,int> containing (p,q).
@@ -70,24 +98,49 @@ public:
   int getNumAntiHermitianMatrices() const override { return m_num_antiherm; };
 
   /**
-   * Returns a reference to the vector of H and L matrices.
+   * Returns a constant reference to the vector of H and L matrices.
    */
-  std::vector<arma::cx_mat>& getMatrices() const override { return *m_matrices; }
+  const std::vector<arma::cx_mat>& getMatrices() const override { return m_matrices; }
 
   /**
-   * Returns a reference to the vector of signs (+1 or -1).
+   * Returns a mutable reference to the vector of H and L matrices.
+   */
+  std::vector<arma::cx_mat>& getMatrices() override { return m_matrices; }
+
+  /**
+   * Returns a constant reference to a single matrix at the specified index.
+   */
+  const arma::cx_mat& getMatrix(size_t index) const { return m_matrices.at(index); }
+
+  /**
+   * Returns a mutable reference to a single matrix at the specified index.
+   */
+  arma::cx_mat& getMatrix(size_t index) { return m_matrices.at(index); }
+
+  /**
+   * Returns a constant reference to the vector of signs (+1 or -1).
    *
    * The sign matches the matrix at the same index in getMatrices().
    * A value of +1 indicates a Hermitian matrix (H).
    * A value of -1 indicates an anti-Hermitian matrix (L).
    */
-  std::vector<int>& getEpsilons() const override { return *m_epsilons; }
+  const std::vector<int>& getEpsilons() const override { return m_epsilons; }
 
   /**
-   * Returns a reference to the vector of conjugate momenta matrices.
+   * Returns a mutable reference to the vector of signs (+1 or -1).
+   */
+  std::vector<int>& getEpsilons() override { return m_epsilons; }
+
+  /**
+   * Returns a constant reference to the vector of conjugate momenta matrices.
    */
   // TODO: Move to Hamiltonian class or document usage.
-  std::vector<arma::cx_mat>& getMomenta() const override { return *m_momenta; }
+  const std::vector<arma::cx_mat>& getMomenta() const override { return m_momenta; }
+
+  /**
+   * Returns a mutable reference to the vector of conjugate momenta matrices.
+   */
+  std::vector<arma::cx_mat>& getMomenta() override { return m_momenta; }
 
   /**
    * Calculates the trace of the Dirac operator squared, \f$\text{Tr}(D^2)\f$.
@@ -155,9 +208,9 @@ public:
   arma::cx_mat derDirac4(const int& k, const bool& herm) const;
 
   /**
-   * Returns a reference to the four-product table of omega matrices.
+   * Returns a constant reference to the four-product table of omega matrices.
    */
-  std::vector<arma::cx_double>& getOmegaTable4() const override {
+  const std::vector<arma::cx_double>& getOmegaTable4() const override {
     initOmegaTable4();
     return *m_omega_table_4;
   }
@@ -172,7 +225,7 @@ public:
    *
    * @param rng Random number generator engine.
    */
-  void randomiseMatrices(const IRng& rng) const override;
+  void randomiseMatrices(const IRng& rng) override;
 
 private:
   // Matrix dimension of the H and L matrices.
@@ -184,13 +237,13 @@ private:
   // Dimension of gamma matrices.
   int m_gamma_dim;
   // Internal H and L matrices (all Hermitian representations).
-  std::unique_ptr<std::vector<arma::cx_mat>> m_matrices;
+  std::vector<arma::cx_mat> m_matrices;
   // Conjugate momenta matrices.
-  std::unique_ptr<std::vector<arma::cx_mat>> m_momenta;
+  std::vector<arma::cx_mat> m_momenta;
   // Omega matrices.
-  std::unique_ptr<std::vector<arma::cx_mat>> m_omegas;
+  std::vector<arma::cx_mat> m_omegas;
   // Sign vector: +1 for Hermitian (H), -1 for anti-Hermitian (L).
-  std::unique_ptr<std::vector<int>> m_epsilons;
+  std::vector<int> m_epsilons;
   // Four-product table for omega matrices (lazily initialised on demand).
   mutable std::unique_ptr<std::vector<arma::cx_double>> m_omega_table_4{};
   // Flag ensuring thread-safe lazy initialisation of m_omega_table_4.

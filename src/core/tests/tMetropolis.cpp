@@ -26,7 +26,7 @@ TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
 
   const Metropolis metropolis(std::move(action), scale, num_steps, std::move(rng));
 
-  const auto dirac = DiracOperator(1, 1, 5);
+  auto dirac = DiracOperator(1, 1, 5);
   const auto old_dirac_matrix = dirac.getDiracMatrix();
   metropolis.updateDirac(dirac);
   const auto new_dirac_matrix = dirac.getDiracMatrix();

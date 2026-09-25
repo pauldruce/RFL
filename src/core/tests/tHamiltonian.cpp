@@ -44,7 +44,7 @@ TEST(HamiltonianTests, CanChangeStepSize) {
 
 TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
   const Hamiltonian hamiltonian(std::make_unique<Action>(), Integrator::LEAPFROG, 0.2, std::make_unique<StdRng>());
-  const auto dirac = DiracOperator(1, 1, 5);
+  auto dirac = DiracOperator(1, 1, 5);
   const auto old_dirac_matrix = dirac.getDiracMatrix();
   hamiltonian.updateDirac(dirac);
 

@@ -10,7 +10,7 @@
 
 class MockAlgorithm final : public IAlgorithm {
 public:
-  MOCK_METHOD(double, updateDirac, (const IDiracOperator& dirac), (const override));
+  MOCK_METHOD(double, updateDirac, (IDiracOperator & dirac), (const override));
 };
 
 TEST(SimulationTests, ConstructorDoesNotThrow) {

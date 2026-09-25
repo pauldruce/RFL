@@ -47,10 +47,13 @@ static_assert(std::is_same_v<decltype(&IRng::getUniformInt), uint64_t (IRng::*)(
 static_assert(std::is_base_of_v<IDiracOperator, DiracOperator>, "DiracOperator must inherit from IDiracOperator.");
 static_assert(std::is_final_v<DiracOperator>, "DiracOperator must be declared final.");
 
-// Constructibility
+// Constructibility and value semantics
 static_assert(!std::is_default_constructible_v<DiracOperator>, "DiracOperator default constructor must not be available.");
 static_assert(std::is_constructible_v<DiracOperator, int, int, int>, "DiracOperator must be constructible from (p, q, dim).");
 static_assert(std::is_copy_constructible_v<DiracOperator>, "DiracOperator must be copy-constructible.");
+static_assert(std::is_copy_assignable_v<DiracOperator>, "DiracOperator must be copy-assignable.");
+static_assert(std::is_move_constructible_v<DiracOperator>, "DiracOperator must be move-constructible.");
+static_assert(std::is_move_assignable_v<DiracOperator>, "DiracOperator must be move-assignable.");
 
 // Core public inspector signatures and const-qualifications
 static_assert(std::is_same_v<decltype(&DiracOperator::getType), std::pair<int, int> (DiracOperator::*)() const>,
@@ -64,6 +67,16 @@ static_assert(std::is_same_v<decltype(&DiracOperator::getEigenvalues), arma::vec
 
 static_assert(std::is_same_v<decltype(&DiracOperator::getDiracMatrix), arma::cx_mat (DiracOperator::*)() const>,
               "DiracOperator::getDiracMatrix must return arma::cx_mat and be const.");
+
+static_assert(std::is_same_v<decltype(&DiracOperator::randomiseMatrices), void (DiracOperator::*)(const IRng&)>,
+              "DiracOperator::randomiseMatrices must be non-const.");
+
+using ConstGetMatrices = const std::vector<arma::cx_mat>& (DiracOperator::*)() const;
+using MutGetMatrices = std::vector<arma::cx_mat>& (DiracOperator::*)();
+static_assert(std::is_same_v<ConstGetMatrices, decltype(static_cast<ConstGetMatrices>(&DiracOperator::getMatrices))>,
+              "DiracOperator must provide a const getMatrices() overload.");
+static_assert(std::is_same_v<MutGetMatrices, decltype(static_cast<MutGetMatrices>(&DiracOperator::getMatrices))>,
+              "DiracOperator must provide a mutable getMatrices() overload.");
 
 // ============================================================================
 // Action Contract Assertions
@@ -120,8 +133,8 @@ static_assert(std::is_constructible_v<Metropolis, std::unique_ptr<Action>&&, con
 static_assert(!std::is_copy_constructible_v<Metropolis>, "Metropolis must be non-copyable.");
 static_assert(!std::is_copy_assignable_v<Metropolis>, "Metropolis must not be copy-assignable.");
 
-static_assert(std::is_same_v<decltype(&Metropolis::updateDirac), double (Metropolis::*)(const IDiracOperator&) const>,
-              "Metropolis::updateDirac must accept const IDiracOperator&, return double, and be const.");
+static_assert(std::is_same_v<decltype(&Metropolis::updateDirac), double (Metropolis::*)(IDiracOperator&) const>,
+              "Metropolis::updateDirac must accept IDiracOperator&, return double, and be const.");
 
 // ============================================================================
 // Simulation Contract Assertions

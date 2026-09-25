@@ -40,9 +40,9 @@ double Metropolis::delta4(const IDiracOperator& dirac,
                           const cx_double& z) {
   double res = 0.;
 
-  auto& omega_table_4 = dirac.getOmegaTable4();
-  auto& mat = dirac.getMatrices();
-  auto& eps = dirac.getEpsilons();
+  const auto& omega_table_4 = dirac.getOmegaTable4();
+  const auto& mat = dirac.getMatrices();
+  const auto& eps = dirac.getEpsilons();
   auto mat_dim = dirac.getMatrixDimension();
   auto gamma_dim = dirac.getGammaDimension();
   auto num_matrices = dirac.getNumMatrices();
@@ -271,7 +271,7 @@ double Metropolis::delta4(const IDiracOperator& dirac,
   return res;
 }
 
-double Metropolis::runDualAverage(const IDiracOperator& dirac,
+double Metropolis::runDualAverage(IDiracOperator& dirac,
                                   const double target) {
   // Initial and final action traces.
   auto* s_i = new double[2];
@@ -318,7 +318,7 @@ double Metropolis::runDualAverage(const IDiracOperator& dirac,
   return (stat / (m_num_steps * nsw));
 }
 
-double Metropolis::run(const IDiracOperator& dirac) const {
+double Metropolis::run(IDiracOperator& dirac) const {
   // Initial and final action traces.
   auto* s_i = new double[2];
   auto* s_f = new double[2];
@@ -351,7 +351,7 @@ double Metropolis::run(const IDiracOperator& dirac) const {
   return (stat / (m_num_steps * nsw));
 }
 
-double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
+double Metropolis::runDualAverageCore(IDiracOperator& dirac,
                                       const double* s_i,
                                       double* s_f) const {
   // Acceptance probability.
@@ -422,7 +422,7 @@ double Metropolis::runDualAverageCore(const IDiracOperator& dirac,
   return e;
 }
 
-double Metropolis::runCore(const IDiracOperator& dirac,
+double Metropolis::runCore(IDiracOperator& dirac,
                            const double* s_i,
                            double* s_f) const {
   // Acceptance probability.

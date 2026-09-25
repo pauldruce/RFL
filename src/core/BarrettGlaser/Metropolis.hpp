@@ -56,7 +56,7 @@ public:
    * @param dirac Dirac operator to update.
    * @return Mean acceptance rate across sweeps.
    */
-  double updateDirac(const IDiracOperator& dirac) const override {
+  double updateDirac(IDiracOperator& dirac) const override {
     return this->run(dirac);
   }
 
@@ -67,10 +67,10 @@ private:
   std::unique_ptr<IRng> m_rng;
 
   // MCMC routine without dual-averaging.
-  double run(const IDiracOperator& dirac) const;
+  double run(IDiracOperator& dirac) const;
 
   // MCMC routine with dual-averaging.
-  double runDualAverage(const IDiracOperator& dirac,
+  double runDualAverage(IDiracOperator& dirac,
                         double target);
 
   double delta24(const IDiracOperator& dirac,
@@ -91,11 +91,11 @@ private:
                        const int& column_index,
                        const arma::cx_double& z);
 
-  double runDualAverageCore(const IDiracOperator& dirac,
+  double runDualAverageCore(IDiracOperator& dirac,
                             const double* s_i,
                             double* s_f) const;
 
-  double runCore(const IDiracOperator& dirac,
+  double runCore(IDiracOperator& dirac,
                  const double* s_i,
                  double* s_f) const;
 };

@@ -9,7 +9,7 @@
 static void CompareActions(const int p, const int q, const int dim, const double g_2) {
   constexpr int num_of_test_repeats = 100;
   const Action action(g_2);
-  const DiracOperator dirac(p, q, dim);
+  DiracOperator dirac(p, q, dim);
 
   for (int i = 0; i < num_of_test_repeats; ++i) {
     const StdRng rng;

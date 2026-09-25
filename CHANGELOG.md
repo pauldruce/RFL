@@ -15,13 +15,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Codebase Cleanliness & Modern Tooling:** Fixed header guard collisions, removed dead commented legacy tests, and repaired verification scripts ([#75](https://github.com/pauldruce/RFL/pull/75)).
 
 ### 🚀 Features & Enhancements
-* feat(core): optimise DiracOperator omega table initialisation with lazy allocation and loop hoisting ([#46](https://github.com/pauldruce/RFL/issues/46))
+* refactor(core): transform DiracOperator into regular value type with strict const-correctness ([#12](https://github.com/pauldruce/RFL/issues/12))
+* feat(core): optimise DiracOperator omega table initialisation with lazy allocation and loop hoisting ([#46](https://github.com/pauldruce/RFL/issues/46)) by @pauldruce in [#80](https://github.com/pauldruce/RFL/pull/80)
 * feat(core): implement discrete uniform integer sampling for matrix index proposals and IRng interface ([#49](https://github.com/pauldruce/RFL/issues/49)) by @pauldruce in [#79](https://github.com/pauldruce/RFL/pull/79)
 * refactor(core): replace GSL with standard C++ random engine and adopt BSD-3-Clause licence ([#67](https://github.com/pauldruce/RFL/issues/67)) by @pauldruce in [#77](https://github.com/pauldruce/RFL/pull/77)
 * test(api): establish compile-time C++ contract tests and Python API surface assurance by @pauldruce in [#74](https://github.com/pauldruce/RFL/pull/74)
 
 ### 🐛 Bug Fixes
-* fix(core): correct member initialisation in DiracOperator copy constructor ([#46](https://github.com/pauldruce/RFL/issues/46))
+* fix(core): correct member initialisation in DiracOperator copy constructor ([#46](https://github.com/pauldruce/RFL/issues/46)) by @pauldruce in [#80](https://github.com/pauldruce/RFL/pull/80)
 * fix(core): address MSVC conversion warnings and restore double-precision test assertions ([#49](https://github.com/pauldruce/RFL/issues/49)) by @pauldruce in [#79](https://github.com/pauldruce/RFL/pull/79)
 * fix(ci,windows): resolve concurrent vcpkg z-applocal DLL copying race condition by @pauldruce in [#73](https://github.com/pauldruce/RFL/pull/73)
 * fix(ci): repair status badges in README and declare packaging classifiers by @pauldruce in [#65](https://github.com/pauldruce/RFL/pull/65)

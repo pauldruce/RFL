@@ -78,48 +78,114 @@ DiracOperator::DiracOperator(int p, int q, int dim)
   this->m_num_antiherm = static_cast<int>(anti.size());
   this->m_num_matrices = m_num_herm + m_num_antiherm;
 
-  this->m_omegas = std::make_unique<std::vector<cx_mat>>(m_num_matrices);
+  this->m_omegas.resize(m_num_matrices);
   for (int i = 0; i < m_num_herm; ++i) {
-    (*m_omegas)[i] = herm[i];
+    m_omegas[i] = herm[i];
   }
   for (int i = 0; i < m_num_antiherm; ++i) {
-    (*m_omegas)[m_num_herm + i] = anti[i];
+    m_omegas[m_num_herm + i] = anti[i];
   }
 
   // Allocate and initialise H and L matrices to identity.
-  m_matrices = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
-  m_momenta = std::make_unique<std::vector<arma::cx_mat>>(m_num_matrices);
-  m_epsilons = std::make_unique<std::vector<int>>(m_num_matrices);
+  m_matrices.resize(m_num_matrices);
+  m_momenta.resize(m_num_matrices);
+  m_epsilons.resize(m_num_matrices);
   for (int i = 0; i < m_num_matrices; i++) {
     if (i < m_num_herm) {
-      (*m_epsilons)[i] = 1;
+      m_epsilons[i] = 1;
     } else {
-      (*m_epsilons)[i] = -1;
+      m_epsilons[i] = -1;
     }
 
-    (*m_matrices)[i].eye(m_dim, m_dim);
-    (*m_momenta)[i].eye(m_dim, m_dim);
+    m_matrices[i].eye(m_dim, m_dim);
+    m_momenta[i].eye(m_dim, m_dim);
   }
 }
 
 DiracOperator::DiracOperator(const DiracOperator& original)
-    : m_clifford(original.m_clifford) {
-  // Copy all state from the original DiracOperator.
-  this->m_dim = original.m_dim;
-  this->m_num_matrices = original.m_num_matrices;
-  this->m_num_herm = original.m_num_herm;
-  this->m_num_antiherm = original.m_num_antiherm;
-  this->m_gamma_dim = original.m_gamma_dim;
-  this->m_matrices = std::make_unique<std::vector<arma::cx_mat>>(*original.m_matrices);
-  this->m_momenta = std::make_unique<std::vector<arma::cx_mat>>(*original.m_momenta);
-  this->m_omegas = std::make_unique<std::vector<cx_mat>>(*original.m_omegas);
-  this->m_epsilons = std::make_unique<std::vector<int>>(*original.m_epsilons);
+    : m_dim(original.m_dim),
+      m_clifford(original.m_clifford),
+      m_num_matrices(original.m_num_matrices),
+      m_num_herm(original.m_num_herm),
+      m_num_antiherm(original.m_num_antiherm),
+      m_gamma_dim(original.m_gamma_dim),
+      m_matrices(original.m_matrices),
+      m_momenta(original.m_momenta),
+      m_omegas(original.m_omegas),
+      m_epsilons(original.m_epsilons) {
   if (original.m_omega_table_4) {
     this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
     std::call_once(this->m_omega_table_flag, []() {});
   } else {
     this->m_omega_table_4 = nullptr;
   }
+}
+
+DiracOperator::DiracOperator(DiracOperator&& other) noexcept
+    : m_dim(other.m_dim),
+      m_clifford(std::move(other.m_clifford)),
+      m_num_matrices(other.m_num_matrices),
+      m_num_herm(other.m_num_herm),
+      m_num_antiherm(other.m_num_antiherm),
+      m_gamma_dim(other.m_gamma_dim),
+      m_matrices(std::move(other.m_matrices)),
+      m_momenta(std::move(other.m_momenta)),
+      m_omegas(std::move(other.m_omegas)),
+      m_epsilons(std::move(other.m_epsilons)),
+      m_omega_table_4(std::move(other.m_omega_table_4)) {
+  if (this->m_omega_table_4) {
+    std::call_once(this->m_omega_table_flag, []() {});
+  }
+}
+
+DiracOperator& DiracOperator::operator=(const DiracOperator& original) {
+  if (this == &original) {
+    return *this;
+  }
+
+  this->m_dim = original.m_dim;
+  this->m_clifford = original.m_clifford;
+  this->m_num_matrices = original.m_num_matrices;
+  this->m_num_herm = original.m_num_herm;
+  this->m_num_antiherm = original.m_num_antiherm;
+  this->m_gamma_dim = original.m_gamma_dim;
+  this->m_matrices = original.m_matrices;
+  this->m_momenta = original.m_momenta;
+  this->m_omegas = original.m_omegas;
+  this->m_epsilons = original.m_epsilons;
+
+  if (original.m_omega_table_4) {
+    this->m_omega_table_4 = std::make_unique<std::vector<cx_double>>(*original.m_omega_table_4);
+    std::call_once(this->m_omega_table_flag, []() {});
+  } else {
+    this->m_omega_table_4 = nullptr;
+  }
+
+  return *this;
+}
+
+DiracOperator& DiracOperator::operator=(DiracOperator&& other) noexcept {
+  if (this == &other) {
+    return *this;
+  }
+
+  this->m_dim = other.m_dim;
+  this->m_clifford = std::move(other.m_clifford);
+  this->m_num_matrices = other.m_num_matrices;
+  this->m_num_herm = other.m_num_herm;
+  this->m_num_antiherm = other.m_num_antiherm;
+  this->m_gamma_dim = other.m_gamma_dim;
+  this->m_matrices = std::move(other.m_matrices);
+  this->m_momenta = std::move(other.m_momenta);
+  this->m_omegas = std::move(other.m_omegas);
+  this->m_epsilons = std::move(other.m_epsilons);
+  this->m_omega_table_4 = std::move(other.m_omega_table_4);
+
+  if (this->m_omega_table_4) {
+    std::call_once(this->m_omega_table_flag, []() {});
+  }
+
+  return *this;
 }
 
 /**
@@ -153,8 +219,8 @@ cx_mat DiracOperator::getDiracMatrix() const {
 
   const cx_mat id(m_dim, m_dim, fill::eye);
   for (int i = 0; i < m_num_matrices; ++i) {
-    cx_mat bracket = kron((*m_matrices)[i], id) + (*m_epsilons)[i] * kron(id, (*m_matrices)[i].st());
-    dirac += kron((*m_omegas)[i], bracket);
+    cx_mat bracket = kron(m_matrices[i], id) + m_epsilons[i] * kron(id, m_matrices[i].st());
+    dirac += kron(m_omegas[i], bracket);
   }
 
   return dirac;
@@ -169,9 +235,9 @@ vec DiracOperator::getEigenvalues() const {
 
 vector<cx_mat> DiracOperator::getHermitianMatrices() const {
   std::vector<arma::cx_mat> herm_matrices;
-  for (std::size_t i = 0; i < m_matrices->size(); i++) {
-    if (m_epsilons->at(i) == 1) {
-      herm_matrices.push_back(m_matrices->at(i));
+  for (std::size_t i = 0; i < m_matrices.size(); i++) {
+    if (m_epsilons.at(i) == 1) {
+      herm_matrices.push_back(m_matrices.at(i));
     }
   }
   return herm_matrices;
@@ -179,9 +245,9 @@ vector<cx_mat> DiracOperator::getHermitianMatrices() const {
 
 vector<cx_mat> DiracOperator::getAntiHermitianMatrices() const {
   vector<arma::cx_mat> anti_herm_matrices;
-  for (size_t i = 0; i < m_matrices->size(); i++) {
-    if (m_epsilons->at(i) == -1) {
-      anti_herm_matrices.emplace_back(m_matrices->at(i) * cx_double(0, 1));
+  for (size_t i = 0; i < m_matrices.size(); i++) {
+    if (m_epsilons.at(i) == -1) {
+      anti_herm_matrices.emplace_back(m_matrices.at(i) * cx_double(0, 1));
     }
   }
   return anti_herm_matrices;
@@ -203,7 +269,7 @@ void DiracOperator::printOmegaTable4() const {
       //            }
       for (const auto& p : prod) {
         cout << p << " ";
-        e *= (*m_epsilons)[p];
+        e *= m_epsilons[p];
       }
       cout << " " << table[i] << e << endl;
     }
@@ -216,15 +282,15 @@ void DiracOperator::initOmegaTable4() const {
     auto table = std::make_unique<std::vector<cx_double>>(total_entries);
 
     for (int i = 0; i < m_num_matrices; ++i) {
-      const auto& omega_i = (*m_omegas)[i];
+      const auto& omega_i = m_omegas[i];
       for (int j = 0; j < m_num_matrices; ++j) {
-        const cx_mat omega_ij = omega_i * (*m_omegas)[j];
+        const cx_mat omega_ij = omega_i * m_omegas[j];
         const int base_j = m_num_matrices * (j + m_num_matrices * i);
         for (int k = 0; k < m_num_matrices; ++k) {
-          const cx_mat omega_ijk = omega_ij * (*m_omegas)[k];
+          const cx_mat omega_ijk = omega_ij * m_omegas[k];
           const int base_k = m_num_matrices * (k + base_j);
           for (int l = 0; l < m_num_matrices; ++l) {
-            (*table)[l + base_k] = trace(omega_ijk * (*m_omegas)[l]);
+            (*table)[l + base_k] = trace(omega_ijk * m_omegas[l]);
           }
         }
       }
@@ -241,16 +307,16 @@ cx_mat DiracOperator::derDirac24(const int& k, const bool& herm, const double g_
 cx_mat DiracOperator::derDirac2(const int& k) const {
   cx_mat res(m_dim, m_dim, fill::eye);
 
-  res *= (*m_epsilons)[k] * trace((*m_matrices)[k]).real();
-  res += m_dim * (*m_matrices)[k];
+  res *= m_epsilons[k] * trace(m_matrices[k]).real();
+  res += m_dim * m_matrices[k];
 
   return 4 * m_gamma_dim * res;
 }
 
 cx_mat DiracOperator::derDirac4(const int& k, const bool& herm) const {
   cx_mat res(m_dim, m_dim, fill::zeros);
-  auto& epsilons = this->getEpsilons();
-  auto& omega_table_4 = this->getOmegaTable4();
+  const auto& epsilons = this->getEpsilons();
+  const auto& omega_table_4 = this->getOmegaTable4();
 
   // four distinct indices
   for (int i_1 = 0; i_1 < m_num_matrices; ++i_1) {
@@ -319,8 +385,8 @@ cx_mat DiracOperator::computeB4(const int& k,
                                 const int& i_4,
                                 const double& cliff,
                                 const bool& neg) const {
-  auto& matrices = this->getMatrices();
-  auto& epsilons = this->getEpsilons();
+  const auto& matrices = this->getMatrices();
+  const auto& epsilons = this->getEpsilons();
 
   // base matrix products
   cx_mat m_2_m_3 = matrices[i_2] * matrices[i_3];
@@ -370,9 +436,9 @@ cx_mat DiracOperator::computeB4(const int& k,
 }
 
 cx_mat DiracOperator::computeB2(const int& k, const int& i) const {
-  auto& omega_table_4 = this->getOmegaTable4();
-  auto& matrices = this->getMatrices();
-  auto& epsilons = this->getEpsilons();
+  const auto& omega_table_4 = this->getOmegaTable4();
+  const auto& matrices = this->getMatrices();
+  const auto& epsilons = this->getEpsilons();
 
   // clifford product
   double cliff = omega_table_4[i + m_num_matrices * (k + m_num_matrices * (i + m_num_matrices * k))].real();
@@ -437,7 +503,7 @@ cx_mat DiracOperator::computeB(const int& k) const {
 }
 
 // TODO: Refactor to reuse the randomisation logic across matrix arrays.
-void DiracOperator::randomiseMatrices(const IRng& rng) const {
+void DiracOperator::randomiseMatrices(const IRng& rng) {
   auto& matrices = this->getMatrices();
   auto& momenta = this->getMomenta();
 
@@ -516,9 +582,9 @@ double DiracOperator::traceOfDirac4() const {
 }
 
 double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, const int& i_4) const {
-  auto& epsilons = this->getEpsilons();
-  auto& omega_table_4 = this->getOmegaTable4();
-  auto& matrices = this->getMatrices();
+  const auto& epsilons = this->getEpsilons();
+  const auto& omega_table_4 = this->getOmegaTable4();
+  const auto& matrices = this->getMatrices();
 
   const int e = epsilons[i_1] * epsilons[i_2] * epsilons[i_3] * epsilons[i_4];
 
