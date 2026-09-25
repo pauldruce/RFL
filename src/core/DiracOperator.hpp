@@ -158,7 +158,7 @@ public:
    * Returns a reference to the four-product table of omega matrices.
    */
   std::vector<arma::cx_double>& getOmegaTable4() const override {
-    std::call_once(m_omega_table_flag, [this]() { initOmegaTable4(); });
+    initOmegaTable4();
     return *m_omega_table_4;
   }
 
