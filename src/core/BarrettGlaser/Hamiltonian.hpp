@@ -46,7 +46,7 @@ public:
    * @param dirac Dirac operator to update.
    * @return Mean acceptance rate across trajectories.
    */
-  double updateDirac(const IDiracOperator& dirac) const override;
+  double updateDirac(IDiracOperator& dirac) const override;
 
   /**
    * Sets the numerical integrator scheme.
@@ -83,40 +83,40 @@ private:
   std::unique_ptr<IRng> m_rng;
 
   // Samples Gaussian conjugate momenta for the Dirac operator.
-  void sampleMoments(const IDiracOperator& dirac) const;
+  void sampleMoments(IDiracOperator& dirac) const;
   static double calculateK(const IDiracOperator& dirac);
   double calculateH(const IDiracOperator& dirac) const;
 
-  double run(const IDiracOperator& dirac,
+  double run(IDiracOperator& dirac,
              const int& num_iterations,
              const int& iter) const;
 
-  double runDualAveragingCore(const IDiracOperator& dirac,
+  double runDualAveragingCore(IDiracOperator& dirac,
                               const int& nt,
                               std::vector<double>& en_i,
                               std::vector<double>& en_f) const;
 
-  double runCore(const IDiracOperator& dirac,
+  double runCore(IDiracOperator& dirac,
                  const int& nt,
                  std::vector<double>& en_i,
                  std::vector<double>& en_f) const;
 
-  double runCoreDebug(const IDiracOperator& dirac,
+  double runCoreDebug(IDiracOperator& dirac,
                       const int& nt) const;
 
   // The methods below modify the step size m_dt.
-  void runDualAverage(const IDiracOperator& dirac,
+  void runDualAverage(IDiracOperator& dirac,
                       const int& nt,
                       const int& iter,
                       const double& target);
 
-  double run(const IDiracOperator& dirac,
+  double run(IDiracOperator& dirac,
              const int& nt,
              const double& dt_min,
              const double& dt_max,
              const int& iter);
 
-  double runCore(const IDiracOperator& dirac,
+  double runCore(IDiracOperator& dirac,
                  const int& nt,
                  const double& dt_min,
                  const double& dt_max,
@@ -124,11 +124,11 @@ private:
                  std::vector<double>& en_f);
 
   // Numerical integrators.
-  void leapfrog(const IDiracOperator& dirac,
+  void leapfrog(IDiracOperator& dirac,
                 const int& nt,
                 double g_2) const;
 
-  void omelyan(const IDiracOperator& dirac,
+  void omelyan(IDiracOperator& dirac,
                const int& nt,
                double g_2) const;
 };

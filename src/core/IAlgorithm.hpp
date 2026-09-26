@@ -22,7 +22,7 @@ public:
    * @param dirac Dirac operator to update.
    * @return Acceptance rate in the range [0, 1].
    */
-  virtual double updateDirac(const IDiracOperator& dirac) const = 0;
+  virtual double updateDirac(IDiracOperator& dirac) const = 0;
 
   virtual ~IAlgorithm() = default;
 };

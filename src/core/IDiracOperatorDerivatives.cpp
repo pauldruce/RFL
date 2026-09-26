@@ -12,8 +12,8 @@ static cx_mat computeB4(const IDiracOperator& dirac, const int& k,
                         const int& i_4,
                         const double& cliff,
                         const bool& neg) {
-  auto& matrices = dirac.getMatrices();
-  auto& epsilons = dirac.getEpsilons();
+  const auto& matrices = dirac.getMatrices();
+  const auto& epsilons = dirac.getEpsilons();
   const auto dim = dirac.getMatrixDimension();
 
   // Base matrix products.
@@ -68,9 +68,9 @@ static cx_mat computeB2(const IDiracOperator& dirac, const int& k, const int& i)
   const auto dim = dirac.getMatrixDimension();
   const auto gamma_dim = dirac.getGammaDimension();
 
-  auto& omega_table_4 = dirac.getOmegaTable4();
-  auto& matrices = dirac.getMatrices();
-  auto& epsilons = dirac.getEpsilons();
+  const auto& omega_table_4 = dirac.getOmegaTable4();
+  const auto& matrices = dirac.getMatrices();
+  const auto& epsilons = dirac.getEpsilons();
 
   // Clifford product.
   double cliff = omega_table_4[i + num_matrices * (k + num_matrices * (i + num_matrices * k))].real();

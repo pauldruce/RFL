@@ -5,6 +5,7 @@
 #include "../DiracOperator.hpp"
 #include <gtest/gtest.h>
 #include <thread>
+#include <utility>
 #include <vector>
 
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
@@ -250,4 +251,56 @@ TEST(DiracOperatorTests, ConcurrentLazyInitialisationIsThreadSafe) {
     EXPECT_EQ(results[i]->size(), expected_size);
     EXPECT_EQ(results[i], results[0]);
   }
+}
+
+TEST(DiracOperatorTests, CopyAssignmentPreservesStateAndLazyTable) {
+  DiracOperator original(1, 2, 4);
+  DiracOperator target(2, 1, 6);
+
+  // Copy assign uninitialised DiracOperator.
+  target = original;
+  EXPECT_EQ(target.getType(), original.getType());
+  EXPECT_EQ(target.getMatrixDimension(), original.getMatrixDimension());
+  EXPECT_EQ(target.getOmegaTable4().size(), 4 * 4 * 4 * 4);
+
+  // Copy assign already initialised DiracOperator.
+  DiracOperator target2(1, 1, 4);
+  target2 = target;
+  EXPECT_EQ(target2.getOmegaTable4().size(), 4 * 4 * 4 * 4);
+}
+
+TEST(DiracOperatorTests, MoveConstructorTransfersStateAndLazyTable) {
+  DiracOperator source(1, 2, 4);
+  // Initialise lazy table.
+  const auto& table_source = source.getOmegaTable4();
+  EXPECT_EQ(table_source.size(), 4 * 4 * 4 * 4);
+
+  DiracOperator moved(std::move(source));
+  EXPECT_EQ(moved.getType(), std::make_pair(1, 2));
+  EXPECT_EQ(moved.getMatrixDimension(), 4);
+  EXPECT_EQ(moved.getOmegaTable4().size(), 4 * 4 * 4 * 4);
+}
+
+TEST(DiracOperatorTests, MoveAssignmentTransfersStateAndLazyTable) {
+  DiracOperator source(1, 2, 4);
+  source.getOmegaTable4();
+
+  DiracOperator target(1, 1, 5);
+  target = std::move(source);
+  EXPECT_EQ(target.getType(), std::make_pair(1, 2));
+  EXPECT_EQ(target.getMatrixDimension(), 4);
+  EXPECT_EQ(target.getOmegaTable4().size(), 4 * 4 * 4 * 4);
+}
+
+TEST(DiracOperatorTests, MutableAndConstAccessors) {
+  DiracOperator dirac(1, 1, 4);
+  const auto original_val = dirac.getMatrices()[0](0, 0);
+
+  // Mutate matrix element through non-const accessor.
+  dirac.getMatrices()[0](0, 0) = original_val + arma::cx_double(3.0, 1.0);
+
+  // Inspect via const reference.
+  const DiracOperator& const_dirac = dirac;
+  EXPECT_NE(const_dirac.getMatrices()[0](0, 0), original_val);
+  EXPECT_EQ(const_dirac.getMatrices()[0](0, 0), original_val + arma::cx_double(3.0, 1.0));
 }

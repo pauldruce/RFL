@@ -13,7 +13,7 @@ using namespace arma;
 Hamiltonian::Hamiltonian(std::unique_ptr<Action>&& action, const Integrator integrator, const double step_size, std::unique_ptr<IRng>&& rng)
     : m_action(std::move(action)), m_integrator(integrator), m_dt(step_size), m_rng(std::move(rng)) {
 }
-double Hamiltonian::updateDirac(const IDiracOperator& dirac) const {
+double Hamiltonian::updateDirac(IDiracOperator& dirac) const {
   const double acceptance_val_per_iter = this->run(
       dirac,
       10,
@@ -21,7 +21,7 @@ double Hamiltonian::updateDirac(const IDiracOperator& dirac) const {
   return acceptance_val_per_iter;
 }
 
-void Hamiltonian::sampleMoments(const IDiracOperator& dirac) const {
+void Hamiltonian::sampleMoments(IDiracOperator& dirac) const {
   auto& mom = dirac.getMomenta();
   const auto num_matrices = dirac.getNumMatrices();
   const auto mat_dim = dirac.getMatrixDimension();
@@ -57,7 +57,7 @@ double Hamiltonian::calculateH(const IDiracOperator& dirac) const {
   return m_action->calculateS(dirac) + calculateK(dirac);
 }
 
-void Hamiltonian::leapfrog(const IDiracOperator& dirac,
+void Hamiltonian::leapfrog(IDiracOperator& dirac,
                            const int& nt,
                            const double g_2) const {
   auto& mat = dirac.getMatrices();
@@ -77,7 +77,7 @@ void Hamiltonian::leapfrog(const IDiracOperator& dirac,
   }
 }
 
-void Hamiltonian::omelyan(const IDiracOperator& dirac,
+void Hamiltonian::omelyan(IDiracOperator& dirac,
                           const int& nt,
                           const double g_2) const {
 
@@ -103,7 +103,7 @@ void Hamiltonian::omelyan(const IDiracOperator& dirac,
   }
 }
 
-void Hamiltonian::runDualAverage(const IDiracOperator& dirac,
+void Hamiltonian::runDualAverage(IDiracOperator& dirac,
                                  const int& nt,
                                  const int& iter,
                                  const double& target) {
@@ -144,7 +144,7 @@ void Hamiltonian::runDualAverage(const IDiracOperator& dirac,
   m_dt = exp(log_dt_avg);
 }
 
-double Hamiltonian::run(const IDiracOperator& dirac,
+double Hamiltonian::run(IDiracOperator& dirac,
                         const int& num_iterations,
                         const int& iter) const {
   // Initial and final energy arrays.
@@ -172,7 +172,7 @@ double Hamiltonian::run(const IDiracOperator& dirac,
   return stat / iter;
 }
 
-double Hamiltonian::run(const IDiracOperator& dirac,
+double Hamiltonian::run(IDiracOperator& dirac,
                         const int& nt,
                         const double& dt_min,
                         const double& dt_max,
@@ -202,7 +202,7 @@ double Hamiltonian::run(const IDiracOperator& dirac,
   return stat / iter;
 }
 
-double Hamiltonian::runDualAveragingCore(const IDiracOperator& dirac,
+double Hamiltonian::runDualAveragingCore(IDiracOperator& dirac,
                                          const int& nt,
                                          vector<double>& en_i,
                                          vector<double>& en_f) const {
@@ -268,7 +268,7 @@ double Hamiltonian::runDualAveragingCore(const IDiracOperator& dirac,
   return e;
 }
 
-double Hamiltonian::runCore(const IDiracOperator& dirac,
+double Hamiltonian::runCore(IDiracOperator& dirac,
                             const int& nt,
                             vector<double>& en_i,
                             vector<double>& en_f) const {
@@ -322,7 +322,7 @@ double Hamiltonian::runCore(const IDiracOperator& dirac,
   return e;
 }
 
-double Hamiltonian::runCoreDebug(const IDiracOperator& dirac,
+double Hamiltonian::runCoreDebug(IDiracOperator& dirac,
                                  const int& nt) const {
   // Acceptance probability return value.
 
@@ -368,7 +368,7 @@ double Hamiltonian::runCoreDebug(const IDiracOperator& dirac,
   return e;
 }
 
-double Hamiltonian::runCore(const IDiracOperator& dirac,
+double Hamiltonian::runCore(IDiracOperator& dirac,
                             const int& nt,
                             const double& dt_min,
                             const double& dt_max,

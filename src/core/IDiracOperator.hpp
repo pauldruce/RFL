@@ -7,6 +7,7 @@
 
 #include "IRng.hpp"
 #include <armadillo>
+#include <utility>
 
 /**
  * @interface IDiracOperator
@@ -24,7 +25,7 @@ public:
    *
    * @param rng_engine Random number generator engine.
    */
-  virtual void randomiseMatrices(const IRng& rng_engine) const = 0;
+  virtual void randomiseMatrices(const IRng& rng_engine) = 0;
 
   /**
    * Returns the signature of the Dirac operator as a pair (p,q).
@@ -69,30 +70,51 @@ public:
   virtual int getNumAntiHermitianMatrices() const = 0;
 
   /**
-   * Returns a reference to the vector of H and L matrices.
+   * Returns a constant reference to the vector of H and L matrices.
    *
-   * @return Reference to vector of matrices.
+   * @return Constant reference to vector of matrices.
    */
-  virtual std::vector<arma::cx_mat>& getMatrices() const = 0;
+  virtual const std::vector<arma::cx_mat>& getMatrices() const = 0;
 
   /**
-   * Returns a reference to the vector of signs (+1 or -1).
+   * Returns a mutable reference to the vector of H and L matrices.
+   *
+   * @return Mutable reference to vector of matrices.
+   */
+  virtual std::vector<arma::cx_mat>& getMatrices() = 0;
+
+  /**
+   * Returns a constant reference to the vector of signs (+1 or -1).
    *
    * The sign matches the matrix at the same index in getMatrices().
    * A value of +1 indicates a Hermitian matrix (H).
    * A value of -1 indicates an anti-Hermitian matrix (L).
    *
-   * @return Reference to vector of signs.
+   * @return Constant reference to vector of signs.
    */
-  virtual std::vector<int>& getEpsilons() const = 0;
+  virtual const std::vector<int>& getEpsilons() const = 0;
 
   /**
-   * Returns a reference to the vector of conjugate momenta matrices.
+   * Returns a mutable reference to the vector of signs (+1 or -1).
    *
-   * @return Reference to vector of momenta matrices.
+   * @return Mutable reference to vector of signs.
+   */
+  virtual std::vector<int>& getEpsilons() = 0;
+
+  /**
+   * Returns a constant reference to the vector of conjugate momenta matrices.
+   *
+   * @return Constant reference to vector of momenta matrices.
    */
   // TODO: Move to Hamiltonian class or document usage.
-  virtual std::vector<arma::cx_mat>& getMomenta() const = 0;
+  virtual const std::vector<arma::cx_mat>& getMomenta() const = 0;
+
+  /**
+   * Returns a mutable reference to the vector of conjugate momenta matrices.
+   *
+   * @return Mutable reference to vector of momenta matrices.
+   */
+  virtual std::vector<arma::cx_mat>& getMomenta() = 0;
 
   /**
    * Calculates the trace of the Dirac operator squared, \f$\text{Tr}(D^2)\f$.
@@ -137,10 +159,10 @@ public:
   virtual std::vector<arma::cx_mat> getAntiHermitianMatrices() const = 0;
 
   /**
-   * Returns a reference to the four-product table of omega matrices.
+   * Returns a constant reference to the four-product table of omega matrices.
    *
-   * @return Reference to four-product table vector.
+   * @return Constant reference to four-product table vector.
    */
-  virtual std::vector<arma::cx_double>& getOmegaTable4() const = 0;
+  virtual const std::vector<arma::cx_double>& getOmegaTable4() const = 0;
 };
 #endif// RFL_CORE_IDIRACOPERATOR_HPP
