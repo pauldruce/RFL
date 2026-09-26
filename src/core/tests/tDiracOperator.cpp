@@ -5,6 +5,7 @@
 #include "../DiracOperator.hpp"
 #include <gtest/gtest.h>
 #include <thread>
+#include <utility>
 #include <vector>
 
 TEST(DiracOperatorTests, NoErrorsWhenConstruction) {
@@ -275,7 +276,7 @@ TEST(DiracOperatorTests, MoveConstructorTransfersStateAndLazyTable) {
   EXPECT_EQ(table_source.size(), 4 * 4 * 4 * 4);
 
   DiracOperator moved(std::move(source));
-  EXPECT_EQ(moved.getType(), std::pair(1, 2));
+  EXPECT_EQ(moved.getType(), std::make_pair(1, 2));
   EXPECT_EQ(moved.getMatrixDimension(), 4);
   EXPECT_EQ(moved.getOmegaTable4().size(), 4 * 4 * 4 * 4);
 }
@@ -286,7 +287,7 @@ TEST(DiracOperatorTests, MoveAssignmentTransfersStateAndLazyTable) {
 
   DiracOperator target(1, 1, 5);
   target = std::move(source);
-  EXPECT_EQ(target.getType(), std::pair(1, 2));
+  EXPECT_EQ(target.getType(), std::make_pair(1, 2));
   EXPECT_EQ(target.getMatrixDimension(), 4);
   EXPECT_EQ(target.getOmegaTable4().size(), 4 * 4 * 4 * 4);
 }

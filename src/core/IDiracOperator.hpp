@@ -7,6 +7,7 @@
 
 #include "IRng.hpp"
 #include <armadillo>
+#include <utility>
 
 /**
  * @interface IDiracOperator

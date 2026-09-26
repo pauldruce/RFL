@@ -11,6 +11,7 @@
 #include <armadillo>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 /**
  * @class DiracOperator
@@ -70,7 +71,7 @@ public:
    *
    * @return std::pair<int,int> containing (p,q).
    */
-  std::pair<int, int> getType() const override { return std::pair{m_clifford.getP(), m_clifford.getQ()}; }
+  std::pair<int, int> getType() const override { return {m_clifford.getP(), m_clifford.getQ()}; }
 
   /**
    * Returns the matrix dimension of the H and L matrices.

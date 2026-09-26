@@ -7,6 +7,7 @@
 #include "../Simulation.hpp"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <utility>
 
 class MockAlgorithm final : public IAlgorithm {
 public:
@@ -40,7 +41,7 @@ TEST(SimulationTests, GetDiracReturnsSameDirac) {
       std::make_unique<MockAlgorithm>());
 
   const DiracOperator& retrieved_dirac = simulation.getDiracOperator();
-  ASSERT_EQ(retrieved_dirac.getType(), std::pair(1, 1));
+  ASSERT_EQ(retrieved_dirac.getType(), std::make_pair(1, 1));
   ASSERT_TRUE(arma::approx_equal(
       retrieved_dirac.getDiracMatrix(),
       dirac.getDiracMatrix(),
