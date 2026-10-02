@@ -26,12 +26,12 @@ enum Integrator {
 class Hamiltonian final : public IAlgorithm {
 public:
   /**
-   * Default constructor deleted.
+   * @brief Default constructor deleted.
    */
   Hamiltonian() = delete;
 
   /**
-   * Constructs a Hamiltonian simulation algorithm instance.
+   * @brief Constructs a Hamiltonian simulation algorithm instance.
    *
    * @param action Unique pointer to a Barrett-Glaser Action object.
    * @param integrator Numerical integration scheme (LEAPFROG or OMELYAN).
@@ -41,7 +41,7 @@ public:
   Hamiltonian(std::unique_ptr<Action>&& action, Integrator integrator, double step_size, std::unique_ptr<IRng>&& rng);
 
   /**
-   * Runs HMC trajectory updates on the Dirac operator.
+   * @brief Runs HMC trajectory updates on the Dirac operator.
    *
    * @param dirac Dirac operator to update.
    * @return Mean acceptance rate across trajectories.
@@ -49,28 +49,28 @@ public:
   double updateDirac(IDiracOperator& dirac) const override;
 
   /**
-   * Sets the numerical integrator scheme.
+   * @brief Sets the numerical integrator scheme.
    *
    * @param integrator Integrator scheme (LEAPFROG or OMELYAN).
    */
   void setIntegrator(Integrator integrator);
 
   /**
-   * Returns the current numerical integrator scheme.
+   * @brief Returns the current numerical integrator scheme.
    *
    * @return Current Integrator enum value.
    */
   Integrator getIntegrator() const { return this->m_integrator; };
 
   /**
-   * Sets the integration step size dt.
+   * @brief Sets the integration step size dt.
    *
    * @param dt Integration step size.
    */
   void setStepSize(double dt);
 
   /**
-   * Returns the current integration step size dt.
+   * @brief Returns the current integration step size dt.
    *
    * @return Integration step size.
    */
@@ -124,13 +124,13 @@ private:
                  std::vector<double>& en_f);
 
   // Numerical integrators.
-  void leapfrog(IDiracOperator& dirac,
-                const int& nt,
-                double g_2) const;
+  void leapfrog(
+      IDiracOperator& dirac,
+      const int& nt) const;
 
-  void omelyan(IDiracOperator& dirac,
-               const int& nt,
-               double g_2) const;
+  void omelyan(
+      IDiracOperator& dirac,
+      const int& nt) const;
 };
 
 #endif//RFL_HAMILTONIAN_HPP

@@ -15,7 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Codebase Cleanliness & Modern Tooling:** Fixed header guard collisions, removed dead commented legacy tests, and repaired verification scripts ([#75](https://github.com/pauldruce/RFL/pull/75)).
 
 ### 🚀 Features & Enhancements
-* refactor(core): transform DiracOperator into regular value type with strict const-correctness ([#12](https://github.com/pauldruce/RFL/issues/12))
+* feat(core): extract analytic trace variations into dedicated BarrettGlaserAction class ([#14](https://github.com/pauldruce/RFL/issues/14))
+* refactor(core): transform DiracOperator into regular value type with strict const-correctness ([#12](https://github.com/pauldruce/RFL/issues/12)) by @pauldruce in [#81](https://github.com/pauldruce/RFL/pull/81)
 * feat(core): optimise DiracOperator omega table initialisation with lazy allocation and loop hoisting ([#46](https://github.com/pauldruce/RFL/issues/46)) by @pauldruce in [#80](https://github.com/pauldruce/RFL/pull/80)
 * feat(core): implement discrete uniform integer sampling for matrix index proposals and IRng interface ([#49](https://github.com/pauldruce/RFL/issues/49)) by @pauldruce in [#79](https://github.com/pauldruce/RFL/pull/79)
 * refactor(core): replace GSL with standard C++ random engine and adopt BSD-3-Clause licence ([#67](https://github.com/pauldruce/RFL/issues/67)) by @pauldruce in [#77](https://github.com/pauldruce/RFL/pull/77)
@@ -28,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * fix(ci): repair status badges in README and declare packaging classifiers by @pauldruce in [#65](https://github.com/pauldruce/RFL/pull/65)
 
 ### 🧰 Build & CI/CD Architecture
+* chore(lint): introduce verify_comments.py for automated comment hygiene and documentation standards ([#14](https://github.com/pauldruce/RFL/issues/14))
 * refactor(tooling): extract tag_resolver and harden case study paths by @pauldruce in [#78](https://github.com/pauldruce/RFL/pull/78)
 * chore(clean): fix header guard collisions, clean commented legacy tests, and repair verification scripts by @pauldruce in [#75](https://github.com/pauldruce/RFL/pull/75)
 

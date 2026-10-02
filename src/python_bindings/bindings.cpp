@@ -35,12 +35,72 @@ PYBIND11_MODULE(_rfl, m) {
       .def("get_eigenvalues", &DiracOperator::getEigenvalues,
            "Return the eigenvalue spectrum of the Dirac operator.");
 
-  py::class_<Action>(m, "Action")
-      .def(py::init<double, double>(), py::arg("g_2"), py::arg("g_4"))
-      .def("get_g2", &Action::getG2)
-      .def("get_g4", &Action::getG4)
-      .def("set_params", &Action::setParams)
-      .def("calculate_s", &Action::calculateS);
+  py::class_<Action>(m, "Action",
+                     R"doc(
+Barrett-Glaser spectral action evaluator.
+
+Evaluates the spectral action functional:
+    S(D) = g_2 Tr(D^2) + g_4 Tr(D^4)
+
+Parameters
+----------
+g_2 : float
+    Quadratic coupling constant.
+g_4 : float
+    Quartic coupling constant.
+
+References
+----------
+Barrett, J. W. & Glaser, L. (2016). arXiv:1510.01377.
+See `docs/theory/barrett_glaser.md` for mathematical derivations.
+)doc")
+      .def(py::init<double, double>(), py::arg("g_2"), py::arg("g_4"),
+           "Construct an Action with quadratic (g_2) and quartic (g_4) couplings.")
+      .def("get_g2", &Action::getG2, "Return the quadratic coupling constant g_2.")
+      .def("get_g4", &Action::getG4, "Return the quartic coupling constant g_4.")
+      .def("set_params", &Action::setParams, py::arg("g_2"), py::arg("g_4"),
+           "Set quadratic (g_2) and quartic (g_4) coupling constants.")
+      .def("calculate_s", &Action::calculateS, py::arg("dirac"),
+           R"doc(
+Calculate the Barrett-Glaser action using component matrix traces.
+
+Parameters
+----------
+dirac : IDiracOperator
+    The Dirac operator state.
+
+Returns
+-------
+float
+    The calculated spectral action value S(D).
+
+Notes
+-----
+Evaluates S(D) = g_2 Tr(D^2) + g_4 Tr(D^4) using Clifford trace
+factorisations without assembling the full Dirac operator matrix.
+)doc")
+      .def("calculate_s_from_dirac", &Action::calculateSFromDirac, py::arg("dirac"),
+           R"doc(
+Calculate the Barrett-Glaser action from the assembled Dirac operator matrix.
+
+Parameters
+----------
+dirac : IDiracOperator
+    The Dirac operator state.
+
+Returns
+-------
+float
+    The calculated spectral action value S(D).
+
+Notes
+-----
+Assembles the full Dirac matrix D and evaluates S(D) = g_2 Re(Tr(D^2)) + g_4 Re(Tr(D^4)).
+Used primarily as a brute-force baseline to verify calculate_s.
+)doc");
+
+  // Canonical class name alias
+  m.attr("BarrettGlaserAction") = m.attr("Action");
 
   py::class_<StdRng>(m, "StdRng")
       .def(py::init<>(), "Construct an unseeded StdRng engine.")

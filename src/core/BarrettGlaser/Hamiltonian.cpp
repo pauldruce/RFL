@@ -3,7 +3,6 @@
 //
 
 #include "./Hamiltonian.hpp"
-#include "../IDiracOperatorDerivatives.hpp"
 #include "./Action.hpp"
 #include <armadillo>
 
@@ -26,8 +25,11 @@ void Hamiltonian::sampleMoments(IDiracOperator& dirac) const {
   const auto num_matrices = dirac.getNumMatrices();
   const auto mat_dim = dirac.getMatrixDimension();
 
+  // Samples conjugate momenta from the Gaussian Hermitian matrix ensemble:
+  // - Diagonal entries are real Gaussian N(0, 1).
+  // - Off-diagonal entries have real/imag components in N(0, 1/2) (scaled by 1/sqrt(2))
+  //   with Hermitian conjugate symmetry P_{kj} = conj(P_{jk}).
   for (int i = 0; i < num_matrices; ++i) {
-    // Loop over matrix indices.
     for (int j = 0; j < mat_dim; ++j) {
       const double x = m_rng->getGaussian(1.0);
       mom[i](j, j) = cx_double(x, 0.);
@@ -43,6 +45,8 @@ void Hamiltonian::sampleMoments(IDiracOperator& dirac) const {
 }
 
 double Hamiltonian::calculateK(const IDiracOperator& dirac) {
+  // Kinetic energy: K(P) = (1/2) sum_i Tr(P_i^2).
+  // Quadratic kinetic contribution to the total Hamiltonian H = S + K.
   double res = 0;
   const auto& mom = dirac.getMomenta();
   const auto num_matrices = dirac.getNumMatrices();
@@ -57,9 +61,9 @@ double Hamiltonian::calculateH(const IDiracOperator& dirac) const {
   return m_action->calculateS(dirac) + calculateK(dirac);
 }
 
-void Hamiltonian::leapfrog(IDiracOperator& dirac,
-                           const int& nt,
-                           const double g_2) const {
+void Hamiltonian::leapfrog(
+    IDiracOperator& dirac,
+    const int& nt) const {
   auto& mat = dirac.getMatrices();
   auto& mom = dirac.getMomenta();
   const auto num_matrices = dirac.getNumMatrices();
@@ -68,19 +72,19 @@ void Hamiltonian::leapfrog(IDiracOperator& dirac,
     mat[i] += m_dt / 2. * mom[i];
 
     for (int j = 0; j < nt - 1; ++j) {
-      mom[i] += -m_dt * derDirac24(dirac, i, true, g_2);
+      // Force step: dP/dt = -grad(S(D)) evaluated via BarrettGlaserAction.
+      mom[i] += -m_dt * m_action->derDirac24(dirac, i, true);
       mat[i] += m_dt * mom[i];
     }
 
-    mom[i] += -m_dt * derDirac24(dirac, i, true, g_2);
+    mom[i] += -m_dt * m_action->derDirac24(dirac, i, true);
     mat[i] += m_dt / 2. * mom[i];
   }
 }
 
-void Hamiltonian::omelyan(IDiracOperator& dirac,
-                          const int& nt,
-                          const double g_2) const {
-
+void Hamiltonian::omelyan(
+    IDiracOperator& dirac,
+    const int& nt) const {
   auto& mat = dirac.getMatrices();
   auto& mom = dirac.getMomenta();
   const auto num_matrices = dirac.getNumMatrices();
@@ -90,15 +94,16 @@ void Hamiltonian::omelyan(IDiracOperator& dirac,
     mat[i] += xi * m_dt * mom[i];
 
     for (int j = 0; j < nt - 1; ++j) {
-      mom[i] += -(m_dt / 2.) * derDirac24(dirac, i, true, g_2);
+      // Force step: dP/dt = -grad(S(D)) evaluated via BarrettGlaserAction.
+      mom[i] += -(m_dt / 2.) * m_action->derDirac24(dirac, i, true);
       mat[i] += (1 - 2 * xi) * m_dt * mom[i];
-      mom[i] += -(m_dt / 2.) * derDirac24(dirac, i, true, g_2);
+      mom[i] += -(m_dt / 2.) * m_action->derDirac24(dirac, i, true);
       mat[i] += 2 * xi * m_dt * mom[i];
     }
 
-    mom[i] += -(m_dt / 2.) * derDirac24(dirac, i, true, g_2);
+    mom[i] += -(m_dt / 2.) * m_action->derDirac24(dirac, i, true);
     mat[i] += (1 - 2 * xi) * m_dt * mom[i];
-    mom[i] += -(m_dt / 2.) * derDirac24(dirac, i, true, g_2);
+    mom[i] += -(m_dt / 2.) * m_action->derDirac24(dirac, i, true);
     mat[i] += xi * m_dt * mom[i];
   }
 }
@@ -222,20 +227,20 @@ double Hamiltonian::runDualAveragingCore(IDiracOperator& dirac,
 
   // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
-  en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = m_action->getG2() * en_i[0] + m_action->getG4() * en_i[1] + en_i[2];
 
   // Numerical integration.
   if (m_integrator == LEAPFROG) {
-    leapfrog(dirac, nt, m_action->getG2());
+    leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
-    omelyan(dirac, nt, m_action->getG2());
+    omelyan(dirac, nt);
   }
 
   // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
-  en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = m_action->getG2() * en_f[0] + m_action->getG4() * en_f[1] + en_f[2];
 
   // Metropolis accept/reject test.
   // If leapfrog integration diverges and produces NaN, reject proposal immediately.
@@ -288,20 +293,20 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
 
   // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
-  en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = m_action->getG2() * en_i[0] + m_action->getG4() * en_i[1] + en_i[2];
 
   // Numerical integration.
   if (m_integrator == LEAPFROG) {
-    leapfrog(dirac, nt, m_action->getG2());
+    leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
-    omelyan(dirac, nt, m_action->getG2());
+    omelyan(dirac, nt);
   }
 
   // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
-  en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = m_action->getG2() * en_f[0] + m_action->getG4() * en_f[1] + en_f[2];
 
   // Metropolis accept/reject test.
   if (en_f[3] > en_i[3]) {
@@ -344,9 +349,9 @@ double Hamiltonian::runCoreDebug(IDiracOperator& dirac,
 
   // Numerical integration.
   if (m_integrator == LEAPFROG) {
-    leapfrog(dirac, nt, m_action->getG2());
+    leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
-    omelyan(dirac, nt, m_action->getG2());
+    omelyan(dirac, nt);
   }
 
   // Calculate final Hamiltonian.
@@ -393,20 +398,20 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
 
   // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
-  en_i[3] = m_action->getG2() * en_i[0] + en_i[1] + en_i[2];
+  en_i[3] = m_action->getG2() * en_i[0] + m_action->getG4() * en_i[1] + en_i[2];
 
   // Numerical integration.
   if (m_integrator == LEAPFROG) {
-    leapfrog(dirac, nt, m_action->getG2());
+    leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
-    omelyan(dirac, nt, m_action->getG2());
+    omelyan(dirac, nt);
   }
 
   // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
-  en_f[3] = m_action->getG2() * en_f[0] + en_f[1] + en_f[2];
+  en_f[3] = m_action->getG2() * en_f[0] + m_action->getG4() * en_f[1] + en_f[2];
 
   // Metropolis accept/reject test.
   if (en_f[3] > en_i[3]) {

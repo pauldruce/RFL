@@ -188,14 +188,12 @@ DiracOperator& DiracOperator::operator=(DiracOperator&& other) noexcept {
   return *this;
 }
 
-/**
- * Converts a decimal integer to a base representation vector.
- *
- * @param dec Decimal value to convert.
- * @param base Target base for the conversion.
- * @param max Maximum number of digits to output.
- * @return Vector of digits in the target base.
- */
+// Converts a decimal integer to a base representation vector.
+//
+// dec: Decimal value to convert.
+// base: Target base for the conversion.
+// max: Maximum number of digits to output.
+// Returns: Vector of digits in the target base.
 static vector<int> baseConversion(int dec, const int& base, const int& max) {
   vector<int> rem;
 

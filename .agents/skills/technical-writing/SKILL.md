@@ -138,3 +138,85 @@ Do not use Mermaid diagrams for simple, linear, or text-first concepts.
 2. **Never Use Horizontal Flowcharts (`flowchart LR`):** Wide multi-stage horizontal diagrams collapse into unreadable narrow strips on GitHub's viewport.
 3. **Avoid Text-Heavy Nodes:** Bounding-box calculation differences between system fonts and SVG containers cause persistent character truncation on GitHub.
 4. **Reserve Diagrams for Genuine Need:** Only use diagrams when communicating non-trivial, multi-branch network topologies or complex state machines that cannot be understood as text. If a diagram is strictly required, use vertical orientation (`flowchart TD`) with minimal node labels.
+
+---
+
+## 7. Code Commenting & Mathematical Documentation Standards
+
+RFL enforces a strict separation between public API documentation, internal implementation comments, and unit tests.
+
+### 7.1 Separation by Codebase Layer
+
+| Layer | File Types | Allowed Comment Format | Math Notation | Doxygen Tags Allowed? |
+| :--- | :--- | :--- | :--- | :--- |
+| **Public C++ Headers** | `src/core/**/*.hpp`, `include/**/*.hpp` | `/** ... */` (Javadoc style) | Clean ASCII / Markdown in `@brief`; LaTeX `\f$` in body | **Yes** (`@brief`, `@param`, `@return`, `@note`) |
+| **Internal C++ Implementation** | `src/core/**/*.cpp` | `//` or `/* ... */` | Plain text, ASCII, Markdown backticks | **No** (Forbidden) |
+| **Unit & Verification Tests** | `src/core/tests/**/*.cpp`, `tests/**/*.cpp` | `//` or `/* ... */` | Plain text, ASCII, Markdown (`$ ... $`) | **No** (Forbidden; breaks IDE hover cards) |
+| **Python Bindings & Modules** | `python/rfl/`, `pyrfl` | `""" ... """` (Google / NumPyDoc) | Markdown code spans / LaTeX in Notes | **No** (Use Sphinx `:math:` only in Notes) |
+
+### 7.2 The "WHY vs WHAT" Principle
+Assume the reader understands C++ and Python syntax. Never restate syntax in English.
+* ❌ **Do not write (WHAT):** `// Loops over all geometries and calls compareDelta.`
+* ✅ **Write (WHY):** `// Verifies that local trace variations match brute-force recalculation across all admissible Euclidean and Lorentzian signatures.`
+* ❌ **Do not write (WHAT):** `// Multiplies the diagonal entry by 2.`
+* ✅ **Write (WHY):** `// The symmetric move δM = z·E_{ij} + z̄·E_{ji} collapses to z + z̄ = 2z on the diagonal (with z real).`
+
+### 7.3 Dual-Tier Pattern for Public C++ Headers
+Language servers (`clangd`, CLion) convert `@brief` into IDE hover cards. Raw LaTeX (`\f$`) renders as unreadable escape sequences.
+* **Tier 1 (`@brief`):** Use plain ASCII and code spans so tooltips render cleanly in VS Code.
+* **Tier 2 (Body & `@details`):** Use formal Doxygen LaTeX (`\f$ ... \f$` or `\f[ ... \f]`) for generated web manuals.
+
+```cpp
+/**
+ * @class BarrettGlaserAction
+ *
+ * @brief Implements the Barrett-Glaser action: S(D) = g_2 Tr(D^2) + g_4 Tr(D^4).
+ *
+ * Evaluates the spectral action functional \f$ S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4) \f$.
+ * Provides total action evaluation, local analytic trace variations, and gradients for HMC.
+ *
+ * Reference: Barrett & Glaser (2016), arXiv:1510.01377, Eq. (1.1).
+ */
+```
+
+### 7.4 The 4-Part Invariant Framework for Unit Tests
+Every test asserting mathematical, physical, or geometric invariants must document:
+1. **Invariant Definition:** What symmetry or law is being tested (Hermiticity, gauge invariance, trace conservation)?
+2. **Authoritative Literature Reference:** Author, year, paper title/arXiv ID, and equation or theorem number.
+3. **Dual-Path Verification Mechanism:** Which optimized calculation is compared against what brute-force baseline?
+4. **Tolerance Rationale:** Why this tolerance was chosen, based on machine epsilon ($\epsilon_{\text{mach}}$), matrix dimension ($M$), or cancellation error.
+
+```cpp
+// Applies an elementary variation delta_M to matrix x at entry (row, col).
+//
+// 1. Invariant:
+//    Hermiticity preservation: (M + delta_M)† == M + delta_M.
+//
+// 2. Mathematical Move:
+//    The Barrett-Glaser analytic trace variations evaluate the change under:
+//    delta_M = z * E_{row,col} + conj(z) * E_{col,row}
+//    - Off-diagonal (row != col): updates both (row, col) and (col, row).
+//    - Diagonal (row == col): collapses to z + conj(z) = 2z (with Im(z) = 0),
+//      scaling the diagonal update by 2.
+//
+// 3. Dual-Path Verification:
+//    Used to perturb a copied Dirac operator to verify analytic delta formulas.
+```
+
+### 7.5 Tolerance Derivation Policy
+Never assert bare magic constants without explaining their derivation:
+* ❌ `EXPECT_NEAR(diff, delta, 1e-7);`
+* ✅
+  ```cpp
+  // Scale-aware bound: accounts for matrix dimension M and double-well cancellation (EP-4).
+  const double tol = 10.0 * M * std::numeric_limits<double>::epsilon() *
+                     (std::abs(s_f) + std::abs(s_i) + trace_norm);
+  EXPECT_NEAR(diff, delta, tol);
+  ```
+
+### 7.6 Automated Enforcement
+The script `scripts/verify_comments.py` runs under `mise run lint`. It fails if:
+* Doxygen tags (`\f$`, `\f[`, `/// \brief`, `/**`) appear in any test file (`*/tests/*`).
+* Doxygen docblocks (`/**`) appear in implementation `.cpp` files.
+* Raw LaTeX formulas appear in header `@brief` lines.
+
