@@ -35,7 +35,7 @@ The partition function integrates over the space of Dirac operators in a finite 
 
 
 $$
-Z = \int \mathcal{D}D \, \mathrm{e}^{-S(D)}
+Z = \int \mathcal{D}D \mathrm{e}^{-S(D)}
 $$
 
 
@@ -614,6 +614,6 @@ tests/physics/
 
 [^talts2018]: Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). Validating Bayesian inference algorithms with simulation-based calibration. *arXiv preprint arXiv:1804.06788*. [arXiv:1804.06788](https://arxiv.org/abs/1804.06788)
 
-[^vehtari2021]: Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021). Rank-normalization, folding, and localization: An improved $\hat{R}$ for assessing convergence of MCMC. *Bayesian Analysis*, 16(2), 667–718. [DOI: 10.1214/20-BA1221](https://doi.org/10.1214/20-BA1221)
+[^vehtari2021]: Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., & Bürkner, P.-C. (2021). Rank-normalization, folding, and localization: An improved R-hat for assessing convergence of MCMC. *Bayesian Analysis*, 16(2), 667–718. [DOI: 10.1214/20-BA1221](https://doi.org/10.1214/20-BA1221)
 
 [^betancourt2017]: Betancourt, M. (2017). A conceptual introduction to Hamiltonian Monte Carlo. *arXiv preprint arXiv:1701.02434*. [arXiv:1701.02434](https://arxiv.org/abs/1701.02434)
