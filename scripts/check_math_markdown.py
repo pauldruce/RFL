@@ -85,6 +85,11 @@ def check_markdown_math(file_path: Path) -> list[str]:
             continue
 
         if in_display_math:
+            if r"\{" in line or r"\}" in line:
+                errors.append(
+                    f"{file_path}:{line_no}: [R6] Escaped brace in display math: "
+                    "Markdown consumes the backslash before math renders. Use '\\lbrace' and '\\rbrace' instead."
+                )
             continue
 
         # Headings are treated as independent single-line paragraphs
@@ -149,6 +154,14 @@ def check_markdown_math(file_path: Path) -> list[str]:
                         "Move equation to a '$$' display block or drop subscript in prose."
                     )
                     break
+
+        # Rule R6: Check for escaped braces (\{ or \}) in inline math
+        for span in INLINE_MATH_PATTERN.findall(clean_para):
+            if r"\{" in span or r"\}" in span:
+                errors.append(
+                    f"{file_path}:{start_line}: [R6] Escaped brace in inline math '${span}$': "
+                    "Markdown consumes the backslash before math renders. Use '\\lbrace' and '\\rbrace' instead."
+                )
 
     return errors
 

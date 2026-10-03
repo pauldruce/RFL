@@ -31,12 +31,12 @@ $$
 D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a, \quad \text{with } \mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
 $$
 
-where $\epsilon_a \in \{ +1, -1 \}$ are the Clifford generator signs: $\epsilon_a = +1$ for $a \le p$ (Hermitian) and $\epsilon_a = -1$ for $a > p$ (anti-Hermitian).
+where $\epsilon_a \in \lbrace +1, -1 \rbrace$ are the Clifford generator signs: $\epsilon_a = +1$ for $a \le p$ (Hermitian) and $\epsilon_a = -1$ for $a > p$ (anti-Hermitian).
 
 The gamma matrices satisfy the Clifford anticommutation relations:
 
 $$
-\{ \gamma^a, \gamma^b \} = 2 \epsilon_a \delta^{ab} \mathbf{1}_{d_\gamma}
+\lbrace \gamma^a, \gamma^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}_{d_\gamma}
 $$
 
 and their spinor trace satisfies orthogonality:
@@ -413,7 +413,7 @@ $$
 where $P$ denotes precomputed matrix products:
 
 $$
-P \in \{ M_{i_1} M_{i_2} M_{i_3}, \; M_{i_1} M_{i_2}, \; M_{i_1} \}
+P \in \lbrace M_{i_1} M_{i_2} M_{i_3}, \; M_{i_1} M_{i_2}, \; M_{i_1} \rbrace
 $$
 
 Higher powers contract algebraically:

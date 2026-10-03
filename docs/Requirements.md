@@ -7,5 +7,5 @@ Core requirements include:
 
 1. **Spectral Actions:** Actions must be spectral: $S(D) = \sum_i V(\lambda_i)$ with bounded potential $V \ge b$ ($b \in \mathbb{R}$) and Dirac eigenvalues $\lambda_i$.
 2. **Asymptotic Growth:** The potential function must grow asymptotically to infinity: $V(x) \to \infty$ as $x \to \infty$.
-3. **Observable Measurement:** The library must measure observables $f(D)$. Monte Carlo simulations evaluate ensemble averages $\langle f \rangle_N = \frac{1}{N} \sum_{j=1}^N f(D_j)$ over sampled Dirac operators $\{D_j\}$.
+3. **Observable Measurement:** The library must measure observables $f(D)$. Monte Carlo simulations evaluate ensemble averages $\langle f \rangle_N = \frac{1}{N} \sum_{j=1}^N f(D_j)$ over sampled Dirac operators $\lbrace D_j \rbrace$.
 4. **Autocorrelation Analysis:** The library must calculate the integrated autocorrelation time for measured observables.

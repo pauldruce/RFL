@@ -24,7 +24,7 @@ All theory notes and code comments adhere to these mathematical symbols:
 | $(p, q)$ | Clifford signature / Type | The signature of the Clifford algebra $\mathcal{C}\ell(p, q)$, defining the spectral triple type $(p, q)$ with $p$ Hermitian and $q$ anti-Hermitian matrix generators. |
 | $V$ | Generator count | Total number of Clifford generators: $V = p + q$. |
 | $d_\gamma$ | Spinor dimension | Representation dimension of the Clifford algebra $\mathcal{C}\ell(p, q)$. |
-| $\gamma^a$ | Gamma matrices | Generators satisfying $\{ \gamma^a, \gamma^b \} = 2 \epsilon_a \delta^{ab} \mathbf{1}$. |
+| $\gamma^a$ | Gamma matrices | Generators satisfying $\lbrace \gamma^a, \gamma^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}$. |
 | $\epsilon_a$ | Clifford signs | Generator signs: $(\gamma^a)^2 = \epsilon_a \mathbf{1}$, with $\epsilon_a = +1$ for $a \le p$ and $\epsilon_a = -1$ for $a > p$. |
 | $M_a$ | Component matrices | Set of $V$ Hermitian matrices parameterising the geometry. |
 | $D$ | Dirac operator | Assembled operator: $D = \sum_{a=1}^V \gamma^a \otimes M_a$. |

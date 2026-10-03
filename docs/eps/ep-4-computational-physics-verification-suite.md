@@ -49,7 +49,7 @@ $$
 
 
 To establish scientific validity, RFL must verify six fundamental pillars:
-1. **Axiomatic Geometric Invariants:** The assembled Dirac operator must satisfy all spectral triple axioms across all 8 KO dimensions. These axioms include Hermiticity, real structure relations ($J^2, DJ, J\Gamma$), and chirality grading ($\{\Gamma, D\} = 0$).
+1. **Axiomatic Geometric Invariants:** The assembled Dirac operator must satisfy all spectral triple axioms across all 8 KO dimensions. These axioms include Hermiticity, real structure relations ($J^2, DJ, J\Gamma$), and chirality grading ($\lbrace \Gamma, D \rbrace = 0$).
 2. **Continuous Symmetries & Gauge Invariance:** The spectral action and eigenvalue spectra must be invariant under unitary transformations $D \to UDU^\dagger$ for $U \in \mathrm{U}(N)$.
 3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants ensure that samplers experience true physical energy and conservative forces without numerical drift.
 4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime with $g_4 = 0$, spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions of signature $(0, 1)$ must match exact Riemann-Hilbert solutions.
@@ -105,7 +105,7 @@ Researchers and peer reviewers can independently confirm that the software sampl
 | **REQ-001** | **Incremental Action Invariant** | $\lvert (S_f - S_i) - \Delta S \rvert \le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert + \lvert g_2 \rvert \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)) + c_0 M^2 \epsilon_{\mathrm{mach}}$ (Section 3.3). | Tier 1 (Smoke) |
 | **REQ-002** | **Dirac Hermiticity** | $\lVert D - D^\dagger \rVert_F \le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ for assembled Dirac operators. | Tier 1 (Smoke) |
 | **REQ-003** | **Complete KO Real Structure** | $\lVert J^2 - \epsilon' I \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$, $\lVert D J - \epsilon J D \rVert_F \le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$, and $\lVert J \Gamma - \epsilon'' \Gamma J \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$ across all 8 KO dimensions. | Tier 1 (Smoke) |
-| **REQ-004** | **Chirality & Spectral Anti-Symmetry** | $\lVert \Gamma D + D \Gamma \rVert_F \le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ and $\{\lambda_i\} \equiv \{-\lambda_i\}$ to machine precision for even spectral triples. | Tier 1 (Smoke) |
+| **REQ-004** | **Chirality & Spectral Anti-Symmetry** | $\lVert \Gamma D + D \Gamma \rVert_F \le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ and $\lbrace \lambda_i \rbrace \equiv \lbrace -\lambda_i \rbrace$ to machine precision for even spectral triples. | Tier 1 (Smoke) |
 | **REQ-005** | **Gaussian Limit Moments** | MCMC eigenvalue moments match Wigner self-convolution within $3$ standard errors. | Tier 2 (Integration) |
 | **REQ-006** | **Detailed Balance** | Transition probabilities satisfy microscopic reversibility and coarse-grained state-flux balance $N_{A \to B} \approx N_{B \to A}$. | Tier 2 (Integration) |
 | **REQ-007** | **Chain Convergence** | Rank-normalised folded split $\hat{R} < 1.05$ with bulk $\mathrm{ESS} \ge 400$ across independent chains. | Tier 3 (Validation) |
@@ -146,7 +146,7 @@ $$
 
 
 The matrix norm $\lVert A \rVert_F = \sqrt{\mathrm{Tr}(A^\dagger A)}$ denotes the Frobenius norm.
-Because $\gamma^k$ contains exact matrix elements in $\{0, \pm 1, \pm i\}$, errors arise only from floating-point additions.
+Because $\gamma^k$ contains exact matrix elements in $\lbrace 0, \pm 1, \pm i \rbrace$, errors arise only from floating-point additions.
 Summing $p+q \le 8$ terms accumulates at most $\mathcal{O}((p+q)\epsilon_{\mathrm{mach}})$ rounding error:
 
 
@@ -536,7 +536,7 @@ C++ tests focus on deterministic invariants and algebraic correctness:
     EXPECT_NEAR(Sf - Si, dS, tol);
   }
   ```
-* `tAxioms.cpp`: Verifies Hermiticity ($D = D^\dagger$), complete 8-fold KO table ($J^2, JD, J\Gamma$), and chirality ($\{\Gamma, D\} = 0$).
+* `tAxioms.cpp`: Verifies Hermiticity ($D = D^\dagger$), complete 8-fold KO table ($J^2, JD, J\Gamma$), and chirality ($\lbrace \Gamma, D \rbrace = 0$).
 * `tGaugeInvariance.cpp`: Verifies that random Haar unitary transformations $D \to UDU^\dagger$ preserve action values and eigenvalue spectra.
 * `tDerivatives.cpp`: Verifies analytical matrix variations against central finite differences.
 
@@ -583,7 +583,7 @@ tests/physics/
 * **Alignment:** Implemented alongside [EP-1](ep-1-core-architecture-modernisation.md) architecture modernisation.
 * **Tasks:**
   1. Create `src/core/tests/tDelta.cpp` testing `delta24` across all Clifford types $(p, q)$ with $p+q \le 4$.
-  2. Implement `tests/physics/test_axiomatic_invariants.py` asserting $D = D^\dagger$, the complete 8-fold KO table, and $\{\Gamma, D\} = 0$.
+  2. Implement `tests/physics/test_axiomatic_invariants.py` asserting $D = D^\dagger$, the complete 8-fold KO table, and $\lbrace \Gamma, D \rbrace = 0$.
   3. Implement `tests/physics/test_gauge_invariance.py` asserting unitary invariance $S(UDU^\dagger) = S(D)$ under random Haar unitaries.
   4. Implement `tests/physics/test_derivative_consistency.py` testing variations against central finite differences.
   5. Implement `tests/physics/test_gaussian_limit.py` asserting Gaussian trace moments match Wigner self-convolution within statistical tolerance.

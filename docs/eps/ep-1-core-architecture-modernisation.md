@@ -61,9 +61,9 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 
 | Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
 | :--- | :--- | :--- |
-| **REQ-001** | **Hermiticity & Signature Preservation** | Matrix variations $\delta M_k$ must strictly preserve $H_i^\dagger = H_i$ and $L_j^\dagger = -L_j$ dictated by signature signs $\epsilon_k \in \{+1, -1\}$. |
+| **REQ-001** | **Hermiticity & Signature Preservation** | Matrix variations $\delta M_k$ must strictly preserve $H_i^\dagger = H_i$ and $L_j^\dagger = -L_j$ dictated by signature signs $\epsilon_k \in \lbrace +1, -1 \rbrace$. |
 | **REQ-002** | **Exact Analytic Variation** $\Delta S$ | Fast $\mathcal{O}(N^3)$ local variation must equal global recomputation $S(D + \delta D) - S(D)$ within floating-point tolerance ($< 10^{-10}$). |
-| **REQ-003** | **Spectral Symmetry Preservation** | For symmetric geometries (where $\{\Gamma, D\} = 0$), the computed spectrum must satisfy $\{\lambda_i\} = \{-\lambda_i\}$ to machine precision ($< 10^{-12}$). |
+| **REQ-003** | **Spectral Symmetry Preservation** | For symmetric geometries (where $\lbrace \Gamma, D \rbrace = 0$), the computed spectrum must satisfy $\lbrace \lambda_i \rbrace = \lbrace -\lambda_i \rbrace$ to machine precision ($< 10^{-12}$). |
 | **REQ-004** | **Detailed Balance & Ergodicity** | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
 | **REQ-005** | **Automated Step-Size Calibration** | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during burn-in. |
 | **REQ-006** | **Zero-Copy NumPy Interoperability** | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
