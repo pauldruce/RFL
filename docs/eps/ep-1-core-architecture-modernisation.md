@@ -32,7 +32,7 @@ where the Dirac operator is decomposed into Hermitian and anti-Hermitian matrice
 
 $$D = \sum_{i=1}^p \gamma^i \otimes H_i + \sum_{j=1}^q \gamma^{p+j} \otimes L_j$$
 
-As the research programme expands into **Fermion Functional Integrals (Barrett 2024)**, **Product Geometries $S_F^2 \otimes \mathcal{F}$ (Barrett 2026)**, and **Random Matrix Spectral Statistics**, the legacy codebase exhibits structural bottlenecks:
+As the research programme expands into **Fermion Functional Integrals (Barrett 2024)**, **Product Geometries** $S_F^2 \otimes \mathcal{F}$ **(Barrett 2026)**, and **Random Matrix Spectral Statistics**, the legacy codebase exhibits structural bottlenecks:
 1. **Opaque Execution Control:** The legacy `Simulation` class executes a monolithic, blocking loop. Researchers cannot inspect eigenvalue trajectories, stream observables to disk, or apply interactive stopping conditions in Jupyter notebooks.
 2. **Entangled Physics & Sampling:** The analytical trace variation formulas $\Delta \text{Tr}(D^2)$ and $\Delta \text{Tr}(D^4)$ are embedded directly inside `Metropolis.cpp`. This prevents reusing the same physics for Hybrid Monte Carlo (HMC) or new multi-term action potentials ($S_6, \text{Pfaffian}$).
 3. **Leaky Interface & Const Violation:** The legacy `IDiracOperator` interface exposes private precomputed lookup tables (`getOmegaTable4()`) and breaks `const`-correctness by returning mutable matrix references from `const` member functions to allow MCMC mutation.
@@ -62,7 +62,7 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 | Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
 | :--- | :--- | :--- |
 | **REQ-001** | **Hermiticity & Signature Preservation** | Matrix variations $\delta M_k$ must strictly preserve $H_i^\dagger = H_i$ and $L_j^\dagger = -L_j$ dictated by signature signs $\epsilon_k \in \{+1, -1\}$. |
-| **REQ-002** | **Exact Analytic Variation $\Delta S$** | Fast $\mathcal{O}(N^3)$ local variation must equal global recomputation $S(D + \delta D) - S(D)$ within floating-point tolerance ($< 10^{-10}$). |
+| **REQ-002** | **Exact Analytic Variation** $\Delta S$ | Fast $\mathcal{O}(N^3)$ local variation must equal global recomputation $S(D + \delta D) - S(D)$ within floating-point tolerance ($< 10^{-10}$). |
 | **REQ-003** | **Spectral Symmetry Preservation** | For symmetric geometries (where $\{\Gamma, D\} = 0$), the computed spectrum must satisfy $\{\lambda_i\} = \{-\lambda_i\}$ to machine precision ($< 10^{-12}$). |
 | **REQ-004** | **Detailed Balance & Ergodicity** | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
 | **REQ-005** | **Automated Step-Size Calibration** | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during burn-in. |
@@ -105,9 +105,9 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 
 | Criteria | Option A: Embedded in Sampler (Legacy) | Option B: Physics Action with Analytic Variations | Option C: Automatic Differentiation (AD) |
 | :--- | :--- | :--- | :--- |
-| **Separation of Concerns**| ❌ Physics tangled in MCMC | ✅ **Clean separation ($S, \Delta S, \nabla S$)** | ✅ Clean separation |
-| **Computational Speed** | ✅ Fast analytical $\mathcal{O}(N^3)$ | ✅ **Fast analytical $\mathcal{O}(N^3)$** | ❌ 10–50x slower for matrix traces |
-| **Reusability for HMC** | ❌ Impossible without duplication | ✅ **Directly reuses gradient $\nabla S$** | ✅ Automatic gradients |
+| **Separation of Concerns**| ❌ Physics tangled in MCMC | ✅ **Clean separation** ($S, \Delta S, \nabla S$) | ✅ Clean separation |
+| **Computational Speed** | ✅ Fast analytical $\mathcal{O}(N^3)$ | ✅ **Fast analytical** $\mathcal{O}(N^3)$ | ❌ 10–50x slower for matrix traces |
+| **Reusability for HMC** | ❌ Impossible without duplication | ✅ **Directly reuses gradient** $\nabla S$ | ✅ Automatic gradients |
 | **Decision** | Rejected | **Selected (Option B)** | Rejected |
 
 *Rationale:* Analytical variation formulas are essential for MCMC performance. Encapsulating these formulas inside `BarrettGlaserAction` cleanly separates physical theory from numerical sampling and enables immediate reuse in HMC.

@@ -65,7 +65,7 @@ $$
 \mathrm{Tr}_{\mathcal{H}}(D^2) = \sum_{a,b=1}^V \mathrm{tr}(\gamma^a \gamma^b) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \mathcal{D}_b) = d_\gamma \sum_{a=1}^V \epsilon_a \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2)
 $$
 
-Expanding the algebra operator $\mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T$:
+Expanding the squared algebra operator $\mathcal{D}_a^2$:
 
 $$
 \mathcal{D}_a^2 = M_a^2 \otimes \mathbf{1}_N + 2 \epsilon_a M_a \otimes M_a^T + \mathbf{1}_N \otimes (M_a^T)^2
@@ -94,9 +94,9 @@ $$
 where $\Omega_{abcd} = \mathrm{tr}(\gamma^a \gamma^b \gamma^c \gamma^d)$ is the 4-gamma Clifford trace tensor.
 
 The contractions partition into three symmetry classes:
-1. **$B_4$:** Terms where all four indices $(a, b, c, d)$ are distinct.
-2. **$B_2$:** Terms with two distinct index pairs (e.g. $\Omega_{aabb}, \Omega_{abab}, \Omega_{abba}$).
-3. **$B$:** Quartic self-couplings where $a = b = c = d$.
+1. **Four distinct indices** $B_4$: Terms where all four indices $(a, b, c, d)$ are distinct.
+2. **Two pairs** $B_2$: Terms with two distinct index pairs (e.g. $\Omega_{aabb}, \Omega_{abab}, \Omega_{abba}$).
+3. **Single index** $B$: Quartic self-couplings where $a = b = c = d$.
 
 ---
 
@@ -114,11 +114,15 @@ $$
 \delta M = z E_{ij} + \bar{z} E_{ji}
 $$
 
-where $E_{ij}$ is the standard matrix unit: $(E_{ij})_{kl} = \delta_{ik} \delta_{jl}$.
+where $E_{ij}$ is the standard matrix unit:
+
+$$
+(E_{ij})_{kl} = \delta_{ik} \delta_{jl}
+$$
 
 ### 3.1 Diagonal vs Off-Diagonal Perturbations
 
-**Off-diagonal move ($i \neq j$):**
+**Off-diagonal move** ($i \neq j$):
 Updates both $(i, j)$ and $(j, i)$:
 
 $$
@@ -127,7 +131,7 @@ $$
 
 The trace vanishes: $\mathrm{Tr}(\delta M) = 0$.
 
-**Diagonal move ($i = j$):**
+**Diagonal move** ($i = j$):
 The variation collapses to:
 
 $$
@@ -147,15 +151,20 @@ $$
 $$
 
 **Step 1 (Operator expansion):**
-Expand the square and apply trace cyclicity $\mathrm{Tr}_{\mathcal{H}}(D \delta D) = \mathrm{Tr}_{\mathcal{H}}(\delta D D)$:
+Expand the square and apply trace cyclicity $\mathrm{Tr}(D \delta D) = \mathrm{Tr}(\delta D D)$:
 
 $$
 \Delta \mathrm{Tr}(D^2) = 2 \mathrm{Tr}_{\mathcal{H}}(D \delta D) + \mathrm{Tr}_{\mathcal{H}}((\delta D)^2)
 $$
 
 **Step 2 (Clifford trace factorisation):**
-Substitute $D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a$ and $\delta D = \gamma^x \otimes \delta \mathcal{D}_x$.
-Factor the Hilbert space trace $\mathrm{Tr}_{\mathcal{H}} = \mathrm{tr} \otimes \mathrm{Tr}_{\mathrm{alg}}$:
+Substitute the operator decomposition and perturbation:
+
+$$
+D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a, \quad \delta D = \gamma^x \otimes \delta \mathcal{D}_x
+$$
+
+Factor the Hilbert space trace $\mathrm{Tr} \otimes \mathrm{Tr}$:
 
 $$
 \mathrm{Tr}_{\mathcal{H}}(D \delta D) = \sum_{a=1}^V \mathrm{tr}(\gamma^a \gamma^x) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x)
@@ -179,8 +188,13 @@ $$
 \Delta \mathrm{Tr}(D^2) = d_\gamma \epsilon_x \left[ 2 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x) + \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) \right]
 $$
 
-**Step 3 (Expansion into matrix components $M_x$ and $\delta M$):**
-Substitute $\mathcal{D}_x = M_x \otimes \mathbf{1}_N + \epsilon_x \mathbf{1}_N \otimes M_x^T$ and $\delta \mathcal{D}_x = \delta M \otimes \mathbf{1}_N + \epsilon_x \mathbf{1}_N \otimes \delta M^T$.
+**Step 3 (Expansion into matrix components):**
+Substitute the algebra operators:
+
+$$
+\mathcal{D}_x = M_x \otimes \mathbf{1}_N + \epsilon_x \mathbf{1}_N \otimes M_x^T, \quad \delta \mathcal{D}_x = \delta M \otimes \mathbf{1}_N + \epsilon_x \mathbf{1}_N \otimes \delta M^T
+$$
+
 Expand the operator product on $\mathbb{C}^N \otimes \mathbb{C}^N$:
 
 $$
@@ -205,17 +219,17 @@ $$
 \Delta \mathrm{Tr}(D^2) = 4 d_\gamma \left[ \epsilon_x N \mathrm{Tr}(M_x \delta M) + \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M) \right] + 2 d_\gamma \left[ \epsilon_x N \mathrm{Tr}((\delta M)^2) + (\mathrm{Tr}(\delta M))^2 \right]
 $$
 
-**Step 4 (Evaluation on elementary move $\delta M = z E_{ij} + \bar{z} E_{ji}$):**
+**Step 4 (Evaluation on elementary move):**
 Use $\mathrm{Tr}(M_x \delta M) = 2 \mathrm{Re}(z M_x(j, i))$:
 
-**Off-diagonal move ($i \neq j$):**
+**Off-diagonal move** ($i \neq j$):
 Here $\mathrm{Tr}(\delta M) = 0$ and $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$:
 
 $$
 \Delta_2 = 4 d_\gamma N \left( 2 \mathrm{Re}(z M_x(j, i)) + |z|^2 \right)
 $$
 
-**Diagonal move ($i = j$):**
+**Diagonal move** ($i = j$):
 Here $\mathrm{Tr}(\delta M) = 2 \mathrm{Re}(z)$ and $\mathrm{Tr}((\delta M)^2) = 4 \mathrm{Re}(z)^2$:
 
 $$
@@ -240,16 +254,25 @@ $$
 $$
 
 **Step 2 (Clifford trace factorisation):**
-Substitute $D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a$ and $\delta D = \gamma^x \otimes \delta \mathcal{D}_x$.
-Factoring $\mathrm{Tr}_{\mathcal{H}} = \mathrm{tr} \otimes \mathrm{Tr}_{\mathrm{alg}}$ isolates the Clifford trace tensors $\Omega_{abcd} = \mathrm{tr}(\gamma^a \gamma^b \gamma^c \gamma^d)$:
+Substitute the operator decomposition and perturbation:
 
-**Linear term ($O(z)$):**
+$$
+D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a, \quad \delta D = \gamma^x \otimes \delta \mathcal{D}_x
+$$
+
+Factoring the trace isolates the Clifford trace tensors:
+
+$$
+\Omega_{abcd} = \mathrm{tr}(\gamma^a \gamma^b \gamma^c \gamma^d)
+$$
+
+**Linear term**, order $O(z)$:
 
 $$
 4 \mathrm{Tr}_{\mathcal{H}}(D^3 \delta D) = 4 \sum_{i_1, i_2, i_3=1}^V \Omega_{i_1 i_2 i_3 x} \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_{i_1} \mathcal{D}_{i_2} \mathcal{D}_{i_3} \delta \mathcal{D}_x)
 $$
 
-**Quadratic terms ($O(z^2)$):**
+**Quadratic terms**, order $O(z^2)$:
 
 $$
 \begin{aligned}
@@ -258,15 +281,15 @@ $$
 \end{aligned}
 $$
 
-**Cubic term ($O(z^3)$):**
+**Cubic term**, order $O(z^3)$:
 Since $(\gamma^x)^3 = \epsilon_x \gamma^x$, Clifford orthogonality leaves only $a = x$:
 
 $$
 4 \mathrm{Tr}_{\mathcal{H}}(D (\delta D)^3) = 4 d_\gamma \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3)
 $$
 
-**Quartic term ($O(z^4)$):**
-Since $(\gamma^x)^4 = \mathbf{1}_{d_\gamma}$:
+**Quartic term**, order $O(z^4)$:
+Since $(\gamma^x)^4 = \mathbf{1}$ (spinor identity):
 
 $$
 \mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4)
@@ -274,14 +297,23 @@ $$
 
 **Step 3 (Expansion into matrix components and algebra traces):**
 
-Each algebra operator has the Kronecker form $\mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T$.
+Each algebra operator has the Kronecker form:
+
+$$
+\mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
+$$
+
 Expanding operator products on $\mathbb{C}^N \otimes \mathbb{C}^N$ and taking the trace yields the component matrix expressions.
 
-#### 1. Linear variation $\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_{i_1} \mathcal{D}_{i_2} \mathcal{D}_{i_3} \delta \mathcal{D}_x)$
+#### 1. Linear Variation
 
-Substituting $\mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T$ into the product and taking the algebra trace $\mathrm{Tr}_{\mathrm{alg}} = \mathrm{Tr} \otimes \mathrm{Tr}$ contracts the 16 tensor products into three trace topologies:
+$$
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_{i_1} \mathcal{D}_{i_2} \mathcal{D}_{i_3} \delta \mathcal{D}_x)
+$$
 
-**Single-trace (leading $O(N)$):**
+Taking the algebra trace contracts the 16 tensor products into three trace topologies:
+
+**Single-trace**, leading order $O(N)$:
 
 $$
 N \left[ \mathrm{Tr}(M_1 M_2 M_3 \delta M) + \epsilon_1 \epsilon_2 \epsilon_3 \epsilon_x \mathrm{Tr}(M_3 M_2 M_1 \delta M) \right]
@@ -308,7 +340,11 @@ $$
 
 These terms map directly to variables `t_1` to `t_8` in `BarrettGlaserAction::delta4`.
 
-#### 2. Quadratic variations $\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2 (\delta \mathcal{D}_x)^2)$ and $\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x \mathcal{D}_a \delta \mathcal{D}_x)$
+#### 2. Quadratic Variations
+
+$$
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2 (\delta \mathcal{D}_x)^2) \quad \text{and} \quad \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x \mathcal{D}_a \delta \mathcal{D}_x)
+$$
 
 Expand the operator squares:
 
@@ -328,7 +364,11 @@ $$
 \end{aligned}
 $$
 
-#### 3. Cubic variation $\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3)$
+#### 3. Cubic Variation
+
+$$
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3)
+$$
 
 Expand $(\delta \mathcal{D}_x)^3$:
 
@@ -336,13 +376,17 @@ $$
 (\delta \mathcal{D}_x)^3 = (\delta M)^3 \otimes \mathbf{1}_N + 3 \epsilon_x (\delta M)^2 \otimes \delta M^T + 3 \delta M \otimes (\delta M^T)^2 + \epsilon_x \mathbf{1}_N \otimes (\delta M^T)^3
 $$
 
-Multiplying by $\mathcal{D}_x = M_x \otimes \mathbf{1}_N + \epsilon_x \mathbf{1}_N \otimes M_x^T$ and taking the trace yields:
+Multiplying by $\mathcal{D}_x$ and taking the trace yields:
 
 $$
 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3) = 2 N \mathrm{Tr}(M_x (\delta M)^3) + 6 \mathrm{Tr}(M_x \delta M) \mathrm{Tr}((\delta M)^2) + 2 \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}((\delta M)^3)
 $$
 
-#### 4. Quartic variation $\mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4)$
+#### 4. Quartic Variation
+
+$$
+\mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4)
+$$
 
 Expand the fourth power using the binomial theorem:
 
@@ -356,7 +400,7 @@ $$
 \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4) = 2 N \mathrm{Tr}((\delta M)^4) + 8 \epsilon_x \mathrm{Tr}((\delta M)^3) \mathrm{Tr}(\delta M) + 6 (\mathrm{Tr}((\delta M)^2))^2
 $$
 
-**Step 4 (Evaluation on elementary move $\delta M = z E_{ij} + \bar{z} E_{ji}$ in $O(N^2)$):**
+**Step 4 (Evaluation on elementary move):**
 
 Substituting the rank-1 matrix unit perturbation avoids full matrix multiplications:
 
@@ -366,9 +410,17 @@ $$
 \mathrm{Tr}(P \delta M) = z P(j, i) + \bar{z} P(i, j)
 $$
 
-where $P$ denotes precomputed matrix products ($M_{i_1} M_{i_2} M_{i_3}$, $M_{i_1} M_{i_2}$, etc.).
+where $P$ denotes precomputed matrix products:
 
-Higher powers contract algebraically via $(\delta M)^2 = |z|^2 (E_{ii} + E_{jj}) + (z^2 E_{ij}^2 + \bar{z}^2 E_{ji}^2)$.
+$$
+P \in \{ M_{i_1} M_{i_2} M_{i_3}, \; M_{i_1} M_{i_2}, \; M_{i_1} \}
+$$
+
+Higher powers contract algebraically:
+
+$$
+(\delta M)^2 = |z|^2 (E_{ii} + E_{jj}) + (z^2 E_{ij}^2 + \bar{z}^2 E_{ji}^2)
+$$
 
 The scalar quartic term evaluates to:
 

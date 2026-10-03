@@ -72,7 +72,7 @@ Researchers and peer reviewers can independently confirm that the software sampl
 * **Goal 4:** Verify analytical action derivatives and variations against numerical central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$.
 * **Goal 5:** Implement an automated Gaussian-limit test comparing MCMC eigenvalue moments to the exact Wigner semicircle self-convolution and Simulation-Based Calibration (SBC).
 * **Goal 6:** Validate 1-matrix models of signature $(0, 1)$ against exact analytical Riemann-Hilbert solutions from published literature.
-* **Goal 7:** Provide automated MCMC statistical diagnostics including integrated autocorrelation time $\tau_{\mathrm{int}}$ and rank-normalised folded split $\hat{R}$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$.
+* **Goal 7:** Provide automated MCMC statistical diagnostics including integrated autocorrelation time $\tau_{\mathrm{int}}$ and rank-normalised folded split $\hat{R}$ with bulk $\mathrm{ESS} \ge 400$.
 
 ### 2.3 Non-Goals
 * Re-implementing external statistical packages inside RFL C++ core.
@@ -108,7 +108,7 @@ Researchers and peer reviewers can independently confirm that the software sampl
 | **REQ-004** | **Chirality & Spectral Anti-Symmetry** | $\lVert \Gamma D + D \Gamma \rVert_F \le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ and $\{\lambda_i\} \equiv \{-\lambda_i\}$ to machine precision for even spectral triples. | Tier 1 (Smoke) |
 | **REQ-005** | **Gaussian Limit Moments** | MCMC eigenvalue moments match Wigner self-convolution within $3$ standard errors. | Tier 2 (Integration) |
 | **REQ-006** | **Detailed Balance** | Transition probabilities satisfy microscopic reversibility and coarse-grained state-flux balance $N_{A \to B} \approx N_{B \to A}$. | Tier 2 (Integration) |
-| **REQ-007** | **Chain Convergence** | Rank-normalised folded split $\hat{R} < 1.05$ with $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$ across independent chains. | Tier 3 (Validation) |
+| **REQ-007** | **Chain Convergence** | Rank-normalised folded split $\hat{R} < 1.05$ with bulk $\mathrm{ESS} \ge 400$ across independent chains. | Tier 3 (Validation) |
 | **REQ-008** | **Unitary Gauge Invariance** | $\lvert S(U D U^\dagger) - S(D) \rvert \le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ and $\max_i \lvert \lambda_i(U D U^\dagger) - \lambda_i(D) \rvert \le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ for Haar unitary $U \in \mathrm{U}(N)$. | Tier 1 (Smoke) |
 | **REQ-009** | **Action Derivatives** | Analytical matrix variations match central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$ (Section 3.3). | Tier 1 (Smoke) |
 | **REQ-010** | **Simulation-Based Calibration** | Posterior rank statistics from Gaussian ensemble MCMC pass Kolmogorov-Smirnov uniformity test with $p > 0.01$ (Talts et al. 2018)[^talts2018]. | Tier 3 (Validation) |
