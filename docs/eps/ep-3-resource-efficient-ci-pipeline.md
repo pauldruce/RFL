@@ -407,7 +407,6 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
       - '*.md'
       - '.agents/**'
       - 'research/**'
-      - 'vault/**'
       - '.gitignore'
     code:
       - 'src/**'

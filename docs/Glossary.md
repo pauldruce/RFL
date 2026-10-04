@@ -22,6 +22,7 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | **Matrix Dimension (N)** | The size $N \times N$ of the internal matrices $H_i, L_j$. | *Matrix size, cutoff size* |
 | **Chirality Operator (Gamma)** | The grading operator satisfying $\Gamma^2 = \mathbb{I}$ and $\lbrace \Gamma, D \rbrace = 0$ for even geometries. | *Grading operator, gamma five* |
 | **Reality Operator (J)** | The antilinear isometry representing charge conjugation in real spectral triples. | *Charge conjugation operator* |
+| **Decomposition** ($B_n$) | The partition of the quartic trace into terms with $n \in \lbrace 4, 2, 1 \rbrace$ distinct matrix indices ($B_4, B_2, B$). | *Quartic splitting, Clifford topologies* |
 
 ---
 
@@ -38,6 +39,7 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | **Observer** | A software object that listens to step/sweep events and records observables. | *Sink, listener, telemetry logger* |
 | **Autocorrelation Time (tau_int)** | The integrated statistical correlation time between successive Markov samples ($\tau_{\text{int}}$). | *Correlation length, memory time* |
 | **Eigenvalue Spectrum** | The set of real eigenvalues $\lbrace \lambda_i \rbrace$ of the assembled Dirac operator $D$. | *Eigen-spectrum, Dirac energies* |
+| **Statistical Rank (Sample Rank)** | The ordinal sorting position $r \in \lbrace 1, \dots, S \rbrace$ of a sample in an ascending sorted array (distinct from algebraic matrix rank). | *Sorting index, sample rank* |
 
 ---
 

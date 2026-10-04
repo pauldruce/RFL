@@ -19,30 +19,49 @@ where:
 * $N$ is the matrix dimension.
 * $V = p + q$ is the number of Clifford generators.
 
-The Dirac operator $D: \mathcal{H} \to \mathcal{H}$ acts on a state $\psi \in \mathcal{H}$ as:
+The Dirac operator $D: \mathcal{H} \to \mathcal{H}$ decomposes into $p$ Hermitian matrices $H_a$ and $q$ anti-Hermitian matrices $L_b$:
 
 $$
-D(\psi) = \sum_{a=1}^V \gamma^a \otimes (M_a \psi + \epsilon_a \psi M_a)
+D = \sum_{a=1}^p e^a \otimes \lbrace H_a, \cdot \rbrace + \sum_{b=1}^q e^{p+b} \otimes [L_b, \cdot]
 $$
 
-In Kronecker product notation on $\mathbb{C}^{d_\gamma} \otimes \mathbb{C}^N \otimes \mathbb{C}^N$:
+where $e^1, \dots, e^{p+q}$ are generators of the real Clifford algebra $\mathcal{C}\ell(p, q)$, satisfying:
 
 $$
-D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a, \quad \text{with } \mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
+\lbrace e^a, e^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}_{d_\gamma}
 $$
 
-where $\epsilon_a \in \lbrace +1, -1 \rbrace$ are the Clifford generator signs: $\epsilon_a = +1$ for $a \le p$ (Hermitian) and $\epsilon_a = -1$ for $a > p$ (anti-Hermitian).
+with $\epsilon_a = +1$ for $a \le p$ and $\epsilon_a = -1$ for $a > p$.
 
-The gamma matrices satisfy the Clifford anticommutation relations:
+### 1.1 The Hermitian Coordinate Basis
 
-$$
-\lbrace \gamma^a, \gamma^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}_{d_\gamma}
-$$
-
-and their spinor trace satisfies orthogonality:
+To parameterise the space of Dirac operators using solely Hermitian matrices $M_a$:
+1. Substitute the anti-Hermitian matrices with Hermitian matrices: $L_b = i M_{p+b}$.
+2. Absorb the factor of $i$ into the anti-Hermitian Clifford generators:
 
 $$
-\mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \epsilon_a \delta^{ab}
+\gamma^a = \begin{cases} e^a & \text{for } a \le p \\ i e^a & \text{for } a > p \end{cases}
+$$
+
+Under this basis transformation:
+* Every generator $\gamma^a$ is Hermitian and squares to $+\mathbf{1}$:
+  $$
+  (\gamma^a)^2 = \mathbf{1}_{d_\gamma}, \quad \lbrace \gamma^a, \gamma^b \rbrace = 2 \delta^{ab} \mathbf{1}_{d_\gamma}
+  $$
+  Consequently, the spinor trace is strictly positive definite:
+  $$
+  \mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \delta^{ab}
+  $$
+* The metric signs $\epsilon_a \in \lbrace +1, -1 \rbrace$ move entirely into the matrix superoperator:
+  $$
+  \mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
+  $$
+  where $\epsilon_a = +1$ gives the anticommutator $\lbrace M_a, \cdot \rbrace$, and $\epsilon_a = -1$ gives the commutator $[M_a, \cdot]$.
+
+In this unified Hermitian basis, the Dirac operator reads:
+
+$$
+D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a
 $$
 
 ---
@@ -59,10 +78,10 @@ where $g_2$ and $g_4$ are coupling constants.
 
 ### 2.1 Quadratic Trace $\mathrm{Tr}(D^2)$
 
-Expanding $D^2$ and applying Clifford trace orthogonality $\mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \epsilon_a \delta^{ab}$:
+Expanding $D^2$ and applying Clifford trace orthogonality $\mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \delta^{ab}$:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}(D^2) = \sum_{a,b=1}^V \mathrm{tr}(\gamma^a \gamma^b) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \mathcal{D}_b) = d_\gamma \sum_{a=1}^V \epsilon_a \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2)
+\mathrm{Tr}_{\mathcal{H}}(D^2) = \sum_{a,b=1}^V \mathrm{tr}(\gamma^a \gamma^b) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \mathcal{D}_b) = d_\gamma \sum_{a=1}^V \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2)
 $$
 
 Expanding the squared algebra operator $\mathcal{D}_a^2$:
@@ -77,10 +96,10 @@ $$
 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2) = 2 N \mathrm{Tr}(M_a^2) + 2 \epsilon_a (\mathrm{Tr}(M_a))^2
 $$
 
-Multiplying by $d_\gamma \epsilon_a$ gives the component formula:
+Multiplying by $d_\gamma$ gives the component formula:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}(D^2) = 2 d_\gamma \sum_{a=1}^V \left[ \epsilon_a N \mathrm{Tr}(M_a^2) + (\mathrm{Tr}(M_a))^2 \right]
+\mathrm{Tr}_{\mathcal{H}}(D^2) = 2 d_\gamma \sum_{a=1}^V \left[ N \mathrm{Tr}(M_a^2) + \epsilon_a (\mathrm{Tr}(M_a))^2 \right]
 $$
 
 ### 2.2 Quartic Trace $\mathrm{Tr}(D^4)$
@@ -93,10 +112,32 @@ $$
 
 where $\Omega_{abcd} = \mathrm{tr}(\gamma^a \gamma^b \gamma^c \gamma^d)$ is the 4-gamma Clifford trace tensor.
 
-The contractions partition into three symmetry classes:
-1. **Four distinct indices** $B_4$: Terms where all four indices $(a, b, c, d)$ are distinct.
-2. **Two pairs** $B_2$: Terms with two distinct index pairs (e.g. $\Omega_{aabb}, \Omega_{abab}, \Omega_{abba}$).
-3. **Single index** $B$: Quartic self-couplings where $a = b = c = d$.
+#### Index Classification ($B_n$ Notation)
+
+The notation $B_n$ originates from the Barrett–Glaser action decomposition.
+The subscript $n \in \lbrace 4, 2, 1 \rbrace$ denotes the number of distinct matrix indices in the product:
+
+$$
+\mathcal{D}_a \mathcal{D}_b \mathcal{D}_c \mathcal{D}_d
+$$
+
+The Clifford trace vanishes for any term containing an odd count of any gamma generator.
+Therefore, index combinations with odd counts (such as $[3, 1]$ or $[2, 1, 1]$) vanish identically.
+The non-vanishing contractions partition into three symmetry classes:
+
+1. **Four distinct indices** ($B_4$, $n=4$):
+   Terms where all four indices $(a, b, c, d)$ are distinct.
+   These terms couple four different matrices via the anti-symmetrised Clifford tensor.
+2. **Two pairs** ($B_2$, $n=2$):
+   Terms with two distinct index pairs ($a \ne b$), where each index appears twice.
+   Because $(\gamma^a)^2 = \epsilon_a \mathbf{1}$, the Clifford tensor collapses to signed spinor dimensions:
+   $$
+   \Omega_{aabb} = \epsilon_a \epsilon_b d_\gamma, \quad \Omega_{abab} = -\epsilon_a \epsilon_b d_\gamma, \quad \Omega_{abba} = \epsilon_a \epsilon_b d_\gamma
+   $$
+   These terms describe quartic interactions between pairs of distinct matrices $M_a$ and $M_b$ (such as $\mathrm{Tr}(M_a^2 M_b^2)$ and cyclically permuted $\mathrm{Tr}(M_a M_b M_a M_b)$ terms).
+3. **Single index** ($B$ or $B_1$, $n=1$):
+   Quartic self-couplings where all four indices coincide ($a = b = c = d$).
+   Here $(\gamma^a)^4 = \mathbf{1}$, yielding $\Omega_{aaaa} = d_\gamma$ and single-matrix self-interactions $\mathrm{Tr}(M_a^4)$.
 
 ---
 
@@ -170,22 +211,22 @@ $$
 \mathrm{Tr}_{\mathcal{H}}(D \delta D) = \sum_{a=1}^V \mathrm{tr}(\gamma^a \gamma^x) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x)
 $$
 
-Apply Clifford trace orthogonality $\mathrm{tr}(\gamma^a \gamma^x) = d_\gamma \epsilon_x \delta^{ax}$. Only the $x$-th term survives:
+Apply Clifford trace orthogonality $\mathrm{tr}(\gamma^a \gamma^x) = d_\gamma \delta^{ax}$. Only the $x$-th term survives:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}(D \delta D) = d_\gamma \epsilon_x \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x)
+\mathrm{Tr}_{\mathcal{H}}(D \delta D) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x)
 $$
 
 Similarly, for the variation squared:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}((\delta D)^2) = \mathrm{tr}((\gamma^x)^2) \cdot \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) = d_\gamma \epsilon_x \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2)
+\mathrm{Tr}_{\mathcal{H}}((\delta D)^2) = \mathrm{tr}((\gamma^x)^2) \cdot \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2)
 $$
 
 Combining these yields the algebra-level variation:
 
 $$
-\Delta \mathrm{Tr}(D^2) = d_\gamma \epsilon_x \left[ 2 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x) + \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) \right]
+\Delta \mathrm{Tr}(D^2) = d_\gamma \left[ 2 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x) + \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) \right]
 $$
 
 **Step 3 (Expansion into matrix components):**
@@ -207,34 +248,41 @@ $$
 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x) = 2 N \mathrm{Tr}(M_x \delta M) + 2 \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M)
 $$
 
-Setting $M_x \to \delta M$ gives the square term:
+Setting $M_x \to \delta M$ gives the squared variation:
 
 $$
 \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) = 2 N \mathrm{Tr}((\delta M)^2) + 2 \epsilon_x (\mathrm{Tr}(\delta M))^2
 $$
 
-Multiply by $d_\gamma \epsilon_x$ (using $\epsilon_x^2 = 1$) to obtain the component matrix form:
+Multiply by $d_\gamma$ to obtain the master formula:
 
 $$
-\Delta \mathrm{Tr}(D^2) = 4 d_\gamma \left[ \epsilon_x N \mathrm{Tr}(M_x \delta M) + \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M) \right] + 2 d_\gamma \left[ \epsilon_x N \mathrm{Tr}((\delta M)^2) + (\mathrm{Tr}(\delta M))^2 \right]
+\Delta \mathrm{Tr}(D^2) = 4 d_\gamma \left[ N \mathrm{Tr}(M_x \delta M) + \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M) \right] + 2 d_\gamma \left[ N \mathrm{Tr}((\delta M)^2) + \epsilon_x (\mathrm{Tr}(\delta M))^2 \right]
 $$
 
 **Step 4 (Evaluation on elementary move):**
-Use $\mathrm{Tr}(M_x \delta M) = 2 \mathrm{Re}(z M_x(j, i))$:
+Substitute the elementary perturbation $\delta M = z E_{ij} + \bar{z} E_{ji}$ into the master formula:
 
-**Off-diagonal move** ($i \neq j$):
-Here $\mathrm{Tr}(\delta M) = 0$ and $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$:
+* **Off-diagonal move** ($i \neq j$):
+  The diagonal elements are zero, so $\mathrm{Tr}(\delta M) = 0$. The terms containing $\epsilon_x$ drop out:
+  * $\mathrm{Tr}(M_x \delta M) = 2 \mathrm{Re}(z M_x(j, i))$
+  * $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$
 
-$$
-\Delta_2 = 4 d_\gamma N \left( 2 \mathrm{Re}(z M_x(j, i)) + |z|^2 \right)
-$$
+  Substituting these yields:
+  $$
+  \Delta_2 = 4 d_\gamma N \left( 2 \mathrm{Re}(z M_x(j, i)) + |z|^2 \right)
+  $$
 
-**Diagonal move** ($i = j$):
-Here $\mathrm{Tr}(\delta M) = 2 \mathrm{Re}(z)$ and $\mathrm{Tr}((\delta M)^2) = 4 \mathrm{Re}(z)^2$:
+* **Diagonal move** ($i = j$):
+  Here $\delta M = 2 \mathrm{Re}(z) E_{ii}$. With $\delta = 2 \mathrm{Re}(z)$:
+  * $\mathrm{Tr}(\delta M) = \delta$
+  * $\mathrm{Tr}(M_x \delta M) = \delta M_x(i, i)$
+  * $\mathrm{Tr}((\delta M)^2) = (\mathrm{Tr}(\delta M))^2 = \delta^2$
 
-$$
-\Delta_2 = 8 d_\gamma \mathrm{Re}(z) \left[ N (M_x(i, i) + \mathrm{Re}(z)) + \epsilon_x (\mathrm{Tr}(M_x) + \mathrm{Re}(z)) \right]
-$$
+  Substituting these and factoring out $2 \delta = 4 \mathrm{Re}(z)$ yields:
+  $$
+  \Delta_2 = 8 d_\gamma \mathrm{Re}(z) \left[ N (M_x(i, i) + \mathrm{Re}(z)) + \epsilon_x (\mathrm{Tr}(M_x) + \mathrm{Re}(z)) \right]
+  $$
 
 ---
 
@@ -337,8 +385,6 @@ $$
 $$
 \left[ \epsilon_x \mathrm{Tr}(M_1 M_2 M_3) + \epsilon_1 \epsilon_2 \epsilon_3 \mathrm{Tr}(M_3 M_2 M_1) \right] \mathrm{Tr}(\delta M)
 $$
-
-These terms map directly to variables `t_1` to `t_8` in `BarrettGlaserAction::delta4`.
 
 #### 2. Quadratic Variations
 
@@ -469,6 +515,14 @@ The quartic gradient partitions across the three index topologies:
 $$
 \nabla_{M_k} \mathrm{Tr}(D^4) = B_4(k) + B_2(k) + B(k)
 $$
+
+where each component derives from the corresponding $B_n$ index topology:
+* $B_4(k)$ **(4 distinct indices):** Sum of directional variations where matrix $M_k$ couples with three other distinct matrices $M_{i_1}, M_{i_2}, M_{i_3}$.
+* $B_2(k)$ **(2 distinct pairs):** Sum of pairwise variations coupling $M_k$ with companion matrices $M_i$ ($i \ne k$):
+  $$
+  B_2(k) = \sum_{i \neq k} B_2(k, i)
+  $$
+* $B(k)$ **(single index):** Directional derivative of the quartic self-coupling term $\mathrm{Tr}(M_k^4)$.
 
 To preserve the Hermitian tangent space along numerical integrator trajectories, the force is projected onto the Hermitian subspace:
 

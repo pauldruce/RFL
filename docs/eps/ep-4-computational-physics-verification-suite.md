@@ -440,18 +440,21 @@ Vehtari et al. (2021)[^vehtari2021] resolved these flaws with three enhancements
 The algorithm splits each chain into two halves.
 This doubles the number of chains to $2M$ and detects non-stationarity or initial burn-in drift.
 
-**Enhancement 2: Rank Normalisation**
-The algorithm pools all samples across chains and replaces raw values with their ranks $r_{mn}$.
-It transforms ranks to standard normal quantiles:
-
+**Enhancement 2: Rank Normalisation (Inverse Normal Transformation)**
+The algorithm pools all scalar draws across chains.
+It replaces each value with its statistical sorting rank $r_{mn} \in \lbrace 1, \dots, S \rbrace$ (its position when sorted from smallest to largest, distinct from matrix rank).
+It maps these ranks to standard Gaussian scores using the **Rank-based Inverse Normal Transformation**:
 
 $$
 \tilde{\theta}_{mn} = \Phi^{-1}\left(\frac{r_{mn} - 3/8}{S + 1/4}\right)
 $$
 
+Here:
+* **Blom's Formula** $\frac{r_{mn} - 3/8}{S + 1/4}$: Maps integer ranks to continuous probabilities in $(0, 1)$ with minimal quantile bias (Blom 1958).
+* **Probit Function** ($\Phi^{-1}$): The inverse standard normal cumulative distribution function (`scipy.stats.norm.ppf` in Python), converting probabilities to Gaussian scores distributed as $\mathcal{N}(0, 1)$.
+* $S = 2MN$: The total sample count across all split chains.
 
-where $S = 2MN$ is the total sample count.
-This rank transformation makes the diagnostic robust against heavy-tailed eigenvalue distributions.
+This transformation protects the diagnostic against heavy-tailed eigenvalue distributions and extreme outliers without altering sample order.
 
 **Enhancement 3: Folding (Folded R-hat)**
 The algorithm calculates $\hat{R}$ on absolute deviations from the median:

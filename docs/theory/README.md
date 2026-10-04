@@ -2,7 +2,7 @@
 
 This directory contains the mathematical derivations, physical invariants, and algorithmic factorisations implemented across the Random Fuzzy Library (RFL).
 
-It serves as the authoritative Single Source of Truth (SSOT) bridging academic literature, the Obsidian Research Vault, and the C++20 / Python codebase.
+It serves as the authoritative Single Source of Truth (SSOT) bridging academic literature and the C++17 / Python codebase.
 
 ---
 
@@ -40,7 +40,7 @@ Every theory document in this directory follows this four-section structure:
 1. **Mathematical Formulation:** Continuous and algebraic definitions, Hilbert spaces, and continuous symmetries.
 2. **Discrete & Computational Realisation:** Tensor product factorisations, matrix algorithms, and computational complexity: $O(N^2)$ versus $O(N^3)$.
 3. **Invariants & Symmetries:** Physical conservation laws and symmetry preservation (Hermiticity, gauge invariance, trace cyclicity) verified in unit tests.
-4. **References:** Authoritative citations with DOI, arXiv ID, and citekeys matching `docs/references.bib` and the Obsidian Research Vault.
+4. **References:** Authoritative citations with DOI, arXiv ID, and citekeys matching `docs/references.bib`.
 
 ---
 

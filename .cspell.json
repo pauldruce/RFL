@@ -205,7 +205,12 @@
     "fuzzyuser",
     "milestoned",
     "pycache",
-    "zenodo"
+    "zenodo",
+    "Blom",
+    "Blom's",
+    "Probit",
+    "scipy",
+    "superoperator"
   ],
   "flagWords": [
     "initialize",
