@@ -211,13 +211,10 @@ double Hamiltonian::runDualAveragingCore(IDiracOperator& dirac,
                                          const int& nt,
                                          vector<double>& en_i,
                                          vector<double>& en_f) const {
-  // Acceptance probability return value.
   double e = 1;
 
-  // Resample momentum.
   sampleMoments(dirac);
 
-  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -225,18 +222,15 @@ double Hamiltonian::runDualAveragingCore(IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
   en_i[3] = m_action->getG2() * en_i[0] + m_action->getG4() * en_i[1] + en_i[2];
 
-  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt);
   }
 
-  // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
@@ -246,7 +240,6 @@ double Hamiltonian::runDualAveragingCore(IDiracOperator& dirac,
   // If leapfrog integration diverges and produces NaN, reject proposal immediately.
   if (std::isnan(en_f[3])) {
     e = 0;
-    // Reject proposal and restore previous configuration.
     for (int j = 0; j < num_matrices; ++j)
       mat[j] = mat_bk[j];
     en_f[0] = en_i[0];
@@ -260,7 +253,6 @@ double Hamiltonian::runDualAveragingCore(IDiracOperator& dirac,
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
-      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
@@ -277,13 +269,10 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
                             const int& nt,
                             vector<double>& en_i,
                             vector<double>& en_f) const {
-  // Acceptance probability return value.
   double e = 1;
 
-  // Resample momentum.
   sampleMoments(dirac);
 
-  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -291,18 +280,15 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
   en_i[3] = m_action->getG2() * en_i[0] + m_action->getG4() * en_i[1] + en_i[2];
 
-  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt);
   }
 
-  // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
@@ -314,7 +300,6 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
-      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];
@@ -329,12 +314,8 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
 
 double Hamiltonian::runCoreDebug(IDiracOperator& dirac,
                                  const int& nt) const {
-  // Acceptance probability return value.
-
-  // Resample momentum.
   sampleMoments(dirac);
 
-  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -342,19 +323,16 @@ double Hamiltonian::runCoreDebug(IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // Calculate initial Hamiltonian.
   const double initial_S = m_action->calculateS(dirac);
   const double initial_K = calculateK(dirac);
   const double initial_hamiltonian = initial_S + initial_K;
 
-  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt);
   }
 
-  // Calculate final Hamiltonian.
   const double final_S = m_action->calculateS(dirac);
   const double final_K = calculateK(dirac);
   const double final_hamiltonian = final_S + final_K;
@@ -364,7 +342,6 @@ double Hamiltonian::runCoreDebug(IDiracOperator& dirac,
   // Metropolis accept/reject test.
   if (final_hamiltonian > initial_hamiltonian) {
     if (const double r = m_rng->getUniform(); r > e) {
-      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
     }
@@ -379,16 +356,13 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
                             const double& dt_max,
                             vector<double>& en_i,
                             vector<double>& en_f) {
-  // Acceptance probability return value.
   double e = 1;
 
-  // Resample momentum.
   sampleMoments(dirac);
 
   // Choose dt uniformly from [dt_min, dt_max).
   this->m_dt = dt_min + (dt_max - dt_min) * m_rng->getUniform();
 
-  // Store previous configuration.
   const auto num_matrices = dirac.getNumMatrices();
   auto mat_bk = vector<cx_mat>(num_matrices);
   auto& mat = dirac.getMatrices();
@@ -396,18 +370,15 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
     mat_bk[j] = mat[j];
   }
 
-  // Calculate initial Hamiltonian.
   en_i[2] = calculateK(dirac);
   en_i[3] = m_action->getG2() * en_i[0] + m_action->getG4() * en_i[1] + en_i[2];
 
-  // Numerical integration.
   if (m_integrator == LEAPFROG) {
     leapfrog(dirac, nt);
   } else if (m_integrator == OMELYAN) {
     omelyan(dirac, nt);
   }
 
-  // Calculate final Hamiltonian.
   en_f[0] = dirac.traceOfDiracSquared();
   en_f[1] = dirac.traceOfDirac4();
   en_f[2] = calculateK(dirac);
@@ -419,7 +390,6 @@ double Hamiltonian::runCore(IDiracOperator& dirac,
     e = exp(en_i[3] - en_f[3]);
 
     if (r > e) {
-      // Reject proposal and restore previous configuration.
       for (int j = 0; j < num_matrices; ++j)
         mat[j] = mat_bk[j];
       en_f[0] = en_i[0];

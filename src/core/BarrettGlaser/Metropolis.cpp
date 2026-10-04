@@ -130,11 +130,8 @@ double Metropolis::runDualAverageCore(
       mat[x](row_index, row_index) += 2. * z.real();
     }
 
-    // Update action.
     s_f[0] = s_i[0] + delta_2;
     s_f[1] = s_i[1] + delta_4;
-
-    // Proposal accepted.
     e = 1;
   } else {
     e = exp(-action_delta);
@@ -151,7 +148,6 @@ double Metropolis::runDualAverageCore(
         mat[x](row_index, row_index) += 2. * z.real();
       }
 
-      // Update action.
       s_f[0] = s_i[0] + delta_2;
       s_f[1] = s_i[1] + delta_4;
     } else {
@@ -208,11 +204,8 @@ double Metropolis::runCore(
       mat[x](row_index, row_index) += 2. * z.real();
     }
 
-    // Update action.
     s_f[0] = s_i[0] + delta_2;
     s_f[1] = s_i[1] + delta_4;
-
-    // Proposal accepted.
     ret = 1;
   } else {
     const double e = exp(-action_delta);
@@ -229,11 +222,8 @@ double Metropolis::runCore(
         mat[x](row_index, row_index) += 2. * z.real();
       }
 
-      // Update action.
       s_f[0] = s_i[0] + delta_2;
       s_f[1] = s_i[1] + delta_4;
-
-      // Proposal accepted.
       ret = 1;
     } else {
       s_f[0] = s_i[0];

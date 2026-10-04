@@ -51,7 +51,7 @@ $$
 To establish scientific validity, RFL must verify six fundamental pillars:
 1. **Axiomatic Geometric Invariants:** The assembled Dirac operator must satisfy all spectral triple axioms across all 8 KO dimensions. These axioms include Hermiticity, real structure relations ($J^2, DJ, J\Gamma$), and chirality grading ($\lbrace \Gamma, D \rbrace = 0$).
 2. **Continuous Symmetries & Gauge Invariance:** The spectral action and eigenvalue spectra must be invariant under unitary transformations $D \to UDU^\dagger$ for $U \in \mathrm{U}(N)$.
-3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants ensure that samplers experience true physical energy and conservative forces without numerical drift.
+3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants guarantee that samplers experience true physical energy and conservative forces without numerical drift.
 4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime with $g_4 = 0$, spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions of signature $(0, 1)$ must match exact Riemann-Hilbert solutions.
 5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalised folded split $\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
 6. **Physical Scaling Invariants for General Regimes:** In interactive regimes without analytical solutions, simulations must satisfy exact parameter rescaling and coupling monotonicity laws.
@@ -59,10 +59,10 @@ To establish scientific validity, RFL must verify six fundamental pillars:
 #### The Unit-Test-First Principle for Physical Invariants
 Fast unit tests provide immediate deterministic feedback with zero stochastic flakiness.
 Whenever a physical invariant can be verified on a single configuration or state transition, developers must write a unit test.
-Single-step action updates, geometric axioms, gauge transformations, and finite-difference derivatives must execute as unit tests.
+Single-step action updates, geometric axioms, gauge transformations, and finite-difference derivatives must run as unit tests.
 Longer stochastic simulations must only test collective properties, ergodicity, and asymptotic distributions that unit tests cannot cover.
 
-Automating these checks ensures that RFL provides reliable, mathematically sound foundations for research.
+Automating these checks guarantees that RFL provides reliable, mathematically sound foundations for research.
 Researchers and peer reviewers can independently confirm that the software samples the true physical distribution.
 
 ### 2.2 Goals
@@ -71,7 +71,7 @@ Researchers and peer reviewers can independently confirm that the software sampl
 * **Goal 3:** Verify unitary gauge invariance ($U(N)$ symmetry) for action evaluations and eigenvalue spectra under random Haar unitary transformations.
 * **Goal 4:** Verify analytical action derivatives and variations against numerical central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$.
 * **Goal 5:** Implement an automated Gaussian-limit test comparing MCMC eigenvalue moments to the exact Wigner semicircle self-convolution and Simulation-Based Calibration (SBC).
-* **Goal 6:** Validate 1-matrix models of signature $(0, 1)$ against exact analytical Riemann-Hilbert solutions from published literature.
+* **Goal 6:** Verify 1-matrix models of signature $(0, 1)$ against exact analytical Riemann-Hilbert solutions from published literature.
 * **Goal 7:** Provide automated MCMC statistical diagnostics including integrated autocorrelation time $\tau_{\mathrm{int}}$ and rank-normalised folded split $\hat{R}$ with bulk $\mathrm{ESS} \ge 400$.
 
 ### 2.3 Non-Goals
@@ -86,12 +86,12 @@ Researchers and peer reviewers can independently confirm that the software sampl
 ### 3.1 Core Research Scenarios
 1. **Scenario 1 (Continuous Integration Verification):**
    A developer modifies C++ matrix algebra.
-   The fast test runner executes deterministic algebraic and geometric invariant tests.
+   The fast test runner runs deterministic algebraic and geometric invariant tests.
    The runner confirms that action calculations, unitary gauge symmetry, and Clifford relations match exact mathematical identities within machine precision.
 
 2. **Scenario 2 (Academic Peer-Review Audit):**
    A journal reviewer downloads RFL from GitHub.
-   The reviewer executes `pytest tests/physics/` or `ctest`.
+   The reviewer runs `pytest tests/physics/` or `ctest`.
    The suite outputs statistical verification metrics and confirms detailed balance without requiring manual configuration.
 
 3. **Scenario 3 (Verification in General Interactive Regimes):**
@@ -179,7 +179,7 @@ The total action $S(D)$ approaches zero, even though component traces exceed $10
 A tolerance scaled only by $\lvert S \rvert$ collapses near $S \approx 0$ and underestimates numerical cancellation.
 Therefore, the error bound incorporates component trace magnitudes $\lvert g_2 \rvert \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)$.
 
-Furthermore, evaluating matrix powers $D^4$ of dimension $M$ accumulates rounding error bounded by Wilkinson's matrix multiplication theorem (Higham 2002)[^higham2002].
+Furthermore, calculating matrix powers $D^4$ of dimension $M$ accumulates rounding error bounded by Wilkinson's matrix multiplication theorem (Higham 2002)[^higham2002].
 Summing $M \times M$ matrix products sets a dimension-dependent roundoff floor of $c_0 M^2 \epsilon_{\mathrm{mach}}$.
 This floor replaces ad-hoc constants with an explicit numerical bound grounded in matrix dimension.
 The complete, scale-aware error bound is:
@@ -190,7 +190,7 @@ $$
 $$
 
 
-For $M \approx 100$, $\lvert S \rvert \approx 10^4$, and empirical constants $c_1 \approx 10, c_0 \approx 5$, this bound evaluates to approximately $10^{-10}$.
+For $M \approx 100$, $\lvert S \rvert \approx 10^4$, and empirical constants $c_1 \approx 10, c_0 \approx 5$, this bound calculates to approximately $10^{-10}$.
 
 #### 3. Unitary Gauge & Spectral Invariance (REQ-008)
 Unitary transformation $D \to U D U^\dagger$ involves matrix multiplication.
@@ -239,7 +239,7 @@ h^* = \left( \frac{3 \epsilon_{\mathrm{mach}} \lvert S \rvert}{\lvert S''' \rver
 $$
 
 
-Evaluating at $h^*$ yields the minimum achievable error:
+Calculating at $h^*$ yields the minimum achievable error:
 
 
 $$
@@ -292,23 +292,23 @@ $$
 
 RFL computes this quantity through two independent pathways:
 * **Global Evaluation Path:** Reassembles the complete Dirac operator $D \in \mathbb{C}^{M \times M}$ and computes explicit matrix powers and traces in $\mathcal{O}(M^3)$ operations.
-* **Local Incremental Path (`delta24`):** Exploits single-element matrix variations. It evaluates $\Delta S$ in $\mathcal{O}(N)$ operations using precomputed Clifford trace tensors ($\Omega$ table).
+* **Local Incremental Path (`delta24`):** Exploits single-element matrix variations. It calculates $\Delta S$ via on-the-fly matrix products in $\mathcal{O}(V^3 N^3)$ operations (optimisable to $\mathcal{O}(V^3 N^2)$ with sweep-level matrix caching) using precomputed Clifford trace tensors ($\Omega$ table).
 
 *Physical Failure Mode:*
 If a sign error or indexing flaw corrupts the precomputed $\Omega$ tensor, the program does not crash.
 All matrix configurations remain strictly Hermitian.
-However, the Metropolis filter evaluates an incorrect energy difference.
+However, the Metropolis filter calculates an incorrect energy difference.
 The Markov chain drifts away from the true Boltzmann distribution $\mathrm{e}^{-S(D)}$ and samples an unphysical ensemble.
 Verifying REQ-001 guarantees that the local update exactly mirrors the global internal energy change.
 
 *Precedents in Major Scientific Software:*
 * **Lattice QCD (Grid, Chroma, USQCD, MILC):**
-  Lattice gauge updates evaluate the local action change using products of neighbouring link variables called staples.
+  Lattice gauge updates calculate the local action change using products of neighbouring link variables called staples.
   Lattice QCD suites maintain regression tests comparing local single-link staple updates against full 4D lattice action recalculations.
   They document this check as staple consistency or local-versus-global action invariance.
 * **Molecular Dynamics (GROMACS, LAMMPS):**
   In microcanonical ($NVE$) ensembles, total energy $E = E_{\mathrm{kin}} + E_{\mathrm{pot}}$ is a conserved Hamiltonian invariant.
-  GROMACS validates integrators using the physical validation framework of Merz et al. (2018)[^merz2018].
+  GROMACS verifies integrators using the physical validation framework of Merz et al. (2018)[^merz2018].
   The framework tracks energy drift against the shadow Hamiltonian to confirm physical correctness.
 
 #### 3. Derivative Invariants: Generalised Forces & Symplectic Consistency
@@ -323,7 +323,7 @@ $$
 
 RFL computes and verifies action gradients through two independent pathways:
 * **Analytical Path:** Calculates symbolic matrix variations derived from trace cyclicity and noncommutative differential calculus.
-* **Numerical Finite-Difference Path:** Evaluates directional derivatives using central finite difference stencils:
+* **Numerical Finite-Difference Path:** Calculates directional derivatives using central finite difference stencils:
 
 
 $$
@@ -335,12 +335,12 @@ $$
 An error in analytical forces violates Liouville's theorem of phase space volume conservation.
 In HMC, trajectories fail energy conservation ($\Delta H \gg 0$), collapsing Metropolis acceptance rates.
 In Langevin simulations without acceptance steps, erroneous forces silently bias stationary expectation values.
-Verifying REQ-009 guarantees symplectic consistency and correct force fields before executing dynamical sampling.
+Verifying REQ-009 guarantees symplectic consistency and correct force fields before running dynamical sampling.
 
 *Precedents in Major Scientific Software:*
 * **Stan (Bayesian Modelling & HMC):**
   Stan provides an automated gradient verification diagnostic (`diagnose test=gradient`).
-  Stan evaluates algorithmic automatic differentiation against numerical finite differences across random parameter vectors.
+  Stan compares algorithmic automatic differentiation against numerical finite differences across random parameter vectors.
   Stan flags parameters exceeding a relative tolerance of $10^{-6}$ as algorithmic implementation bugs.
 * **Lattice QCD (USQCD, Grid):**
   In dynamical pseudofermion simulations, the fermion force requires differentiating the inverted Dirac operator.
@@ -353,7 +353,7 @@ Verifying REQ-009 guarantees symplectic consistency and correct force fields bef
 #### 4. Scientific Documentation & Recording Standards
 Leading scientific software projects document verification invariants through structured technical standards:
 * **Unit-Test-First Coverage:** Whenever an invariant can be tested deterministically on a single state, projects implement it as a fast unit test.
-* **Dual-Path Verification Tests:** Projects maintain automated regression tests executing both computational pathways in continuous integration.
+* **Dual-Path Verification Tests:** Projects maintain automated regression tests running both computational pathways in continuous integration.
 * **Explicit Precision Budgets:** Documentation justifies numerical tolerances using machine precision and condition numbers instead of arbitrary thresholds.
 * **Diagnostic Verification Tools:** Software exposes diagnostic commands (such as Stan's `test_grad` and GROMACS's `gmx check`) allowing users to verify algorithmic consistency.
 * **Theory-to-Code Traceability:** Technical documentation links code routines directly to underlying theoretical equations and literature citations.
@@ -420,7 +420,7 @@ $$
 $$
 
 
-The classical potential scale reduction factor evaluates the ratio:
+The classical potential scale reduction factor calculates the ratio:
 
 
 $$
@@ -481,7 +481,7 @@ Modern computational standards established by Vehtari et al. (2021)[^vehtari2021
 * **Threshold:** $\hat{R} < 1.05$ across all primary observables ($\mathrm{Tr}(D^2)$, $\mathrm{Tr}(D^4)$, and spectral radii).
 * **Effective Sample Size:** Bulk effective sample size $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$ across chains.
 
-In RFL (REQ-007), Tier 3 nightly validation executes 4 independent chains.
+In RFL (REQ-007), Tier 3 nightly validation runs 4 independent chains.
 Passing this test proves that the noncommutative geometry ensemble has equilibrated to the true Boltzmann distribution.
 
 ---
@@ -512,9 +512,9 @@ Python tests in `tests/physics/` verify statistical distributions, moments, and 
 
 *Rationale:*
 Following established practices in GROMACS and Stan:
-* **Tier 1 (Smoke / Deterministic Gate, < 2 minutes):** Executes on every commit and PR. Enforces the unit-test-first policy. Tests all deterministic algebraic identities, Hermiticity, gauge invariance, and finite differences in fast unit tests.
-* **Tier 2 (Physics Integration Gate, ~3–5 minutes):** Executes on PR merge to `main`. Uses fixed seeds to test short MCMC chains, loose-tolerance Gaussian moments ($4\sigma$), and state-flux balance.
-* **Tier 3 (Scientific Validation Suite, Nightly / Release Gate, ~30–60 minutes):** Executes high-statistics runs, multi-chain split $\hat{R}$, Riemann-Hilbert curve fits, and Simulation-Based Calibration.
+* **Tier 1 (Smoke / Deterministic Gate, < 2 minutes):** Runs on every commit and PR. Enforces the unit-test-first policy. Tests all deterministic algebraic identities, Hermiticity, gauge invariance, and finite differences in fast unit tests.
+* **Tier 2 (Physics Integration Gate, ~3–5 minutes):** Runs on PR merge to `main`. Uses fixed seeds to test short MCMC chains, loose-tolerance Gaussian moments ($4\sigma$), and state-flux balance.
+* **Tier 3 (Scientific Validation Suite, Nightly / Release Gate, ~30–60 minutes):** Runs high-statistics runs, multi-chain split $\hat{R}$, Riemann-Hilbert curve fits, and Simulation-Based Calibration.
 * **Flakiness Control Protocol:** Stochastic tests apply the Holm-Bonferroni correction to prevent false discovery inflation. If a stochastic test fails with $p < \alpha$, CI triggers an automated second run with an independent seed and double chain length before failing.
 
 ---
@@ -523,25 +523,24 @@ Following established practices in GROMACS and Stan:
 
 ### 5.1 C++ Core Verification (`src/core/tests/`)
 C++ tests focus on deterministic invariants and algebraic correctness:
-* `tDelta.cpp`: Verifies incremental action update `delta24` against full action difference using dimension-scaled tolerance:
+* `tDelta.cpp`: Verifies incremental action update `delta24` against full action difference, and analytical gradients `derDirac24` against numerical finite differences:
   ```cpp
   TEST(DeltaTests, IncrementalActionMatchesFullDifference) {
-    const DiracOperator dirac(1, 3, 6);
-    const Action action(-1.0, 1.0);
+    DiracOperator dirac(1, 3, 6);
+    const BarrettGlaserAction action(-1.0, 1.0);
     const double Si = action.calculateS(dirac);
-    const double dS = dirac.delta24(action, 0, 1, 2, {0.1, 0.0});
+    const double dS = action.delta24(dirac, 0, 1, 2, {0.1, 0.0});
     // Apply update and recalculate Sf
     const double Sf = action.calculateS(dirac);
     const double M = dirac.getMatrixDimension() * dirac.getGammaDimension();
     const double eps_mach = std::numeric_limits<double>::epsilon();
-    const double trace_scale = std::abs(action.getG2()) * dirac.traceTwo() + action.getG4() * dirac.traceFour();
+    const double trace_scale = std::abs(action.getG2()) * dirac.traceOfDiracSquared() + action.getG4() * dirac.traceOfDirac4();
     const double tol = 10.0 * M * eps_mach * (std::abs(Sf) + std::abs(Si) + trace_scale) + 5.0 * M * M * eps_mach;
     EXPECT_NEAR(Sf - Si, dS, tol);
   }
   ```
 * `tAxioms.cpp`: Verifies Hermiticity ($D = D^\dagger$), complete 8-fold KO table ($J^2, JD, J\Gamma$), and chirality ($\lbrace \Gamma, D \rbrace = 0$).
 * `tGaugeInvariance.cpp`: Verifies that random Haar unitary transformations $D \to UDU^\dagger$ preserve action values and eigenvalue spectra.
-* `tDerivatives.cpp`: Verifies analytical matrix variations against central finite differences.
 
 ### 5.2 Python Physics Suite (`tests/physics/`)
 Python tests focus on statistical physics, limiting theorems, and asymptotic distributions:
@@ -597,7 +596,7 @@ tests/physics/
 * **Tasks:**
   1. Implement `tests/physics/test_riemann_hilbert_1matrix.py` verifying signature $(0, 1)$ spectral densities against exact analytical curves.
   2. Implement `tests/physics/test_detailed_balance.py` testing microscopic reversibility and coarse-grained state-flux balance.
-  3. Implement `tests/physics/test_gaussian_sbc.py` validating the MCMC sampler with Simulation-Based Calibration.
+  3. Implement `tests/physics/test_gaussian_sbc.py` verifying the MCMC sampler with Simulation-Based Calibration.
   4. Implement rank-normalised folded split $\hat{R}$ and $\mathrm{ESS}_{\mathrm{bulk}}$ diagnostics in Python analysis utilities.
   5. Implement `tests/physics/test_scaling_invariants.py` to verify parameter rescaling and coupling monotonicity.
   6. Create benchmark scripts to recreate published matrix model scaling curves and archive golden reference datasets.

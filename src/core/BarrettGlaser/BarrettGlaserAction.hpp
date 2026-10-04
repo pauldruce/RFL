@@ -154,7 +154,7 @@ public:
    * @param[in] z Complex perturbation value.
    * @return Exact change in Tr(D^4).
    *
-   * @note Complexity: O(N^2) update operations vs O(d_gamma^3 N^3) full recalculation.
+   * @note Complexity: O(V^3 N^3) on-the-fly matrix products per move vs O((d_gamma N)^3) Dirac recalculation. Can be optimised to O(V^3 N^2) with sweep-level matrix product caching.
    *
    * @see Literature: [Barrett2016, Section 3, Eq. 3.4-3.14] (arXiv:1510.01377)
    * @see Theory: docs/theory/barrett_glaser.md#33-quartic-variation-delta-s_4

@@ -1,6 +1,6 @@
 # The Barrett-Glaser Spectral Action
 
-This document provides the mathematical derivations, trace factorisations, and local variation formulae implemented by `rfl::BarrettGlaserAction` in `src/core/BarrettGlaser/BarrettGlaserAction.hpp`.
+This document provides the mathematical derivations, trace factorisations, and local variation formulae implemented by `BarrettGlaserAction` in `src/core/BarrettGlaser/BarrettGlaserAction.hpp`.
 
 ---
 
@@ -81,6 +81,27 @@ S(D) = g_2 \mathrm{Tr}_{\mathcal{H}}(D^2) + g_4 \mathrm{Tr}_{\mathcal{H}}(D^4)
 $$
 
 where $g_2$ and $g_4$ are coupling constants.
+
+#### Field Rescaling & Literature Conventions
+In theoretical literature (such as [Barrett2016]), the quartic coupling is commonly fixed to $g_4 = 1$. Under a constant field rescaling of the Dirac operator for positive quartic coupling $g_4 > 0$:
+
+$$
+D = g_4^{-1/4} \tilde{D}
+$$
+
+the action transforms as:
+
+$$
+S(D) = \frac{g_2}{\sqrt{g_4}} \mathrm{Tr}_{\mathcal{H}}(\tilde{D}^2) + \mathrm{Tr}_{\mathcal{H}}(\tilde{D}^4) = \tilde{g}_2 \mathrm{Tr}_{\mathcal{H}}(\tilde{D}^2) + \mathrm{Tr}_{\mathcal{H}}(\tilde{D}^4)
+$$
+
+Because the flat matrix Lebesgue measure $dM = \prod_{a=1}^V dM_a$ transforms by a constant Jacobian factor:
+
+$$
+\prod_{a=1}^V dM_a = g_4^{-V N^2 / 4} \prod_{a=1}^V d\tilde{M}_a
+$$
+
+constant prefactors cancel identically in MCMC acceptance ratios. Setting the quartic coupling to 1 loses no physical generality when scanning the phase diagram along the rescaled quadratic coupling. RFL parameterises both quadratic and quartic couplings explicitly to preserve exact physical scales and avoid manual observable rescalings.
 
 ### 2.1 Quadratic Trace $\mathrm{Tr}(D^2)$
 
@@ -238,7 +259,7 @@ $$
 \mathcal{D}_x \delta \mathcal{D}_x = (M_x \delta M) \otimes \mathbf{1}_N + \epsilon_x M_x \otimes \delta M^T + \epsilon_x \delta M \otimes M_x^T + \mathbf{1}_N \otimes (M_x \delta M)^T
 $$
 
-Evaluate the trace using $\mathrm{Tr}(\mathbf{1}_N) = N$ and $\mathrm{Tr}(A^T) = \mathrm{Tr}(A)$:
+Calculate the trace using $\mathrm{Tr}(\mathbf{1}_N) = N$ and $\mathrm{Tr}(A^T) = \mathrm{Tr}(A)$:
 
 $$
 \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x) = 2 N \mathrm{Tr}(M_x \delta M) + 2 \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M)
@@ -256,7 +277,7 @@ $$
 \Delta \mathrm{Tr}(D^2) = 4 d_\gamma \left[ N \mathrm{Tr}(M_x \delta M) + \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M) \right] + 2 d_\gamma \left[ N \mathrm{Tr}((\delta M)^2) + \epsilon_x (\mathrm{Tr}(\delta M))^2 \right]
 $$
 
-**Step 4 (Evaluation on elementary move):**
+**Step 4 (Calculation on elementary move):**
 Substitute the elementary perturbation $\delta M = z E_{ij} + \bar{z} E_{ji}$ into the master formula.
 
 **Off-diagonal move** ($i \neq j$):
@@ -319,14 +340,14 @@ $$
 $$
 
 **Cubic term**, order $O(z^3)$:
-Since $(\gamma^x)^3 = \epsilon_x \gamma^x$, Clifford orthogonality leaves only $a = x$:
+Because $(\gamma^x)^3 = \epsilon_x \gamma^x$, Clifford orthogonality leaves only $a = x$:
 
 $$
 4 \mathrm{Tr}_{\mathcal{H}}(D (\delta D)^3) = 4 d_\gamma \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3)
 $$
 
 **Quartic term**, order $O(z^4)$:
-Since $(\gamma^x)^4 = \mathbf{1}$ (spinor identity):
+Because $(\gamma^x)^4 = \mathbf{1}$ (spinor identity):
 
 $$
 \mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4)
@@ -390,7 +411,7 @@ $$
 \end{aligned}
 $$
 
-Evaluate the algebra traces:
+Calculate the algebra traces:
 
 $$
 \begin{aligned}
@@ -414,7 +435,7 @@ $$
 Multiplying by $\mathcal{D}_x$ and taking the trace yields:
 
 $$
-\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3) = 2 N \mathrm{Tr}(M_x (\delta M)^3) + 6 \mathrm{Tr}(M_x \delta M) \mathrm{Tr}((\delta M)^2) + 2 \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}((\delta M)^3)
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3) = 2 N \mathrm{Tr}(M_x (\delta M)^3) + 6 \mathrm{Tr}(M_x \delta M) \mathrm{Tr}((\delta M)^2) + 6 \epsilon_x \mathrm{Tr}(M_x (\delta M)^2) \mathrm{Tr}(\delta M) + 2 \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}((\delta M)^3)
 $$
 
 #### 4. Quartic Variation
@@ -429,17 +450,17 @@ $$
 (\delta \mathcal{D}_x)^4 = (\delta M)^4 \otimes \mathbf{1}_N + 4 \epsilon_x (\delta M)^3 \otimes \delta M^T + 6 (\delta M)^2 \otimes (\delta M^T)^2 + 4 \epsilon_x \delta M \otimes (\delta M^T)^3 + \mathbf{1}_N \otimes (\delta M^T)^4
 $$
 
-Evaluate the trace over $\mathbb{C}^N \otimes \mathbb{C}^N$:
+Calculate the trace over $\mathbb{C}^N \otimes \mathbb{C}^N$:
 
 $$
 \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4) = 2 N \mathrm{Tr}((\delta M)^4) + 8 \epsilon_x \mathrm{Tr}((\delta M)^3) \mathrm{Tr}(\delta M) + 6 (\mathrm{Tr}((\delta M)^2))^2
 $$
 
-**Step 4 (Evaluation on elementary move):**
+**Step 4 (Calculation on elementary move):**
 
 Substituting the rank-1 matrix unit perturbation avoids full matrix multiplications:
 
-Traces against $\delta M$ evaluate at indices $(i, j)$:
+Traces against $\delta M$ contract at indices $(i, j)$:
 
 $$
 \mathrm{Tr}(P \delta M) = z P(j, i) + \bar{z} P(i, j)
@@ -457,13 +478,19 @@ $$
 (\delta M)^2 = |z|^2 (E_{ii} + E_{jj}) + (z^2 E_{ij}^2 + \bar{z}^2 E_{ji}^2)
 $$
 
-The scalar quartic term evaluates to:
+For off-diagonal moves ($i \neq j$), the scalar quartic term contracts to:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = 4 d_\gamma (N + \epsilon_x) |z|^4
+\mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = 4 d_\gamma (N + 6) |z|^4
 $$
 
-Precomputing matrix products and evaluating trace updates at index $(i, j)$ reduces computational complexity from $O(d_\gamma^3 N^6)$ to $O(N^2)$ operations.
+For diagonal moves ($i = j$), where $\delta M = 2 \mathrm{Re}(z) E_{ii}$, the scalar quartic term contracts to:
+
+$$
+\mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = 32 d_\gamma (N + 3 + 4 \epsilon_x) \mathrm{Re}(z)^4
+$$
+
+Calculating trace updates at index $(i, j)$ avoids full $O((d_\gamma N)^3)$ Dirac recalculation. Computing on-the-fly matrix products runs in $O(V^3 N^3)$ operations per move. Caching matrix products across a sweep can reduce this to $O(V^3 N^2)$ operations.
 
 ### 3.4 Total Variation & Acceptance
 
