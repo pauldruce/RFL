@@ -36,27 +36,33 @@ with $\epsilon_a = +1$ for $a \le p$ and $\epsilon_a = -1$ for $a > p$.
 ### 1.1 The Hermitian Coordinate Basis
 
 To parameterise the space of Dirac operators using solely Hermitian matrices $M_a$:
+
 1. Substitute the anti-Hermitian matrices with Hermitian matrices: $L_b = i M_{p+b}$.
 2. Absorb the factor of $i$ into the anti-Hermitian Clifford generators:
 
 $$
-\gamma^a = \begin{cases} e^a & \text{for } a \le p \\ i e^a & \text{for } a > p \end{cases}
+\gamma^a = e^a \quad (a \le p), \qquad \gamma^{p+b} = i e^{p+b} \quad (b \le q)
 $$
 
-Under this basis transformation:
-* Every generator $\gamma^a$ is Hermitian and squares to $+\mathbf{1}$:
-  $$
-  (\gamma^a)^2 = \mathbf{1}_{d_\gamma}, \quad \lbrace \gamma^a, \gamma^b \rbrace = 2 \delta^{ab} \mathbf{1}_{d_\gamma}
-  $$
-  Consequently, the spinor trace is strictly positive definite:
-  $$
-  \mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \delta^{ab}
-  $$
-* The metric signs $\epsilon_a \in \lbrace +1, -1 \rbrace$ move entirely into the matrix superoperator:
-  $$
-  \mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
-  $$
-  where $\epsilon_a = +1$ gives the anticommutator $\lbrace M_a, \cdot \rbrace$, and $\epsilon_a = -1$ gives the commutator $[M_a, \cdot]$.
+Under this basis transformation, every generator $\gamma^a$ is Hermitian and squares to $+\mathbf{1}$:
+
+$$
+(\gamma^a)^2 = \mathbf{1}_{d_\gamma}, \quad \lbrace \gamma^a, \gamma^b \rbrace = 2 \delta^{ab} \mathbf{1}_{d_\gamma}
+$$
+
+Consequently, the spinor trace is strictly positive definite:
+
+$$
+\mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \delta^{ab}
+$$
+
+The metric signs $\epsilon_a \in \lbrace +1, -1 \rbrace$ move entirely into the matrix superoperator:
+
+$$
+\mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
+$$
+
+where $\epsilon_a = +1$ gives the anticommutator $\lbrace M_a, \cdot \rbrace$, and $\epsilon_a = -1$ gives the commutator $[M_a, \cdot]$.
 
 In this unified Hermitian basis, the Dirac operator reads:
 
@@ -125,19 +131,9 @@ The Clifford trace vanishes for any term containing an odd count of any gamma ge
 Therefore, index combinations with odd counts (such as $[3, 1]$ or $[2, 1, 1]$) vanish identically.
 The non-vanishing contractions partition into three symmetry classes:
 
-1. **Four distinct indices** ($B_4$, $n=4$):
-   Terms where all four indices $(a, b, c, d)$ are distinct.
-   These terms couple four different matrices via the anti-symmetrised Clifford tensor.
-2. **Two pairs** ($B_2$, $n=2$):
-   Terms with two distinct index pairs ($a \ne b$), where each index appears twice.
-   Because $(\gamma^a)^2 = \epsilon_a \mathbf{1}$, the Clifford tensor collapses to signed spinor dimensions:
-   $$
-   \Omega_{aabb} = \epsilon_a \epsilon_b d_\gamma, \quad \Omega_{abab} = -\epsilon_a \epsilon_b d_\gamma, \quad \Omega_{abba} = \epsilon_a \epsilon_b d_\gamma
-   $$
-   These terms describe quartic interactions between pairs of distinct matrices $M_a$ and $M_b$ (such as $\mathrm{Tr}(M_a^2 M_b^2)$ and cyclically permuted $\mathrm{Tr}(M_a M_b M_a M_b)$ terms).
-3. **Single index** ($B$ or $B_1$, $n=1$):
-   Quartic self-couplings where all four indices coincide ($a = b = c = d$).
-   Here $(\gamma^a)^4 = \mathbf{1}$, yielding $\Omega_{aaaa} = d_\gamma$ and single-matrix self-interactions $\mathrm{Tr}(M_a^4)$.
+* **Four distinct indices** ($B_4$, $n=4$): Terms where all four indices $(a, b, c, d)$ are distinct, coupling four different matrices via the anti-symmetrised Clifford tensor.
+* **Two pairs** ($B_2$, $n=2$): Terms with two distinct index pairs ($a \ne b$), where each index appears twice. Because $(\gamma^a)^2 = \epsilon_a \mathbf{1}$, the Clifford tensor collapses to signed spinor dimensions: $\Omega_{aabb} = \epsilon_a \epsilon_b d_\gamma$, $\Omega_{abab} = -\epsilon_a \epsilon_b d_\gamma$, and $\Omega_{abba} = \epsilon_a \epsilon_b d_\gamma$. These terms describe quartic interactions between pairs of distinct matrices $M_a$ and $M_b$ (such as $\mathrm{Tr}(M_a^2 M_b^2)$ and cyclically permuted $\mathrm{Tr}(M_a M_b M_a M_b)$ terms).
+* **Single index** ($B$ or $B_1$, $n=1$): Quartic self-couplings where all four indices coincide ($a = b = c = d$). Here $(\gamma^a)^4 = \mathbf{1}$, yielding $\Omega_{aaaa} = d_\gamma$ and single-matrix self-interactions $\mathrm{Tr}(M_a^4)$.
 
 ---
 
@@ -261,28 +257,21 @@ $$
 $$
 
 **Step 4 (Evaluation on elementary move):**
-Substitute the elementary perturbation $\delta M = z E_{ij} + \bar{z} E_{ji}$ into the master formula:
+Substitute the elementary perturbation $\delta M = z E_{ij} + \bar{z} E_{ji}$ into the master formula.
 
-* **Off-diagonal move** ($i \neq j$):
-  The diagonal elements are zero, so $\mathrm{Tr}(\delta M) = 0$. The terms containing $\epsilon_x$ drop out:
-  * $\mathrm{Tr}(M_x \delta M) = 2 \mathrm{Re}(z M_x(j, i))$
-  * $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$
+**Off-diagonal move** ($i \neq j$):
+The diagonal elements are zero, so $\mathrm{Tr}(\delta M) = 0$. The terms containing $\epsilon_x$ drop out: $\mathrm{Tr}(M_x \delta M) = 2 \mathrm{Re}(z M_x(j, i))$ and $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$. Substituting these yields:
 
-  Substituting these yields:
-  $$
-  \Delta_2 = 4 d_\gamma N \left( 2 \mathrm{Re}(z M_x(j, i)) + |z|^2 \right)
-  $$
+$$
+\Delta_2 = 4 d_\gamma N \left( 2 \mathrm{Re}(z M_x(j, i)) + |z|^2 \right)
+$$
 
-* **Diagonal move** ($i = j$):
-  Here $\delta M = 2 \mathrm{Re}(z) E_{ii}$. With $\delta = 2 \mathrm{Re}(z)$:
-  * $\mathrm{Tr}(\delta M) = \delta$
-  * $\mathrm{Tr}(M_x \delta M) = \delta M_x(i, i)$
-  * $\mathrm{Tr}((\delta M)^2) = (\mathrm{Tr}(\delta M))^2 = \delta^2$
+**Diagonal move** ($i = j$):
+Here $\delta M = 2 \mathrm{Re}(z) E_{ii}$. With $\delta = 2 \mathrm{Re}(z)$, we have $\mathrm{Tr}(\delta M) = \delta$, $\mathrm{Tr}(M_x \delta M) = \delta M_x(i, i)$, and $\mathrm{Tr}((\delta M)^2) = (\mathrm{Tr}(\delta M))^2 = \delta^2$. Substituting these and factoring out $2 \delta = 4 \mathrm{Re}(z)$ yields:
 
-  Substituting these and factoring out $2 \delta = 4 \mathrm{Re}(z)$ yields:
-  $$
-  \Delta_2 = 8 d_\gamma \mathrm{Re}(z) \left[ N (M_x(i, i) + \mathrm{Re}(z)) + \epsilon_x (\mathrm{Tr}(M_x) + \mathrm{Re}(z)) \right]
-  $$
+$$
+\Delta_2 = 8 d_\gamma \mathrm{Re}(z) \left[ N (M_x(i, i) + \mathrm{Re}(z)) + \epsilon_x (\mathrm{Tr}(M_x) + \mathrm{Re}(z)) \right]
+$$
 
 ---
 
@@ -518,10 +507,7 @@ $$
 
 where each component derives from the corresponding $B_n$ index topology:
 * $B_4(k)$ **(4 distinct indices):** Sum of directional variations where matrix $M_k$ couples with three other distinct matrices $M_{i_1}, M_{i_2}, M_{i_3}$.
-* $B_2(k)$ **(2 distinct pairs):** Sum of pairwise variations coupling $M_k$ with companion matrices $M_i$ ($i \ne k$):
-  $$
-  B_2(k) = \sum_{i \neq k} B_2(k, i)
-  $$
+* $B_2(k)$ **(2 distinct pairs):** Sum of pairwise variations coupling $M_k$ with companion matrices $M_i$: $B_2(k) = \sum_{i \neq k} B_2(k, i)$.
 * $B(k)$ **(single index):** Directional derivative of the quartic self-coupling term $\mathrm{Tr}(M_k^4)$.
 
 To preserve the Hermitian tangent space along numerical integrator trajectories, the force is projected onto the Hermitian subspace:
