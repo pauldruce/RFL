@@ -1,9 +1,9 @@
 //
-// Created for RFL milestone v0.3.0 (Issue #56)
 // Public API static contract tests and type trait assurances.
 //
 
 #include "BarrettGlaser/Action.hpp"
+#include "BarrettGlaser/BarrettGlaserAction.hpp"
 #include "BarrettGlaser/Metropolis.hpp"
 #include "DiracOperator.hpp"
 #include "IAction.hpp"
@@ -102,8 +102,18 @@ static_assert(std::is_same_v<decltype(&Action::getG4), double (Action::*)() cons
 static_assert(std::is_same_v<decltype(&Action::setParams), void (Action::*)(double, double)>,
               "Action::setParams must accept (double, double) and return void.");
 
-static_assert(std::is_same_v<decltype(&Action::calculateS), double (Action::*)(const IDiracOperator&) const>,
-              "Action::calculateS must accept const IDiracOperator&, return double, and be const.");
+static_assert(std::is_same_v<Action, BarrettGlaserAction>, "Action must be an alias for BarrettGlaserAction.");
+static_assert(std::is_base_of_v<IAction, BarrettGlaserAction>, "BarrettGlaserAction must inherit from IAction.");
+
+// BarrettGlaserAction trace variation and gradient methods
+static_assert(std::is_same_v<decltype(&BarrettGlaserAction::delta2), double (*)(const IDiracOperator&, int, int, int, const arma::cx_double&)>,
+              "BarrettGlaserAction::delta2 must be a static member function.");
+static_assert(std::is_same_v<decltype(&BarrettGlaserAction::delta4), double (*)(const IDiracOperator&, int, int, int, const arma::cx_double&)>,
+              "BarrettGlaserAction::delta4 must be a static member function.");
+static_assert(std::is_same_v<decltype(&BarrettGlaserAction::derDirac2), arma::cx_mat (*)(const IDiracOperator&, int)>,
+              "BarrettGlaserAction::derDirac2 must be a static member function.");
+static_assert(std::is_same_v<decltype(&BarrettGlaserAction::derDirac4), arma::cx_mat (*)(const IDiracOperator&, int, bool)>,
+              "BarrettGlaserAction::derDirac4 must be a static member function.");
 
 // ============================================================================
 // StdRng Contract Assertions

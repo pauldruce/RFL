@@ -169,15 +169,13 @@ Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
   return *this;
 }
 
-/**
- * Decomposes signature (p, q) into base mode counts.
- *
- * For example, (5,3) = (2,0) + (2,0) + (0,2) + (1,1).
- *
- * @param p Number of Hermitian gamma matrices.
- * @param q Number of anti-Hermitian gamma matrices.
- * @param dec Output array of base mode counts.
- */
+// Decomposes signature (p, q) into base mode counts.
+//
+// For example, (5,3) = (2,0) + (2,0) + (0,2) + (1,1).
+//
+// p: Number of Hermitian gamma matrices.
+// q: Number of anti-Hermitian gamma matrices.
+// dec: Output array of base mode counts.
 static void decomp(const int p, const int q, int* dec) {
   if (p) {
     if (!(p % 2)) {

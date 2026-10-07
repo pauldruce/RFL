@@ -15,13 +15,14 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | :--- | :--- | :--- |
 | **Dirac Operator** | The matrix operator $D = \sum \gamma^i \otimes H_i + \sum \gamma^{p+j} \otimes L_j$ that defines the geometry. | *Dirac matrix (when referring to the operator object)* |
 | **Clifford Module** | The real or complex representation of the Clifford algebra $\text{Cl}(p,q)$ holding gamma matrices $\gamma^a$. | *Clifford algebra engine, Gamma set* |
-| **Gamma Matrix** | A generator matrix $\gamma^a$ of the Clifford algebra satisfying $\{\gamma^a, \gamma^b\} = 2\eta^{ab}\mathbb{I}$. | *Dirac gamma, Clifford matrix* |
+| **Gamma Matrix** | A generator matrix $\gamma^a$ of the Clifford algebra satisfying $\lbrace \gamma^a, \gamma^b \rbrace = 2\eta^{ab}\mathbb{I}$. | *Dirac gamma, Clifford matrix* |
 | **Spectral Triple** | The mathematical triplet $(A, \mathcal{H}, D)$ that defines a noncommutative geometry. | *NCG triplet, Connes triple* |
 | **Barrett-Glaser Action** | The spectral action functional $S(D) = g_2 \text{Tr}(D^2) + g_4 \text{Tr}(D^4)$. | *BG functional, Spectral potential* |
 | **Signature** | The integer pair $(p, q)$ representing $p$ Hermitian and $q$ anti-Hermitian matrix generators. | *Clifford type, metric signature* |
 | **Matrix Dimension (N)** | The size $N \times N$ of the internal matrices $H_i, L_j$. | *Matrix size, cutoff size* |
-| **Chirality Operator (Gamma)** | The grading operator satisfying $\Gamma^2 = \mathbb{I}$ and $\{\Gamma, D\} = 0$ for even geometries. | *Grading operator, gamma five* |
+| **Chirality Operator (Gamma)** | The grading operator satisfying $\Gamma^2 = \mathbb{I}$ and $\lbrace \Gamma, D \rbrace = 0$ for even geometries. | *Grading operator, gamma five* |
 | **Reality Operator (J)** | The antilinear isometry representing charge conjugation in real spectral triples. | *Charge conjugation operator* |
+| **Decomposition** ($B_n$) | The partition of the quartic trace into terms with $n \in \lbrace 4, 2, 1 \rbrace$ distinct matrix indices ($B_4, B_2, B$). | *Quartic splitting, Clifford topologies* |
 
 ---
 
@@ -37,7 +38,8 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 | **Observable** | A physical quantity calculated from the Dirac operator (e.g. $\text{Tr}(D^2)$, $\text{Tr}(D^4)$, eigenvalues). | *Measurement, metric, output* |
 | **Observer** | A software object that listens to step/sweep events and records observables. | *Sink, listener, telemetry logger* |
 | **Autocorrelation Time (tau_int)** | The integrated statistical correlation time between successive Markov samples ($\tau_{\text{int}}$). | *Correlation length, memory time* |
-| **Eigenvalue Spectrum** | The set of real eigenvalues $\{\lambda_i\}$ of the assembled Dirac operator $D$. | *Eigen-spectrum, Dirac energies* |
+| **Eigenvalue Spectrum** | The set of real eigenvalues $\lbrace \lambda_i \rbrace$ of the assembled Dirac operator $D$. | *Eigen-spectrum, Dirac energies* |
+| **Statistical Rank (Sample Rank)** | The ordinal sorting position $r \in \lbrace 1, \dots, S \rbrace$ of a sample in an ascending sorted array (distinct from algebraic matrix rank). | *Sorting index, sample rank* |
 
 ---
 
