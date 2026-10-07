@@ -35,7 +35,7 @@ The partition function integrates over the space of Dirac operators in a finite 
 
 
 $$
-Z = \int \mathcal{D}D \mathrm{e}^{-S(D)}
+Z = \int \mathcal{D}D \thinspace \mathrm{e}^{-S(D)}
 $$
 
 
@@ -286,7 +286,7 @@ The transition probability follows the Boltzmann factor:
 
 
 $$
-P_{\mathrm{accept}} = \min\left(1, \, \mathrm{e}^{-\Delta S}\right)
+P_{\mathrm{accept}} = \min\left(1, \mathrm{e}^{-\Delta S}\right)
 $$
 
 
@@ -471,7 +471,7 @@ The final diagnostic takes the maximum across both rank-transformed and folded-r
 
 
 $$
-\hat{R} = \max\left(\hat{R}(\tilde{\theta}), \, \hat{R}(\tilde{\theta}^{\mathrm{fold}})\right)
+\hat{R} = \max\left(\hat{R}(\tilde{\theta}), \hat{R}(\tilde{\theta}^{\mathrm{fold}})\right)
 $$
 
 

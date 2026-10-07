@@ -8,6 +8,8 @@ Enforces rules defined in docs/theory/README.md:
 - R3 / C2: No inline math ending in ')' directly followed by ')' (prevents ')$)' delimiter bug).
 - R4: No inline math spans inside bold delimiters (**...$...**).
 - R5: Headings must not contain multi-subscript math violating R2.
+- R6: Escaped braces (\{, \}) in math must be replaced with \lbrace and \rbrace.
+- R7: Punctuation-based thin space (\,) must be replaced with \thinspace (prevents Markdown escaping bug).
 """
 
 from __future__ import annotations
@@ -90,6 +92,11 @@ def check_markdown_math(file_path: Path) -> list[str]:
                     f"{file_path}:{line_no}: [R6] Escaped brace in display math: "
                     "Markdown consumes the backslash before math renders. Use '\\lbrace' and '\\rbrace' instead."
                 )
+            if r"\," in line:
+                errors.append(
+                    f"{file_path}:{line_no}: [R7] Escaped comma '\\,' in display math: "
+                    "Markdown consumes the backslash before math renders, converting it to a literal comma. Use '\\thinspace' instead."
+                )
             continue
 
         # Headings are treated as independent single-line paragraphs
@@ -161,6 +168,11 @@ def check_markdown_math(file_path: Path) -> list[str]:
                 errors.append(
                     f"{file_path}:{start_line}: [R6] Escaped brace in inline math '${span}$': "
                     "Markdown consumes the backslash before math renders. Use '\\lbrace' and '\\rbrace' instead."
+                )
+            if r"\," in span:
+                errors.append(
+                    f"{file_path}:{start_line}: [R7] Escaped comma '\\,' in inline math '${span}$': "
+                    "Markdown consumes the backslash before math renders, converting it to a literal comma. Use '\\thinspace' instead."
                 )
 
     return errors

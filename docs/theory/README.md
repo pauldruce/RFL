@@ -48,3 +48,16 @@ Every theory document in this directory follows this four-section structure:
 * **In C++ Headers:** Public headers cite theory notes using `@see Theory: docs/theory/<note>.md#<section>`.
 * **In Unit Tests:** Invariant tests cite equation numbers and verify analytical variations against brute-force recalculation.
 
+---
+
+## 5. Mathematical Typesetting & Markdown Compatibility
+
+Mathematical documentation renders across GitHub (MathJax) and Visual Studio Code (KaTeX).
+Authors must follow these formatting rules to prevent parser collisions:
+
+* **Display Math:** Place `$$` delimiters on separate lines with blank lines before and after. Do not indent inside list items.
+* **Thin Spacing (`\thinspace`):** Use `\thinspace` before differentials ($\mathrm{d}x$). Do not use `\,` because CommonMark strips the backslash before punctuation, rendering an unwanted comma.
+* **Set Braces (`\lbrace`, `\rbrace`):** Use `\lbrace` and `\rbrace` for set notation and anticommutators. Markdown strips backslashes before literal braces `\{` and `\}`.
+* **Separation (`\quad`, `\qquad`):** Use `\quad` and `\qquad` to separate distinct equations or conditions. Avoid `~` in equations.
+
+
