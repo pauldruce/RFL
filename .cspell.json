@@ -198,6 +198,7 @@
     "fuzzyuser",
     "milestoned",
     "pycache",
+    "testpaths",
     "zenodo"
   ],
   "flagWords": [

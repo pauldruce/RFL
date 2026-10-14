@@ -48,9 +48,17 @@ run = "python3 scripts/check_d2_images.py"
 description = "Recompile all SVG diagrams from D2 sources"
 run = "python3 scripts/check_d2_images.py --fix"
 
+[tasks.lint-traceability]
+description = "Verify requirements traceability across Enhancement Proposals and test suites"
+run = "python3 scripts/verify_traceability.py --audit"
+
+[tasks.matrix-traceability]
+description = "Generate living requirements traceability matrix"
+run = "python3 scripts/verify_traceability.py --generate-matrix docs/Traceability_Matrix.md"
+
 [tasks.lint]
-description = "Execute all linting checks (C++, spelling, links, D2)"
-depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2"]
+description = "Execute all linting checks (C++, spelling, links, D2, traceability)"
+depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2", "lint-traceability"]
 
 [tasks.pre-push]
 description = "Execute pre-push verification suite (linting and test suites)"
