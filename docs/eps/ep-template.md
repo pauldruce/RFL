@@ -42,10 +42,10 @@ The table below tracks the status of each implementation phase:
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
-| :--- | :--- | :--- |
-| **REQ-001** | **[Requirement Name]** | [Mathematical or physical invariant to preserve.] |
-| **REQ-002** | **[Requirement Name]** | [Computational precision or tolerance limit.] |
+| Requirement ID | Requirement Summary | Lifecycle Status | Operational & Physical Invariant |
+| :--- | :--- | :--- | :--- |
+| **REQ-[SYS]-001** | **[Requirement Name]** | Phase 1 (Planned) | [Mathematical or physical invariant to preserve.] |
+| **REQ-[SYS]-002** | **[Requirement Name]** | Phase 1 (Planned) | [Computational precision or tolerance limit.] |
 
 ---
 

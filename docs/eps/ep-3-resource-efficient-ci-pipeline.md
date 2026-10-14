@@ -86,18 +86,18 @@ The new architecture must address these bottlenecks by defining clear operationa
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Operational & Invariant Definition |
-| :--- | :--- | :--- |
-| **REQ-ARC-001** | **Fast Dual-Platform PR Gate** | Tier 1 PR checks must validate Ubuntu and macOS runners in under 120 seconds using pre-installed system packages. |
-| **REQ-ARC-002** | **Zero-Compute Documentation PRs** | Commits touching only documentation, markdown, or configuration files must trigger zero compilation jobs. |
-| **REQ-ARC-003** | **Branch Protection Integrity** | Path-filtered workflows must report passing status checks to GitHub to prevent pull request deadlocks. |
-| **REQ-ARC-004** | **Unified Single-Source Build Specification** | All C++ libraries, test targets, and bindings must be declared in a single build specification across all supported operating systems. |
-| **REQ-ARC-005** | **Declarative Multi-Platform Developer Tasks** | Developer workflows (build, test, lint, format) must be invoked through identical declarative commands across Linux, macOS, and Windows. |
-| **REQ-ARC-006** | **Automated Zero-Maintenance Code Hygiene** | Code formatting, linting, and spell-checking must run automatically on git-staged or tracked files with pinned tool versions. |
-| **REQ-ARC-007** | **Fine-Grained Modular Target Decomposition** | Core C++ libraries must be decomposed into independent component targets to ensure modifying a leaf file recompiles only dependent units. |
-| **REQ-ARC-008** | **Compiler Object Caching** | The build system must support transparent compiler object caching across local builds and CI runners, achieving cache hits above 70%. |
-| **REQ-ARC-009** | **Strict Forward Windows Compatibility** | All build definitions, compiler configurations, and repository conventions must support native Windows execution without emulation layers. |
-| **REQ-ARC-010** | **Direct Standardised Python Packaging** | The Python packaging mechanism must directly compile and package native extensions using standard PEP 517 workflows without wrapper scripts. |
+| Requirement ID | Requirement Summary | Lifecycle Status | Operational & Technical Invariant |
+| :--- | :--- | :--- | :--- |
+| **REQ-CI-001** | **Fast Dual-Platform PR Gate** | Phase 1 (Implemented) | Tier 1 PR checks must validate Ubuntu and macOS runners in under 120 seconds using pre-installed system packages. |
+| **REQ-CI-002** | **Zero-Compute Documentation PRs** | Phase 1 (Implemented) | Commits touching only documentation, markdown, or configuration files must trigger zero compilation jobs. |
+| **REQ-CI-003** | **Branch Protection Integrity** | Phase 1 (Implemented) | Path-filtered workflows must report passing status checks to GitHub to prevent pull request deadlocks. |
+| **REQ-CI-004** | **Unified Single-Source Build Specification** | Phase 2 (Implemented) | All C++ libraries, test targets, and bindings must be declared in a single build specification across all supported operating systems. |
+| **REQ-CI-005** | **Declarative Multi-Platform Developer Tasks** | Phase 2 (Implemented) | Developer workflows (build, test, lint, format) must be invoked through identical declarative commands across Linux, macOS, and Windows. |
+| **REQ-CI-006** | **Automated Zero-Maintenance Code Hygiene** | Phase 2 (Implemented) | Code formatting, linting, and spell-checking must run automatically on git-staged or tracked files with pinned tool versions. |
+| **REQ-CI-007** | **Fine-Grained Modular Target Decomposition** | Phase 2 (Implemented) | Core C++ libraries must be decomposed into independent component targets to ensure modifying a leaf file recompiles only dependent units. |
+| **REQ-CI-008** | **Compiler Object Caching** | Phase 3 (Implemented) | The build system must support transparent compiler object caching across local builds and CI runners, achieving cache hits above 70%. |
+| **REQ-CI-009** | **Strict Forward Windows Compatibility** | Phase 4 (Implemented) | All build definitions, compiler configurations, and repository conventions must support native Windows execution without emulation layers. |
+| **REQ-CI-010** | **Direct Standardised Python Packaging** | Phase 4 (Implemented) | The Python packaging mechanism must directly compile and package native extensions using standard PEP 517 workflows without wrapper scripts. |
 
 ---
 
