@@ -11,6 +11,7 @@ if [ -z "$STAGED_FILES" ]; then
     exit 0
 fi
 
+# 1. Spelling verification via CSpell
 echo "🔍 Checking staged files for spelling compliance (CSpell)..."
 
 if command -v cspell >/dev/null 2>&1; then
@@ -19,4 +20,10 @@ elif command -v npx >/dev/null 2>&1; then
     echo "$STAGED_FILES" | xargs npx cspell lint --dot --no-must-find-files
 else
     echo "⚠️ Warning: Neither 'cspell' nor 'npx' is found. Skipping spell check."
+fi
+
+# 2. Specification traceability and requirement ID audit
+if echo "$STAGED_FILES" | grep -qE "(docs/eps/|src/|tests/|scripts/)"; then
+    echo "📋 Verifying requirement IDs and traceability..."
+    python3 scripts/verify_traceability.py --audit
 fi

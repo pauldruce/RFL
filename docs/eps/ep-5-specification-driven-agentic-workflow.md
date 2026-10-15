@@ -113,6 +113,23 @@ Stubs must return **degenerate values** (such as `arma::zeros(...)` or `NaN`), *
 
 ---
 
+### 4.4 ADR-4: Shift-Left Local Git Hooks vs Remote-Only CI Gating
+
+| Criteria | Option A: Remote CI Only | Option B: Shift-Left Dual Loop (Local Hooks + Remote CI) (Selected) |
+| :--- | :--- | :--- |
+| **Agent Feedback Latency** | 2–5 minutes per push | **< 1 second (instant stderr self-correction in local turn)** |
+| **PR Commit Hygiene** | Poor (multiple noisy retry commits) | **Optimal (clean, atomic commits on branch)** |
+| **Context Retention** | Low (agent ends turn prematurely) | **High (agent self-corrects in the active execution turn)** |
+| **Compute Consumption** | High (consumes remote runner minutes) | **Zero (local CPU cycles, < 200 ms)** |
+| **Integrity Assurance** | Authoritative (clean-room multi-OS) | **Authoritative (CI mirrors identical checks on clean virtual machines)** |
+| **Decision** | Rejected | **Selected (Option B)** |
+
+*Rationale:* Autonomous AI coding agents optimise for rapid task completion. When verification happens solely in remote CI pipelines, feedback latency averages 2 to 5 minutes. The agent concludes its execution turn falsely, leaving broken links or failing tests for the user to report.
+
+Wiring `verify_traceability.py --audit` and CSpell into `.githooks/pre-commit` shifts verification left into the agent's inner loop. The `git commit` command fails immediately in the terminal tool output. The agent observes the error in stderr and corrects the issue during the active turn without human intervention. The `.githooks/pre-push` hook executes `mise run pre-push`, preventing broken builds from leaving the workstation. Remote CI remains essential as the authoritative clean-room gatekeeper across Ubuntu, macOS, and Windows.
+
+---
+
 ## 5. Target Architecture & The Specification-Driven Development Workflow
 
 ### 5.1 The 5-Stage Contributor Lifecycle
@@ -124,14 +141,16 @@ Stage 1: SPECIFY (Human Architect)
   │  - Author requirement in EP: REQ-<SYS>-<NUM>
   │  - Define invariants and numerical tolerances
   ▼
-Stage 2: SCAFFOLD (Contributor)
+Stage 2: SCAFFOLD (Contributor / Agentic Loop)
   │  - Declare public headers in include/rfl/ with degenerate stubs (zeros/NaN)
   │  - Register tagged tests (// [REQ-...] or @pytest.mark.req)
+  │  - Local pre-commit hook verifies requirement tags and spelling (< 1s)
   ▼
-Stage 3: IMPLEMENT VIA RED-GREEN ANCHORS (Contributor)
+Stage 3: IMPLEMENT VIA RED-GREEN ANCHORS (Contributor / Agentic Loop)
   │  - Red Anchor (test: commit): Compiles, links, and produces assertion <failure> (Red)
   │  - Green Anchor (HEAD): Replaces stubs with math kernel (Green)
   │  - Append Git trailer: "Implements: REQ-<SYS>-<NUM>"
+  │  - Local pre-push hook executes mise run pre-push (lint + unit tests)
   ▼
 Stage 4: QUALIFY (Automated CI Pipeline)
   │  - Verify Git trailers against docs/eps/
@@ -147,12 +166,13 @@ Stage 5: SIGN-OFF & MERGE (Human Architect)
 #### Detailed Stage Rules:
 
 1. **Stage 1 (Specify):** The human architect authors or refines the Enhancement Proposal in `docs/eps/`. The EP defines the mathematical requirements, tolerances, and ADRs.
-2. **Stage 2 (Scaffold):** The contributor declares public headers in `include/rfl/` using regular value types. The contributor writes test cases tagged with requirement identifiers (`// [REQ-...]` or `@pytest.mark.req`). Method stubs return degenerate values (`arma::zeros(...)` or `NaN`), never throwing uncaught exceptions.
+2. **Stage 2 (Scaffold):** The contributor declares public headers in `include/rfl/` using regular value types. The contributor writes test cases tagged with requirement identifiers (`// [REQ-...]` or `@pytest.mark.req`). Method stubs return degenerate values (`arma::zeros(...)` or `NaN`), never throwing uncaught exceptions. The `.githooks/pre-commit` hook audits requirement ID syntax, CSpell dictionaries, and markdown links in under one second.
 3. **Stage 3 (Implement via Red-Green Anchors):**
    * The contributor creates an atomic pull request containing at least one commit matching `^test:` (the Red Anchor) and finishing at `HEAD` (the Green Anchor). The Red Anchor is deterministically resolved as the immediate parent of the first `feat:` commit.
    * **Red Anchor (`test:`):** Adds interface stubs and the new test assertions. It must compile and link with zero errors. All tests mapped to the claimed requirements must fail on mathematical assertions (`<failure>`), all pre-existing tests must pass, and the suite must produce zero uncaught exceptions (`<error>`).
    * **Green Anchor (`HEAD`):** Replaces stubs with the implementation in `src/`. All tests turn green. Feature commits may modify `include/` for templates and inline helpers provided public AST signatures remain identical.
    * The commit message or PR description must include the Git trailer: `Implements: REQ-...`.
+   * The `.githooks/pre-push` hook executes `mise run pre-push` (incremental build, lint checks, and unit tests), preventing broken code from leaving the workstation.
 4. **Stage 4 (Qualify):**
    * GitHub Actions runs `scripts/verify_traceability.py --check-pr`.
    * On the Ubuntu runner, CI executes an **in-place checkout**: it checks out the Red Anchor, compiles, and verifies that claimed tests produce `<failure>`, pre-existing tests pass, and zero `<error>` tags exist. It then checks out `HEAD` and recompiles incrementally using Ninja and `ccache` in under 2 seconds, verifying all tests pass.
@@ -164,6 +184,9 @@ Stage 5: SIGN-OFF & MERGE (Human Architect)
 
 ```
 RFL Traceability & Governance Architecture
+├── .githooks/
+│   ├── pre-commit                                   (Shift-left hygiene: CSpell + verify_traceability)
+│   └── pre-push                                     (Local smoke tests: mise pre-push)
 ├── docs/eps/
 │   ├── ep-1-core-architecture-modernisation.md      (REQ-ARCH-001..007)
 │   ├── ep-2-package-and-binary-distribution.md      (REQ-PKG-001..009)
@@ -213,6 +236,8 @@ python3 scripts/verify_traceability.py --verify-manifest tests/qualification/.ma
 
 | Verification Gate | Command / Target | Target Invariant |
 | :--- | :--- | :--- |
+| **Pre-Commit Shift-Left** | `.githooks/pre-commit` | CSpell spelling check and `verify_traceability.py --audit` execute on staged files in < 1 second. |
+| **Pre-Push Smoke Gate** | `.githooks/pre-push` | Executes `mise run pre-push` (lint checks and fast unit tests) before remote push. |
 | **Static ID Audit** | `mise run lint-traceability` | All `REQ-` IDs are globally unique; zero collisions across EPs. |
 | **Unit Test Coverage** | `pytest scripts/tests/test_verify_traceability.py` | 100% test coverage over Markdown table, GTest, Catch2, and Pytest parsing. |
 | **Execution Performance** | `time mise run lint-traceability` | Wall-clock execution time < 200 ms. |
