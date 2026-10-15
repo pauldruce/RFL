@@ -64,6 +64,10 @@ run = "python3 scripts/verify_traceability.py --audit"
 description = "Generate living requirements traceability matrix"
 run = "python3 scripts/verify_traceability.py --generate-matrix docs/Traceability_Matrix.md"
 
+[tasks.verify-tdd]
+description = "Verify atomic Red-Green TDD commit protocol (REQ-TRC-007)"
+run = "python3 scripts/verify_tdd_commits.py --dry-run"
+
 [tasks.lint]
 description = "Execute all linting checks (C++, spelling, links, D2, traceability)"
 depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2", "lint-traceability"]

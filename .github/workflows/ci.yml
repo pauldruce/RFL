@@ -67,6 +67,37 @@ jobs:
       - name: Spell & British English Check (CSpell)
         run: npx cspell lint --dot .
 
+      - name: Audit requirement IDs and qualification manifest
+        run: python3 scripts/verify_traceability.py --audit
+
+  governance:
+    name: Specification Traceability & PR Governance
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Audit Requirement IDs & Sealed Manifests
+        run: python3 scripts/verify_traceability.py --audit
+
+      - name: Verify PR Trailers & Qualification Seals
+        env:
+          GITHUB_EVENT_PATH: ${{ env.GITHUB_EVENT_PATH }}
+        run: |
+          python3 scripts/verify_traceability.py --check-pr --base origin/${{ github.base_ref || 'main' }}
+
+      - name: Verify Atomic Red-Green Commit Topology
+        run: |
+          python3 scripts/verify_tdd_commits.py --base origin/${{ github.base_ref || 'main' }} --dry-run
+
   lint:
     name: "C++ Linter (${{ matrix.path }})"
     needs: filter
@@ -186,7 +217,7 @@ jobs:
 
   ci-gate:
     name: CI Gatekeeper
-    needs: [filter, check_milestone, validate_docs, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
+    needs: [filter, check_milestone, validate_docs, governance, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -195,6 +226,7 @@ jobs:
           echo "Filter result: ${{ needs.filter.result }}"
           echo "Milestone check result: ${{ needs.check_milestone.result }}"
           echo "Documentation & link check result: ${{ needs.validate_docs.result }}"
+          echo "Governance result: ${{ needs.governance.result }}"
           echo "Lint result: ${{ needs.lint.result }}"
           echo "Ubuntu smoke test result: ${{ needs.test_ubuntu.result }}"
           echo "macOS smoke test result: ${{ needs.test_macos.result }}"
@@ -218,6 +250,12 @@ jobs:
           if [ "${{ needs.validate_docs.result }}" = "failure" ] || \
              [ "${{ needs.validate_docs.result }}" = "cancelled" ]; then
             echo "❌ Documentation and link integrity validation failed or was cancelled."
+            exit 1
+          fi
+
+          if [ "${{ needs.governance.result }}" = "failure" ] || \
+             [ "${{ needs.governance.result }}" = "cancelled" ]; then
+            echo "❌ Specification traceability and PR governance validation failed or was cancelled."
             exit 1
           fi
 

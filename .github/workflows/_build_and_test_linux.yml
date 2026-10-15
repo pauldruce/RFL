@@ -95,4 +95,9 @@ jobs:
         run: cmake --build build --config ${{ inputs.build_type }}
 
       - name: Test
-        run: ctest --test-dir build -C ${{ inputs.build_type }} --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure
+        run: ctest --test-dir build -C ${{ inputs.build_type }} --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure --output-junit junit.xml
+
+      - name: Requirements Traceability PR Qualification (JUnit XML)
+        if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'
+        run: |
+          python3 scripts/verify_traceability.py --check-pr --base origin/${{ github.base_ref || 'main' }} --verify-xml build/junit.xml
