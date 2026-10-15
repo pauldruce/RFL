@@ -1,0 +1,7 @@
+# Global project maintainer
+* @pauldruce
+
+# Sealed qualification acceptance tests and cryptographic manifests (EP-5 / REQ-TRC-006)
+# Any modification to physical invariants or tolerances requires explicit CODEOWNERS approval.
+/tests/qualification/ @pauldruce
+/tests/qualification/.manifest @pauldruce

@@ -61,7 +61,7 @@ class TestRequirementIDValidation(unittest.TestCase):
 
 
 class TestLegacyRequirementAliasing(unittest.TestCase):
-    """Test legacy alias resolution and collision disambiguation (Section 7 Phase 1)."""
+    """Test legacy alias resolution and collision disambiguation [REQ-TRC-003]."""
 
     def test_path_prefixed_disambiguation(self) -> None:
         # Disambiguate colliding REQ-001 by path prefix
@@ -102,7 +102,7 @@ class TestMathPipeShielding(unittest.TestCase):
 
 
 class TestEPTableParser(unittest.TestCase):
-    """Test Markdown requirement table extraction from Enhancement Proposals."""
+    """Test Markdown requirement table extraction from Enhancement Proposals [REQ-TRC-002]."""
 
     def test_parse_four_column_ep_table(self) -> None:
         ep_content = """# EP-99: Test Proposal
@@ -135,7 +135,7 @@ class TestEPTableParser(unittest.TestCase):
 
 
 class TestCppTestExtraction(unittest.TestCase):
-    """Test requirement tag extraction from GoogleTest and Catch2 source files."""
+    """Test requirement tag extraction from GoogleTest and Catch2 source files [REQ-TRC-004]."""
 
     def test_extract_googletest_comments(self) -> None:
         cpp_content = """
@@ -252,7 +252,7 @@ class TestManifestVerification(unittest.TestCase):
 
 
 class TestJUnitXMLParser(unittest.TestCase):
-    """Test JUnit XML parsing across PASSED, FAILED, ERROR, and SKIPPED states."""
+    """Test JUnit XML parsing across PASSED, FAILED, ERROR, and SKIPPED states [REQ-TRC-005]."""
 
     def test_parse_junit_states(self) -> None:
         xml_content = """<?xml version="1.0" encoding="UTF-8"?>
@@ -304,6 +304,73 @@ class TestZeroCopyFortranInvariant(unittest.TestCase):
 
         with self.assertRaises(AssertionError):
             vt.assert_zero_copy_fortran_aligned(valid_arr, 0x9999)
+
+
+class TestManifestSealing(unittest.TestCase):
+    """Test REQ-TRC-006 qualification test cryptographic sealing and verification."""
+
+    def test_verify_manifest_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            test_file = tmp_root / "tests" / "qualification" / "test_sample.py"
+            test_file.parent.mkdir(parents=True, exist_ok=True)
+            test_file.write_text("def test_ok(): pass\n", encoding="utf-8")
+
+            manifest_file = test_file.parent / ".manifest"
+            success, msgs = vt.generate_manifest(manifest_file, tmp_root)
+            self.assertTrue(success)
+
+            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
+            self.assertTrue(verify_ok)
+            self.assertEqual(len(errs), 0)
+
+    def test_verify_manifest_detects_tampering(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            test_file = tmp_root / "tests" / "qualification" / "test_sample.py"
+            test_file.parent.mkdir(parents=True, exist_ok=True)
+            test_file.write_text("TOLERANCE = 1e-12\n", encoding="utf-8")
+
+            manifest_file = test_file.parent / ".manifest"
+            vt.generate_manifest(manifest_file, tmp_root)
+
+            # Contributor or agent tampers with tolerance:
+            test_file.write_text("TOLERANCE = 1e-6\n", encoding="utf-8")
+
+            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
+            self.assertFalse(verify_ok)
+            self.assertEqual(len(errs), 1)
+            self.assertIn("Integrity violation in sealed file", errs[0])
+
+    def test_verify_manifest_crlf_normalization(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            test_file = tmp_root / "tests" / "qualification" / "test_sample.py"
+            test_file.parent.mkdir(parents=True, exist_ok=True)
+
+            # Write file with Unix LF line endings and generate manifest
+            test_file.write_bytes(b"line 1\nline 2\n")
+            manifest_file = test_file.parent / ".manifest"
+            vt.generate_manifest(manifest_file, tmp_root)
+
+            # Simulate Windows checkout with CRLF line endings
+            test_file.write_bytes(b"line 1\r\nline 2\r\n")
+
+            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
+            self.assertTrue(verify_ok, f"Expected CRLF to be normalised to LF, got errors: {errs}")
+
+    def test_verify_manifest_missing_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            manifest_file = tmp_root / "tests" / "qualification" / ".manifest"
+            manifest_file.parent.mkdir(parents=True, exist_ok=True)
+            manifest_file.write_text(
+                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  missing_file.py\n",
+                encoding="utf-8",
+            )
+            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
+            self.assertFalse(verify_ok)
+            self.assertIn("missing", errs[0].lower())
 
 
 if __name__ == "__main__":

@@ -15,10 +15,10 @@ The table below tracks the status of each implementation phase:
 
 | Phase | Scope & Deliverables | Target Version | PR / Issue | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 1** | Standardise requirement namespacing and resolve ID collisions across EP-1 to EP-4 | `v0.3.0` | — | ⏳ Scheduled |
-| **Phase 2** | Implement zero-dependency traceability engine (`scripts/verify_traceability.py`) and `mise` tasks | `v0.3.0` | — | 💡 Planned |
-| **Phase 3** | Implement physical invariant test sealing (`tests/qualification/.manifest` SHA-256 integrity) | `v0.4.0` | — | 💡 Planned |
-| **Phase 4** | Integrate GitHub Actions CI PR Step Summaries and two-commit Red-Green verification | `v0.4.0` | — | 💡 Planned |
+| **Phase 1** | Standardise requirement namespacing and resolve ID collisions across EP-1 to EP-4 | `v0.3.0` | — | ✅ Complete |
+| **Phase 2** | Implement zero-dependency traceability engine (`scripts/verify_traceability.py`) and `mise` tasks | `v0.3.0` | — | ✅ Complete |
+| **Phase 3** | Implement physical invariant test sealing (`tests/qualification/.manifest` SHA-256 integrity) | `v0.4.0` | — | ✅ Complete |
+| **Phase 4** | Integrate GitHub Actions CI PR Step Summaries and two-commit Red-Green verification | `v0.4.0` | — | ⏳ Scheduled |
 
 ---
 
@@ -51,14 +51,14 @@ This paradigm introduces specific operational risks:
 
 | Requirement ID | Requirement Summary | Lifecycle Status | Operational & Architectural Invariant |
 | :--- | :--- | :--- | :--- |
-| **REQ-TRC-001** | **Global Requirement Namespacing** | Phase 1 (Planned) | Requirement IDs must conform to regex `^REQ-[A-Z]{2,4}-\d{3}$`. Subsystem codes: `ARCH` (Architecture), `PKG` (Packaging), `CI` (CI/CD), `PHY` (Physics), `TRC` (Traceability). |
-| **REQ-TRC-002** | **Lifecycle Phase Awareness** | Phase 1 (Planned) | Requirement tables in Section 3 of all EPs must include four columns: `Requirement ID`, `Requirement Summary`, `Lifecycle Status`, and `Operational / Physical Invariant`. The engine must evaluate only requirements marked `Phase <N> (Implemented)`. |
-| **REQ-TRC-003** | **Zero-Dependency Traceability Engine** | Phase 2 (Planned) | `scripts/verify_traceability.py` must use standard Python $\ge 3.10$ libraries only. Exit codes: 0 (pass), 1 (traceability error), 2 (CLI usage/parser error). Runs using `mise` in under 200 ms. |
-| **REQ-TRC-004** | **Multi-Framework Tag Support** | Phase 2 (Planned) | The tool must extract tags from GoogleTest comments (`// [REQ-...]`) preceding test macros, Catch2 bracketed tags (`[REQ-...]`), and Pytest AST decorators (`@pytest.mark.req`). |
-| **REQ-TRC-005** | **Conventional PR Metadata & Dynamic Verification** | Phase 2 (Planned) | Feature PRs claiming requirement delivery must supply Git trailers (`Implements: REQ-...`). The tool maps static source tags to test symbols, and confirms in JUnit XML that all target tests executed with zero failures. Catch2 v3 and Pytest omit `status="run"`; verification asserts the test element is present and contains no `<skipped>`, `<error>`, or `<failure>` tags. |
-| **REQ-TRC-006** | **Qualification Test Sealing** | Phase 3 (Planned) | Core scientific qualification tests in `tests/qualification/` must match SHA-256 hashes in `.manifest` using normalised LF line endings. Tolerance changes require `CODEOWNERS` approval and the `qualification-override` PR label. |
+| **REQ-TRC-001** | **Global Requirement Namespacing** | Phase 1 (Implemented) | Requirement IDs must conform to regex `^REQ-[A-Z]{2,4}-\d{3}$`. Subsystem codes: `ARCH` (Architecture), `PKG` (Packaging), `CI` (CI/CD), `PHY` (Physics), `TRC` (Traceability). |
+| **REQ-TRC-002** | **Lifecycle Phase Awareness** | Phase 1 (Implemented) | Requirement tables in Section 3 of all EPs must include four columns: `Requirement ID`, `Requirement Summary`, `Lifecycle Status`, and `Operational / Physical Invariant`. The engine must evaluate only requirements marked `Phase <N> (Implemented)`. |
+| **REQ-TRC-003** | **Zero-Dependency Traceability Engine** | Phase 2 (Implemented) | `scripts/verify_traceability.py` must use standard Python $\ge 3.10$ libraries only. Exit codes: 0 (pass), 1 (traceability error), 2 (CLI usage/parser error). Runs using `mise` in under 200 ms. |
+| **REQ-TRC-004** | **Multi-Framework Tag Support** | Phase 2 (Implemented) | The tool must extract tags from GoogleTest comments (`// [REQ-...]`) preceding test macros, Catch2 bracketed tags (`[REQ-...]`), and Pytest AST decorators (`@pytest.mark.req`). |
+| **REQ-TRC-005** | **Conventional PR Metadata & Dynamic Verification** | Phase 2 (Implemented) | Feature PRs claiming requirement delivery must supply Git trailers (`Implements: REQ-...`). The tool maps static source tags to test symbols, and confirms in JUnit XML that all target tests executed with zero failures. Catch2 v3 and Pytest omit `status="run"`; verification asserts the test element is present and contains no `<skipped>`, `<error>`, or `<failure>` tags. |
+| **REQ-TRC-006** | **Qualification Test Sealing** | Phase 3 (Implemented) | Core scientific qualification tests in `tests/qualification/` must match SHA-256 hashes in `.manifest` using normalised LF line endings. Tolerance changes require `CODEOWNERS` approval and the `qualification-override` PR label. |
 | **REQ-TRC-007** | **Atomic Red-Green Protocol** | Phase 4 (Planned) | Feature PRs introducing new components must provide a Red Anchor and Green Anchor (`HEAD`). The Red Anchor is resolved as the parent of the first `feat:` commit (`git rev-list --reverse --parents -E --grep='^feat(\([^)]+\))?:' origin/main..HEAD`). Stubs return degenerate values (`NaN` or zeros); at the Red Anchor, all tests mapped to the PR's `Implements: REQ-...` trailer(s) must produce `<failure>`, all pre-existing unrelated tests must pass, and the suite must produce zero `<error>` tags. CI runs an in-place checkout in the same build directory on Ubuntu. Repositories enforce Squash-and-Merge to protect `git bisect` on `main`. |
-| **REQ-TRC-008** | **Fortran Alignment & Zero-Copy Invariant** | Phase 2 (Planned) | Python buffer bindings over Armadillo matrices must verify column-major / Fortran alignment (`.flags['F_CONTIGUOUS']`) and pointer equality. This prevents silent matrix transposition and complex conjugation ($H \to H^*$) of Hermitian operators. |
+| **REQ-TRC-008** | **Fortran Alignment & Zero-Copy Invariant** | Phase 2 (Implemented) | Python buffer bindings over Armadillo matrices must verify column-major / Fortran alignment (`.flags['F_CONTIGUOUS']`) and pointer equality. This prevents silent matrix transposition and complex conjugation ($H \to H^*$) of Hermitian operators. |
 
 ---
 

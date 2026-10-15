@@ -21,15 +21,15 @@
 | **REQ-CI-008** | Compiler Object Caching | [EP-3](eps/ep-3-resource-efficient-ci-pipeline.md) | Phase 3 (Implemented) | — | ⏳ Implemented |
 | **REQ-CI-009** | Strict Forward Windows Compatibility | [EP-3](eps/ep-3-resource-efficient-ci-pipeline.md) | Phase 4 (Implemented) | — | ⏳ Implemented |
 | **REQ-CI-010** | Direct Standardised Python Packaging | [EP-3](eps/ep-3-resource-efficient-ci-pipeline.md) | Phase 4 (Implemented) | — | ⏳ Implemented |
-| **REQ-PHY-001** | Incremental Action Invariant | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
-| **REQ-PHY-002** | Dirac Hermiticity | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
-| **REQ-PHY-003** | Complete KO Real Structure | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
-| **REQ-PHY-004** | Chirality & Spectral Anti-Symmetry | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
+| **REQ-PHY-001** | Incremental Action Invariant | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | `test_numerical_tolerances.TestNumericalTolerances.test_trace_cancellation_bounds` | 💡 Planned |
+| **REQ-PHY-002** | Dirac Hermiticity | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | `test_numerical_tolerances.TestNumericalTolerances.test_hermiticity_error_bounds` | 💡 Planned |
+| **REQ-PHY-003** | Complete KO Real Structure | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | `test_numerical_tolerances.TestNumericalTolerances.test_ko_real_structure_error_bounds` | 💡 Planned |
+| **REQ-PHY-004** | Chirality & Spectral Anti-Symmetry | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | `test_numerical_tolerances.TestNumericalTolerances.test_chirality_sign_anti_commutation_exact_factor` | 💡 Planned |
 | **REQ-PHY-005** | Gaussian Limit Moments | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
 | **REQ-PHY-006** | Detailed Balance | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 2 (Planned) | — | 💡 Planned |
 | **REQ-PHY-007** | Chain Convergence | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 2 (Planned) | — | 💡 Planned |
-| **REQ-PHY-008** | Unitary Gauge Invariance | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
-| **REQ-PHY-009** | Action Derivatives | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | — | 💡 Planned |
+| **REQ-PHY-008** | Unitary Gauge Invariance | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | `test_numerical_tolerances.TestNumericalTolerances.test_unitary_gauge_invariance_error_bounds` | 💡 Planned |
+| **REQ-PHY-009** | Action Derivatives | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 1 (Planned) | `test_numerical_tolerances.TestNumericalTolerances.test_finite_difference_optimal_step_and_error_floor` | 💡 Planned |
 | **REQ-PHY-010** | Simulation-Based Calibration | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 2 (Planned) | — | 💡 Planned |
 | **REQ-PHY-011** | Physical Scaling Laws | [EP-4](eps/ep-4-computational-physics-verification-suite.md) | Phase 2 (Planned) | — | 💡 Planned |
 | **REQ-PKG-001** | Directory & Target Standardisation | [EP-2](eps/ep-2-package-and-binary-distribution.md) | Phase 1 (Implemented) | — | ⏳ Implemented |
@@ -41,11 +41,11 @@
 | **REQ-PKG-007** | Standard CMake Installation | [EP-2](eps/ep-2-package-and-binary-distribution.md) | Phase 2 (Planned) | — | 💡 Planned |
 | **REQ-PKG-008** | CPack Binary Packaging | [EP-2](eps/ep-2-package-and-binary-distribution.md) | Phase 2 (Planned) | — | 💡 Planned |
 | **REQ-PKG-009** | Ecosystem Package Distribution | [EP-2](eps/ep-2-package-and-binary-distribution.md) | Phase 3 (Planned) | — | 💡 Planned |
-| **REQ-TRC-001** | Global Requirement Namespacing | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 1 (Planned) | — | 💡 Planned |
-| **REQ-TRC-002** | Lifecycle Phase Awareness | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 1 (Planned) | — | 💡 Planned |
-| **REQ-TRC-003** | Zero-Dependency Traceability Engine | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Planned) | — | 💡 Planned |
-| **REQ-TRC-004** | Multi-Framework Tag Support | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Planned) | — | 💡 Planned |
-| **REQ-TRC-005** | Conventional PR Metadata & Dynamic Verification | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Planned) | — | 💡 Planned |
-| **REQ-TRC-006** | Qualification Test Sealing | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 3 (Planned) | — | 💡 Planned |
+| **REQ-TRC-001** | Global Requirement Namespacing | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 1 (Implemented) | `test_verify_traceability.TestRequirementIDValidation.test_valid_canonical_ids`<br>`test_verify_traceability.TestRequirementIDValidation.test_invalid_canonical_ids` | ⏳ Implemented |
+| **REQ-TRC-002** | Lifecycle Phase Awareness | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 1 (Implemented) | `test_verify_traceability.TestEPTableParser.test_parse_four_column_ep_table` | ⏳ Implemented |
+| **REQ-TRC-003** | Zero-Dependency Traceability Engine | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Implemented) | `test_verify_traceability.TestLegacyRequirementAliasing.test_path_prefixed_disambiguation`<br>`test_verify_traceability.TestLegacyRequirementAliasing.test_unambiguous_legacy_aliases`<br>`test_verify_traceability.TestLegacyRequirementAliasing.test_already_canonical_ids_unchanged` | ⏳ Implemented |
+| **REQ-TRC-004** | Multi-Framework Tag Support | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Implemented) | `test_verify_traceability.TestCppTestExtraction.test_extract_googletest_comments`<br>`test_verify_traceability.TestCppTestExtraction.test_extract_catch2_bracketed_tags` | ⏳ Implemented |
+| **REQ-TRC-005** | Conventional PR Metadata & Dynamic Verification | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Implemented) | `test_verify_traceability.TestJUnitXMLParser.test_parse_junit_states` | ⏳ Implemented |
+| **REQ-TRC-006** | Qualification Test Sealing | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 3 (Implemented) | `test_numerical_tolerances.TestNumericalTolerances.test_machine_epsilon_ieee754`<br>`test_verify_traceability.TestManifestSealing.test_verify_manifest_valid`<br>`test_verify_traceability.TestManifestSealing.test_verify_manifest_detects_tampering`<br>*(+2 more)* | ⏳ Implemented |
 | **REQ-TRC-007** | Atomic Red-Green Protocol | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 4 (Planned) | — | 💡 Planned |
-| **REQ-TRC-008** | Fortran Alignment & Zero-Copy Invariant | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Planned) | — | 💡 Planned |
+| **REQ-TRC-008** | Fortran Alignment & Zero-Copy Invariant | [EP-5](eps/ep-5-specification-driven-agentic-workflow.md) | Phase 2 (Implemented) | `test_numerical_tolerances.TestNumericalTolerances.test_fortran_zero_copy_alignment_invariant`<br>`test_verify_traceability.TestZeroCopyFortranInvariant.test_fortran_contiguous_verification`<br>`test_verify_traceability.MockArray.__init__` | ⏳ Implemented |

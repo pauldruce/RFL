@@ -402,12 +402,50 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
     class TestVisitor(ast.NodeVisitor):
         def __init__(self) -> None:
             self.class_name: str | None = None
+            self.class_tags: list[tuple[str, int]] = []
 
         def visit_ClassDef(self, node: ast.ClassDef) -> None:
             prev_class = self.class_name
+            prev_tags = list(self.class_tags)
             self.class_name = node.name
+
+            current_class_tags: list[tuple[str, int]] = []
+            for decorator in node.decorator_list:
+                call_node: ast.Call | None = None
+                if isinstance(decorator, ast.Call):
+                    call_node = decorator
+                if call_node:
+                    func_expr = call_node.func
+                    is_req = False
+                    if isinstance(func_expr, ast.Attribute) and func_expr.attr == "req":
+                        is_req = True
+                    elif isinstance(func_expr, ast.Name) and func_expr.id == "req":
+                        is_req = True
+                    if is_req:
+                        for arg in call_node.args:
+                            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                                current_class_tags.append((arg.value, node.lineno))
+
+            docstring = ast.get_docstring(node)
+            if docstring:
+                for match in REQ_TAG_SEARCH_PATTERN.finditer(docstring):
+                    current_class_tags.append((match.group(1), node.lineno))
+
+            start_line = node.lineno - 1
+            idx = start_line - 1
+            while idx >= 0:
+                line_str = lines[idx].strip()
+                if line_str.startswith("#"):
+                    for m in REQ_TAG_SEARCH_PATTERN.finditer(line_str):
+                        current_class_tags.append((m.group(1), idx + 1))
+                    idx -= 1
+                else:
+                    break
+
+            self.class_tags = prev_tags + current_class_tags
             self.generic_visit(node)
             self.class_name = prev_class
+            self.class_tags = prev_tags
 
         def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
             self._process_func(node)
@@ -418,7 +456,7 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             self.generic_visit(node)
 
         def _process_func(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
-            found_tags: list[tuple[str, int]] = []
+            found_tags: list[tuple[str, int]] = list(self.class_tags)
 
             # 1. Inspect Pytest markers: @pytest.mark.req("REQ-...")
             for decorator in node.decorator_list:
@@ -557,6 +595,10 @@ def verify_manifest(manifest_path: Path, repo_root: Path) -> tuple[bool, list[st
 
         expected_hash, rel_target = parts[0].strip(), parts[1].strip()
         target_path = repo_root / rel_target
+        if not target_path.exists():
+            manifest_relative = manifest_path.parent / rel_target
+            if manifest_relative.exists():
+                target_path = manifest_relative
 
         if not target_path.exists():
             errors.append(f"Sealed qualification file missing: {rel_target}")
@@ -578,8 +620,50 @@ def verify_manifest(manifest_path: Path, repo_root: Path) -> tuple[bool, list[st
         except Exception as exc:
             errors.append(f"Failed to read sealed file '{rel_target}': {exc}")
 
+    if verified_count == 0 and not errors:
+        errors.append(f"No sealed files found in manifest: {manifest_path}")
+
     success = len(errors) == 0
     return success, errors
+
+
+def generate_manifest(manifest_path: Path, repo_root: Path) -> tuple[bool, list[str]]:
+    """Generate or update the cryptographic manifest for sealed qualification tests."""
+    abs_manifest = (repo_root / manifest_path if not manifest_path.is_absolute() else manifest_path).resolve()
+    target_dir = abs_manifest.parent if abs_manifest.name == ".manifest" else abs_manifest
+    actual_manifest = abs_manifest if abs_manifest.name == ".manifest" else abs_manifest / ".manifest"
+
+    if not target_dir.exists():
+        return False, [f"Target directory does not exist: {target_dir}"]
+
+    lines = [
+        "# RFL Sealed Qualification Acceptance Test Manifest",
+        "# Enforces IEEE 754 precision bounds and scientific invariants (EP-5 / REQ-TRC-006)",
+        "# Generated with normalised LF line endings across all platforms.",
+        "",
+    ]
+    test_files = sorted(
+        [
+            f
+            for f in target_dir.rglob("*")
+            if f.is_file()
+            and f.name != ".manifest"
+            and not f.name.endswith(".md")
+            and not f.name.startswith(".")
+            and "__pycache__" not in f.parts
+            and f.suffix in {".py", ".cpp", ".hpp", ".h", ".cc"}
+        ]
+    )
+    for tf in test_files:
+        raw_bytes = tf.read_bytes()
+        normalised = raw_bytes.replace(b"\r\n", b"\n")
+        sha = hashlib.sha256(normalised).hexdigest()
+        rel_path = tf.resolve().relative_to(repo_root.resolve()).as_posix()
+        lines.append(f"{sha}  {rel_path}")
+
+    lines.append("")
+    actual_manifest.write_text("\n".join(lines), encoding="utf-8")
+    return True, [f"Generated sealed manifest with {len(test_files)} file(s): {actual_manifest}"]
 
 
 @dataclasses.dataclass
@@ -706,10 +790,22 @@ def audit_repository(repo_root: Path, eps_dir: Path) -> int:
         for r in missing_implemented:
             print(f"  • [{r.req_id}] {r.summary} ({r.ep_file})")
 
+    # 4. Verify sealed qualification manifest if present
+    manifest_path = repo_root / "tests" / "qualification" / ".manifest"
+    manifest_errors: list[str] = []
+    if manifest_path.exists():
+        manifest_ok, manifest_errors = verify_manifest(manifest_path, repo_root)
+        if manifest_ok:
+            print(f"\n🔒 Verified sealed qualification manifest ({manifest_path.relative_to(repo_root)}).")
+        else:
+            print("\n❌ Sealed qualification manifest integrity failure:")
+            for err in manifest_errors:
+                print(f"  • {err}")
+
     print("\n" + "=" * 70)
 
-    # Exit code: 0 if valid IDs and zero EP errors; 1 if errors found
-    if ep_errors:
+    # Exit code: 0 if valid IDs, zero EP errors, and zero manifest errors; 1 if errors found
+    if ep_errors or manifest_errors:
         return 1
     return 0
 
@@ -850,12 +946,61 @@ def check_pull_request(
     eps_dir: Path,
     xml_paths: list[Path] | None = None,
     red_anchor: bool = False,
+    pr_labels: list[str] | None = None,
 ) -> int:
-    """Verify Git trailers and test execution for a feature pull request."""
+    """Verify Git trailers, qualification seals, and test execution for a pull request."""
     req_map, _ = collect_all_requirements(eps_dir, repo_root)
     all_tests = collect_all_tests(repo_root)
 
-    # Extract Git trailers: "Implements: REQ-..."
+    print("=" * 70)
+    print(" RFL Pull Request Traceability Qualification Gate")
+    print("=" * 70)
+
+    errors: list[str] = []
+
+    # 1. Inspect changed files for sealed qualification modifications (REQ-TRC-006)
+    diff_cmd = ["git", "diff", "--name-only", f"{base_ref}..HEAD"]
+    try:
+        diff_res = subprocess.run(diff_cmd, cwd=repo_root, capture_output=True, text=True, check=True)
+        changed_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
+    except Exception:
+        diff_res = subprocess.run(["git", "diff", "--name-only", "HEAD~1..HEAD"], cwd=repo_root, capture_output=True, text=True)
+        changed_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
+
+    qualification_changes = [f for f in changed_files if f.startswith("tests/qualification/")]
+    if qualification_changes:
+        manifest_path = repo_root / "tests" / "qualification" / ".manifest"
+        manifest_ok, manifest_errs = verify_manifest(manifest_path, repo_root)
+        if not manifest_ok:
+            for err in manifest_errs:
+                errors.append(f"Qualification test integrity error: {err}")
+
+        # Check for qualification-override label
+        active_labels: list[str] = []
+        if pr_labels:
+            active_labels.extend(pr_labels)
+        env_labels = os.environ.get("RFL_PR_LABELS", "")
+        if env_labels:
+            active_labels.extend([label.strip() for label in env_labels.split(",") if label.strip()])
+        event_path = os.environ.get("GITHUB_EVENT_PATH")
+        if event_path and Path(event_path).exists():
+            try:
+                with open(event_path, encoding="utf-8") as f:
+                    event_data = json.load(f)
+                for label_obj in event_data.get("pull_request", {}).get("labels", []):
+                    name = label_obj.get("name")
+                    if name:
+                        active_labels.append(name)
+            except Exception:
+                pass
+
+        if "qualification-override" not in active_labels:
+            errors.append(
+                "Changes detected in sealed qualification tests ('tests/qualification/'). "
+                "Altering tolerances requires the 'qualification-override' PR label and CODEOWNERS approval."
+            )
+
+    # 2. Extract Git trailers: "Implements: REQ-..."
     cmd = ["git", "log", f"{base_ref}..HEAD", "--pretty=format:%B---COMMIT---"]
     try:
         process_result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True, check=True)
@@ -875,11 +1020,13 @@ def check_pull_request(
 
     claimed_requirements = [canonicalize_req(r) for r in claimed_raw_ids]
 
-    print("=" * 70)
-    print(" RFL Pull Request Traceability Qualification Gate")
-    print("=" * 70)
-
     if not claimed_requirements:
+        if errors:
+            print("\n❌ Pull request verification failed:")
+            for err in errors:
+                print(f"  • {err}")
+            print("=" * 70)
+            return 1
         print("ℹ️  No 'Implements: REQ-...' trailer found.")
         print("   Treated as internal refactoring (non-blocking informational pass).")
         print("=" * 70)
@@ -887,7 +1034,6 @@ def check_pull_request(
 
     print(f"🔍 Claimed Requirement Delivery: {', '.join(claimed_requirements)}")
 
-    errors: list[str] = []
     xml_results: dict[str, JUnitResult] = {}
     if xml_paths:
         for p in xml_paths:
@@ -1003,6 +1149,10 @@ def main() -> int:
                         help="Verify test execution against JUnit XML outputs")
     parser.add_argument("--verify-manifest", type=Path, metavar="MANIFEST_PATH",
                         help="Verify cryptographic SHA-256 integrity of sealed qualification tests")
+    parser.add_argument("--generate-manifest", type=Path, metavar="MANIFEST_PATH",
+                        help="Generate or reseal cryptographic SHA-256 manifest for qualification tests")
+    parser.add_argument("--pr-label", action="append", default=[], dest="pr_labels",
+                        help="Specify PR label for qualification override verification")
     parser.add_argument("--generate-matrix", type=Path, metavar="OUTPUT_MD",
                         help="Generate Markdown traceability matrix document")
     parser.add_argument("--dump-json", action="store_true",
@@ -1024,6 +1174,12 @@ def main() -> int:
         print(f"✅ Sealed qualification manifest verified successfully: {args.verify_manifest}")
         return 0
 
+    if args.generate_manifest:
+        success, messages = generate_manifest(args.generate_manifest, repo_root)
+        for msg in messages:
+            print(f"✅ {msg}" if success else f"❌ {msg}")
+        return 0 if success else 1
+
     if args.query:
         return query_requirement(args.query, repo_root, eps_dir)
 
@@ -1036,7 +1192,14 @@ def main() -> int:
         return 0
 
     if args.check_pr:
-        return check_pull_request(args.base, repo_root, eps_dir, args.verify_xml, red_anchor=args.red_anchor)
+        return check_pull_request(
+            args.base,
+            repo_root,
+            eps_dir,
+            args.verify_xml,
+            red_anchor=args.red_anchor,
+            pr_labels=args.pr_labels,
+        )
 
     # Default action: run audit
     return audit_repository(repo_root, eps_dir)

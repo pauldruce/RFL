@@ -1,0 +1,5 @@
+# RFL Sealed Qualification Acceptance Test Manifest
+# Enforces IEEE 754 precision bounds and scientific invariants (EP-5 / REQ-TRC-006)
+# Generated with normalised LF line endings across all platforms.
+
+f53d3624d44196b5a4bd57225ee1926766ae738a57c1355bdabb88fa472e28c2  tests/qualification/test_numerical_tolerances.py
