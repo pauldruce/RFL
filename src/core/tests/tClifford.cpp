@@ -91,6 +91,7 @@ TEST(CliffordTests, GetGammas) {
   }
 }
 
+// [REQ-ARCH-001] Verify Clifford gamma generators satisfy signature Hermiticity signs.
 TEST(CliffordTests, GammasHaveCorrectHermiticity) {
   vector<CliffordData> data;
   data.push_back({1, 0});
@@ -189,6 +190,7 @@ TEST(CliffordTests, GammasSatisfyAntiCommutationRelations) {
 }
 
 // TODO: Find the minimum set of (p,q) signatures to cover all code paths.
+// [REQ-ARCH-003] Verify chirality grading operator matches Clifford product definition.
 TEST(CliffordTests, ChiralityIsCorrect) {
   // TODO: Fix source code because this test fails when max_p or max_q is 6 or greater.
   constexpr int max_p = 5;

@@ -4,6 +4,10 @@
 # ==============================================================================
 set -euo pipefail
 
+# Clear inherited Git worktree environment variables (such as GIT_DIR) so child
+# build tools (e.g. CMake FetchContent) can clone external repositories cleanly.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_PREFIX
+
 # 1. Execute pre-push validation suite via mise
 if [ "${RFL_SKIP_PRE_PUSH:-0}" != "1" ]; then
     echo "🚀 Running pre-push verification suite via mise..."
@@ -14,7 +18,7 @@ if [ "${RFL_SKIP_PRE_PUSH:-0}" != "1" ]; then
     else
         echo "⚠️ mise not found in PATH; executing fallback test suite..."
         ctest --test-dir build --output-on-failure
-        uv run --group test pytest src/python_bindings/tests
+        uv run --group test pytest src/python_bindings/tests scripts/tests
     fi
 fi
 

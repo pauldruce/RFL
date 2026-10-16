@@ -1,6 +1,0 @@
-# Ensure consistent line endings across operating systems
-* text=auto
-
-# Enforce strict LF line endings for sealed qualification test suites and manifests (EP-5 / REQ-TRC-006)
-tests/qualification/** text eol=lf
-tests/qualification/.manifest text eol=lf

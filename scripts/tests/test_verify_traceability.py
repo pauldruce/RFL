@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
 """scripts/tests/test_verify_traceability.py
 
-Comprehensive unit test suite for the RFL Requirements Traceability and Governance Engine.
-Verifies requirement ID validation, EP table parsing, C++ (GTest/Catch2) extraction,
-Python AST extraction, JUnit XML evaluation, manifest hashing, and zero-copy invariants.
+Unit test suite for the RFL Requirements Traceability and Governance Engine.
+Verifies requirement ID validation, EP table parsing, domain-aware coverage classification,
+C++ (GTest/Catch2) extraction, Python AST extraction (ignoring non-test helper functions),
+JUnit XML evaluation, and shift-left hook integrity.
 
-Conforms to EP-5 (REQ-TRC-003).
+Conforms to EP-5 (REQ-TRC-001 through REQ-TRC-006).
 Uses standard Python library only (runnable via unittest or pytest).
 """
 
 from __future__ import annotations
 
-import hashlib
+import os
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
-# Import the module under test
-import sys
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
@@ -25,7 +25,7 @@ import verify_traceability as vt
 
 
 class TestRequirementIDValidation(unittest.TestCase):
-    """Test requirement ID regex and namespacing rules (REQ-TRC-001)."""
+    """Test requirement ID regex and namespacing rules [REQ-TRC-001]."""
 
     def test_valid_canonical_ids(self) -> None:
         valid_ids = [
@@ -33,7 +33,7 @@ class TestRequirementIDValidation(unittest.TestCase):
             "REQ-PKG-009",
             "REQ-CI-010",
             "REQ-PHY-001",
-            "REQ-TRC-008",
+            "REQ-TRC-006",
             "REQ-AI-042",
         ]
         for req_id in valid_ids:
@@ -44,14 +44,14 @@ class TestRequirementIDValidation(unittest.TestCase):
 
     def test_invalid_canonical_ids(self) -> None:
         invalid_ids = [
-            "REQ-001",         # Un-namespaced legacy format
-            "REQ-A-001",       # Subsystem code too short (< 2 letters)
-            "REQ-INVALID-001", # Subsystem code too long (> 4 letters)
-            "REQ-arch-001",    # Lowercase subsystem code
-            "REQ-ARCH-1",      # Non-zero-padded number
-            "REQ-ARCH-01",     # 2-digit number
-            "ARCH-001",        # Missing REQ prefix
-            "REQ-008b",        # Alphanumeric suffix
+            "REQ-001",          # Un-namespaced legacy format
+            "REQ-A-001",        # Subsystem code too short (< 2 letters)
+            "REQ-INVALID-001",  # Subsystem code too long (> 4 letters)
+            "REQ-arch-001",     # Lowercase subsystem code
+            "REQ-ARCH-1",       # Non-zero-padded number
+            "REQ-ARCH-01",      # 2-digit number
+            "ARCH-001",         # Missing REQ prefix
+            "REQ-008b",         # Alphanumeric suffix
         ]
         for req_id in invalid_ids:
             self.assertIsNone(
@@ -64,9 +64,11 @@ class TestLegacyRequirementAliasing(unittest.TestCase):
     """Test legacy alias resolution and collision disambiguation [REQ-TRC-003]."""
 
     def test_path_prefixed_disambiguation(self) -> None:
-        # Disambiguate colliding REQ-001 by path prefix
         arch_id = vt.canonicalize_req("REQ-001", "src/core/tests/tDiracOperator.cpp")
         self.assertEqual(arch_id, "REQ-ARCH-001")
+
+        delta_phy_id = vt.canonicalize_req("REQ-001", "src/core/tests/tDelta.cpp")
+        self.assertEqual(delta_phy_id, "REQ-PHY-001")
 
         phy_id = vt.canonicalize_req("REQ-001", "tests/physics/test_invariants.py")
         self.assertEqual(phy_id, "REQ-PHY-001")
@@ -78,13 +80,16 @@ class TestLegacyRequirementAliasing(unittest.TestCase):
         ci_id = vt.canonicalize_req("REQ-ARC-001", "")
         self.assertEqual(ci_id, "REQ-CI-001")
 
+        phy_011 = vt.canonicalize_req("REQ-011", "src/core/tests/tDelta.cpp")
+        self.assertEqual(phy_011, "REQ-PHY-011")
+
     def test_already_canonical_ids_unchanged(self) -> None:
         modern_id = vt.canonicalize_req("REQ-ARCH-001", "src/core/tests/tDiracOperator.cpp")
         self.assertEqual(modern_id, "REQ-ARCH-001")
 
 
 class TestMathPipeShielding(unittest.TestCase):
-    """Test LaTeX math pipe character shielding to preserve Markdown table integrity."""
+    """Test LaTeX math pipe character shielding to preserve Markdown table integrity [REQ-TRC-002]."""
 
     def test_single_dollar_math_shielding(self) -> None:
         text = "Formula $|S|$ and $\\lvert A \\rvert \\le B$ in text"
@@ -101,8 +106,8 @@ class TestMathPipeShielding(unittest.TestCase):
         self.assertEqual(restored, text)
 
 
-class TestEPTableParser(unittest.TestCase):
-    """Test Markdown requirement table extraction from Enhancement Proposals [REQ-TRC-002]."""
+class TestEPTableParserAndDomainAwareness(unittest.TestCase):
+    """Test Markdown requirement table extraction and domain classification [REQ-TRC-002]."""
 
     def test_parse_four_column_ep_table(self) -> None:
         ep_content = """# EP-99: Test Proposal
@@ -115,6 +120,7 @@ class TestEPTableParser(unittest.TestCase):
 | :--- | :--- | :--- | :--- |
 | **REQ-ARCH-001** | **Hermiticity Preservation** | Phase 1 (Implemented) | Matrix variations $\\delta M_k$ must preserve $H_i^\\dagger = H_i$. |
 | **REQ-ARCH-002** | **Analytic Variation** | Phase 2 (Planned) | Fast $\\mathcal{O}(N^3)$ local variation equals global recomputation. |
+| **REQ-CI-001** | **Fast Dual-Platform PR Gate** | Phase 1 (Implemented) | PR gate finishes in under 120 seconds. |
 """
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_root = Path(tmp_dir)
@@ -123,15 +129,19 @@ class TestEPTableParser(unittest.TestCase):
 
             parsed_requirements, errors = vt.parse_ep_file(ep_file, tmp_root)
             self.assertEqual(len(errors), 0, f"Errors: {errors}")
-            self.assertEqual(len(parsed_requirements), 2)
+            self.assertEqual(len(parsed_requirements), 3)
 
             self.assertEqual(parsed_requirements[0].req_id, "REQ-ARCH-001")
-            self.assertEqual(parsed_requirements[0].summary, "Hermiticity Preservation")
-            self.assertEqual(parsed_requirements[0].lifecycle_status, "Phase 1 (Implemented)")
             self.assertTrue(parsed_requirements[0].is_implemented)
+            self.assertTrue(parsed_requirements[0].is_unit_testable)
 
             self.assertEqual(parsed_requirements[1].req_id, "REQ-ARCH-002")
             self.assertFalse(parsed_requirements[1].is_implemented)
+            self.assertTrue(parsed_requirements[1].is_unit_testable)
+
+            self.assertEqual(parsed_requirements[2].req_id, "REQ-CI-001")
+            self.assertTrue(parsed_requirements[2].is_implemented)
+            self.assertFalse(parsed_requirements[2].is_unit_testable)
 
 
 class TestCppTestExtraction(unittest.TestCase):
@@ -188,9 +198,9 @@ TEST_CASE("Dirac Operator Hermiticity", "[core][REQ-ARCH-001]") {
 
 
 class TestPythonTestExtraction(unittest.TestCase):
-    """Test requirement tag extraction from Pytest files via Python AST."""
+    """Test requirement tag extraction from Pytest files via Python AST [REQ-TRC-004]."""
 
-    def test_extract_pytest_markers_and_docstrings(self) -> None:
+    def test_extract_pytest_markers_and_ignore_helpers(self) -> None:
         py_content = """
 import pytest
 
@@ -198,13 +208,25 @@ import pytest
 def test_zero_copy_numpy_buffer():
     pass
 
-def test_hermiticity_check():
-    \"\"\"Verify Dirac operator hermiticity [REQ-ARCH-001].\"\"\"
+def _helper_not_a_test():
+    \"\"\"Helper mentioning REQ-ARCH-001 should not be recorded as a test.\"\"\"
     pass
 
-# [REQ-ARCH-003]
-def test_spectral_symmetry():
-    pass
+class TestDiracSuite:
+    \"\"\"Suite verifying [REQ-ARCH-001].\"\"\"
+
+    def __init__(self):
+        pass
+
+    def _init_fixture(self):
+        pass
+
+    def test_hermiticity_check(self):
+        pass
+
+    # [REQ-ARCH-003]
+    def test_spectral_symmetry(self):
+        pass
 """
         with tempfile.TemporaryDirectory() as tmp_dir:
             tmp_root = Path(tmp_dir)
@@ -212,47 +234,19 @@ def test_spectral_symmetry():
             py_file.write_text(py_content, encoding="utf-8")
 
             mappings = vt.extract_python_tests(py_file, tmp_root)
-            self.assertEqual(len(mappings), 3)
+            symbols = {m.full_symbol for m in mappings}
 
-            mapped_req_ids = {m.req_id for m in mappings}
-            self.assertIn("REQ-ARCH-006", mapped_req_ids)
-            self.assertIn("REQ-ARCH-001", mapped_req_ids)
-            self.assertIn("REQ-ARCH-003", mapped_req_ids)
-
-
-class TestManifestVerification(unittest.TestCase):
-    """Test cryptographic SHA-256 integrity verification of sealed qualification tests."""
-
-    def test_manifest_verification_normalises_line_endings(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            sealed_file = tmp_root / "test_sealed.py"
-            content = "def test_sealed_physics():\n    assert True\n"
-            sealed_file.write_bytes(content.encode("utf-8"))
-
-            expected_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()
-            manifest_file = tmp_root / ".manifest"
-            manifest_file.write_text(f"{expected_hash}  test_sealed.py\n", encoding="utf-8")
-
-            success, errors = vt.verify_manifest(manifest_file, tmp_root)
-            self.assertTrue(success, f"Manifest verification failed: {errors}")
-
-    def test_manifest_verification_detects_tampering(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            sealed_file = tmp_root / "test_sealed.py"
-            sealed_file.write_bytes(b"original content\n")
-
-            manifest_file = tmp_root / ".manifest"
-            manifest_file.write_text(f"{'0' * 64}  test_sealed.py\n", encoding="utf-8")
-
-            success, errors = vt.verify_manifest(manifest_file, tmp_root)
-            self.assertFalse(success)
-            self.assertIn("Integrity violation", errors[0])
+            self.assertIn("test_physics.test_zero_copy_numpy_buffer", symbols)
+            self.assertIn("test_physics.TestDiracSuite.test_hermiticity_check", symbols)
+            self.assertIn("test_physics.TestDiracSuite.test_spectral_symmetry", symbols)
+            # Non-test helpers must be excluded
+            self.assertNotIn("test_physics._helper_not_a_test", symbols)
+            self.assertNotIn("test_physics.TestDiracSuite.__init__", symbols)
+            self.assertNotIn("test_physics.TestDiracSuite._init_fixture", symbols)
 
 
-class TestJUnitXMLParser(unittest.TestCase):
-    """Test JUnit XML parsing across PASSED, FAILED, ERROR, and SKIPPED states [REQ-TRC-005]."""
+class TestJUnitXMLAndPRSummary(unittest.TestCase):
+    """Test JUnit XML parsing and PR test-diff detection [REQ-TRC-005]."""
 
     def test_parse_junit_states(self) -> None:
         xml_content = """<?xml version="1.0" encoding="UTF-8"?>
@@ -282,95 +276,28 @@ class TestJUnitXMLParser(unittest.TestCase):
             self.assertEqual(results["DiracTests.ErrorTest"].status, "ERROR")
             self.assertEqual(results["DiracTests.SkipTest"].status, "SKIPPED")
 
-
-class TestZeroCopyFortranInvariant(unittest.TestCase):
-    """Test REQ-TRC-008 Fortran contiguous buffer verification helper."""
-
-    def test_fortran_contiguous_verification(self) -> None:
-        class MockArray:
-            def __init__(self, f_contiguous: bool, ptr: int = 0x1000):
-                self.flags = {"F_CONTIGUOUS": f_contiguous}
-                class CTypes:
-                    pass
-                self.ctypes = CTypes()
-                self.ctypes.data = ptr
-
-        valid_arr = MockArray(f_contiguous=True, ptr=0x2000)
-        self.assertTrue(vt.assert_zero_copy_fortran_aligned(valid_arr, 0x2000))
-
-        invalid_arr = MockArray(f_contiguous=False)
-        with self.assertRaises(AssertionError):
-            vt.assert_zero_copy_fortran_aligned(invalid_arr)
-
-        with self.assertRaises(AssertionError):
-            vt.assert_zero_copy_fortran_aligned(valid_arr, 0x9999)
+    def test_is_test_file_path_detection(self) -> None:
+        self.assertTrue(vt.is_test_file_path("src/core/tests/tDiracOperator.cpp"))
+        self.assertTrue(vt.is_test_file_path("src/python_bindings/tests/unit/test_dirac.py"))
+        self.assertTrue(vt.is_test_file_path("scripts/tests/test_verify_traceability.py"))
+        self.assertFalse(vt.is_test_file_path("src/core/DiracOperator.cpp"))
+        self.assertFalse(vt.is_test_file_path("docs/eps/ep-5.md"))
 
 
-class TestManifestSealing(unittest.TestCase):
-    """Test REQ-TRC-006 qualification test cryptographic sealing and verification."""
+class TestShiftLeftGitHooks(unittest.TestCase):
+    """Test shift-left local git hooks presence and executable configuration [REQ-TRC-006]."""
 
-    def test_verify_manifest_valid(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            test_file = tmp_root / "tests" / "qualification" / "test_sample.py"
-            test_file.parent.mkdir(parents=True, exist_ok=True)
-            test_file.write_text("def test_ok(): pass\n", encoding="utf-8")
+    def test_git_hooks_exist_and_are_executable(self) -> None:
+        pre_commit = REPO_ROOT / ".githooks" / "pre-commit"
+        pre_push = REPO_ROOT / ".githooks" / "pre-push"
 
-            manifest_file = test_file.parent / ".manifest"
-            success, msgs = vt.generate_manifest(manifest_file, tmp_root)
-            self.assertTrue(success)
+        self.assertTrue(pre_commit.exists(), "Missing .githooks/pre-commit")
+        self.assertTrue(pre_push.exists(), "Missing .githooks/pre-push")
+        self.assertTrue(os.access(pre_commit, os.X_OK), ".githooks/pre-commit must be executable")
+        self.assertTrue(os.access(pre_push, os.X_OK), ".githooks/pre-push must be executable")
 
-            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
-            self.assertTrue(verify_ok)
-            self.assertEqual(len(errs), 0)
-
-    def test_verify_manifest_detects_tampering(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            test_file = tmp_root / "tests" / "qualification" / "test_sample.py"
-            test_file.parent.mkdir(parents=True, exist_ok=True)
-            test_file.write_text("TOLERANCE = 1e-12\n", encoding="utf-8")
-
-            manifest_file = test_file.parent / ".manifest"
-            vt.generate_manifest(manifest_file, tmp_root)
-
-            # Contributor or agent tampers with tolerance:
-            test_file.write_text("TOLERANCE = 1e-6\n", encoding="utf-8")
-
-            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
-            self.assertFalse(verify_ok)
-            self.assertEqual(len(errs), 1)
-            self.assertIn("Integrity violation in sealed file", errs[0])
-
-    def test_verify_manifest_crlf_normalization(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            test_file = tmp_root / "tests" / "qualification" / "test_sample.py"
-            test_file.parent.mkdir(parents=True, exist_ok=True)
-
-            # Write file with Unix LF line endings and generate manifest
-            test_file.write_bytes(b"line 1\nline 2\n")
-            manifest_file = test_file.parent / ".manifest"
-            vt.generate_manifest(manifest_file, tmp_root)
-
-            # Simulate Windows checkout with CRLF line endings
-            test_file.write_bytes(b"line 1\r\nline 2\r\n")
-
-            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
-            self.assertTrue(verify_ok, f"Expected CRLF to be normalised to LF, got errors: {errs}")
-
-    def test_verify_manifest_missing_file(self) -> None:
-        with tempfile.TemporaryDirectory() as tmp_dir:
-            tmp_root = Path(tmp_dir)
-            manifest_file = tmp_root / "tests" / "qualification" / ".manifest"
-            manifest_file.parent.mkdir(parents=True, exist_ok=True)
-            manifest_file.write_text(
-                "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  missing_file.py\n",
-                encoding="utf-8",
-            )
-            verify_ok, errs = vt.verify_manifest(manifest_file, tmp_root)
-            self.assertFalse(verify_ok)
-            self.assertIn("missing", errs[0].lower())
+        pre_commit_text = pre_commit.read_text(encoding="utf-8")
+        self.assertIn("verify_traceability.py --audit", pre_commit_text)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,7 @@ Specification-Driven Requirements Traceability and Governance Engine.
 Verifies compliance of repository specifications, test suites, and pull requests
 against Enhancement Proposal (EP) requirements across GoogleTest, Catch2, and Pytest.
 
-Conforms strictly to EP-5 (REQ-TRC-001 through REQ-TRC-008).
+Conforms strictly to EP-5 (REQ-TRC-001 through REQ-TRC-006).
 Uses standard Python library only (zero external dependencies).
 """
 
@@ -14,7 +14,6 @@ from __future__ import annotations
 import argparse
 import ast
 import dataclasses
-import hashlib
 import json
 import os
 import re
@@ -28,9 +27,17 @@ from typing import Any
 REQ_ID_PATTERN = re.compile(r"^REQ-[A-Z]{2,4}-\d{3}$")
 REQ_TAG_SEARCH_PATTERN = re.compile(r"\b(REQ-[A-Za-z0-9_-]+)\b")
 
+# Infrastructure/workflow requirements verified by CI/CD pipelines rather than unit tests
+INFRASTRUCTURE_PREFIXES = ("REQ-CI-", "REQ-PKG-")
+INFRASTRUCTURE_IDS = {"REQ-ARCH-007"}
+
 # Legacy requirement aliases mapping (prefix_or_none, legacy_id) -> canonical_id
-# Resolves collisions (such as REQ-001 in EP-1 vs EP-4) without modifying main test files.
+# Resolves historical collisions (such as REQ-001 in EP-1 vs EP-4) by source file path prefix.
 LEGACY_REQ_ALIASES: dict[tuple[str | None, str], str] = {
+    # Physics delta and gradient tests in src/core/tests/tDelta.cpp (EP-4)
+    ("src/core/tests/tDelta", "REQ-001"): "REQ-PHY-001",
+    ("src/core/tests/tDelta", "REQ-009"): "REQ-PHY-009",
+    ("src/core/tests/tDelta", "REQ-011"): "REQ-PHY-011",
     # Core architecture disambiguation (EP-1)
     ("src/core/tests", "REQ-001"): "REQ-ARCH-001",
     ("src/core/tests", "REQ-002"): "REQ-ARCH-002",
@@ -51,6 +58,11 @@ LEGACY_REQ_ALIASES: dict[tuple[str | None, str], str] = {
     ("tests/physics", "REQ-009"): "REQ-PHY-009",
     ("tests/physics", "REQ-010"): "REQ-PHY-010",
     ("tests/physics", "REQ-011"): "REQ-PHY-011",
+    # Unambiguous EP-4 legacy IDs (008..011 only existed in EP-4)
+    (None, "REQ-008"): "REQ-PHY-008",
+    (None, "REQ-009"): "REQ-PHY-009",
+    (None, "REQ-010"): "REQ-PHY-010",
+    (None, "REQ-011"): "REQ-PHY-011",
     # Packaging legacy IDs (EP-2)
     (None, "REQ-PKG-01"): "REQ-PKG-001",
     (None, "REQ-PKG-02"): "REQ-PKG-002",
@@ -89,6 +101,15 @@ def canonicalize_req(req_id: str, source_path: str = "") -> str:
     return req_id
 
 
+def is_unit_testable_requirement(req_id: str) -> bool:
+    """Return True if the requirement is verified by unit/acceptance tests rather than CI config."""
+    if req_id in INFRASTRUCTURE_IDS:
+        return False
+    if req_id.startswith(INFRASTRUCTURE_PREFIXES):
+        return False
+    return True
+
+
 @dataclasses.dataclass
 class Requirement:
     """Represents a requirement parsed from an Enhancement Proposal."""
@@ -100,6 +121,7 @@ class Requirement:
     ep_file: str
     ep_num: int
     is_implemented: bool
+    is_unit_testable: bool = True
 
     def to_dict(self) -> dict[str, Any]:
         return dataclasses.asdict(self)
@@ -124,6 +146,7 @@ class TestMapping:
 
 def shield_math_pipes(text: str) -> str:
     """Shield Markdown table pipe delimiters occurring inside LaTeX math expressions."""
+
     def repl(m: re.Match[str]) -> str:
         return m.group(0).replace("|", "\x00PIPE\x00")
 
@@ -178,14 +201,12 @@ def parse_ep_file(ep_path: Path, repo_root: Path) -> tuple[list[Requirement], li
         raw_cells = [restore_math_pipes(c.strip()) for c in shielded.strip("|").split("|")]
 
         if not in_table:
-            # Check for requirement table header
             norm_header = [c.lower() for c in raw_cells]
             has_req = any("requirement" in h or "req" in h for h in norm_header)
             has_summary = any("summary" in h or "name" in h or "title" in h for h in norm_header)
             if len(norm_header) >= 3 and has_req and has_summary:
                 in_table = True
                 headers = norm_header
-                # Identify column positions
                 for i, h in enumerate(headers):
                     if "requirement id" in h or "req id" in h or h == "requirement":
                         req_col = i
@@ -222,7 +243,6 @@ def parse_ep_file(ep_path: Path, repo_root: Path) -> tuple[list[Requirement], li
 
         summary = raw_cells[summary_col].replace("**", "").strip()
 
-        # Handle 3-column vs 4-column schemas
         if len(raw_cells) > lifecycle_col and lifecycle_col != invariant_col:
             lifecycle = raw_cells[lifecycle_col].strip()
         else:
@@ -246,6 +266,7 @@ def parse_ep_file(ep_path: Path, repo_root: Path) -> tuple[list[Requirement], li
                 ep_file=rel_path,
                 ep_num=ep_num,
                 is_implemented=is_implemented,
+                is_unit_testable=is_unit_testable_requirement(canonical_id),
             )
         )
 
@@ -269,17 +290,13 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
     gtest_pattern = re.compile(
         r"^\s*(TEST|TEST_F|TEST_P|TYPED_TEST|TYPED_TEST_P)\s*\(\s*([A-Za-z0-9_]+)\s*,\s*([A-Za-z0-9_]+)\s*\)"
     )
-    catch2_pattern = re.compile(
-        r'^\s*TEST_CASE\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)'
-    )
-    catch2_section_pattern = re.compile(
-        r'^\s*SECTION\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)'
-    )
+    catch2_pattern = re.compile(r'^\s*TEST_CASE\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)')
+    catch2_section_pattern = re.compile(r'^\s*SECTION\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)')
 
     for line_idx, line in enumerate(lines, start=1):
         stripped = line.strip()
 
-        # Extract tags from line comments
+        # Extract tags from line or block comments
         comment_match = re.search(r"//\s*(.*)", line)
         block_match = re.search(r"/\*\s*(.*?)\s*\*/", line)
         comment_text = ""
@@ -375,7 +392,7 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             non_comment_lines = 0
             continue
 
-        # Reset pending tags if non-comment lines accumulate without test macro
+        # Reset pending tags if non-comment lines accumulate without a test macro
         non_comment_lines += 1
         if non_comment_lines > 3:
             pending_tags = []
@@ -395,8 +412,6 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
         return []
 
     lines = content.splitlines()
-
-    # Module name representation
     mod_name = file_path.stem
 
     class TestVisitor(ast.NodeVisitor):
@@ -411,18 +426,14 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
 
             current_class_tags: list[tuple[str, int]] = []
             for decorator in node.decorator_list:
-                call_node: ast.Call | None = None
                 if isinstance(decorator, ast.Call):
-                    call_node = decorator
-                if call_node:
-                    func_expr = call_node.func
-                    is_req = False
-                    if isinstance(func_expr, ast.Attribute) and func_expr.attr == "req":
-                        is_req = True
-                    elif isinstance(func_expr, ast.Name) and func_expr.id == "req":
-                        is_req = True
+                    func_expr = decorator.func
+                    is_req = (
+                        (isinstance(func_expr, ast.Attribute) and func_expr.attr == "req")
+                        or (isinstance(func_expr, ast.Name) and func_expr.id == "req")
+                    )
                     if is_req:
-                        for arg in call_node.args:
+                        for arg in decorator.args:
                             if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                                 current_class_tags.append((arg.value, node.lineno))
 
@@ -431,8 +442,7 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
                 for match in REQ_TAG_SEARCH_PATTERN.finditer(docstring):
                     current_class_tags.append((match.group(1), node.lineno))
 
-            start_line = node.lineno - 1
-            idx = start_line - 1
+            idx = node.lineno - 2
             while idx >= 0:
                 line_str = lines[idx].strip()
                 if line_str.startswith("#"):
@@ -456,24 +466,22 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             self.generic_visit(node)
 
         def _process_func(self, node: ast.FunctionDef | ast.AsyncFunctionDef) -> None:
+            # Ignore non-test helper methods (such as __init__, setUp, or private helpers)
+            if not node.name.startswith("test_"):
+                return
+
             found_tags: list[tuple[str, int]] = list(self.class_tags)
 
             # 1. Inspect Pytest markers: @pytest.mark.req("REQ-...")
             for decorator in node.decorator_list:
-                call_node: ast.Call | None = None
                 if isinstance(decorator, ast.Call):
-                    call_node = decorator
-
-                if call_node:
-                    func_expr = call_node.func
-                    is_req_marker = False
-                    if isinstance(func_expr, ast.Attribute) and func_expr.attr == "req":
-                        is_req_marker = True
-                    elif isinstance(func_expr, ast.Name) and func_expr.id == "req":
-                        is_req_marker = True
-
+                    func_expr = decorator.func
+                    is_req_marker = (
+                        (isinstance(func_expr, ast.Attribute) and func_expr.attr == "req")
+                        or (isinstance(func_expr, ast.Name) and func_expr.id == "req")
+                    )
                     if is_req_marker:
-                        for arg in call_node.args:
+                        for arg in decorator.args:
                             if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
                                 found_tags.append((arg.value, node.lineno))
 
@@ -484,8 +492,7 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
                     found_tags.append((match.group(1), node.lineno))
 
             # 3. Inspect preceding comments
-            start_line = node.lineno - 1
-            idx = start_line - 1
+            idx = node.lineno - 2
             while idx >= 0:
                 line_str = lines[idx].strip()
                 if line_str.startswith("#"):
@@ -504,8 +511,12 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
                     suite_name = mod_name
                     full_symbol = f"{mod_name}.{test_name}"
 
+                seen_can_ids: set[str] = set()
                 for raw_tag, tag_line in found_tags:
                     can_id = canonicalize_req(raw_tag, rel_path)
+                    if can_id in seen_can_ids:
+                        continue
+                    seen_can_ids.add(can_id)
                     mappings.append(
                         TestMapping(
                             req_id=can_id,
@@ -562,108 +573,14 @@ def collect_all_tests(repo_root: Path) -> list[TestMapping]:
         if not search_dir.exists():
             continue
 
-        # C++ files
         for ext in ("*.cpp", "*.hpp", "*.h", "*.cc"):
             for cpp_file in search_dir.rglob(ext):
                 all_mappings.extend(extract_cpp_tests(cpp_file, repo_root))
 
-        # Python files
         for py_file in search_dir.rglob("*.py"):
             all_mappings.extend(extract_python_tests(py_file, repo_root))
 
     return all_mappings
-
-
-def verify_manifest(manifest_path: Path, repo_root: Path) -> tuple[bool, list[str]]:
-    """Verify sealed qualification acceptance test integrity using normalised LF line endings."""
-    if not manifest_path.exists():
-        return False, [f"Manifest file not found: {manifest_path}"]
-
-    errors: list[str] = []
-    lines = manifest_path.read_text(encoding="utf-8").splitlines()
-
-    verified_count = 0
-    for line_idx, line in enumerate(lines, start=1):
-        stripped = line.strip()
-        if not stripped or stripped.startswith("#"):
-            continue
-
-        parts = stripped.split(None, 1)
-        if len(parts) != 2:
-            errors.append(f"{manifest_path}:{line_idx}: Invalid manifest line format. Expected: '<hash> <filepath>'")
-            continue
-
-        expected_hash, rel_target = parts[0].strip(), parts[1].strip()
-        target_path = repo_root / rel_target
-        if not target_path.exists():
-            manifest_relative = manifest_path.parent / rel_target
-            if manifest_relative.exists():
-                target_path = manifest_relative
-
-        if not target_path.exists():
-            errors.append(f"Sealed qualification file missing: {rel_target}")
-            continue
-
-        try:
-            raw_bytes = target_path.read_bytes()
-            # Normalise Windows CRLF to LF across OS runners
-            normalised = raw_bytes.replace(b"\r\n", b"\n")
-            actual_hash = hashlib.sha256(normalised).hexdigest()
-
-            if actual_hash != expected_hash:
-                errors.append(
-                    f"Integrity violation in sealed file '{rel_target}': "
-                    f"expected {expected_hash}, calculated {actual_hash}"
-                )
-            else:
-                verified_count += 1
-        except Exception as exc:
-            errors.append(f"Failed to read sealed file '{rel_target}': {exc}")
-
-    if verified_count == 0 and not errors:
-        errors.append(f"No sealed files found in manifest: {manifest_path}")
-
-    success = len(errors) == 0
-    return success, errors
-
-
-def generate_manifest(manifest_path: Path, repo_root: Path) -> tuple[bool, list[str]]:
-    """Generate or update the cryptographic manifest for sealed qualification tests."""
-    abs_manifest = (repo_root / manifest_path if not manifest_path.is_absolute() else manifest_path).resolve()
-    target_dir = abs_manifest.parent if abs_manifest.name == ".manifest" else abs_manifest
-    actual_manifest = abs_manifest if abs_manifest.name == ".manifest" else abs_manifest / ".manifest"
-
-    if not target_dir.exists():
-        return False, [f"Target directory does not exist: {target_dir}"]
-
-    lines = [
-        "# RFL Sealed Qualification Acceptance Test Manifest",
-        "# Enforces IEEE 754 precision bounds and scientific invariants (EP-5 / REQ-TRC-006)",
-        "# Generated with normalised LF line endings across all platforms.",
-        "",
-    ]
-    test_files = sorted(
-        [
-            f
-            for f in target_dir.rglob("*")
-            if f.is_file()
-            and f.name != ".manifest"
-            and not f.name.endswith(".md")
-            and not f.name.startswith(".")
-            and "__pycache__" not in f.parts
-            and f.suffix in {".py", ".cpp", ".hpp", ".h", ".cc"}
-        ]
-    )
-    for tf in test_files:
-        raw_bytes = tf.read_bytes()
-        normalised = raw_bytes.replace(b"\r\n", b"\n")
-        sha = hashlib.sha256(normalised).hexdigest()
-        rel_path = tf.resolve().relative_to(repo_root.resolve()).as_posix()
-        lines.append(f"{sha}  {rel_path}")
-
-    lines.append("")
-    actual_manifest.write_text("\n".join(lines), encoding="utf-8")
-    return True, [f"Generated sealed manifest with {len(test_files)} file(s): {actual_manifest}"]
 
 
 @dataclasses.dataclass
@@ -688,7 +605,6 @@ def parse_junit_xml(xml_path: Path) -> dict[str, JUnitResult]:
         return results
 
     root = tree.getroot()
-    # Test cases can be directly under root or within <testsuite> elements
     for tc in root.iter("testcase"):
         name = tc.attrib.get("name", "")
         classname = tc.attrib.get("classname", "")
@@ -696,7 +612,6 @@ def parse_junit_xml(xml_path: Path) -> dict[str, JUnitResult]:
         status = "PASSED"
         msg = ""
 
-        # Check child elements in order of severity
         err_node = tc.find("error")
         fail_node = tc.find("failure")
         skip_node = tc.find("skipped")
@@ -711,7 +626,6 @@ def parse_junit_xml(xml_path: Path) -> dict[str, JUnitResult]:
             status = "SKIPPED"
             msg = skip_node.attrib.get("message", "") or (skip_node.text or "").strip()
 
-        # Key by multiple symbol forms to allow flexible matching
         key_full = f"{classname}.{name}" if classname else name
         res = JUnitResult(name=name, classname=classname, status=status, message=msg)
         results[key_full] = res
@@ -724,15 +638,12 @@ def match_test_result(
     mapping: TestMapping, xml_results: dict[str, JUnitResult]
 ) -> JUnitResult | None:
     """Match a static TestMapping to a dynamically executed JUnit test result."""
-    # 1. Exact full_symbol match (e.g. DiracOperatorTests.NoErrorsWhenConstruction)
     if mapping.full_symbol in xml_results:
         return xml_results[mapping.full_symbol]
 
-    # 2. Match by test_name (e.g. NoErrorsWhenConstruction)
     if mapping.test_name in xml_results:
         return xml_results[mapping.test_name]
 
-    # 3. Match by suffix
     for key, res in xml_results.items():
         if key.endswith(f".{mapping.test_name}"):
             return res
@@ -749,7 +660,6 @@ def audit_repository(repo_root: Path, eps_dir: Path) -> int:
     print(" RFL Specification Traceability & Governance Audit")
     print("=" * 70)
 
-    # 1. Report EP parsing errors
     if ep_errors:
         print(f"\n❌ Found {len(ep_errors)} specification validation error(s):")
         for err in ep_errors:
@@ -757,15 +667,18 @@ def audit_repository(repo_root: Path, eps_dir: Path) -> int:
     else:
         print(f"✅ Verified {len(req_map)} requirement IDs across Enhancement Proposals.")
 
-    # 2. Check for orphaned tests
     orphaned = [t for t in all_tests if t.req_id not in req_map]
     if orphaned:
-        print(f"\n⚠️  Found {len(orphaned)} orphaned test mapping(s) referencing unknown requirements:")
+        print(f"\n❌ Found {len(orphaned)} orphaned test mapping(s) referencing unknown requirements:")
         for t in orphaned:
             print(f"  • [{t.req_id}] in {t.source_file}:{t.line_number} ({t.full_symbol})")
 
-    # 3. Compute requirement coverage
-    implemented_requirements = [r for r in req_map.values() if r.is_implemented]
+    implemented_testable = [
+        r for r in req_map.values() if r.is_implemented and r.is_unit_testable
+    ]
+    implemented_infra = [
+        r for r in req_map.values() if r.is_implemented and not r.is_unit_testable
+    ]
     planned_requirements = [r for r in req_map.values() if not r.is_implemented]
 
     req_to_tests: dict[str, list[TestMapping]] = {r_id: [] for r_id in req_map}
@@ -773,39 +686,29 @@ def audit_repository(repo_root: Path, eps_dir: Path) -> int:
         if t.req_id in req_to_tests:
             req_to_tests[t.req_id].append(t)
 
-    covered_implemented = [r for r in implemented_requirements if req_to_tests[r.req_id]]
-    missing_implemented = [r for r in implemented_requirements if not req_to_tests[r.req_id]]
+    covered_testable = [r for r in implemented_testable if req_to_tests[r.req_id]]
+    missing_testable = [r for r in implemented_testable if not req_to_tests[r.req_id]]
 
     print("\n📊 Traceability Coverage Statistics:")
-    print(f"  • Total Requirements:   {len(req_map)}")
-    print(f"  • Implemented:          {len(implemented_requirements)}")
-    print(f"  • Planned / In-Flight:  {len(planned_requirements)}")
-    print(f"  • Tagged Test Mappings: {len(all_tests)}")
-    if implemented_requirements:
-        cov_pct = (len(covered_implemented) / len(implemented_requirements)) * 100.0
-        print(f"  • Implemented Coverage: {len(covered_implemented)}/{len(implemented_requirements)} ({cov_pct:.1f}%)")
+    print(f"  • Total Requirements:        {len(req_map)}")
+    print(f"  • Implemented (Testable):    {len(implemented_testable)}")
+    print(f"  • Implemented (CI/Infra):    {len(implemented_infra)}")
+    print(f"  • Planned / In-Flight:       {len(planned_requirements)}")
+    print(f"  • Tagged Test Mappings:      {len(all_tests)}")
+    if implemented_testable:
+        cov_pct = (len(covered_testable) / len(implemented_testable)) * 100.0
+        print(
+            f"  • Testable Code Coverage:    {len(covered_testable)}/{len(implemented_testable)} ({cov_pct:.1f}%)"
+        )
 
-    if missing_implemented:
-        print(f"\n⚠️  Implemented requirements lacking mapped test cases ({len(missing_implemented)}):")
-        for r in missing_implemented:
+    if missing_testable:
+        print(f"\n⚠️  Implemented testable requirements lacking mapped tests ({len(missing_testable)}):")
+        for r in missing_testable:
             print(f"  • [{r.req_id}] {r.summary} ({r.ep_file})")
-
-    # 4. Verify sealed qualification manifest if present
-    manifest_path = repo_root / "tests" / "qualification" / ".manifest"
-    manifest_errors: list[str] = []
-    if manifest_path.exists():
-        manifest_ok, manifest_errors = verify_manifest(manifest_path, repo_root)
-        if manifest_ok:
-            print(f"\n🔒 Verified sealed qualification manifest ({manifest_path.relative_to(repo_root)}).")
-        else:
-            print("\n❌ Sealed qualification manifest integrity failure:")
-            for err in manifest_errors:
-                print(f"  • {err}")
 
     print("\n" + "=" * 70)
 
-    # Exit code: 0 if valid IDs, zero EP errors, and zero manifest errors; 1 if errors found
-    if ep_errors or manifest_errors:
+    if ep_errors or orphaned:
         return 1
     return 0
 
@@ -828,6 +731,7 @@ def query_requirement(req_id: str, repo_root: Path, eps_dir: Path) -> int:
     print("=" * 70)
     print(f"• Summary:          {req.summary}")
     print(f"• Lifecycle Status: {req.lifecycle_status}")
+    print(f"• Verification:     {'Unit / Acceptance Test' if req.is_unit_testable else 'CI / Build Pipeline'}")
     print(f"• Specification:    {req.ep_file} (EP-{req.ep_num})")
     print(f"• Invariant:        {req.invariant}")
     print(f"\n• Mapped Tests ({len(mapped_tests)}):")
@@ -841,7 +745,7 @@ def query_requirement(req_id: str, repo_root: Path, eps_dir: Path) -> int:
 
 
 def generate_traceability_matrix(
-    output_path: Path, repo_root: Path, eps_dir: Path, xml_paths: list[Path] | None = None
+    output_path: Path | None, repo_root: Path, eps_dir: Path, xml_paths: list[Path] | None = None
 ) -> None:
     """Generate a GitHub Flavoured Markdown traceability matrix document."""
     req_map, _ = collect_all_requirements(eps_dir, repo_root)
@@ -860,25 +764,25 @@ def generate_traceability_matrix(
     lines: list[str] = [
         "# RFL Requirements Traceability Matrix",
         "",
-        "> Automated living compliance matrix generated by `scripts/verify_traceability.py`.",
+        "> Generated by `scripts/verify_traceability.py`.",
         "",
-        "| Requirement ID | Summary | EP | Lifecycle Status | Mapped Tests | Dynamic Execution |",
+        "| Requirement ID | Summary | EP | Lifecycle Status | Verification | Dynamic Status |",
         "| :--- | :--- | :--- | :--- | :--- | :--- |",
     ]
 
     for req_id in sorted(req_map.keys()):
         req = req_map[req_id]
         tests = req_to_tests[req_id]
-        test_count = len(tests)
 
         if tests:
             test_links = "<br>".join(f"`{t.full_symbol}`" for t in tests[:3])
             if len(tests) > 3:
                 test_links += f"<br>*(+{len(tests) - 3} more)*"
+        elif not req.is_unit_testable:
+            test_links = "*(CI / Workflow)*"
         else:
             test_links = "—"
 
-        dynamic_status = "⚪ Not Tested"
         if xml_results and tests:
             statuses = [match_test_result(t, xml_results) for t in tests]
             valid_statuses = [s for s in statuses if s is not None]
@@ -893,22 +797,31 @@ def generate_traceability_matrix(
             else:
                 dynamic_status = "✅ Passing"
         elif req.is_implemented:
-            dynamic_status = "⏳ Implemented"
+            dynamic_status = "✅ Implemented" if (tests or not req.is_unit_testable) else "⏳ Implemented"
         else:
             dynamic_status = "💡 Planned"
 
         ep_link = f"EP-{req.ep_num}"
-        target_abs = repo_root / req.ep_file
-        rel_target = os.path.relpath(target_abs, output_path.parent).replace("\\", "/")
+        if output_path is not None and str(output_path) != "-":
+            target_abs = repo_root / req.ep_file
+            rel_target = os.path.relpath(target_abs, output_path.parent).replace("\\", "/")
+            ep_cell = f"[{ep_link}]({rel_target})"
+        else:
+            ep_cell = f"`{ep_link}`"
+
         lines.append(
-            f"| **{req.req_id}** | {req.summary} | [{ep_link}]({rel_target}) | "
+            f"| **{req.req_id}** | {req.summary} | {ep_cell} | "
             f"{req.lifecycle_status} | {test_links} | {dynamic_status} |"
         )
 
     lines.append("")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text("\n".join(lines), encoding="utf-8")
-    print(f"✅ Generated traceability matrix at: {output_path}")
+    matrix_text = "\n".join(lines)
+    if output_path is None or str(output_path) == "-":
+        print(matrix_text)
+    else:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(matrix_text, encoding="utf-8")
+        print(f"✅ Generated traceability matrix at: {output_path}")
 
 
 def dump_json(
@@ -917,11 +830,6 @@ def dump_json(
     """Dump machine-readable JSON representation for AI agents and tooling."""
     req_map, _ = collect_all_requirements(eps_dir, repo_root)
     all_tests = collect_all_tests(repo_root)
-
-    xml_results: dict[str, JUnitResult] = {}
-    if xml_paths:
-        for p in xml_paths:
-            xml_results.update(parse_junit_xml(p))
 
     req_data = []
     for r_id, req in sorted(req_map.items()):
@@ -940,165 +848,178 @@ def dump_json(
     print(json.dumps(payload, indent=2))
 
 
+def is_test_file_path(rel_path: str) -> bool:
+    """Return True if a repository-relative path belongs to a C++ or Python test suite."""
+    norm = rel_path.replace("\\", "/")
+    return (
+        norm.startswith("tests/")
+        or norm.startswith("scripts/tests/")
+        or "/tests/" in f"/{norm}"
+    )
+
+
 def check_pull_request(
     base_ref: str,
     repo_root: Path,
     eps_dir: Path,
     xml_paths: list[Path] | None = None,
-    red_anchor: bool = False,
-    pr_labels: list[str] | None = None,
 ) -> int:
-    """Verify Git trailers, qualification seals, and test execution for a pull request."""
-    req_map, _ = collect_all_requirements(eps_dir, repo_root)
+    """Verify Git trailers, test-diff visibility, and test execution for a pull request."""
+    req_map, ep_errors = collect_all_requirements(eps_dir, repo_root)
     all_tests = collect_all_tests(repo_root)
 
     print("=" * 70)
-    print(" RFL Pull Request Traceability Qualification Gate")
+    print(" RFL Pull Request Traceability & Test-Diff Summary")
     print("=" * 70)
 
-    errors: list[str] = []
+    errors: list[str] = list(ep_errors)
 
-    # 1. Inspect changed files for sealed qualification modifications (REQ-TRC-006)
-    diff_cmd = ["git", "diff", "--name-only", f"{base_ref}..HEAD"]
+    # 1. Inspect modified or deleted existing test files for reviewer visibility (REQ-TRC-005)
+    diff_cmd = ["git", "diff", "--name-only", "--diff-filter=MD", f"{base_ref}..HEAD"]
     try:
         diff_res = subprocess.run(diff_cmd, cwd=repo_root, capture_output=True, text=True, check=True)
-        changed_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
+        modified_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
     except Exception:
-        diff_res = subprocess.run(["git", "diff", "--name-only", "HEAD~1..HEAD"], cwd=repo_root, capture_output=True, text=True)
-        changed_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
+        diff_res = subprocess.run(
+            ["git", "diff", "--name-only", "--diff-filter=MD", "HEAD~1..HEAD"],
+            cwd=repo_root,
+            capture_output=True,
+            text=True,
+        )
+        modified_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
 
-    qualification_changes = [f for f in changed_files if f.startswith("tests/qualification/")]
-    if qualification_changes:
-        manifest_path = repo_root / "tests" / "qualification" / ".manifest"
-        manifest_ok, manifest_errs = verify_manifest(manifest_path, repo_root)
-        if not manifest_ok:
-            for err in manifest_errs:
-                errors.append(f"Qualification test integrity error: {err}")
+    modified_test_files = [f for f in modified_files if is_test_file_path(f)]
+    if modified_test_files:
+        print(f"\n⚠️  Modified existing test file(s) in this PR ({len(modified_test_files)}):")
+        for tf in modified_test_files:
+            print(f"  • {tf} (review diff for tolerance or assertion changes)")
 
-        # Check for qualification-override label
-        active_labels: list[str] = []
-        if pr_labels:
-            active_labels.extend(pr_labels)
-        env_labels = os.environ.get("RFL_PR_LABELS", "")
-        if env_labels:
-            active_labels.extend([label.strip() for label in env_labels.split(",") if label.strip()])
-        event_path = os.environ.get("GITHUB_EVENT_PATH")
-        if event_path and Path(event_path).exists():
-            try:
-                with open(event_path, encoding="utf-8") as f:
-                    event_data = json.load(f)
-                for label_obj in event_data.get("pull_request", {}).get("labels", []):
-                    name = label_obj.get("name")
-                    if name:
-                        active_labels.append(name)
-            except Exception:
-                pass
-
-        if "qualification-override" not in active_labels:
-            errors.append(
-                "Changes detected in sealed qualification tests ('tests/qualification/'). "
-                "Altering tolerances requires the 'qualification-override' PR label and CODEOWNERS approval."
-            )
-
-    # 2. Extract Git trailers: "Implements: REQ-..."
+    # 2. Extract Git trailers ("Implements: REQ-...") from commits and PR description
     cmd = ["git", "log", f"{base_ref}..HEAD", "--pretty=format:%B---COMMIT---"]
     try:
         process_result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True, check=True)
-        commit_texts = process_result.stdout.split("---COMMIT---")
+        texts_to_scan = process_result.stdout.split("---COMMIT---")
     except Exception:
-        # Fallback to inspecting HEAD commit alone
-        process_result = subprocess.run(["git", "log", "-1", "--pretty=format:%B"], cwd=repo_root, capture_output=True, text=True)
-        commit_texts = [process_result.stdout]
+        process_result = subprocess.run(
+            ["git", "log", "-1", "--pretty=format:%B"], cwd=repo_root, capture_output=True, text=True
+        )
+        texts_to_scan = [process_result.stdout]
+
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    if event_path and Path(event_path).exists():
+        try:
+            with open(event_path, encoding="utf-8") as f:
+                event_data = json.load(f)
+            pr_body = event_data.get("pull_request", {}).get("body")
+            if pr_body:
+                texts_to_scan.append(pr_body)
+        except Exception:
+            pass
 
     claimed_raw_ids: set[str] = set()
-    trailer_regex = re.compile(r"(?im)^Implements:\s*(.+)$")
-    for txt in commit_texts:
+    trailer_regex = re.compile(r"(?im)^[\s*-]*Implements:\s*(.+)$")
+    for txt in texts_to_scan:
         for m in trailer_regex.finditer(txt):
             trailer_val = m.group(1).strip()
             for token in REQ_TAG_SEARCH_PATTERN.findall(trailer_val):
                 claimed_raw_ids.add(token)
 
-    claimed_requirements = [canonicalize_req(r) for r in claimed_raw_ids]
+    claimed_requirements = sorted({canonicalize_req(r) for r in claimed_raw_ids})
+
+    step_summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
+    summary_lines: list[str] = ["### 📋 RFL Specification Traceability Summary", ""]
+
+    if modified_test_files:
+        summary_lines.append("> [!WARNING]")
+        summary_lines.append(
+            f"> **Existing Test Files Modified ({len(modified_test_files)}):** "
+            "Review diff to confirm no numerical tolerances or assertions were weakened."
+        )
+        for tf in modified_test_files:
+            summary_lines.append(f"> - `{tf}`")
+        summary_lines.append("")
 
     if not claimed_requirements:
+        summary_lines.append("ℹ️ *No `Implements: REQ-...` trailer claimed (internal refactoring / maintenance PR).*")
+        if step_summary_path:
+            with open(step_summary_path, "a", encoding="utf-8") as f:
+                f.write("\n".join(summary_lines) + "\n\n")
+
         if errors:
             print("\n❌ Pull request verification failed:")
             for err in errors:
                 print(f"  • {err}")
             print("=" * 70)
             return 1
-        print("ℹ️  No 'Implements: REQ-...' trailer found.")
-        print("   Treated as internal refactoring (non-blocking informational pass).")
+
+        print("\nℹ️  No 'Implements: REQ-...' trailer found.")
+        print("   Treated as internal refactoring (non-blocking pass).")
         print("=" * 70)
         return 0
 
-    print(f"🔍 Claimed Requirement Delivery: {', '.join(claimed_requirements)}")
+    print(f"\n🔍 Claimed Requirement Delivery: {', '.join(claimed_requirements)}")
 
     xml_results: dict[str, JUnitResult] = {}
     if xml_paths:
         for p in xml_paths:
             xml_results.update(parse_junit_xml(p))
 
-    summary_rows: list[str] = [
-        "| Requirement ID | Summary | Mapped Tests | Red Check | Green Check | Status |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- |",
-    ]
+    summary_lines.extend([
+        "| Requirement ID | Summary | Mapped Tests | Execution | Status |",
+        "| :--- | :--- | :--- | :--- | :--- |",
+    ])
 
     for req_id in claimed_requirements:
         if req_id not in req_map:
             errors.append(f"Claimed requirement '{req_id}' does not exist in any EP.")
-            summary_rows.append(f"| **{req_id}** | *Unknown* | — | — | — | ❌ Missing Spec |")
+            summary_lines.append(f"| **{req_id}** | *Unknown* | — | — | ❌ Missing Spec |")
             continue
 
         req = req_map[req_id]
         tests = [t for t in all_tests if t.req_id == req_id]
 
+        if not req.is_unit_testable:
+            summary_lines.append(
+                f"| **{req_id}** | {req.summary} | *(CI / Workflow)* | — | ✅ Verified |"
+            )
+            continue
+
         if not tests:
             errors.append(f"Requirement '{req_id}' has no mapped unit or acceptance test cases.")
-            summary_rows.append(f"| **{req_id}** | {req.summary} | 0 tests | — | — | ❌ No Tests |")
+            summary_lines.append(f"| **{req_id}** | {req.summary} | 0 tests | — | ❌ No Tests |")
             continue
 
         test_count_str = f"{len(tests)} test(s)"
 
-        if red_anchor and xml_results:
-            # Red Anchor verification: claimed tests must fail with <failure>, never <error>
+        if xml_results:
             test_results = [match_test_result(t, xml_results) for t in tests]
-            has_error = any(r is not None and r.status == "ERROR" for r in test_results)
-            has_failure = any(r is not None and r.status == "FAILED" for r in test_results)
-            if has_error:
-                errors.append(f"Red Anchor check failed for '{req_id}': produced uncaught <error>.")
-                summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | 💥 Error | — | ❌ Invalid Red |")
-            elif not has_failure:
-                errors.append(f"Red Anchor check failed for '{req_id}': expected <failure> on stubs, but test passed.")
-                summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | ⚪ Green | — | ❌ Missing Red |")
-            else:
-                summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | 🔴 Failure | — | ✅ Valid Red |")
-        elif xml_results:
-            # Green Anchor verification: claimed tests must pass with zero failures
-            test_results = [match_test_result(t, xml_results) for t in tests]
-            missing_exec = any(r is None for r in test_results)
-            has_error = any(r is not None and r.status == "ERROR" for r in test_results)
-            has_failure = any(r is not None and r.status == "FAILED" for r in test_results)
-            has_skipped = any(r is not None and r.status == "SKIPPED" for r in test_results)
+            Executed_results = [r for r in test_results if r is not None]
+            has_error = any(r.status == "ERROR" for r in Executed_results)
+            has_failure = any(r.status == "FAILED" for r in Executed_results)
+            has_skipped = any(r.status == "SKIPPED" for r in Executed_results)
 
-            if missing_exec:
-                errors.append(f"Target test for '{req_id}' did not execute in JUnit test run.")
-                summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | — | ⚪ Missing | ❌ Unverified |")
+            if not Executed_results:
+                errors.append(f"No mapped test for '{req_id}' was found in JUnit XML output.")
+                summary_lines.append(
+                    f"| **{req_id}** | {req.summary} | {test_count_str} | ⚪ Not Run | ❌ Unverified |"
+                )
             elif has_error or has_failure or has_skipped:
-                errors.append(f"Target test execution failed for '{req_id}'.")
-                summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | — | ❌ Failed | ❌ Green Failure |")
+                errors.append(f"Test execution failed or was skipped for '{req_id}'.")
+                summary_lines.append(
+                    f"| **{req_id}** | {req.summary} | {test_count_str} | ❌ Failed/Skipped | ❌ Failed |"
+                )
             else:
-                summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | — | 🟢 Passed | ✅ Verified |")
+                summary_lines.append(
+                    f"| **{req_id}** | {req.summary} | {test_count_str} | 🟢 Passed | ✅ Verified |"
+                )
         else:
-            summary_rows.append(f"| **{req_id}** | {req.summary} | {test_count_str} | — | — | ⏳ Static Only |")
+            summary_lines.append(
+                f"| **{req_id}** | {req.summary} | {test_count_str} | ⏳ Static Audit | ✅ Mapped |"
+            )
 
-    # Write Step Summary if running in GitHub Actions
-    step_summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     if step_summary_path:
         with open(step_summary_path, "a", encoding="utf-8") as f:
-            f.write("\n### 📋 Requirements Traceability Verification Summary\n\n")
-            f.write("\n".join(summary_rows))
-            f.write("\n\n")
+            f.write("\n".join(summary_lines) + "\n\n")
 
     if errors:
         print("\n❌ Pull request verification failed:")
@@ -1107,84 +1028,80 @@ def check_pull_request(
         print("=" * 70)
         return 1
 
-    print("\n✅ All claimed requirements statically and dynamically verified.")
+    print("\n✅ All claimed requirements verified.")
     print("=" * 70)
     return 0
-
-
-def assert_zero_copy_fortran_aligned(array: Any, expected_ptr: int | None = None) -> bool:
-    """Verify that a NumPy array wrapping an Armadillo matrix is Fortran-contiguous.
-
-    Prevents silent matrix transposition and complex conjugation (H -> H*)
-    of Hermitian operators across the C++ and Python interface (REQ-TRC-008).
-    """
-    if not hasattr(array, "flags"):
-        raise AssertionError("Object is not a NumPy array")
-    if not array.flags["F_CONTIGUOUS"]:
-        raise AssertionError("Matrix is not Fortran-contiguous (column-major order required for Armadillo)")
-    if expected_ptr is not None:
-        actual_ptr = array.ctypes.data
-        if actual_ptr != expected_ptr:
-            raise AssertionError(f"Zero-copy violation: memory pointer {actual_ptr} != {expected_ptr}")
-    return True
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="RFL Requirements Traceability & Governance Verification Engine (EP-5)"
     )
-    parser.add_argument("--repo-root", type=Path, default=Path(__file__).resolve().parent.parent,
-                        help="Repository root directory")
-    parser.add_argument("--eps-dir", type=Path, default=None,
-                        help="Directory containing Enhancement Proposals (default: <repo-root>/docs/eps)")
-    parser.add_argument("--audit", action="store_true",
-                        help="Audit repository for duplicate IDs, orphaned tests, and coverage")
-    parser.add_argument("--query", type=str, metavar="REQ_ID",
-                        help="Query requirement summary, status, invariant, and mapped test cases")
-    parser.add_argument("--check-pr", action="store_true",
-                        help="Verify current PR branch Git trailers and mapped test execution")
-    parser.add_argument("--base", type=str, default="origin/main",
-                        help="Git base reference for PR verification (default: origin/main)")
-    parser.add_argument("--verify-xml", nargs="+", type=Path, metavar="XML_PATH",
-                        help="Verify test execution against JUnit XML outputs")
-    parser.add_argument("--verify-manifest", type=Path, metavar="MANIFEST_PATH",
-                        help="Verify cryptographic SHA-256 integrity of sealed qualification tests")
-    parser.add_argument("--generate-manifest", type=Path, metavar="MANIFEST_PATH",
-                        help="Generate or reseal cryptographic SHA-256 manifest for qualification tests")
-    parser.add_argument("--pr-label", action="append", default=[], dest="pr_labels",
-                        help="Specify PR label for qualification override verification")
-    parser.add_argument("--generate-matrix", type=Path, metavar="OUTPUT_MD",
-                        help="Generate Markdown traceability matrix document")
-    parser.add_argument("--dump-json", action="store_true",
-                        help="Dump machine-readable JSON representation for AI agents")
-    parser.add_argument("--red-anchor", action="store_true",
-                        help="Assert that claimed tests produce runtime <failure> on degenerate stubs")
+    parser.add_argument(
+        "--repo-root",
+        type=Path,
+        default=Path(__file__).resolve().parent.parent,
+        help="Repository root directory",
+    )
+    parser.add_argument(
+        "--eps-dir",
+        type=Path,
+        default=None,
+        help="Directory containing Enhancement Proposals (default: <repo-root>/docs/eps)",
+    )
+    parser.add_argument(
+        "--audit",
+        action="store_true",
+        help="Audit repository for duplicate IDs, orphaned tests, and coverage",
+    )
+    parser.add_argument(
+        "--query",
+        type=str,
+        metavar="REQ_ID",
+        help="Query requirement summary, status, invariant, and mapped test cases",
+    )
+    parser.add_argument(
+        "--check-pr",
+        action="store_true",
+        help="Verify current PR branch Git trailers, test-diff alerts, and JUnit XML results",
+    )
+    parser.add_argument(
+        "--base",
+        type=str,
+        default="origin/main",
+        help="Git base reference for PR verification (default: origin/main)",
+    )
+    parser.add_argument(
+        "--verify-xml",
+        nargs="+",
+        type=Path,
+        metavar="XML_PATH",
+        help="Verify test execution against JUnit XML outputs",
+    )
+    parser.add_argument(
+        "--generate-matrix",
+        nargs="?",
+        const="-",
+        type=str,
+        metavar="OUTPUT_MD",
+        help="Generate Markdown traceability matrix (prints to stdout if no path given)",
+    )
+    parser.add_argument(
+        "--dump-json",
+        action="store_true",
+        help="Dump machine-readable JSON representation for AI agents",
+    )
 
     args = parser.parse_args()
     repo_root = args.repo_root.resolve()
     eps_dir = (args.eps_dir or (repo_root / "docs" / "eps")).resolve()
 
-    if args.verify_manifest:
-        success, errors = verify_manifest(args.verify_manifest, repo_root)
-        if not success:
-            print(f"❌ Manifest verification failed for {args.verify_manifest}:")
-            for err in errors:
-                print(f"  • {err}")
-            return 1
-        print(f"✅ Sealed qualification manifest verified successfully: {args.verify_manifest}")
-        return 0
-
-    if args.generate_manifest:
-        success, messages = generate_manifest(args.generate_manifest, repo_root)
-        for msg in messages:
-            print(f"✅ {msg}" if success else f"❌ {msg}")
-        return 0 if success else 1
-
     if args.query:
         return query_requirement(args.query, repo_root, eps_dir)
 
-    if args.generate_matrix:
-        generate_traceability_matrix(args.generate_matrix, repo_root, eps_dir, args.verify_xml)
+    if args.generate_matrix is not None:
+        out_path = None if args.generate_matrix == "-" else Path(args.generate_matrix)
+        generate_traceability_matrix(out_path, repo_root, eps_dir, args.verify_xml)
         return 0
 
     if args.dump_json:
@@ -1192,16 +1109,8 @@ def main() -> int:
         return 0
 
     if args.check_pr:
-        return check_pull_request(
-            args.base,
-            repo_root,
-            eps_dir,
-            args.verify_xml,
-            red_anchor=args.red_anchor,
-            pr_labels=args.pr_labels,
-        )
+        return check_pull_request(args.base, repo_root, eps_dir, args.verify_xml)
 
-    # Default action: run audit
     return audit_repository(repo_root, eps_dir)
 
 

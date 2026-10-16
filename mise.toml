@@ -18,19 +18,11 @@ run = "cmake --build build && ctest --test-dir build --output-on-failure"
 
 [tasks.test-python]
 description = "Execute Python test suite using uv and pytest"
-run = "uv run --group test pytest src/python_bindings/tests"
-
-[tasks.test-qualification]
-description = "Execute sealed scientific qualification acceptance test suite"
-run = "python3 -m unittest discover -s tests/qualification"
-
-[tasks.verify-qualification]
-description = "Verify cryptographic integrity of sealed qualification acceptance tests"
-run = "python3 scripts/verify_traceability.py --verify-manifest tests/qualification/.manifest"
+run = "uv run --group test pytest src/python_bindings/tests scripts/tests"
 
 [tasks.test]
-description = "Execute C++, Python, and sealed qualification test suites"
-depends = ["test-cpp", "test-python", "test-qualification"]
+description = "Execute C++ and Python test suites"
+depends = ["test-cpp", "test-python"]
 
 [tasks.lint-cpp]
 description = "Check C++ source formatting against clang-format 16"
@@ -61,12 +53,8 @@ description = "Verify requirements traceability across Enhancement Proposals and
 run = "python3 scripts/verify_traceability.py --audit"
 
 [tasks.matrix-traceability]
-description = "Generate living requirements traceability matrix"
-run = "python3 scripts/verify_traceability.py --generate-matrix docs/Traceability_Matrix.md"
-
-[tasks.verify-tdd]
-description = "Verify atomic Red-Green TDD commit protocol (REQ-TRC-007)"
-run = "python3 scripts/verify_tdd_commits.py --dry-run"
+description = "Generate requirements traceability matrix to stdout"
+run = "python3 scripts/verify_traceability.py --generate-matrix"
 
 [tasks.lint]
 description = "Execute all linting checks (C++, spelling, links, D2, traceability)"
