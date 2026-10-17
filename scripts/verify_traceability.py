@@ -880,12 +880,12 @@ def check_pull_request(
 
     print(f"\n🔍 Impacted Requirements ({len(impacted_requirements)}): {', '.join(impacted_requirements)}")
 
-    if xml_paths is None and os.environ.get("CI"):
+    if xml_paths is None:
         stdlib_tests = [
             f for f in plan.affected_python_test_files if f.startswith("scripts/tests/")
         ]
         py_xml_default = repo_root / "build" / "junit-py.xml"
-        if stdlib_tests and not py_xml_default.exists():
+        if stdlib_tests and not py_xml_default.exists() and os.environ.get("CI"):
             ci_plan.run_unittest_with_junit_xml(stdlib_tests, repo_root, py_xml_default)
         discovered_xml = [
             p
@@ -904,8 +904,9 @@ def check_pull_request(
         for p in xml_paths:
             xml_results.update(parse_junit_xml(p))
 
+    table_header = "| Requirement ID | Summary | Trigger | Mapped Tests | Execution | Status |"
     summary_lines.extend([
-        "| Requirement ID | Summary | Trigger | Mapped Tests | Execution | Status |",
+        table_header,
         "| :--- | :--- | :--- | :--- | :--- | :--- |",
     ])
 
@@ -961,6 +962,9 @@ def check_pull_request(
             summary_lines.append(
                 f"| **{req_id}** | {req.summary} | {triggers_str} | {test_count_str} | ⏳ Static Audit | ✅ Mapped |"
             )
+
+    table_start = summary_lines.index(table_header)
+    print("\n" + "\n".join(summary_lines[table_start:]))
 
     if step_summary_path:
         with open(step_summary_path, "a", encoding="utf-8") as f:

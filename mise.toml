@@ -12,13 +12,8 @@ d2 = "0.8.2"
 description = "Configure and build C++ targets using CMake and Ninja"
 run = "cmake -B build -G Ninja && cmake --build build"
 
-[tasks."provision:d2"]
-description = "Provision the D2 diagram compiler via mise"
-run = "mise install d2"
-
 [tasks."build:d2"]
 description = "Recompile all SVG diagrams from D2 sources"
-depends = ["provision:d2"]
 run = "python3 scripts/check_d2_images.py --fix"
 
 [tasks.fmt]
@@ -95,7 +90,6 @@ run = "python3 scripts/check_links.py"
 
 [tasks."lint:d2"]
 description = "Check that all compiled SVG diagrams match their D2 sources"
-depends = ["provision:d2"]
 run = "python3 scripts/check_d2_images.py"
 
 [tasks."lint:traceability"]
