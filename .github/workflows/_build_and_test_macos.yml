@@ -22,6 +22,11 @@ on:
         type: boolean
         required: false
         default: true
+      ctest_filter:
+        description: 'Optional regex filter for CTest (-R) computed by CI planner'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -97,4 +102,15 @@ jobs:
         run: cmake --build build --config ${{ inputs.build_type }}
 
       - name: Test
-        run: ctest --test-dir build -C ${{ inputs.build_type }} --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure
+        run: |
+          CTEST_ARGS=(
+            --test-dir build
+            -C "${{ inputs.build_type }}"
+            --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)"
+            --output-on-failure
+          )
+          if [ -n "${{ inputs.ctest_filter }}" ]; then
+            CTEST_ARGS+=(-R "${{ inputs.ctest_filter }}")
+          fi
+          ctest "${CTEST_ARGS[@]}"
+

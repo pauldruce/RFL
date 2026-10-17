@@ -641,6 +641,10 @@ def match_test_result(
     if mapping.full_symbol in xml_results:
         return xml_results[mapping.full_symbol]
 
+    for key, res in xml_results.items():
+        if key.endswith(f".{mapping.full_symbol}"):
+            return res
+
     if mapping.test_name in xml_results:
         return xml_results[mapping.test_name]
 
@@ -864,12 +868,14 @@ def check_pull_request(
     eps_dir: Path,
     xml_paths: list[Path] | None = None,
 ) -> int:
-    """Verify Git trailers, test-diff visibility, and test execution for a pull request."""
+    """Verify impacted requirements, Git trailers, test-diff visibility, and JUnit XML execution."""
+    import ci_plan
+
     req_map, ep_errors = collect_all_requirements(eps_dir, repo_root)
     all_tests = collect_all_tests(repo_root)
 
     print("=" * 70)
-    print(" RFL Pull Request Traceability & Test-Diff Summary")
+    print(" RFL Pull Request Traceability & Impact Summary")
     print("=" * 70)
 
     errors: list[str] = list(ep_errors)
@@ -894,37 +900,14 @@ def check_pull_request(
         for tf in modified_test_files:
             print(f"  • {tf} (review diff for tolerance or assertion changes)")
 
-    # 2. Extract Git trailers ("Implements: REQ-...") from commits and PR description
-    cmd = ["git", "log", f"{base_ref}..HEAD", "--pretty=format:%B---COMMIT---"]
-    try:
-        process_result = subprocess.run(cmd, cwd=repo_root, capture_output=True, text=True, check=True)
-        texts_to_scan = process_result.stdout.split("---COMMIT---")
-    except Exception:
-        process_result = subprocess.run(
-            ["git", "log", "-1", "--pretty=format:%B"], cwd=repo_root, capture_output=True, text=True
-        )
-        texts_to_scan = [process_result.stdout]
-
-    event_path = os.environ.get("GITHUB_EVENT_PATH")
-    if event_path and Path(event_path).exists():
-        try:
-            with open(event_path, encoding="utf-8") as f:
-                event_data = json.load(f)
-            pr_body = event_data.get("pull_request", {}).get("body")
-            if pr_body:
-                texts_to_scan.append(pr_body)
-        except Exception:
-            pass
-
-    claimed_raw_ids: set[str] = set()
-    trailer_regex = re.compile(r"(?im)^[\s*-]*Implements:\s*(.+)$")
-    for txt in texts_to_scan:
-        for m in trailer_regex.finditer(txt):
-            trailer_val = m.group(1).strip()
-            for token in REQ_TAG_SEARCH_PATTERN.findall(trailer_val):
-                claimed_raw_ids.add(token)
-
-    claimed_requirements = sorted({canonicalize_req(r) for r in claimed_raw_ids})
+    # 2. Compute impacted requirements via Two-Hop Component + EP Diff + Git Trailer analysis
+    plan = ci_plan.compute_plan(
+        base_ref_flag=base_ref,
+        repo_root=repo_root,
+        eps_dir=eps_dir,
+        include_working_tree=not bool(os.environ.get("CI")),
+    )
+    impacted_requirements = plan.impacted_requirements
 
     step_summary_path = os.environ.get("GITHUB_STEP_SUMMARY")
     summary_lines: list[str] = ["### 📋 RFL Specification Traceability Summary", ""]
@@ -939,8 +922,10 @@ def check_pull_request(
             summary_lines.append(f"> - `{tf}`")
         summary_lines.append("")
 
-    if not claimed_requirements:
-        summary_lines.append("ℹ️ *No `Implements: REQ-...` trailer claimed (internal refactoring / maintenance PR).*")
+    if not impacted_requirements:
+        summary_lines.append(
+            "ℹ️ *No unit-testable requirements impacted or claimed (internal maintenance / docs PR).*"
+        )
         if step_summary_path:
             with open(step_summary_path, "a", encoding="utf-8") as f:
                 f.write("\n".join(summary_lines) + "\n\n")
@@ -952,12 +937,12 @@ def check_pull_request(
             print("=" * 70)
             return 1
 
-        print("\nℹ️  No 'Implements: REQ-...' trailer found.")
+        print("\nℹ️  No unit-testable requirements impacted or claimed.")
         print("   Treated as internal refactoring (non-blocking pass).")
         print("=" * 70)
         return 0
 
-    print(f"\n🔍 Claimed Requirement Delivery: {', '.join(claimed_requirements)}")
+    print(f"\n🔍 Impacted Requirements ({len(impacted_requirements)}): {', '.join(impacted_requirements)}")
 
     xml_results: dict[str, JUnitResult] = {}
     if xml_paths:
@@ -965,14 +950,17 @@ def check_pull_request(
             xml_results.update(parse_junit_xml(p))
 
     summary_lines.extend([
-        "| Requirement ID | Summary | Mapped Tests | Execution | Status |",
-        "| :--- | :--- | :--- | :--- | :--- |",
+        "| Requirement ID | Summary | Trigger | Mapped Tests | Execution | Status |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- |",
     ])
 
-    for req_id in claimed_requirements:
+    for req_id in impacted_requirements:
+        triggers_str = ", ".join(f"`{t}`" for t in plan.requirement_triggers.get(req_id, []))
         if req_id not in req_map:
             errors.append(f"Claimed requirement '{req_id}' does not exist in any EP.")
-            summary_lines.append(f"| **{req_id}** | *Unknown* | — | — | ❌ Missing Spec |")
+            summary_lines.append(
+                f"| **{req_id}** | *Unknown* | {triggers_str} | — | — | ❌ Missing Spec |"
+            )
             continue
 
         req = req_map[req_id]
@@ -980,41 +968,43 @@ def check_pull_request(
 
         if not req.is_unit_testable:
             summary_lines.append(
-                f"| **{req_id}** | {req.summary} | *(CI / Workflow)* | — | ✅ Verified |"
+                f"| **{req_id}** | {req.summary} | {triggers_str} | *(CI / Workflow)* | — | ✅ Verified |"
             )
             continue
 
         if not tests:
             errors.append(f"Requirement '{req_id}' has no mapped unit or acceptance test cases.")
-            summary_lines.append(f"| **{req_id}** | {req.summary} | 0 tests | — | ❌ No Tests |")
+            summary_lines.append(
+                f"| **{req_id}** | {req.summary} | {triggers_str} | 0 tests | — | ❌ No Tests |"
+            )
             continue
 
         test_count_str = f"{len(tests)} test(s)"
 
         if xml_results:
             test_results = [match_test_result(t, xml_results) for t in tests]
-            Executed_results = [r for r in test_results if r is not None]
-            has_error = any(r.status == "ERROR" for r in Executed_results)
-            has_failure = any(r.status == "FAILED" for r in Executed_results)
-            has_skipped = any(r.status == "SKIPPED" for r in Executed_results)
+            executed_results = [r for r in test_results if r is not None]
+            has_error = any(r.status == "ERROR" for r in executed_results)
+            has_failure = any(r.status == "FAILED" for r in executed_results)
+            has_skipped = any(r.status == "SKIPPED" for r in executed_results)
 
-            if not Executed_results:
+            if not executed_results:
                 errors.append(f"No mapped test for '{req_id}' was found in JUnit XML output.")
                 summary_lines.append(
-                    f"| **{req_id}** | {req.summary} | {test_count_str} | ⚪ Not Run | ❌ Unverified |"
+                    f"| **{req_id}** | {req.summary} | {triggers_str} | {test_count_str} | ⚪ Not Run | ❌ Unverified |"
                 )
             elif has_error or has_failure or has_skipped:
                 errors.append(f"Test execution failed or was skipped for '{req_id}'.")
                 summary_lines.append(
-                    f"| **{req_id}** | {req.summary} | {test_count_str} | ❌ Failed/Skipped | ❌ Failed |"
+                    f"| **{req_id}** | {req.summary} | {triggers_str} | {test_count_str} | ❌ Failed/Skipped | ❌ Failed |"
                 )
             else:
                 summary_lines.append(
-                    f"| **{req_id}** | {req.summary} | {test_count_str} | 🟢 Passed | ✅ Verified |"
+                    f"| **{req_id}** | {req.summary} | {triggers_str} | {test_count_str} | 🟢 Passed | ✅ Verified |"
                 )
         else:
             summary_lines.append(
-                f"| **{req_id}** | {req.summary} | {test_count_str} | ⏳ Static Audit | ✅ Mapped |"
+                f"| **{req_id}** | {req.summary} | {triggers_str} | {test_count_str} | ⏳ Static Audit | ✅ Mapped |"
             )
 
     if step_summary_path:
@@ -1028,7 +1018,7 @@ def check_pull_request(
         print("=" * 70)
         return 1
 
-    print("\n✅ All claimed requirements verified.")
+    print("\n✅ All impacted and claimed requirements verified.")
     print("=" * 70)
     return 0
 

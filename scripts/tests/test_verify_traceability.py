@@ -300,5 +300,104 @@ class TestShiftLeftGitHooks(unittest.TestCase):
         self.assertIn("verify_traceability.py --audit", pre_commit_text)
 
 
+class TestCIPlannerAndDependencyGraph(unittest.TestCase):
+    """Test C++ #include graph, pybind11 AST bridge, and Two-Hop requirement impact planner [REQ-TRC-005]."""
+
+    def test_pybind11_symbol_map_extraction(self) -> None:
+        import ci_plan
+
+        symbol_map = ci_plan.parse_pybind11_symbol_map(REPO_ROOT)
+        self.assertEqual(symbol_map.get("DiracOperator"), "src/core/DiracOperator.hpp")
+        self.assertEqual(symbol_map.get("Action"), "src/core/BarrettGlaser/Action.hpp")
+        self.assertEqual(symbol_map.get("Metropolis"), "src/core/BarrettGlaser/Metropolis.hpp")
+        self.assertEqual(symbol_map.get("StdRng"), "src/core/StdRng.hpp")
+        self.assertEqual(symbol_map.get("GslRng"), "src/core/StdRng.hpp")
+        self.assertEqual(symbol_map.get("set_max_clifford_mode"), "src/core/Clifford.hpp")
+
+    def test_cpp_component_isolation_hamiltonian(self) -> None:
+        import ci_plan
+
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=["src/core/BarrettGlaser/Hamiltonian.cpp"],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+        )
+        self.assertTrue(plan.has_changes)
+        self.assertFalse(plan.is_full_run)
+        self.assertEqual(plan.affected_cpp_suites, ["HamiltonianTests"])
+        self.assertEqual(plan.ctest_filter, r"^(HamiltonianTests)\.")
+        # Hamiltonian is not wrapped in bindings.cpp, so Python tests are unaffected
+        self.assertEqual(plan.affected_python_test_files, [])
+
+    def test_two_hop_requirement_impact_from_source_change(self) -> None:
+        import ci_plan
+
+        # Touching Clifford.cpp (which contains zero REQ- tags) must infer REQ-ARCH-001
+        # and REQ-ARCH-003 via its dependent C++ unit tests (tClifford.cpp, tDiracOperator.cpp).
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=["src/core/Clifford.cpp"],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+        )
+        self.assertIn("CliffordTests", plan.affected_cpp_suites)
+        self.assertIn("DiracOperatorTests", plan.affected_cpp_suites)
+        self.assertIn("REQ-ARCH-001", plan.impacted_requirements)
+        self.assertIn("REQ-ARCH-003", plan.impacted_requirements)
+        self.assertIn("component-test", plan.requirement_triggers["REQ-ARCH-001"])
+        # Python tests using rfl.DiracOperator / rfl.set_max_clifford_mode are also affected via pybind11 bridge
+        self.assertIn(
+            "src/python_bindings/tests/integration/test_boundary_safety.py",
+            plan.affected_python_test_files,
+        )
+
+    def test_ep_spec_diff_triggers_mapped_tests_without_code_change(self) -> None:
+        import ci_plan
+
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=["docs/eps/ep-1-core-architecture-redesign.md"],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+            ep_diff_requirements={"REQ-ARCH-001"},
+        )
+        self.assertIn("REQ-ARCH-001", plan.impacted_requirements)
+        self.assertIn("ep-spec-diff", plan.requirement_triggers["REQ-ARCH-001"])
+        self.assertIn("CliffordTests", plan.affected_cpp_suites)
+        self.assertIn("DiracOperatorTests", plan.affected_cpp_suites)
+        self.assertTrue(plan.builds.test_ubuntu)
+        self.assertFalse(plan.builds.test_macos)
+        self.assertFalse(plan.builds.test_windows)
+
+    def test_docs_prose_only_change_skips_cpp_builds(self) -> None:
+        import ci_plan
+
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=["README.md"],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+        )
+        self.assertTrue(plan.builds.validate_docs)
+        self.assertFalse(plan.builds.lint_cpp)
+        self.assertFalse(plan.builds.test_ubuntu)
+        self.assertFalse(plan.builds.test_macos)
+        self.assertFalse(plan.builds.test_windows)
+        self.assertEqual(plan.required_checks, ["validate_docs"])
+
+    def test_full_run_plan(self) -> None:
+        import ci_plan
+
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=[],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+            full_run=True,
+        )
+        self.assertTrue(plan.is_full_run)
+        self.assertEqual(plan.ctest_filter, "")
+        self.assertEqual(
+            plan.required_checks,
+            ["validate_docs", "lint", "test_ubuntu", "test_macos", "test_windows"],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -22,6 +22,11 @@ on:
         type: boolean
         required: false
         default: true
+      ctest_filter:
+        description: 'Optional regex filter for CTest (-R) computed by CI planner'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -104,4 +109,16 @@ jobs:
 
       - name: Test
         shell: pwsh
-        run: ctest --test-dir build -C ${{ inputs.build_type }} --parallel $env:NUMBER_OF_PROCESSORS --output-on-failure
+        run: |
+          $ctestArgs = @(
+            "--test-dir", "build",
+            "-C", "${{ inputs.build_type }}",
+            "--parallel", "$env:NUMBER_OF_PROCESSORS",
+            "--output-on-failure"
+          )
+          if ("${{ inputs.ctest_filter }}" -ne "") {
+            $ctestArgs += "-R"
+            $ctestArgs += "${{ inputs.ctest_filter }}"
+          }
+          ctest @ctestArgs
+

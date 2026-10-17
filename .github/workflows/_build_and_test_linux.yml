@@ -22,6 +22,11 @@ on:
         type: boolean
         required: false
         default: true
+      ctest_filter:
+        description: 'Optional regex filter for CTest (-R) computed by CI planner'
+        type: string
+        required: false
+        default: ''
 
 permissions:
   contents: read
@@ -95,11 +100,28 @@ jobs:
         run: cmake --build build --config ${{ inputs.build_type }}
 
       - name: Test
-        run: ctest --test-dir build -C ${{ inputs.build_type }} --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure --output-junit junit.xml
+        run: |
+          CTEST_ARGS=(
+            --test-dir build
+            -C "${{ inputs.build_type }}"
+            --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)"
+            --output-on-failure
+            --output-junit junit.xml
+          )
+          if [ -n "${{ inputs.ctest_filter }}" ]; then
+            CTEST_ARGS+=(-R "${{ inputs.ctest_filter }}")
+          fi
+          ctest "${CTEST_ARGS[@]}"
 
       - name: Requirements Traceability PR Summary (JUnit XML)
         if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'
         env:
           GITHUB_EVENT_PATH: ${{ env.GITHUB_EVENT_PATH }}
         run: |
-          python3 scripts/verify_traceability.py --check-pr --base origin/${{ github.base_ref || 'main' }} --verify-xml build/junit.xml
+          python3 scripts/ci_plan.py test-affected --only-python --base-ref origin/${{ github.base_ref || 'main' }} --py-xml build/junit-py.xml
+          XML_FILES=(build/junit.xml)
+          if [ -f build/junit-py.xml ]; then
+            XML_FILES+=(build/junit-py.xml)
+          fi
+          python3 scripts/verify_traceability.py --check-pr --base origin/${{ github.base_ref || 'main' }} --verify-xml "${XML_FILES[@]}"
+

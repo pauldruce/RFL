@@ -54,8 +54,8 @@ Without clear structural guardrails, agentic workflows exhibit three recurring f
 | **REQ-TRC-002** | **Lifecycle & Domain Awareness** | Phase 1 (Implemented) | Requirement tables in Section 3 of all EPs must include four columns: `Requirement ID`, `Requirement Summary`, `Lifecycle Status`, and `Operational & Physical Invariant`. Test coverage audits evaluate unit-testable requirements (`ARCH`, `PHY`, `TRC`) marked `Implemented`. |
 | **REQ-TRC-003** | **Zero-Dependency Traceability Engine** | Phase 2 (Implemented) | `scripts/verify_traceability.py` must use standard Python $\ge 3.10$ libraries only. Exit codes: 0 (pass), 1 (validation error), 2 (CLI usage error). Runs in under 200 ms. |
 | **REQ-TRC-004** | **Multi-Framework Tag Support** | Phase 2 (Implemented) | The engine must extract tags from GoogleTest comments (`// [REQ-...]`), Catch2 tags (`[REQ-...]`), and Pytest test functions (`def test_*` via `@pytest.mark.req`, docstrings, or comments), ignoring non-test helper methods. |
-| **REQ-TRC-005** | **PR Step Summary & Test-Diff Visibility** | Phase 3 (Implemented) | PRs supplying `Implements: REQ-...` trailers are verified against static test mappings and CTest/Pytest JUnit XML outputs. Any modifications to existing test files are highlighted in `$GITHUB_STEP_SUMMARY`. |
-| **REQ-TRC-006** | **Shift-Left Local Git Hooks** | Phase 3 (Implemented) | `.githooks/pre-commit` executes CSpell, link validation, and `verify_traceability.py --audit` on staged changes in under 1 second. `.githooks/pre-push` runs `mise run pre-push`. |
+| **REQ-TRC-005** | **Two-Hop Impact Planner & PR Summary** | Phase 3 (Implemented) | `scripts/ci_plan.py` computes affected tests and impacted requirements from C++ `#include` graphs, `pybind11` symbol ASTs, EP table diffs, and Git trailers (`plan.json`). `verify_traceability.py --check-pr` verifies JUnit XML execution and highlights modified test files in `$GITHUB_STEP_SUMMARY`. |
+| **REQ-TRC-006** | **Shift-Left Local Git Hooks** | Phase 3 (Implemented) | `.githooks/pre-commit` executes CSpell, link validation, and `verify_traceability.py --audit` on staged changes in under 1 second. `.githooks/pre-push` runs `mise run pre-push` (`lint` + `test-affected`). |
 
 ---
 
@@ -71,7 +71,7 @@ Without clear structural guardrails, agentic workflows exhibit three recurring f
 | **Maintenance** | Vulnerable to upstream deprecation | **Complete repository ownership alongside existing scripts** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* RFL follows lean development principles. Adding external documentation build chains violates `REQ-CI-001` and `REQ-CI-005`. A single-file Python script in `scripts/` mirrors existing repository utilities (`scripts/check_links.py`, `scripts/verify_changelog.py`).
+*Rationale:* RFL follows lean development principles. Adding external documentation build chains violates `REQ-CI-001` and `REQ-CI-005`. Single-file Python scripts in `scripts/` mirror existing repository utilities (`scripts/check_links.py`, `scripts/verify_changelog.py`).
 
 ---
 
@@ -85,20 +85,24 @@ Without clear structural guardrails, agentic workflows exhibit three recurring f
 | **Execution Proof** | Fragile git checkout gymnastics in CI | **Direct verification of CTest and Pytest JUnit XML results** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Enforcing multi-commit Red-Green git topology or SHA-256 test manifests introduces high rigidity and encourages agents to write compliance theatre (such as dummy stubs or trivial arithmetic tests). In RFL, a human architect reviews every pull request. Verifying that claimed requirements (`Implements: REQ-...`) execute and pass in JUnit XML—while surfacing any modified existing test files directly in `$GITHUB_STEP_SUMMARY`—provides complete assurance with zero ceremonial overhead.
+*Rationale:* Enforcing multi-commit Red-Green git topology or SHA-256 test manifests introduces high rigidity and encourages agents to write compliance theatre (such as dummy stubs or trivial arithmetic tests). In RFL, a human architect reviews every pull request. Verifying that impacted and claimed requirements execute and pass in JUnit XML—while surfacing any modified existing test files directly in `$GITHUB_STEP_SUMMARY`—provides complete assurance with zero ceremonial overhead.
 
 ---
 
-### 4.3 ADR-3: Informative PR Summaries vs Hard Blocking on Untagged PRs
+### 4.3 ADR-3: Two-Hop Component & Requirement Impact Planner vs Source Code Tagging
 
-| Criteria | Option A: Hard CI Blocker on Untagged PRs | Option B: Dynamic Informational Step Summary (Selected) |
+| Criteria | Option A: Tag Production `src/` Files with `REQ-` IDs | Option B: Two-Hop Graph via Tests & `pybind11` AST (Selected) |
 | :--- | :--- | :--- |
-| **Refactoring Friction** | High (Forces fake `REQ-` tags on routine cleanups) | **Zero (Untagged PRs pass as internal maintenance)** |
-| **Visibility** | Obscure CI console log | **Clean Markdown table posted to `$GITHUB_STEP_SUMMARY`** |
-| **Gating Boundary** | All PRs blocked unless tagged | **Hard gate only when `Implements: REQ-...` is claimed; informational otherwise** |
+| **Source Code Cleanliness** | ❌ Poor (Pollutes C++ headers and sources with governance tags) | ✅ **100% Clean (`src/` contains zero requirement tags or CI comments)** |
+| **Cross-Language Bridge** | Manual `# +ci:depends_on` magic comments that rot | **Automatic (`bindings.cpp` symbol table + Python AST `rfl.<Symbol>`)** |
+| **EP Spec Edit Detection** | Ignored by static YAML path filters | **Automatic (`git diff` on EP tables schedules mapped C++/Python tests)** |
+| **CI Execution Speed** | Runs all tests on every code change | **Runs only affected CTest suites (`-R`) and affected Python test files** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Blocking commits that lack a formal requirement causes requirement inflation. If a PR supplies `Implements: REQ-...`, CI verifies that the requirement exists, maps to at least one test, and passes in JUnit XML. Routine refactoring PRs pass without friction.
+*Rationale:* Production code in `src/` should remain pure C++ and Python without requirement annotations or magic CI comments. Because unit tests sit between the production code they import/include and the `[REQ-...]` tags they verify, `scripts/ci_plan.py` infers requirement impact in three automatic hops:
+1. **Hop 1 (`Code -> Affected Tests`):** Scans C++ `#include` graphs (pairing `.cpp` implementations with `.hpp` headers) and maps Python test ASTs (`rfl.<Symbol>`) through `src/python_bindings/bindings.cpp` (`py::class_<>`).
+2. **Hop 2 (`Affected Tests + EP Diffs -> Impacted Requirements`):** Reads `[REQ-...]` tags from affected tests, plus any modified requirement rows in `docs/eps/ep-*.md` and `Implements: REQ-...` trailers.
+3. **Hop 3 (`Impacted Requirements -> Full Requirement Test Closure`):** Schedules all C++ and Python test suites mapped to those impacted requirements in `plan.json` for the Smart Gatekeeper (`ci-gate`).
 
 ---
 
@@ -111,7 +115,7 @@ Without clear structural guardrails, agentic workflows exhibit three recurring f
 | **Compute Consumption** | High (consumes remote runner minutes) | **Zero (local CPU cycles, < 200 ms for static audit)** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Wiring CSpell, `check_links.py`, and `verify_traceability.py --audit` into `.githooks/pre-commit` shifts verification left into the agent's inner loop. If an agent introduces a broken link, typo, or malformed requirement tag, `git commit` fails immediately in the terminal output, allowing the agent to self-correct in the same turn. `.githooks/pre-push` executes `mise run pre-push` to guarantee all unit tests pass before code leaves the workstation.
+*Rationale:* Wiring CSpell, `check_links.py`, and `verify_traceability.py --audit` into `.githooks/pre-commit` shifts verification left into the agent's inner loop. If an agent introduces a broken link, typo, or malformed requirement tag, `git commit` fails immediately in the terminal output, allowing the agent to self-correct in the same turn. `.githooks/pre-push` executes `mise run pre-push` (`lint` + `test-affected`) to guarantee affected component and requirement tests pass before code leaves the workstation.
 
 ---
 
@@ -125,37 +129,39 @@ Without clear structural guardrails, agentic workflows exhibit three recurring f
    - Specify physical invariant and numerical tolerance
 
 2. IMPLEMENT & TAG (Contributor / Agent)
-   - Implement C++ / Python feature and unit tests
+   - Implement C++ / Python feature and unit tests (zero tags in src/)
    - Tag test cases with // [REQ-<SYS>-<NUM>] or @pytest.mark.req("REQ-...")
    - Local pre-commit hook verifies spelling, links, and traceability (< 1s)
 
 3. VERIFY & PUSH (Local Pre-Push Gate)
-   - Include "Implements: REQ-<SYS>-<NUM>" in commit message or PR body
-   - Local pre-push hook runs `mise run pre-push` (linting + CTest + Pytest)
+   - Local pre-push hook runs `mise run pre-push` (lint + affected component/requirement tests)
 
-4. QUALIFY & MERGE (CI & Human Review)
-   - CI validates requirement mappings and JUnit XML execution
-   - CI posts traceability table and modified-test alerts to $GITHUB_STEP_SUMMARY
-   - Human architect reviews diff and merges via Squash-and-Merge
+4. PLAN, QUALIFY & MERGE (3-Tier CI & Human Review)
+   - Tier 1 (`plan`): `scripts/ci_plan.py` outputs `plan.json` (affected tests & impacted REQs)
+   - Tier 2 (Execution): Runs targeted CTest (`-R`) and Python suites, emitting JUnit XML
+   - Tier 3 (`ci-gate`): Verifies all `required_checks` in `plan.json` succeeded
 ```
 
-### 5.2 CLI Interface (`scripts/verify_traceability.py`)
+### 5.2 CLI Interface (`scripts/ci_plan.py` & `scripts/verify_traceability.py`)
 
 ```bash
+# Inspect affected components, test suites, and impacted requirements (including uncommitted work)
+mise run affected
+
+# Output deterministic CI execution plan as JSON
+mise run plan
+
+# Run C++ and Python unit tests strictly on affected components and impacted requirements
+mise run test-affected
+
 # Audit repository for duplicate IDs, orphaned tags, and testable coverage
 python3 scripts/verify_traceability.py --audit
 
 # Query requirement details, invariant, and mapped test cases
 python3 scripts/verify_traceability.py --query REQ-ARCH-001
 
-# Validate current PR branch against origin/main (trailers, test diffs, JUnit XML)
-python3 scripts/verify_traceability.py --check-pr --base origin/main [--verify-xml build/junit.xml]
-
-# Generate Markdown traceability matrix on demand (stdout or file)
-python3 scripts/verify_traceability.py --generate-matrix [docs/Traceability_Matrix.md]
-
-# Dump machine-readable JSON representation for AI agents
-python3 scripts/verify_traceability.py --dump-json
+# Validate current PR branch against origin/main (impacted REQs, test diffs, JUnit XML)
+python3 scripts/verify_traceability.py --check-pr --base origin/main --verify-xml build/junit.xml build/junit-py.xml
 ```
 
 ---
@@ -165,7 +171,9 @@ python3 scripts/verify_traceability.py --dump-json
 | Verification Gate | Command / Target | Target Invariant |
 | :--- | :--- | :--- |
 | **Pre-Commit Hook** | `.githooks/pre-commit` | CSpell, markdown link checks, and `verify_traceability.py --audit` complete in < 1s. |
-| **Pre-Push Hook** | `.githooks/pre-push` | Runs `mise run pre-push` (all lint checks, CTest, and Pytest) before pushing. |
+| **Pre-Push Hook** | `.githooks/pre-push` | Runs `mise run pre-push` (`lint` + `test-affected`) before pushing. |
+| **CI Execution Planner** | `mise run plan` | Computes affected C++/Python tests and impacted `REQ-` IDs in < 200 ms (`plan.json`). |
 | **Static ID Audit** | `mise run lint-traceability` | All `REQ-` IDs are globally unique across EPs; zero orphaned test tags. |
-| **Tool Unit Tests** | `pytest scripts/tests/test_verify_traceability.py` | Unit test coverage over Markdown table, GTest, Catch2, Pytest AST, and JUnit XML parsing. |
-| **CI PR Summary** | `.github/workflows/ci.yml` | Renders claimed requirement status and modified test file alerts in `$GITHUB_STEP_SUMMARY`. |
+| **Tool Unit Tests** | `python3 -m unittest discover -s scripts/tests` | Unit test coverage over EP tables, GTest/Catch2/Pytest extraction, `pybind11` AST bridge, and `plan.json`. |
+| **CI Smart Gatekeeper** | `.github/workflows/ci.yml` (`ci-gate`) | Enforces all `required_checks` from `plan.json` and renders impact tables in `$GITHUB_STEP_SUMMARY`. |
+
