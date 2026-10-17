@@ -87,7 +87,7 @@ jobs:
 
       - name: Verify PR traceability (docs / script-only PRs)
         if: github.event_name == 'pull_request' && needs.plan.outputs.test_ubuntu != 'true'
-        run: mise run ci:verify-pr
+        run: mise run ci:verify:pr
 
   lint:
     name: "C++ Linter (${{ matrix.path }})"

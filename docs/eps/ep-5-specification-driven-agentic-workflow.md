@@ -59,7 +59,7 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 | **REQ-TRC-003** | **Zero-Dependency Traceability Engine** | Phase 2 (Implemented) | `scripts/verify_traceability.py` must use standard Python $\ge 3.10$ libraries only. Exit codes must be deterministic: 0 (pass), 1 (validation error), 2 (CLI usage error). Execution must complete in under 200 ms. |
 | **REQ-TRC-004** | **Multi-Framework Tag Support** | Phase 2 (Implemented) | The engine must extract tags from GoogleTest comments (`// [REQ-...]`), Catch2 tags (`[REQ-...]`), and Pytest test functions (`def test_*` via `@pytest.mark.req`, `@pytest.mark.requirement`, docstrings, or comments), ignoring non-test helper methods. |
 | **REQ-TRC-005** | **Two-Hop Impact Planner & PR Summary** | Phase 3 (Implemented) | `scripts/ci_plan.py` must resolve affected tests and impacted requirements using C++ `#include` graphs, `pybind11` AST bridges, EP table diffs, and Git trailers (`plan.json`). `verify_traceability.py --check-pr` must verify JUnit XML test execution and highlight modified existing tests in `$GITHUB_STEP_SUMMARY`. |
-| **REQ-TRC-006** | **Shift-Left Local Git Hooks** | Phase 4 (Implemented) | `.githooks/pre-commit` must execute CSpell, markdown link validation, and `verify_traceability.py --audit` on staged files in under 1 second. `.githooks/pre-push` must execute `mise run pre-push` (`lint` + `test:affected`) to block broken pushes. |
+| **REQ-TRC-006** | **Shift-Left Local Git Hooks** | Phase 4 (Implemented) | `.githooks/pre-commit` must execute CSpell, markdown link validation, and `verify_traceability.py --audit` on staged files in under 1 second. `.githooks/pre-push` must execute `mise run pre:push` (`lint` + `test:affected`) to block broken pushes. |
 
 ---
 
@@ -120,7 +120,7 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 | **Developer Flow** | Context-switching while waiting for remote checks | **Seamless (immediate feedback within active turn)** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Wiring CSpell, `check_links.py`, and `verify_traceability.py --audit` into `.githooks/pre-commit` shifts verification left into the agent's inner loop. If an agent introduces a broken link, typo, or malformed requirement tag, `git commit` fails immediately in the terminal output. The agent can self-correct in the same turn. The `.githooks/pre-push` hook executes `mise run pre-push` (`lint` + `test:affected`), guaranteeing that affected component and requirement tests pass before code leaves the workstation.
+*Rationale:* Wiring CSpell, `check_links.py`, and `verify_traceability.py --audit` into `.githooks/pre-commit` shifts verification left into the agent's inner loop. If an agent introduces a broken link, typo, or malformed requirement tag, `git commit` fails immediately in the terminal output. The agent can self-correct in the same turn. The `.githooks/pre-push` hook executes `mise run pre:push` (`lint` + `test:affected`), guaranteeing that affected component and requirement tests pass before code leaves the workstation.
 
 ---
 
@@ -158,11 +158,11 @@ As illustrated in Figure 5.1, the traceability and execution planning pipeline c
    - Local pre-commit hook verifies spelling, links, and traceability (< 1s)
 
 3. VERIFY LOCALLY (Pre-Push Gate)
-   - Local pre-push hook runs `mise run pre-push` (lint + affected component/requirement tests)
+   - Local pre-push hook runs `mise run pre:push` (lint + affected component/requirement tests)
 
 4. PLAN, QUALIFY & MERGE (3-Tier CI & Human Review)
    - Tier 1 (`plan`): `mise run ci:plan` outputs `plan.json` (affected tests & impacted REQs)
-   - Tier 2 (Execution): Runs `mise run ci:docs`, targeted CTest (`mise run ci:test-cpp`), and `mise run ci:verify-pr`
+   - Tier 2 (Execution): Runs `mise run ci:docs`, targeted CTest (`mise run ci:test:cpp`), and `mise run ci:verify:pr`
    - Tier 3 (`ci-gate`): `mise run ci:gate` verifies all `required_checks` in `plan.json` succeeded
 ```
 
@@ -184,7 +184,7 @@ mise run test:affected
 mise run test:cpp -- -R "^(DiracOperatorTests)\."
 
 # Execute C++ test suite in CI runners with regex filter and JUnit XML output
-mise run ci:test-cpp -- -C Release -R "^(CliffordTests)\." --junit junit.xml
+mise run ci:test:cpp -- -C Release -R "^(CliffordTests)\." --junit junit.xml
 
 # Audit repository for duplicate IDs, orphaned tags, and missing test coverage
 mise run lint:traceability
@@ -196,7 +196,7 @@ mise run traceability:matrix
 mise run traceability:query -- REQ-ARCH-001
 
 # Validate pull request branch against origin/main (impacted REQs, test diffs, JUnit XML)
-mise run ci:verify-pr
+mise run ci:verify:pr
 ```
 
 ---
@@ -205,8 +205,8 @@ mise run ci:verify-pr
 
 | Verification Gate | Command / Target | Target Invariant |
 | :--- | :--- | :--- |
-| **Pre-Commit Hook** | `mise run pre-commit` | CSpell, markdown link checks, and traceability audit complete in ~1.5s. |
-| **Pre-Push Hook** | `mise run pre-push` | Executes `lint` and `test:affected` before push. |
+| **Pre-Commit Hook** | `mise run pre:commit` | CSpell, markdown link checks, and traceability audit complete in ~1.5s. |
+| **Pre-Push Hook** | `mise run pre:push` | Executes `lint` and `test:affected` before push. |
 | **CI Execution Planner** | `mise run ci:plan` | Computes affected C++ and Python tests and impacted `REQ-` IDs in < 200 ms (`plan.json`). |
 | **Static ID Audit** | `mise run lint:traceability` | All `REQ-` IDs are globally unique across EPs; zero orphaned test tags. |
 | **Tool Unit Tests** | `mise run test:scripts` | Unit tests verify EP tables, test extraction, `pybind11` AST bridge, and `ci:gate`. |

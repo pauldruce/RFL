@@ -332,14 +332,15 @@ class TestShiftLeftGitHooks(unittest.TestCase):
         self.assertTrue(os.access(pre_push, os.X_OK), ".githooks/pre-push must be executable")
 
         pre_commit_text = pre_commit.read_text(encoding="utf-8")
-        self.assertIn("mise run pre-commit", pre_commit_text)
+        self.assertIn("mise run pre:commit", pre_commit_text)
 
         pre_push_text = pre_push.read_text(encoding="utf-8")
-        self.assertIn("mise run pre-push", pre_push_text)
+        self.assertIn("mise run pre:push", pre_push_text)
         self.assertIn("mise run release:verify", pre_push_text)
 
         mise_toml = (REPO_ROOT / "mise.toml").read_text(encoding="utf-8")
-        self.assertIn("[tasks.pre-commit]", mise_toml)
+        self.assertIn('[tasks."pre:commit"]', mise_toml)
+        self.assertIn('[tasks."pre:push"]', mise_toml)
         self.assertIn("verify_traceability.py --audit", mise_toml)
 
 

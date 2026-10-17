@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Pre-push Hook: Executes mise pre-push verification and checks release tags
+# Pre-push Hook: Executes mise pre:push verification and checks release tags
 # ==============================================================================
 set -euo pipefail
 
@@ -9,9 +9,9 @@ set -euo pipefail
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_PREFIX
 export PATH="$HOME/.local/bin:$PATH"
 
-# 1. Execute pre-push validation suite via mise
+# 1. Execute pre-push validation suite via mise (pre:push)
 if [ "${RFL_SKIP_PRE_PUSH:-0}" != "1" ]; then
-    mise run pre-push
+    mise run pre:push
 fi
 
 # 2. Read standard input: <local_ref> <local_sha> <remote_ref> <remote_sha>

@@ -31,7 +31,7 @@ run = "python3 scripts/ci_plan.py plan --json"
 description = "Verify that the current pull request has an assigned milestone"
 run = "python3 scripts/ci_plan.py check-milestone"
 
-[tasks."ci:verify-pr"]
+[tasks."ci:verify:pr"]
 description = "Verify pull request requirements traceability, test diffs, and JUnit XML"
 run = "python3 scripts/verify_traceability.py --check-pr"
 
@@ -43,7 +43,7 @@ run = "python3 scripts/ci_plan.py gate"
 description = "Run CI documentation, link, spelling, traceability, and script unit test checks"
 depends = ["lint:links", "lint:spelling", "lint:traceability", "test:scripts"]
 
-[tasks."ci:test-cpp"]
+[tasks."ci:test:cpp"]
 description = "Execute C++ test suite in CI with parallel workers, output-on-failure, and optional regex filter"
 run = "python3 scripts/ci_plan.py ctest"
 
@@ -111,11 +111,11 @@ run = "python3 scripts/verify_traceability.py --generate-matrix"
 description = "Query detailed status, invariant, and mapped tests for a requirement ID"
 run = "python3 scripts/verify_traceability.py --query"
 
-[tasks.pre-commit]
+[tasks."pre:commit"]
 description = "Execute pre-commit verification suite (spelling, links, and traceability)"
 depends = ["lint:spelling", "lint:links", "lint:traceability"]
 
-[tasks.pre-push]
+[tasks."pre:push"]
 description = "Execute pre-push verification suite (linting and affected component/requirement tests)"
 depends = ["lint", "test:affected"]
 

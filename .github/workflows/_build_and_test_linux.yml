@@ -105,10 +105,10 @@ jobs:
           install: false
 
       - name: Test
-        run: mise run ci:test-cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit junit.xml
+        run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit junit.xml
 
       - name: Verify PR traceability
         if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'
-        run: mise run ci:verify-pr
+        run: mise run ci:verify:pr
 
 
