@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * **Codebase Cleanliness & Modern Tooling:** Fixed header guard collisions, removed dead commented legacy tests, and repaired verification scripts ([#75](https://github.com/pauldruce/RFL/pull/75)).
 
 ### 🚀 Features & Enhancements
+* feat(governance): implement specification-driven development and requirements traceability (EP-5) by @pauldruce in [#84](https://github.com/pauldruce/RFL/pull/84)
 * feat(core): extract analytic trace variations into dedicated BarrettGlaserAction class ([#14](https://github.com/pauldruce/RFL/issues/14)) by @pauldruce in [#82](https://github.com/pauldruce/RFL/pull/82)
 * refactor(core): transform DiracOperator into regular value type with strict const-correctness ([#12](https://github.com/pauldruce/RFL/issues/12)) by @pauldruce in [#81](https://github.com/pauldruce/RFL/pull/81)
 * feat(core): optimise DiracOperator omega table initialisation with lazy allocation and loop hoisting ([#46](https://github.com/pauldruce/RFL/issues/46)) by @pauldruce in [#80](https://github.com/pauldruce/RFL/pull/80)
