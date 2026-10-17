@@ -424,6 +424,30 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         self.assertIn("test_ubuntu=true", content)
         self.assertIn("ctest_filter=^(HamiltonianTests)\\.", content)
 
+    def test_pyproject_toml_change_triggers_all_python_tests(self) -> None:
+        import ci_plan
+
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=["pyproject.toml"],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+        )
+        self.assertEqual(plan.affected_cpp_suites, [])
+        self.assertTrue(plan.needs_python_bindings_build)
+        self.assertIn("scripts/tests/test_verify_traceability.py", plan.affected_python_test_files)
+        self.assertIn(
+            "src/python_bindings/tests/unit/test_api_surface.py",
+            plan.affected_python_test_files,
+        )
+        self.assertIn(
+            "src/python_bindings/tests/integration/test_boundary_safety.py",
+            plan.affected_python_test_files,
+        )
+        self.assertIn("REQ-TRC-005", plan.impacted_requirements)
+        self.assertTrue(plan.builds.validate_docs)
+        self.assertFalse(plan.builds.lint_cpp)
+        self.assertFalse(plan.builds.test_ubuntu)
+
 
 if __name__ == "__main__":
     unittest.main()

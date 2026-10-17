@@ -628,11 +628,18 @@ def compute_plan_from_files(
     queue = list(changed_files)
 
     # If bindings.cpp itself was directly modified, all Python `rfl` tests are affected
-    if "src/python_bindings/bindings.cpp" in affected_files or py_build_wide:
+    if "src/python_bindings/bindings.cpp" in affected_files:
         for py_rfl_test in graph.python_rfl_test_files:
             if py_rfl_test not in affected_files:
                 affected_files.add(py_rfl_test)
                 queue.append(py_rfl_test)
+
+    # If pyproject.toml or src/python_bindings/CMakeLists.txt changed, all Python tests are affected
+    if py_build_wide:
+        for py_test in graph.all_python_test_files:
+            if py_test not in affected_files:
+                affected_files.add(py_test)
+                queue.append(py_test)
 
     if cpp_build_wide:
         for cpp_test in graph.all_cpp_test_files:
@@ -731,7 +738,6 @@ def compute_plan_from_files(
         or cpp_source_or_header_changed
         or cpp_build_wide
         or workflow_changed
-        or needs_python_bindings_build
     )
     # Run macOS and Windows when C++ production code, CMake, or workflows change
     run_cross_platform = cpp_source_or_header_changed or cpp_build_wide or workflow_changed

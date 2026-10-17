@@ -121,6 +121,10 @@ Without clear structural guardrails, agentic workflows exhibit three recurring f
 
 ## 5. Target Architecture & Workflow
 
+![RFL CI Execution Planner & Two-Hop Impact Analyser](images/ep5_ci_planner_c4.svg)
+
+*Figure 5.1: C4 component architecture of the CI Execution Planner and Two-Hop Impact Analyser (`scripts/ci_plan.py` and `scripts/verify_traceability.py`). Source script co-located at [`docs/eps/images/ep5_ci_planner_c4.d2`](images/ep5_ci_planner_c4.d2).*
+
 ### 5.1 The Contributor Lifecycle
 
 ```
