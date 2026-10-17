@@ -35,7 +35,7 @@ if [[ "$TOOL_NAME" == "run_command" ]]; then
   fi
 
   # Auto-allow read-only and safe verification mise commands
-  if echo "$CMD" | grep -qE "^mise[[:space:]]+(tasks|ls|doctor|version|run[[:space:]]+(affected|plan|ci(:[a-z0-9_:-]+)?|lint(:[a-z0-9_:-]+)?|traceability:(matrix|query)|test(:[a-z0-9_:-]+)?|pre[:\-]commit|pre[:\-]push|changelog:preview|release:verify))([[:space:]]|$)"; then
+  if echo "$CMD" | grep -qE "^mise[[:space:]]+(tasks|ls|doctor|version|run[[:space:]]+(affected|plan|ci(:[a-z0-9_:-]+)?|lint(:[a-z0-9_:-]+)?|provision(:[a-z0-9_:-]+)?|traceability:(matrix|query)|test(:[a-z0-9_:-]+)?|pre[:\-]commit|pre[:\-]push|changelog:preview|release:verify))([[:space:]]|$)"; then
     echo '{"decision": "allow", "permissionOverrides": ["command(mise)"], "overwrite": {"BypassSandbox": true}}'
     exit 0
   fi

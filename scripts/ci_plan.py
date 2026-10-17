@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import ast
 import dataclasses
+import io
 import json
 import os
 import re
@@ -866,8 +867,11 @@ def run_unittest_with_junit_xml(test_files: list[str], repo_root: Path, xml_path
             self.records.append((test, "SKIPPED", reason, elapsed))
             super().addSkip(test, reason)
 
-    runner = unittest.TextTestRunner(verbosity=2, resultclass=XMLTrackingResult)
+    buf = io.StringIO()
+    runner = unittest.TextTestRunner(stream=buf, verbosity=0, resultclass=XMLTrackingResult)
     result: XMLTrackingResult = runner.run(suite)  # type: ignore[assignment]
+    if not result.wasSuccessful():
+        sys.stderr.write(buf.getvalue())
 
     if xml_path is not None:
         xml_path.parent.mkdir(parents=True, exist_ok=True)
