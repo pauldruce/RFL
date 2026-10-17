@@ -1126,6 +1126,11 @@ def cmd_test_affected(args: argparse.Namespace, repo_root: Path) -> int:
 
 def cmd_check_milestone() -> int:
     """Verify that a GitHub pull request has an assigned milestone."""
+    event_name = os.environ.get("GITHUB_EVENT_NAME", "pull_request")
+    if event_name != "pull_request":
+        print(f"Skipping milestone check for event: {event_name}")
+        return 0
+
     milestone = ""
     pr_number: str | int = ""
     repo = os.environ.get("GITHUB_REPOSITORY", "")
