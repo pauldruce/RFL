@@ -871,6 +871,7 @@ def check_pull_request(
     """Verify impacted requirements, Git trailers, test-diff visibility, and JUnit XML execution."""
     import ci_plan
 
+    resolved_base = ci_plan.resolve_base_ref(base_ref, repo_root)
     req_map, ep_errors = collect_all_requirements(eps_dir, repo_root)
     all_tests = collect_all_tests(repo_root)
 
@@ -881,7 +882,7 @@ def check_pull_request(
     errors: list[str] = list(ep_errors)
 
     # 1. Inspect modified or deleted existing test files for reviewer visibility (REQ-TRC-005)
-    diff_cmd = ["git", "diff", "--name-only", "--diff-filter=MD", f"{base_ref}..HEAD"]
+    diff_cmd = ["git", "diff", "--name-only", "--diff-filter=MD", f"{resolved_base}..HEAD"]
     try:
         diff_res = subprocess.run(diff_cmd, cwd=repo_root, capture_output=True, text=True, check=True)
         modified_files = [line.strip() for line in diff_res.stdout.splitlines() if line.strip()]
@@ -902,7 +903,7 @@ def check_pull_request(
 
     # 2. Compute impacted requirements via Two-Hop Component + EP Diff + Git Trailer analysis
     plan = ci_plan.compute_plan(
-        base_ref_flag=base_ref,
+        base_ref_flag=resolved_base,
         repo_root=repo_root,
         eps_dir=eps_dir,
         include_working_tree=not bool(os.environ.get("CI")),
@@ -943,6 +944,19 @@ def check_pull_request(
         return 0
 
     print(f"\n🔍 Impacted Requirements ({len(impacted_requirements)}): {', '.join(impacted_requirements)}")
+
+    if xml_paths is None and os.environ.get("CI"):
+        stdlib_tests = [
+            f for f in plan.affected_python_test_files if f.startswith("scripts/tests/")
+        ]
+        py_xml_default = repo_root / "build" / "junit-py.xml"
+        if stdlib_tests and not py_xml_default.exists():
+            ci_plan.run_unittest_with_junit_xml(stdlib_tests, repo_root, py_xml_default)
+        discovered_xml = [
+            p for p in (repo_root / "build" / "junit.xml", py_xml_default) if p.exists()
+        ]
+        if discovered_xml:
+            xml_paths = discovered_xml
 
     xml_results: dict[str, JUnitResult] = {}
     if xml_paths:
@@ -1058,8 +1072,8 @@ def main() -> int:
     parser.add_argument(
         "--base",
         type=str,
-        default="origin/main",
-        help="Git base reference for PR verification (default: origin/main)",
+        default="",
+        help="Git base reference for PR verification (default: auto-resolved via GITHUB_BASE_REF or origin/main)",
     )
     parser.add_argument(
         "--verify-xml",

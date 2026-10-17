@@ -138,6 +138,8 @@ def is_full_run(run_all_flag: bool) -> bool:
     """Return True if full-repository regression mode is active."""
     if run_all_flag:
         return True
+    if os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch":
+        return True
     env_val = os.environ.get("CI_RUN_ALL", "").strip().lower()
     return env_val in ("1", "true", "yes")
 
@@ -979,6 +981,25 @@ def write_step_summary(plan: Plan) -> None:
         f.write("\n".join(lines) + "\n")
 
 
+def write_github_output(plan: ExecutionPlan) -> None:
+    """Export execution plan keys to $GITHUB_OUTPUT when running in GitHub Actions."""
+    output_path = os.environ.get("GITHUB_OUTPUT")
+    if not output_path:
+        return
+    lines = [
+        f"has_changes={'true' if plan.has_changes else 'false'}",
+        f"validate_docs={'true' if plan.builds.get('validate_docs') else 'false'}",
+        f"lint_cpp={'true' if plan.builds.get('lint_cpp') else 'false'}",
+        f"test_ubuntu={'true' if plan.builds.get('test_ubuntu') else 'false'}",
+        f"test_macos={'true' if plan.builds.get('test_macos') else 'false'}",
+        f"test_windows={'true' if plan.builds.get('test_windows') else 'false'}",
+        f"ctest_filter={plan.ctest_filter}",
+        f"required_checks={json.dumps(plan.required_checks)}",
+    ]
+    with open(output_path, "a", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+
+
 def cmd_plan(args: argparse.Namespace, repo_root: Path) -> int:
     """Execute the `plan` sub-command."""
     plan = compute_plan(
@@ -994,6 +1015,7 @@ def cmd_plan(args: argparse.Namespace, repo_root: Path) -> int:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         out_path.write_text(payload + "\n", encoding="utf-8")
 
+    write_github_output(plan)
     write_step_summary(plan)
 
     if args.summary and not args.json:

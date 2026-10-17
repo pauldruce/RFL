@@ -14,55 +14,29 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ==========================================
-  # Tier 1: Planner (Fast Dependency & Requirement Impact Analysis)
-  # ==========================================
   plan:
     name: CI Execution Planner
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.parse.outputs.has_changes }}
-      validate_docs: ${{ steps.parse.outputs.validate_docs }}
-      lint_cpp: ${{ steps.parse.outputs.lint_cpp }}
-      test_ubuntu: ${{ steps.parse.outputs.test_ubuntu }}
-      test_macos: ${{ steps.parse.outputs.test_macos }}
-      test_windows: ${{ steps.parse.outputs.test_windows }}
-      ctest_filter: ${{ steps.parse.outputs.ctest_filter }}
-      required_checks: ${{ steps.parse.outputs.required_checks }}
+      has_changes: ${{ steps.plan.outputs.has_changes }}
+      validate_docs: ${{ steps.plan.outputs.validate_docs }}
+      lint_cpp: ${{ steps.plan.outputs.lint_cpp }}
+      test_ubuntu: ${{ steps.plan.outputs.test_ubuntu }}
+      test_macos: ${{ steps.plan.outputs.test_macos }}
+      test_windows: ${{ steps.plan.outputs.test_windows }}
+      ctest_filter: ${{ steps.plan.outputs.ctest_filter }}
+      required_checks: ${{ steps.plan.outputs.required_checks }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-
-      - name: Compute CI Execution Plan
+      - name: Compute CI execution plan
         id: plan
-        env:
-          CI_BASE_REF: origin/${{ github.base_ref || 'main' }}
-          CI_RUN_ALL: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
-          GITHUB_EVENT_PATH: ${{ env.GITHUB_EVENT_PATH }}
-        run: |
-          python3 scripts/ci_plan.py plan --base-ref "origin/${{ github.base_ref || 'main' }}" --json --output plan.json
-          cat plan.json
+        run: python3 scripts/ci_plan.py plan --output plan.json
 
-      - name: Parse Plan Outputs
-        id: parse
-        run: |
-          echo "has_changes=$(jq -r .has_changes plan.json)" >> "$GITHUB_OUTPUT"
-          echo "validate_docs=$(jq -r .builds.validate_docs plan.json)" >> "$GITHUB_OUTPUT"
-          echo "lint_cpp=$(jq -r .builds.lint_cpp plan.json)" >> "$GITHUB_OUTPUT"
-          echo "test_ubuntu=$(jq -r .builds.test_ubuntu plan.json)" >> "$GITHUB_OUTPUT"
-          echo "test_macos=$(jq -r .builds.test_macos plan.json)" >> "$GITHUB_OUTPUT"
-          echo "test_windows=$(jq -r .builds.test_windows plan.json)" >> "$GITHUB_OUTPUT"
-          echo "ctest_filter=$(jq -r .ctest_filter plan.json)" >> "$GITHUB_OUTPUT"
-          echo "required_checks=$(jq -c .required_checks plan.json)" >> "$GITHUB_OUTPUT"
-
-      - name: Upload Execution Plan
+      - name: Upload execution plan
         uses: actions/upload-artifact@v7
         with:
           name: pipeline-plan
@@ -88,15 +62,10 @@ jobs:
           fi
           echo "✅ Pull request is assigned to milestone: $MILESTONE"
 
-  # ==========================================
-  # Tier 2: Dynamic Execution Jobs
-  # ==========================================
   validate_docs:
     name: Documentation, Links, Spelling & Traceability
     needs: plan
-    if: >-
-      needs.plan.outputs.validate_docs == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    if: needs.plan.outputs.validate_docs == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -104,48 +73,30 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-
       - name: Validate links and badges
         run: python3 scripts/check_links.py
 
       - name: Spell & British English Check (CSpell)
         run: npx cspell lint --dot .
 
-      - name: Audit requirement IDs and test traceability engine
+      - name: Audit requirement IDs and traceability engine
         run: |
           python3 scripts/verify_traceability.py --audit
           python3 -m unittest discover -s scripts/tests
 
-      - name: Verify PR Traceability Summary (Docs / Script-Only PRs)
+      - name: Verify PR traceability (docs / script-only PRs)
         if: github.event_name == 'pull_request' && needs.plan.outputs.test_ubuntu != 'true'
-        env:
-          GITHUB_EVENT_PATH: ${{ env.GITHUB_EVENT_PATH }}
-        run: |
-          python3 scripts/ci_plan.py test-affected --only-python --base-ref origin/${{ github.base_ref || 'main' }} --py-xml build/junit-py.xml
-          if [ -f build/junit-py.xml ]; then
-            python3 scripts/verify_traceability.py --check-pr --base origin/${{ github.base_ref || 'main' }} --verify-xml build/junit-py.xml
-          else
-            python3 scripts/verify_traceability.py --check-pr --base origin/${{ github.base_ref || 'main' }}
-          fi
+        run: python3 scripts/verify_traceability.py --check-pr
 
   lint:
     name: "C++ Linter (${{ matrix.path }})"
     needs: plan
-    if: >-
-      needs.plan.outputs.lint_cpp == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    if: needs.plan.outputs.lint_cpp == 'true'
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        path:
-          - "src"
-          - "examples"
-          - "playground"
+        path: [src, examples, playground]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -159,9 +110,7 @@ jobs:
   test_ubuntu:
     name: Ubuntu PR Smoke Test
     needs: plan
-    if: >-
-      needs.plan.outputs.test_ubuntu == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    if: needs.plan.outputs.test_ubuntu == 'true'
     uses: ./.github/workflows/_build_and_test_linux.yml
     with:
       os: ubuntu-latest
@@ -171,9 +120,7 @@ jobs:
   test_macos:
     name: macOS PR Smoke Test
     needs: plan
-    if: >-
-      needs.plan.outputs.test_macos == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    if: needs.plan.outputs.test_macos == 'true'
     uses: ./.github/workflows/_build_and_test_macos.yml
     with:
       os: macos-latest
@@ -183,9 +130,7 @@ jobs:
   test_windows:
     name: Windows PR Smoke Test
     needs: plan
-    if: >-
-      needs.plan.outputs.test_windows == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    if: needs.plan.outputs.test_windows == 'true'
     uses: ./.github/workflows/_build_and_test_windows.yml
     with:
       os: windows-latest
@@ -195,12 +140,7 @@ jobs:
   matrix_linux:
     name: "Matrix Linux"
     needs: plan
-    if: >-
-      (
-        needs.plan.outputs.test_ubuntu == 'true' ||
-        github.event_name == 'workflow_dispatch'
-      ) &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    if: needs.plan.outputs.test_ubuntu == 'true' && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -215,12 +155,7 @@ jobs:
   matrix_macos:
     name: "Matrix macOS"
     needs: plan
-    if: >-
-      (
-        needs.plan.outputs.test_macos == 'true' ||
-        github.event_name == 'workflow_dispatch'
-      ) &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    if: needs.plan.outputs.test_macos == 'true' && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -235,12 +170,7 @@ jobs:
   matrix_windows:
     name: "Matrix Windows"
     needs: plan
-    if: >-
-      (
-        needs.plan.outputs.test_windows == 'true' ||
-        github.event_name == 'workflow_dispatch'
-      ) &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    if: needs.plan.outputs.test_windows == 'true' && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -252,75 +182,27 @@ jobs:
       arma_version: ${{ matrix.arma_version }}
       install_system_armadillo: false
 
-  # ==========================================
-  # Tier 3: Smart Gatekeeper (Unified Branch Protection Check)
-  # ==========================================
   ci-gate:
     name: CI Gatekeeper
-    needs:
-      - plan
-      - check_milestone
-      - validate_docs
-      - lint
-      - test_ubuntu
-      - test_macos
-      - test_windows
-      - matrix_linux
-      - matrix_macos
-      - matrix_windows
+    needs: [plan, check_milestone, validate_docs, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Evaluate Required Checks
+      - name: Evaluate required checks
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
         run: |
-          if [ "${{ needs.plan.result }}" != "success" ]; then
-            echo "❌ CI Execution Planner failed or was cancelled (status: ${{ needs.plan.result }})."
-            exit 1
-          fi
-
-          if [ "${{ needs.check_milestone.result }}" = "failure" ] || \
-             [ "${{ needs.check_milestone.result }}" = "cancelled" ]; then
-            echo "❌ Milestone verification failed: pull request must have an assigned milestone."
-            exit 1
-          fi
-
-          if [ "${{ needs.plan.outputs.has_changes }}" = "false" ]; then
-            echo "✅ No changes detected. Gatekeeper PASSED."
-            exit 0
-          fi
-
-          REQUIRED='${{ needs.plan.outputs.required_checks }}'
-          echo "Required checks from plan.json: $REQUIRED"
-
-          RESULTS='{
-            "validate_docs": "${{ needs.validate_docs.result }}",
-            "lint": "${{ needs.lint.result }}",
-            "test_ubuntu": "${{ needs.test_ubuntu.result }}",
-            "test_macos": "${{ needs.test_macos.result }}",
-            "test_windows": "${{ needs.test_windows.result }}"
-          }'
-
-          FAILED=0
-          for check in $(echo "$REQUIRED" | jq -r '.[]'); do
-            status=$(echo "$RESULTS" | jq -r --arg c "$check" '.[$c]')
-            echo "Checking $check: status=$status"
-            if [ "$status" != "success" ]; then
-              echo "❌ ERROR: Required check '$check' failed with status: $status"
-              FAILED=1
-            fi
-          done
-
-          for matrix_res in "${{ needs.matrix_linux.result }}" "${{ needs.matrix_macos.result }}" "${{ needs.matrix_windows.result }}"; do
-            if [ "$matrix_res" = "failure" ] || [ "$matrix_res" = "cancelled" ]; then
-              echo "❌ ERROR: Compatibility matrix check failed or was cancelled."
-              FAILED=1
-            fi
-          done
-
-          if [ $FAILED -ne 0 ]; then
-            echo "❌ Pipeline failed required checks."
-            exit 1
-          fi
-
-          echo "✅ All required checks in plan.json passed. Gatekeeper PASSED."
-          exit 0
+          python3 -c '
+          import json, os, sys
+          needs = json.loads(os.environ["NEEDS_JSON"])
+          if needs["plan"]["result"] != "success":
+              sys.exit("❌ CI Execution Planner failed or was cancelled.")
+          if needs["check_milestone"]["result"] in ("failure", "cancelled"):
+              sys.exit("❌ Milestone verification failed: pull request must have an assigned milestone.")
+          required = json.loads(needs["plan"]["outputs"].get("required_checks", "[]"))
+          failed = [j for j in required if needs[j]["result"] != "success"]
+          failed += [j for j in ("matrix_linux", "matrix_macos", "matrix_windows") if needs[j]["result"] in ("failure", "cancelled")]
+          if failed:
+              sys.exit(f"❌ Failed or cancelled required checks: {failed}")
+          print(f"✅ All required checks passed: {required}")
+          '

@@ -169,15 +169,9 @@ Clifford& Clifford::operator=(const Clifford& clifford_to_copy) {
   return *this;
 }
 
-/**
- * Decomposes signature (p, q) into base mode counts.
- *
- * For example, (5,3) = (2,0) + (2,0) + (0,2) + (1,1).
- *
- * @param p Number of Hermitian gamma matrices.
- * @param q Number of anti-Hermitian gamma matrices.
- * @param dec Output array of base mode counts.
- */
+// Decomposes signature (p, q) into base mode counts:
+// (2,0), (0,2), (1,1), (1,0), and (0,1).
+// For example, (5,3) = (2,0) + (2,0) + (0,2) + (1,1).
 static void decomp(const int p, const int q, int* dec) {
   if (p) {
     if (!(p % 2)) {
@@ -237,7 +231,7 @@ void Clifford::initGammas() {
   *this = c_1;
 }
 
-// TODO: Verify agreement with Lawson and Michelson.
+// TODO: Verify the graded tensor product chirality phase convention against Lawson and Michelson (1989) for p, q >= 6.
 Clifford& Clifford::operator*=(const Clifford& clifford_2) {
   // Store frequently used variables.
   const int p_2 = clifford_2.getP();

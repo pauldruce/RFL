@@ -188,14 +188,7 @@ DiracOperator& DiracOperator::operator=(DiracOperator&& other) noexcept {
   return *this;
 }
 
-/**
- * Converts a decimal integer to a base representation vector.
- *
- * @param dec Decimal value to convert.
- * @param base Target base for the conversion.
- * @param max Maximum number of digits to output.
- * @return Vector of digits in the target base.
- */
+// Converts a decimal integer to a fixed-width digit vector in the target base.
 static vector<int> baseConversion(int dec, const int& base, const int& max) {
   vector<int> rem;
 
@@ -262,11 +255,6 @@ void DiracOperator::printOmegaTable4() const {
     if (z != cx_double(0., 0.)) {
       int e = 1;
       vector<int> prod = baseConversion(i, m_num_matrices, 4);
-      //            vector<int>::const_iterator end(prod.end());
-      //            for (vector<int>::const_iterator iter = prod.begin(); iter != end; ++iter) {
-      //                cout << (*iter) << " ";
-      //                e *= eps[(*iter)];
-      //            }
       for (const auto& p : prod) {
         cout << p << " ";
         e *= m_epsilons[p];
@@ -502,7 +490,7 @@ cx_mat DiracOperator::computeB(const int& k) const {
   return 2 * m_gamma_dim * res;
 }
 
-// TODO: Refactor to reuse the randomisation logic across matrix arrays.
+// TODO: Extract a shared GUE Hermitian matrix sampling helper for m_matrices, m_momenta, and Hamiltonian::sampleMoments.
 void DiracOperator::randomiseMatrices(const IRng& rng) {
   auto& matrices = this->getMatrices();
   auto& momenta = this->getMomenta();
@@ -666,8 +654,6 @@ double DiracOperator::computeA4(const int& i_1, const int& i_2, const int& i_3, 
       res += epsilons[i_1] * epsilons[i_2] * tr_12 * tr_34;
       res += epsilons[i_1] * epsilons[i_3] * tr_13 * tr_24;
       res += epsilons[i_1] * epsilons[i_4] * tr_14 * tr_23;
-
-      //	  cliff = omega_table_4[i4 + D.nHL * (i3 + D.nHL * (i2 + D.nHL * i1))].real();
 
       return 2 * cliff * res;
     } else {

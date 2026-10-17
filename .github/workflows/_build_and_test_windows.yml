@@ -109,16 +109,5 @@ jobs:
 
       - name: Test
         shell: pwsh
-        run: |
-          $ctestArgs = @(
-            "--test-dir", "build",
-            "-C", "${{ inputs.build_type }}",
-            "--parallel", "$env:NUMBER_OF_PROCESSORS",
-            "--output-on-failure"
-          )
-          if ("${{ inputs.ctest_filter }}" -ne "") {
-            $ctestArgs += "-R"
-            $ctestArgs += "${{ inputs.ctest_filter }}"
-          }
-          ctest @ctestArgs
+        run: ctest --test-dir build -C "${{ inputs.build_type }}" --parallel "$env:NUMBER_OF_PROCESSORS" --output-on-failure -R "${{ inputs.ctest_filter }}"
 
