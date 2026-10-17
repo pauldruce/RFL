@@ -60,6 +60,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
       - name: Install dependencies
         uses: ./.github/actions/install-linux-deps
         with:
@@ -81,9 +84,6 @@ jobs:
           CCACHE_COMPRESS: "1"
         run: |
           CMAKE_ARGS=(
-            -B build
-            -S .
-            -G Ninja
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
@@ -94,18 +94,17 @@ jobs:
               -DARMADILLO_GIT_TAG=${{ inputs.arma_version }}
             )
           fi
-          cmake "${CMAKE_ARGS[@]}"
+          mise run build:configure -- "${CMAKE_ARGS[@]}"
 
       - name: Build
-        run: cmake --build build --config ${{ inputs.build_type }}
+        run: mise run build:cpp -- --config ${{ inputs.build_type }}
 
-      - name: Set up Mise
-        uses: jdx/mise-action@v2
-        with:
-          install: false
-
-      - name: Test
+      - name: Test C++
         run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit build/junit.xml
+
+      - name: Test Python Bindings
+        if: inputs.install_system_armadillo == true
+        run: mise run ci:test:python
 
       - name: Verify PR traceability
         if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'

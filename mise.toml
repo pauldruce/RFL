@@ -8,9 +8,21 @@ node = "lts"
 "clang-format" = "16.0.6"
 d2 = "0.8.2"
 
+[tasks."build:configure"]
+description = "Configure CMake build directory with Ninja"
+run = "cmake -B build -S . -G Ninja"
+
+[tasks."build:cpp"]
+description = "Build all C++ targets using CMake"
+run = "cmake --build build"
+
+[tasks."build:sdist"]
+description = "Build Python source distribution package via uv"
+run = "uv build --sdist --out-dir dist"
+
 [tasks.build]
 description = "Configure and build C++ targets using CMake and Ninja"
-run = "cmake -B build -G Ninja && cmake --build build"
+depends = ["build:configure", "build:cpp"]
 
 [tasks."build:d2"]
 description = "Recompile all SVG diagrams from D2 sources"
@@ -37,12 +49,16 @@ description = "Evaluate upstream CI job statuses against required_checks"
 run = "python3 scripts/ci_plan.py gate"
 
 [tasks."ci:docs"]
-description = "Run CI documentation, link, spelling, traceability, and script unit test checks"
-depends = ["lint:links", "lint:spelling", "lint:traceability", "test:scripts"]
+description = "Run CI documentation, link, spelling, D2, traceability, and script unit test checks"
+depends = ["lint:links", "lint:spelling", "lint:d2", "lint:traceability", "test:scripts"]
 
 [tasks."ci:test:cpp"]
 description = "Execute C++ test suite in CI with parallel workers, output-on-failure, and optional regex filter"
 run = "python3 scripts/ci_plan.py ctest"
+
+[tasks."ci:test:python"]
+description = "Execute Python test suite with JUnit XML output"
+run = "uv run --group test pytest ${PYTEST_TARGETS:-src/python_bindings/tests} --junit-xml=build/junit-py.xml"
 
 [tasks.plan]
 description = "Alias for ci:plan"

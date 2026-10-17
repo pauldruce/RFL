@@ -41,6 +41,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v7
 
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
       - name: Install dependencies
         if: matrix.language == 'c-cpp'
         uses: ./.github/actions/install-linux-deps
@@ -49,11 +52,7 @@ jobs:
 
       - name: Configure CMake
         if: matrix.language == 'c-cpp'
-        run: |
-          cmake \
-            -B build \
-            -S . \
-            -DCMAKE_BUILD_TYPE=Release
+        run: mise run build:configure -- -DCMAKE_BUILD_TYPE=Release
 
       - name: Initialise CodeQL
         uses: github/codeql-action/init@v4
@@ -63,8 +62,7 @@ jobs:
 
       - name: Build C++ code
         if: matrix.language == 'c-cpp'
-        run: |
-          cmake --build build --target all -j 4
+        run: mise run build:cpp -- --target all -j 4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

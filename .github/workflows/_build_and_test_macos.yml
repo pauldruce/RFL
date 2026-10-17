@@ -60,6 +60,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
       - name: Install dependencies
         uses: ./.github/actions/install-macos-deps
         with:
@@ -82,9 +85,6 @@ jobs:
         run: |
           HOMEBREW_PREFIX="$(brew --prefix 2>/dev/null || echo '/opt/homebrew')"
           CMAKE_ARGS=(
-            -B build
-            -S .
-            -G Ninja
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
             -DCMAKE_PREFIX_PATH="${HOMEBREW_PREFIX}"
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5
@@ -96,16 +96,11 @@ jobs:
               -DARMADILLO_GIT_TAG=${{ inputs.arma_version }}
             )
           fi
-          cmake "${CMAKE_ARGS[@]}"
+          mise run build:configure -- "${CMAKE_ARGS[@]}"
 
       - name: Build
-        run: cmake --build build --config ${{ inputs.build_type }}
-
-      - name: Set up Mise
-        uses: jdx/mise-action@v2
-        with:
-          install: false
+        run: mise run build:cpp -- --config ${{ inputs.build_type }}
 
       - name: Test
-        run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}"
+        run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit build/junit.xml
 

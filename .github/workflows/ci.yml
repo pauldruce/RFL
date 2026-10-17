@@ -90,23 +90,19 @@ jobs:
         run: mise run ci:verify:pr
 
   lint:
-    name: "C++ Linter (${{ matrix.path }})"
+    name: C++ Linter
     needs: plan
     if: needs.plan.outputs.lint_cpp == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        path: [src, examples, playground]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Run clang-format style check for ${{ matrix.path }}
-        uses: jidicula/clang-format-action@v4.18.0
-        with:
-          clang-format-version: "16"
-          check-path: ${{ matrix.path }}
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
+      - name: Run C++ Style Linter
+        run: mise run lint:cpp
 
   test_ubuntu:
     name: Ubuntu PR Smoke Test
