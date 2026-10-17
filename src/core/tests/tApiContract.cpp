@@ -156,6 +156,8 @@ static_assert(std::is_same_v<decltype(&Simulation::getDiracOperator), const Dira
 // ============================================================================
 // Runtime Sanity Tests
 // ============================================================================
+// [REQ-ARCH-001]
+// [REQ-ARCH-006]
 TEST(ApiContractTest, EnduringPublicContractSanity) {
   // Verify DiracOperator runtime instantiation and inspector contracts.
   DiracOperator dirac(1, 3, 6);

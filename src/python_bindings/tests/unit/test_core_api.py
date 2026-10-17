@@ -1,9 +1,11 @@
 """Unit tests for the RFL Python core API."""
 
 import numpy as np
+import pytest
 import rfl
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_dirac_operator():
     """Verify Dirac operator initialisation, type, and eigenvalue spectrum."""
     p, q = 1, 3
@@ -18,6 +20,7 @@ def test_dirac_operator():
     assert len(eigenvals) == 400
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_action():
     """Verify Barrett-Glaser action parameters and action calculation."""
     g_2 = -1.0
@@ -32,6 +35,7 @@ def test_action():
     assert isinstance(s, float)
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_std_rng():
     """Verify standard C++ random number generator initialisation."""
     rng = rfl.StdRng(42)
@@ -39,6 +43,7 @@ def test_std_rng():
     assert 0.0 <= rng.get_uniform() < 1.0
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_metropolis():
     """Verify Metropolis algorithm execution and acceptance rate output."""
     dirac = rfl.DiracOperator(1, 3, 10)

@@ -24,6 +24,15 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import verify_traceability as vt
 
 
+def req(*req_ids: str):
+    """Test marker attaching requirement IDs for AST extraction [REQ-TRC-004]."""
+
+    def decorator(func):
+        return func
+
+    return decorator
+
+
 class TestRequirementIDValidation(unittest.TestCase):
     """Test requirement ID regex and namespacing rules [REQ-TRC-001]."""
 
@@ -60,32 +69,58 @@ class TestRequirementIDValidation(unittest.TestCase):
             )
 
 
-class TestLegacyRequirementAliasing(unittest.TestCase):
-    """Test legacy alias resolution and collision disambiguation [REQ-TRC-003]."""
+class TestStrictRequirementIDEnforcement(unittest.TestCase):
+    """Test strict requirement ID enforcement and rejection of un-namespaced IDs [REQ-TRC-003]."""
 
-    def test_path_prefixed_disambiguation(self) -> None:
-        arch_id = vt.canonicalize_req("REQ-001", "src/core/tests/tDiracOperator.cpp")
-        self.assertEqual(arch_id, "REQ-ARCH-001")
+    @req("REQ-TRC-003")
+    def test_canonical_id_unchanged(self) -> None:
+        canonical_id = vt.canonicalize_req("REQ-ARCH-001")
+        self.assertEqual(canonical_id, "REQ-ARCH-001")
 
-        delta_phy_id = vt.canonicalize_req("REQ-001", "src/core/tests/tDelta.cpp")
-        self.assertEqual(delta_phy_id, "REQ-PHY-001")
+        with_path = vt.canonicalize_req("REQ-ARCH-001", "src/core/tests/tDiracOperator.cpp")
+        self.assertEqual(with_path, "REQ-ARCH-001")
 
-        phy_id = vt.canonicalize_req("REQ-001", "tests/physics/test_invariants.py")
-        self.assertEqual(phy_id, "REQ-PHY-001")
+    @req("REQ-TRC-003")
+    def test_legacy_ids_not_rewritten_and_fail_pattern(self) -> None:
+        legacy_ids = ["REQ-001", "REQ-ARC-001", "REQ-PKG-01"]
+        for legacy_id in legacy_ids:
+            # Legacy IDs must NOT be silently rewritten to canonical IDs
+            rewritten = vt.canonicalize_req(legacy_id, "src/core/tests/tDiracOperator.cpp")
+            self.assertEqual(rewritten, legacy_id)
 
-    def test_unambiguous_legacy_aliases(self) -> None:
-        pkg_id = vt.canonicalize_req("REQ-PKG-01", "any/arbitrary/path.py")
-        self.assertEqual(pkg_id, "REQ-PKG-001")
+        # Legacy IDs with invalid syntax must fail the canonical REQ_ID_PATTERN match
+        self.assertIsNone(vt.REQ_ID_PATTERN.match("REQ-001"))
+        self.assertIsNone(vt.REQ_ID_PATTERN.match("REQ-PKG-01"))
 
-        ci_id = vt.canonicalize_req("REQ-ARC-001", "")
-        self.assertEqual(ci_id, "REQ-CI-001")
+    @req("REQ-TRC-003")
+    def test_extract_python_tests_markers(self) -> None:
+        py_content = """
+import pytest
 
-        phy_011 = vt.canonicalize_req("REQ-011", "src/core/tests/tDelta.cpp")
-        self.assertEqual(phy_011, "REQ-PHY-011")
+@pytest.mark.req("REQ-ARCH-001")
+def test_func_with_req():
+    pass
 
-    def test_already_canonical_ids_unchanged(self) -> None:
-        modern_id = vt.canonicalize_req("REQ-ARCH-001", "src/core/tests/tDiracOperator.cpp")
-        self.assertEqual(modern_id, "REQ-ARCH-001")
+@pytest.mark.requirement("REQ-ARCH-006")
+def test_func_with_requirement():
+    pass
+
+@pytest.mark.requirement("REQ-TRC-001")
+class TestClassWithMarker:
+    def test_method(self):
+        pass
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            py_file = tmp_root / "test_markers.py"
+            py_file.write_text(py_content, encoding="utf-8")
+
+            mappings = vt.extract_python_tests(py_file, tmp_root)
+            req_symbols = {(m.req_id, m.full_symbol) for m in mappings}
+
+            self.assertIn(("REQ-ARCH-001", "test_markers.test_func_with_req"), req_symbols)
+            self.assertIn(("REQ-ARCH-006", "test_markers.test_func_with_requirement"), req_symbols)
+            self.assertIn(("REQ-TRC-001", "test_markers.TestClassWithMarker.test_method"), req_symbols)
 
 
 class TestMathPipeShielding(unittest.TestCase):
@@ -332,8 +367,8 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
     def test_two_hop_requirement_impact_from_source_change(self) -> None:
         import ci_plan
 
-        # Touching Clifford.cpp (which contains zero REQ- tags) must infer REQ-ARCH-001
-        # and REQ-ARCH-003 via its dependent C++ unit tests (tClifford.cpp, tDiracOperator.cpp).
+        # Touching Clifford.cpp (which contains zero REQ- tags) must infer REQ-ARCH-001,
+        # REQ-ARCH-003, and REQ-ARCH-006 via dependent C++ tests and Python integration tests.
         plan = ci_plan.compute_plan_from_files(
             changed_files=["src/core/Clifford.cpp"],
             base_ref="origin/main",
@@ -343,7 +378,9 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         self.assertIn("DiracOperatorTests", plan.affected_cpp_suites)
         self.assertIn("REQ-ARCH-001", plan.impacted_requirements)
         self.assertIn("REQ-ARCH-003", plan.impacted_requirements)
+        self.assertIn("REQ-ARCH-006", plan.impacted_requirements)
         self.assertIn("component-test", plan.requirement_triggers["REQ-ARCH-001"])
+        self.assertIn("component-test", plan.requirement_triggers["REQ-ARCH-006"])
         # Python tests using rfl.DiracOperator / rfl.set_max_clifford_mode are also affected via pybind11 bridge
         self.assertIn(
             "src/python_bindings/tests/integration/test_boundary_safety.py",
@@ -432,7 +469,7 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
             base_ref="origin/main",
             repo_root=REPO_ROOT,
         )
-        self.assertEqual(plan.affected_cpp_suites, [])
+        self.assertIn("ApiContractTest", plan.affected_cpp_suites)
         self.assertTrue(plan.needs_python_bindings_build)
         self.assertIn("scripts/tests/test_verify_traceability.py", plan.affected_python_test_files)
         self.assertIn(
@@ -444,9 +481,10 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
             plan.affected_python_test_files,
         )
         self.assertIn("REQ-TRC-005", plan.impacted_requirements)
+        self.assertIn("REQ-ARCH-006", plan.impacted_requirements)
         self.assertTrue(plan.builds.validate_docs)
         self.assertFalse(plan.builds.lint_cpp)
-        self.assertFalse(plan.builds.test_ubuntu)
+        self.assertTrue(plan.builds.test_ubuntu)
 
 
 if __name__ == "__main__":

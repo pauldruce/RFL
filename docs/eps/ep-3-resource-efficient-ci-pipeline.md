@@ -126,7 +126,7 @@ The new architecture must address these bottlenecks by defining clear operationa
 | **Reliability** | ✅ High | ✅ **High** | ❌ Poor (Developers forget tokens) |
 | **Decision** | Rejected | **Selected (Option B)** | Rejected |
 
-*Rationale:* Top-level `paths-ignore` causes pull requests to hang if repository branch protection enforces required status checks. Using a job-level path filter (`dorny/paths-filter`) allows the workflow to execute, dynamically skip compilation jobs, and immediately report a successful status check.
+*Rationale:* Top-level `paths-ignore` causes pull requests to hang if repository branch protection enforces required status checks. Using a job-level path filter (`dorny/paths-filter`) allows the workflow to execute, dynamically skip compilation jobs, and immediately report a successful status check. Note that in `v0.3.0`, [EP-5](ep-5-specification-driven-agentic-workflow.md) superseded static path filtering with the dependency-graph planner `scripts/ci_plan.py`.
 
 ---
 
@@ -313,11 +313,11 @@ run = "pre-commit run --all-files"
 description = "Automatically format all code across the repository"
 run = "pre-commit run --all-files"
 
-[tasks.lint-d2]
+[tasks."lint:d2"]
 description = "Check that all compiled SVG diagrams match their D2 sources"
 run = "python3 scripts/check_d2_images.py"
 
-[tasks.build-d2]
+[tasks."build:d2"]
 description = "Recompile all SVG diagrams from D2 sources"
 run = "python3 scripts/check_d2_images.py --fix"
 
@@ -417,7 +417,7 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
       - 'third_party/**'
   ```
 * **Jobs:**
-  * `filter`: Evaluates changed paths in seconds using `dorny/paths-filter`.
+  * `filter`: Evaluates changed paths in seconds using `dorny/paths-filter`. Note that `v0.3.0` ([EP-5](ep-5-specification-driven-agentic-workflow.md)) superseded static filtering with `scripts/ci_plan.py`.
   * `test_ubuntu`: Executes if `code == true`. Uses `apt-get install libarmadillo-dev libgsl-dev`, `ccache`, Ninja, and CMake/CTest.
   * `test_macos`: Executes if `code == true`. Uses `brew install armadillo gsl`, `ccache`, Ninja, and CMake/CTest.
   * `ci-gate`: Always runs (`if: always()`). Evaluates upstream results; reports success if code passed or if docs were skipped.

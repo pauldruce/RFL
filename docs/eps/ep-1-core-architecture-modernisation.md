@@ -66,7 +66,7 @@ As the research programme expands into **Fermion Functional Integrals (Barrett 2
 | **REQ-ARCH-003** | **Spectral Symmetry Preservation** | Phase 1 (Implemented) | For symmetric geometries (where $\{\Gamma, D\} = 0$), the computed spectrum must satisfy $\{\lambda_i\} = \{-\lambda_i\}$ to machine precision ($< 10^{-12}$). |
 | **REQ-ARCH-004** | **Detailed Balance & Ergodicity** | Phase 3 (Planned) | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
 | **REQ-ARCH-005** | **Automated Step-Size Calibration** | Phase 3 (Planned) | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during burn-in. |
-| **REQ-ARCH-006** | **Zero-Copy NumPy Interoperability** | Phase 1 (Planned) | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
+| **REQ-ARCH-006** | **Zero-Copy NumPy Interoperability** | Phase 1 (Implemented) | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
 | **REQ-ARCH-007** | **Active LTS Platform Policy** | Phase 1 (Implemented) | Maintain compatibility with active Ubuntu LTS (≥ 22.04), macOS (≥ 14), Armadillo (≥ 11.4), and conforming C++17 compilers. |
 
 ---

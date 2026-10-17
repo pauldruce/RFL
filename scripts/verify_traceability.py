@@ -31,74 +31,9 @@ REQ_TAG_SEARCH_PATTERN = re.compile(r"\b(REQ-[A-Za-z0-9_-]+)\b")
 INFRASTRUCTURE_PREFIXES = ("REQ-CI-", "REQ-PKG-")
 INFRASTRUCTURE_IDS = {"REQ-ARCH-007"}
 
-# Legacy requirement aliases mapping (prefix_or_none, legacy_id) -> canonical_id
-# Resolves historical collisions (such as REQ-001 in EP-1 vs EP-4) by source file path prefix.
-LEGACY_REQ_ALIASES: dict[tuple[str | None, str], str] = {
-    # Physics delta and gradient tests in src/core/tests/tDelta.cpp (EP-4)
-    ("src/core/tests/tDelta", "REQ-001"): "REQ-PHY-001",
-    ("src/core/tests/tDelta", "REQ-009"): "REQ-PHY-009",
-    ("src/core/tests/tDelta", "REQ-011"): "REQ-PHY-011",
-    # Core architecture disambiguation (EP-1)
-    ("src/core/tests", "REQ-001"): "REQ-ARCH-001",
-    ("src/core/tests", "REQ-002"): "REQ-ARCH-002",
-    ("src/core/tests", "REQ-003"): "REQ-ARCH-003",
-    ("src/core/tests", "REQ-004"): "REQ-ARCH-004",
-    ("src/core/tests", "REQ-005"): "REQ-ARCH-005",
-    ("src/core/tests", "REQ-006"): "REQ-ARCH-006",
-    ("src/core/tests", "REQ-007"): "REQ-ARCH-007",
-    # Physics test suite disambiguation (EP-4)
-    ("tests/physics", "REQ-001"): "REQ-PHY-001",
-    ("tests/physics", "REQ-002"): "REQ-PHY-002",
-    ("tests/physics", "REQ-003"): "REQ-PHY-003",
-    ("tests/physics", "REQ-004"): "REQ-PHY-004",
-    ("tests/physics", "REQ-005"): "REQ-PHY-005",
-    ("tests/physics", "REQ-006"): "REQ-PHY-006",
-    ("tests/physics", "REQ-007"): "REQ-PHY-007",
-    ("tests/physics", "REQ-008"): "REQ-PHY-008",
-    ("tests/physics", "REQ-009"): "REQ-PHY-009",
-    ("tests/physics", "REQ-010"): "REQ-PHY-010",
-    ("tests/physics", "REQ-011"): "REQ-PHY-011",
-    # Unambiguous EP-4 legacy IDs (008..011 only existed in EP-4)
-    (None, "REQ-008"): "REQ-PHY-008",
-    (None, "REQ-009"): "REQ-PHY-009",
-    (None, "REQ-010"): "REQ-PHY-010",
-    (None, "REQ-011"): "REQ-PHY-011",
-    # Packaging legacy IDs (EP-2)
-    (None, "REQ-PKG-01"): "REQ-PKG-001",
-    (None, "REQ-PKG-02"): "REQ-PKG-002",
-    (None, "REQ-PKG-03"): "REQ-PKG-003",
-    (None, "REQ-PKG-04"): "REQ-PKG-004",
-    (None, "REQ-PKG-05"): "REQ-PKG-005",
-    (None, "REQ-PKG-06"): "REQ-PKG-006",
-    (None, "REQ-PKG-07"): "REQ-PKG-007",
-    (None, "REQ-PKG-08"): "REQ-PKG-008",
-    (None, "REQ-PKG-09"): "REQ-PKG-009",
-    # CI legacy IDs (EP-3)
-    (None, "REQ-ARC-001"): "REQ-CI-001",
-    (None, "REQ-ARC-002"): "REQ-CI-002",
-    (None, "REQ-ARC-003"): "REQ-CI-003",
-    (None, "REQ-ARC-004"): "REQ-CI-004",
-    (None, "REQ-ARC-005"): "REQ-CI-005",
-    (None, "REQ-ARC-006"): "REQ-CI-006",
-    (None, "REQ-ARC-007"): "REQ-CI-007",
-    (None, "REQ-ARC-008"): "REQ-CI-008",
-    (None, "REQ-ARC-009"): "REQ-CI-009",
-    (None, "REQ-ARC-010"): "REQ-CI-010",
-}
-
-
 def canonicalize_req(req_id: str, source_path: str = "") -> str:
-    """Map legacy or un-namespaced requirement IDs to canonical namespaced IDs."""
-    normalized_path = source_path.replace("\\", "/")
-    # Check path-prefixed rules first
-    for (prefix, leg_id), canonical in LEGACY_REQ_ALIASES.items():
-        if leg_id == req_id and prefix is not None and normalized_path.startswith(prefix):
-            return canonical
-    # Check fallback rules with no prefix constraint
-    for (prefix, leg_id), canonical in LEGACY_REQ_ALIASES.items():
-        if leg_id == req_id and prefix is None:
-            return canonical
-    return req_id
+    """Return stripped requirement ID. All requirements use canonical REQ-<SYS>-<NUM> IDs."""
+    return req_id.strip()
 
 
 def is_unit_testable_requirement(req_id: str) -> bool:
@@ -429,8 +364,8 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
                 if isinstance(decorator, ast.Call):
                     func_expr = decorator.func
                     is_req = (
-                        (isinstance(func_expr, ast.Attribute) and func_expr.attr == "req")
-                        or (isinstance(func_expr, ast.Name) and func_expr.id == "req")
+                        (isinstance(func_expr, ast.Attribute) and func_expr.attr in ("req", "requirement"))
+                        or (isinstance(func_expr, ast.Name) and func_expr.id in ("req", "requirement"))
                     )
                     if is_req:
                         for arg in decorator.args:
@@ -477,8 +412,8 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
                 if isinstance(decorator, ast.Call):
                     func_expr = decorator.func
                     is_req_marker = (
-                        (isinstance(func_expr, ast.Attribute) and func_expr.attr == "req")
-                        or (isinstance(func_expr, ast.Name) and func_expr.id == "req")
+                        (isinstance(func_expr, ast.Attribute) and func_expr.attr in ("req", "requirement"))
+                        or (isinstance(func_expr, ast.Name) and func_expr.id in ("req", "requirement"))
                     )
                     if is_req_marker:
                         for arg in decorator.args:
