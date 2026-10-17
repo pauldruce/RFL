@@ -23,16 +23,22 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
-# Global Requirement ID specification (REQ-TRC-001)
+# Pre-compiled module-level regular expressions for test and document extraction
 REQ_ID_PATTERN = re.compile(r"^REQ-[A-Z]{2,4}-\d{3}$")
 REQ_TAG_SEARCH_PATTERN = re.compile(r"\b(REQ-[A-Za-z0-9_-]+)\b")
+MATH_BLOCK_PATTERN = re.compile(r"\$\$.*?\$\$|\$.*?\$|\\\[.*?\\\]|\\\(.*?\\\)", flags=re.DOTALL)
+GTEST_PATTERN = re.compile(
+    r"^\s*(TEST|TEST_F|TEST_P|TYPED_TEST|TYPED_TEST_P)\s*\(\s*([A-Za-z0-9_]+)\s*,\s*([A-Za-z0-9_]+)\s*\)"
+)
+CATCH2_PATTERN = re.compile(r'^\s*TEST_CASE\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)')
+CATCH2_SECTION_PATTERN = re.compile(r'^\s*SECTION\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)')
 
 # Infrastructure/workflow requirements verified by CI/CD pipelines rather than unit tests
 INFRASTRUCTURE_PREFIXES = ("REQ-CI-", "REQ-PKG-")
 INFRASTRUCTURE_IDS = {"REQ-ARCH-007"}
 
-def canonicalize_req(req_id: str, source_path: str = "") -> str:
-    """Return stripped requirement ID. All requirements use canonical REQ-<SYS>-<NUM> IDs."""
+def canonicalize_req(req_id: str) -> str:
+    """Return stripped canonical requirement ID. All requirements use canonical REQ-<SYS>-<NUM> IDs."""
     return req_id.strip()
 
 
@@ -81,15 +87,7 @@ class TestMapping:
 
 def shield_math_pipes(text: str) -> str:
     """Shield Markdown table pipe delimiters occurring inside LaTeX math expressions."""
-
-    def repl(m: re.Match[str]) -> str:
-        return m.group(0).replace("|", "\x00PIPE\x00")
-
-    text = re.sub(r"\$\$.*?\$\$", repl, text, flags=re.DOTALL)
-    text = re.sub(r"\$.*?\$", repl, text)
-    text = re.sub(r"\\\(.*?\\\)", repl, text)
-    text = re.sub(r"\\\[.*?\\\]", repl, text, flags=re.DOTALL)
-    return text
+    return MATH_BLOCK_PATTERN.sub(lambda m: m.group(0).replace("|", "\x00PIPE\x00"), text)
 
 
 def restore_math_pipes(text: str) -> str:
@@ -117,6 +115,8 @@ def parse_ep_file(ep_path: Path, repo_root: Path) -> tuple[list[Requirement], li
         return [], [f"{rel_path}: Section 3 heading ('## 3.') not found"]
 
     section3_text = section3_match.group(1)
+    section3_start_pos = section3_match.start(1)
+    section3_line_offset = content[:section3_start_pos].count("\n")
     lines = section3_text.splitlines()
 
     in_table = False
@@ -127,6 +127,7 @@ def parse_ep_file(ep_path: Path, repo_root: Path) -> tuple[list[Requirement], li
     invariant_col = 3
 
     for line_idx, line in enumerate(lines, start=1):
+        file_line_idx = section3_line_offset + line_idx
         stripped = line.strip()
         if not stripped.startswith("|") or not stripped.endswith("|"):
             in_table = False
@@ -167,12 +168,12 @@ def parse_ep_file(ep_path: Path, repo_root: Path) -> tuple[list[Requirement], li
             continue
 
         raw_id = id_match.group(0)
-        canonical_id = canonicalize_req(raw_id, rel_path)
+        canonical_id = canonicalize_req(raw_id)
 
         # Validate canonical ID against global naming standard REQ-TRC-001
         if not REQ_ID_PATTERN.match(canonical_id):
             errors.append(
-                f"{rel_path}:{line_idx}: Invalid requirement ID format '{canonical_id}'. "
+                f"{rel_path}:{file_line_idx}: Invalid requirement ID format '{canonical_id}'. "
                 f"Must match {REQ_ID_PATTERN.pattern}"
             )
 
@@ -222,12 +223,6 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
     pending_tags: list[tuple[str, int]] = []
     non_comment_lines = 0
 
-    gtest_pattern = re.compile(
-        r"^\s*(TEST|TEST_F|TEST_P|TYPED_TEST|TYPED_TEST_P)\s*\(\s*([A-Za-z0-9_]+)\s*,\s*([A-Za-z0-9_]+)\s*\)"
-    )
-    catch2_pattern = re.compile(r'^\s*TEST_CASE\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)')
-    catch2_section_pattern = re.compile(r'^\s*SECTION\s*\(\s*"([^"]+)"(?:\s*,\s*"([^"]*)")?\s*\)')
-
     for line_idx, line in enumerate(lines, start=1):
         stripped = line.strip()
 
@@ -251,14 +246,14 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             continue
 
         # Check for GoogleTest macro
-        gm = gtest_pattern.match(stripped)
+        gm = GTEST_PATTERN.match(stripped)
         if gm:
             suite_name = gm.group(2)
             test_name = gm.group(3)
             full_symbol = f"{suite_name}.{test_name}"
 
             for raw_tag, tag_line in pending_tags:
-                can_id = canonicalize_req(raw_tag, rel_path)
+                can_id = canonicalize_req(raw_tag)
                 mappings.append(
                     TestMapping(
                         req_id=can_id,
@@ -276,7 +271,7 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             continue
 
         # Check for Catch2 TEST_CASE
-        cm = catch2_pattern.match(stripped)
+        cm = CATCH2_PATTERN.match(stripped)
         if cm:
             test_desc = cm.group(1)
             tag_str = cm.group(2) or ""
@@ -284,7 +279,7 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             all_tags = pending_tags + [(t, line_idx) for t in embedded_tags]
 
             for raw_tag, tag_line in all_tags:
-                can_id = canonicalize_req(raw_tag, rel_path)
+                can_id = canonicalize_req(raw_tag)
                 mappings.append(
                     TestMapping(
                         req_id=can_id,
@@ -302,7 +297,7 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             continue
 
         # Check for Catch2 SECTION
-        sm = catch2_section_pattern.match(stripped)
+        sm = CATCH2_SECTION_PATTERN.match(stripped)
         if sm:
             section_desc = sm.group(1)
             tag_str = sm.group(2) or ""
@@ -310,7 +305,7 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             all_tags = pending_tags + [(t, line_idx) for t in embedded_tags]
 
             for raw_tag, tag_line in all_tags:
-                can_id = canonicalize_req(raw_tag, rel_path)
+                can_id = canonicalize_req(raw_tag)
                 mappings.append(
                     TestMapping(
                         req_id=can_id,
@@ -333,6 +328,49 @@ def extract_cpp_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             pending_tags = []
 
     return mappings
+
+
+def _extract_node_tags(
+    node: ast.ClassDef | ast.FunctionDef | ast.AsyncFunctionDef,
+    lines: list[str],
+) -> list[tuple[str, int]]:
+    """Extract requirement tags from decorators, docstrings, and preceding comments."""
+    tags: list[tuple[str, int]] = []
+
+    # 1. Decorator inspection (@pytest.mark.req / @pytest.mark.requirement / @req)
+    for decorator in node.decorator_list:
+        if isinstance(decorator, ast.Call):
+            func_expr = decorator.func
+            is_req = (
+                (isinstance(func_expr, ast.Attribute) and func_expr.attr in ("req", "requirement"))
+                or (isinstance(func_expr, ast.Name) and func_expr.id in ("req", "requirement"))
+            )
+            if is_req:
+                for arg in decorator.args:
+                    if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
+                        tags.append((arg.value, node.lineno))
+
+    # 2. Docstrings
+    docstring = ast.get_docstring(node)
+    if docstring:
+        for match in REQ_TAG_SEARCH_PATTERN.finditer(docstring):
+            tags.append((match.group(1), node.lineno))
+
+    # 3. Preceding comments (scanning upwards from top-most decorator or def)
+    start_line = node.decorator_list[0].lineno if node.decorator_list else node.lineno
+    idx = start_line - 2
+    while idx >= 0:
+        line_str = lines[idx].strip()
+        if line_str.startswith("#"):
+            for m in REQ_TAG_SEARCH_PATTERN.finditer(line_str):
+                tags.append((m.group(1), idx + 1))
+            idx -= 1
+        elif not line_str:
+            idx -= 1  # Allow blank lines between comment lines
+        else:
+            break
+
+    return tags
 
 
 def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
@@ -358,35 +396,7 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             prev_class = self.class_name
             prev_tags = list(self.class_tags)
             self.class_name = node.name
-
-            current_class_tags: list[tuple[str, int]] = []
-            for decorator in node.decorator_list:
-                if isinstance(decorator, ast.Call):
-                    func_expr = decorator.func
-                    is_req = (
-                        (isinstance(func_expr, ast.Attribute) and func_expr.attr in ("req", "requirement"))
-                        or (isinstance(func_expr, ast.Name) and func_expr.id in ("req", "requirement"))
-                    )
-                    if is_req:
-                        for arg in decorator.args:
-                            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                                current_class_tags.append((arg.value, node.lineno))
-
-            docstring = ast.get_docstring(node)
-            if docstring:
-                for match in REQ_TAG_SEARCH_PATTERN.finditer(docstring):
-                    current_class_tags.append((match.group(1), node.lineno))
-
-            idx = node.lineno - 2
-            while idx >= 0:
-                line_str = lines[idx].strip()
-                if line_str.startswith("#"):
-                    for m in REQ_TAG_SEARCH_PATTERN.finditer(line_str):
-                        current_class_tags.append((m.group(1), idx + 1))
-                    idx -= 1
-                else:
-                    break
-
+            current_class_tags = _extract_node_tags(node, lines)
             self.class_tags = prev_tags + current_class_tags
             self.generic_visit(node)
             self.class_name = prev_class
@@ -405,37 +415,7 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
             if not node.name.startswith("test_"):
                 return
 
-            found_tags: list[tuple[str, int]] = list(self.class_tags)
-
-            # 1. Inspect Pytest markers: @pytest.mark.req("REQ-...")
-            for decorator in node.decorator_list:
-                if isinstance(decorator, ast.Call):
-                    func_expr = decorator.func
-                    is_req_marker = (
-                        (isinstance(func_expr, ast.Attribute) and func_expr.attr in ("req", "requirement"))
-                        or (isinstance(func_expr, ast.Name) and func_expr.id in ("req", "requirement"))
-                    )
-                    if is_req_marker:
-                        for arg in decorator.args:
-                            if isinstance(arg, ast.Constant) and isinstance(arg.value, str):
-                                found_tags.append((arg.value, node.lineno))
-
-            # 2. Inspect docstring
-            docstring = ast.get_docstring(node)
-            if docstring:
-                for match in REQ_TAG_SEARCH_PATTERN.finditer(docstring):
-                    found_tags.append((match.group(1), node.lineno))
-
-            # 3. Inspect preceding comments
-            idx = node.lineno - 2
-            while idx >= 0:
-                line_str = lines[idx].strip()
-                if line_str.startswith("#"):
-                    for m in REQ_TAG_SEARCH_PATTERN.finditer(line_str):
-                        found_tags.append((m.group(1), idx + 1))
-                    idx -= 1
-                else:
-                    break
+            found_tags = list(self.class_tags) + _extract_node_tags(node, lines)
 
             if found_tags:
                 test_name = node.name
@@ -448,7 +428,7 @@ def extract_python_tests(file_path: Path, repo_root: Path) -> list[TestMapping]:
 
                 seen_can_ids: set[str] = set()
                 for raw_tag, tag_line in found_tags:
-                    can_id = canonicalize_req(raw_tag, rel_path)
+                    can_id = canonicalize_req(raw_tag)
                     if can_id in seen_can_ids:
                         continue
                     seen_can_ids.add(can_id)
@@ -880,29 +860,14 @@ def check_pull_request(
 
     print(f"\n🔍 Impacted Requirements ({len(impacted_requirements)}): {', '.join(impacted_requirements)}")
 
-    if xml_paths is None:
-        stdlib_tests = [
-            f for f in plan.affected_python_test_files if f.startswith("scripts/tests/")
-        ]
-        py_xml_default = repo_root / "build" / "junit-py.xml"
-        if stdlib_tests and not py_xml_default.exists() and os.environ.get("CI"):
-            ci_plan.run_unittest_with_junit_xml(stdlib_tests, repo_root, py_xml_default)
-        discovered_xml = [
-            p
-            for p in (
-                repo_root / "build" / "junit.xml",
-                repo_root / "junit.xml",
-                py_xml_default,
-            )
-            if p.exists()
-        ]
-        if discovered_xml:
-            xml_paths = discovered_xml
-
+    # Strictly isolate static traceability verification from dynamic execution evaluation
     xml_results: dict[str, JUnitResult] = {}
     if xml_paths:
         for p in xml_paths:
-            xml_results.update(parse_junit_xml(p))
+            if p.exists():
+                xml_results.update(parse_junit_xml(p))
+            else:
+                errors.append(f"Specified JUnit XML output not found: {p}")
 
     table_header = "| Requirement ID | Summary | Trigger | Mapped Tests | Execution | Status |"
     summary_lines.extend([

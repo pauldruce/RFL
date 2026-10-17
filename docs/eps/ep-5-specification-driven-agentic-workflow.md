@@ -134,16 +134,19 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 As illustrated in Figure 5.1, the traceability and execution planning pipeline consists of four internal components:
 
 1. **Dependency Graph Builder (`scripts/ci_plan.py`):**
-   Parses C++ `#include` statements across `src/` and `tests/` to construct a bidirectional dependency graph. Pairs `.cpp` implementation files with their corresponding `.hpp` headers. Parses `src/python_bindings/bindings.cpp` to extract `py::class_` declarations and map C++ types to exported `rfl.<Symbol>` names. Parses Python test ASTs to map `rfl.<Symbol>` imports and method calls back to underlying C++ components.
+   Parses C++ `#include` statements across `src/` and `tests/` using an LRU-cached path resolver (`@functools.lru_cache`) to construct a bidirectional dependency graph without redundant filesystem I/O. Pairs `.cpp` implementation files with their corresponding `.hpp` headers. Parses `src/python_bindings/bindings.cpp` to extract `py::class_` declarations and map C++ types to exported `rfl.<Symbol>` names. Parses Python test ASTs to map `rfl.<Symbol>` imports and method calls back to underlying C++ components.
 
 2. **Hop 1: Component & Test Resolver (`scripts/ci_plan.py`):**
-   Ingests changed files from `git diff` against the merge base (or uncommitted working changes). Conducts a reverse breadth-first search (BFS) through the dependency graph to find all affected C++ compilation units and test executables. Traces Python test dependencies and flags build-wide modifications (such as `CMakeLists.txt` or `pyproject.toml`) that require full-suite execution.
+   Ingests changed files from `git diff` against the merge base (or uncommitted working changes). Conducts a reverse breadth-first search (BFS) using an $\mathcal{O}(1)$ `collections.deque` queue through the dependency graph to find all affected C++ compilation units and test executables. Traces Python test dependencies and flags build-wide modifications (such as `CMakeLists.txt` or `pyproject.toml`) that require full-suite execution.
 
 3. **Hop 2: Requirement Impact Analyser (`scripts/ci_plan.py` & `scripts/verify_traceability.py`):**
    Inspects the affected tests identified in Hop 1 to extract associated `[REQ-...]` tags. Scans `git diff` for modified requirement rows in `docs/eps/ep-*.md` specification tables. Parses `Implements: REQ-...` commit trailers to capture explicitly declared targets. Merges these inputs into a consolidated list of impacted requirements.
 
 4. **Hop 3: Test Closure & Job Planner (`scripts/ci_plan.py`):**
    Queries the traceability database to find all tests that verify the impacted requirements (requirement test closure). Merges directly affected tests with requirement-closure tests into a minimal, sufficient execution set. Emits `plan.json`, regex filters for CTest (`ctest -R <filter>`), Python test target paths, and GitHub Actions step outputs (`GITHUB_OUTPUT`).
+
+5. **Governance & Verification Gates (`scripts/verify_traceability.py`):**
+   Strictly separates static requirement mapping audits from dynamic execution evaluation. In static mode (`--check-pr`), the engine verifies that all claimed or impacted requirements exist in the specification and possess corresponding test cases in code. In dynamic mode (`--verify-xml <path>`), the engine inspects JUnit XML reports from CTest and Pytest to guarantee that tests passed without error or regression. Inverted control is strictly prohibited: the verification engine never executes test runners inline.
 
 ### 5.2 The Contributor Lifecycle
 

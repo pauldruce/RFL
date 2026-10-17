@@ -24,6 +24,7 @@ from pathlib import Path
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SCRIPT_DIR = Path(__file__).resolve().parent.parent
 REPO_ROOT = SCRIPT_DIR.parent
@@ -32,16 +33,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 import ci_plan  # noqa: E402
 
 
-def req(*req_ids: str):
-    """Decorator compatible with extract_python_tests (@req('REQ-...'))."""
-
-    def decorator(obj):
-        return obj
-
-    return decorator
-
-
-@req("REQ-TRC-005")
+# [REQ-TRC-005]
 class TestCIPlannerAndDependencyGraph(unittest.TestCase):
     """Test C++ #include graph, pybind11 AST bridge, and Two-Hop requirement impact planner [REQ-TRC-005]."""
 
@@ -200,15 +192,8 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
             repo_root=REPO_ROOT,
         )
         with tempfile.NamedTemporaryFile(mode="r+", encoding="utf-8") as tmp:
-            old_env = os.environ.get("GITHUB_OUTPUT")
-            os.environ["GITHUB_OUTPUT"] = tmp.name
-            try:
+            with patch.dict(os.environ, {"GITHUB_OUTPUT": tmp.name}):
                 ci_plan.write_github_output(plan)
-            finally:
-                if old_env is None:
-                    os.environ.pop("GITHUB_OUTPUT", None)
-                else:
-                    os.environ["GITHUB_OUTPUT"] = old_env
             tmp.seek(0)
             content = tmp.read()
         self.assertIn("has_changes=true", content)
@@ -216,99 +201,63 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         self.assertIn("ctest_filter=^(HamiltonianTests)\\.", content)
 
     def test_cmd_gate_evaluation(self) -> None:
-        old_needs = os.environ.get("NEEDS_JSON")
-        buf = io.StringIO()
-        try:
-            with redirect_stdout(buf), redirect_stderr(buf):
-                # 1. All required checks pass
-                os.environ["NEEDS_JSON"] = json.dumps(
-                    {
-                        "plan": {
-                            "result": "success",
-                            "outputs": {"required_checks": '["validate_docs", "test_ubuntu"]'},
-                        },
-                        "check_milestone": {"result": "success"},
-                        "validate_docs": {"result": "success"},
-                        "test_ubuntu": {"result": "success"},
-                        "test_macos": {"result": "skipped"},
-                    }
-                )
-                self.assertEqual(ci_plan.cmd_gate(), 0)
+        passing_needs = {
+            "plan": {
+                "result": "success",
+                "outputs": {"required_checks": '["validate_docs", "test_ubuntu"]'},
+            },
+            "check_milestone": {"result": "success"},
+            "validate_docs": {"result": "success"},
+            "test_ubuntu": {"result": "success"},
+            "test_macos": {"result": "skipped"},
+        }
+        with patch.dict(os.environ, {"NEEDS_JSON": json.dumps(passing_needs)}), \
+             redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(ci_plan.cmd_gate(), 0)
 
-                # 2. Required check fails
-                os.environ["NEEDS_JSON"] = json.dumps(
-                    {
-                        "plan": {
-                            "result": "success",
-                            "outputs": {"required_checks": '["validate_docs", "test_ubuntu"]'},
-                        },
-                        "check_milestone": {"result": "success"},
-                        "validate_docs": {"result": "success"},
-                        "test_ubuntu": {"result": "failure"},
-                    }
-                )
-                self.assertEqual(ci_plan.cmd_gate(), 1)
+        failing_needs = dict(passing_needs)
+        failing_needs["test_ubuntu"] = {"result": "failure"}
+        with patch.dict(os.environ, {"NEEDS_JSON": json.dumps(failing_needs)}), \
+             redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(ci_plan.cmd_gate(), 1)
 
-                # 3. Milestone check fails
-                os.environ["NEEDS_JSON"] = json.dumps(
-                    {
-                        "plan": {
-                            "result": "success",
-                            "outputs": {"required_checks": '["validate_docs"]'},
-                        },
-                        "check_milestone": {"result": "failure"},
-                        "validate_docs": {"result": "success"},
-                    }
-                )
-                self.assertEqual(ci_plan.cmd_gate(), 1)
-        finally:
-            if old_needs is None:
-                os.environ.pop("NEEDS_JSON", None)
-            else:
-                os.environ["NEEDS_JSON"] = old_needs
+        failing_milestone = dict(passing_needs)
+        failing_milestone["check_milestone"] = {"result": "failure"}
+        with patch.dict(os.environ, {"NEEDS_JSON": json.dumps(failing_milestone)}), \
+             redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(ci_plan.cmd_gate(), 1)
 
     def test_cmd_check_milestone(self) -> None:
-        old_event_name = os.environ.get("GITHUB_EVENT_NAME")
-        old_event_path = os.environ.get("GITHUB_EVENT_PATH")
-        old_repo = os.environ.get("GITHUB_REPOSITORY")
-        buf = io.StringIO()
-        try:
-            with redirect_stdout(buf), redirect_stderr(buf):
-                # 1. Non-PR event skips milestone check
-                os.environ["GITHUB_EVENT_NAME"] = "workflow_dispatch"
+        # 1. Non-PR event skips milestone check
+        with patch.dict(os.environ, {"GITHUB_EVENT_NAME": "workflow_dispatch"}), \
+             redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+            self.assertEqual(ci_plan.cmd_check_milestone(), 0)
+
+        # 2. PR event with milestone assigned in event payload passes
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", encoding="utf-8") as tmp:
+            json.dump({"pull_request": {"number": 84, "milestone": {"title": "v0.3.0"}}}, tmp)
+            tmp.flush()
+            env = {
+                "GITHUB_EVENT_NAME": "pull_request",
+                "GITHUB_REPOSITORY": "",
+                "GITHUB_EVENT_PATH": tmp.name,
+            }
+            with patch.dict(os.environ, env), \
+                 redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
                 self.assertEqual(ci_plan.cmd_check_milestone(), 0)
 
-                # 2. PR event with milestone assigned in event payload passes
-                os.environ["GITHUB_EVENT_NAME"] = "pull_request"
-                os.environ["GITHUB_REPOSITORY"] = ""
-                with tempfile.NamedTemporaryFile(mode="w", suffix=".json", encoding="utf-8") as tmp:
-                    json.dump(
-                        {"pull_request": {"number": 84, "milestone": {"title": "v0.3.0"}}},
-                        tmp,
-                    )
-                    tmp.flush()
-                    os.environ["GITHUB_EVENT_PATH"] = tmp.name
-                    self.assertEqual(ci_plan.cmd_check_milestone(), 0)
-
-                # 3. PR event without milestone fails
-                with tempfile.NamedTemporaryFile(mode="w", suffix=".json", encoding="utf-8") as tmp:
-                    json.dump(
-                        {"pull_request": {"number": 84, "milestone": None}},
-                        tmp,
-                    )
-                    tmp.flush()
-                    os.environ["GITHUB_EVENT_PATH"] = tmp.name
-                    self.assertEqual(ci_plan.cmd_check_milestone(), 1)
-        finally:
-            for k, v in (
-                ("GITHUB_EVENT_NAME", old_event_name),
-                ("GITHUB_EVENT_PATH", old_event_path),
-                ("GITHUB_REPOSITORY", old_repo),
-            ):
-                if v is None:
-                    os.environ.pop(k, None)
-                else:
-                    os.environ[k] = v
+        # 3. PR event without milestone fails
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", encoding="utf-8") as tmp:
+            json.dump({"pull_request": {"number": 84, "milestone": None}}, tmp)
+            tmp.flush()
+            env = {
+                "GITHUB_EVENT_NAME": "pull_request",
+                "GITHUB_REPOSITORY": "",
+                "GITHUB_EVENT_PATH": tmp.name,
+            }
+            with patch.dict(os.environ, env), \
+                 redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
+                self.assertEqual(ci_plan.cmd_check_milestone(), 1)
 
     def test_cmd_ctest_missing_build_dir(self) -> None:
         args = argparse.Namespace(

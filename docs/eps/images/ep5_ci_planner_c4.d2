@@ -33,11 +33,11 @@ planner: "CI Planner & Traceability Container (scripts/)" {
     border-radius: 8
   }
 
-  graph_builder: "1. Dependency Graph Builder\n«ci_plan.py»\n--\nC++ #include & .cpp/.hpp pairing\nbindings.cpp py::class_ -> Python AST" {
+  graph_builder: "1. Dependency Graph Builder\n«ci_plan.py»\n--\nLRU-cached C++ #include resolver\nbindings.cpp py::class_ -> Python AST" {
     class: internal_component
   }
 
-  hop1: "2. Hop 1: Component & Test Resolver\n«ci_plan.py»\n--\nReverse BFS from changed files\npyproject.toml / CMake build-wide triggers" {
+  hop1: "2. Hop 1: Component & Test Resolver\n«ci_plan.py»\n--\nReverse BFS traversal (O(1) deque)\npyproject.toml / CMake build-wide triggers" {
     class: internal_component
   }
 
@@ -70,7 +70,7 @@ consumers: "Execution & Governance Gates" {
     class: external_system
   }
 
-  gatekeeper: "Smart Gatekeeper & PR Auditor\n«ci-gate + verify_traceability.py»\n--\nVerifies required_checks & JUnit proof\nPublishes GITHUB_STEP_SUMMARY" {
+  gatekeeper: "Smart Gatekeeper & PR Auditor\n«ci:gate + ci:verify:pr»\n--\nStatic requirement mapping audit\nDynamic JUnit XML execution verification" {
     class: external_system
   }
 

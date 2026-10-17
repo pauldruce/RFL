@@ -13,18 +13,21 @@ from __future__ import annotations
 
 import argparse
 import ast
+from collections import deque
 import dataclasses
+import functools
 import io
 import json
 import os
+from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
 import time
+from typing import Any
 import unittest
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -82,9 +85,7 @@ class Plan:
     required_checks: list[str]
 
     def to_dict(self) -> dict[str, Any]:
-        data = dataclasses.asdict(self)
-        data["builds"] = self.builds.to_dict()
-        return data
+        return dataclasses.asdict(self)
 
 
 @dataclasses.dataclass
@@ -202,10 +203,11 @@ def collect_all_changed_files(
     return sorted(files_set)
 
 
-def _resolve_cpp_include(include_str: str, including_file: Path, repo_root: Path) -> str | None:
+@functools.lru_cache(maxsize=2048)
+def _resolve_cpp_include(include_str: str, parent_dir: Path, repo_root: Path) -> str | None:
     """Resolve a C++ #include string to a repository-relative POSIX path if it exists."""
     search_bases = [
-        including_file.parent,
+        parent_dir,
         repo_root / "src" / "core",
         repo_root / "src" / "legacy" / "include",
         repo_root / "src" / "legacy" / "source",
@@ -241,7 +243,7 @@ def parse_pybind11_symbol_map(repo_root: Path) -> dict[str, str]:
     for line in content.splitlines():
         m = CPP_INCLUDE_PATTERN.match(line)
         if m:
-            resolved = _resolve_cpp_include(m.group(1), bindings_file, repo_root)
+            resolved = _resolve_cpp_include(m.group(1), bindings_file.parent, repo_root)
             if resolved:
                 stem = Path(resolved).stem
                 stem_to_header[stem] = resolved
@@ -384,7 +386,7 @@ def build_dependency_graph(repo_root: Path) -> DependencyGraph:
                 for line in lines:
                     inc_match = CPP_INCLUDE_PATTERN.match(line)
                     if inc_match:
-                        inc_target = _resolve_cpp_include(inc_match.group(1), cpp_file, repo_root)
+                        inc_target = _resolve_cpp_include(inc_match.group(1), cpp_file.parent, repo_root)
                         if inc_target:
                             # If inc_target changes, rel_path is affected
                             add_edge(inc_target, rel_path)
@@ -481,7 +483,7 @@ def extract_modified_ep_requirements(
                     continue
                 first_cell = cells[0]
                 for raw_id in vt.REQ_TAG_SEARCH_PATTERN.findall(first_cell):
-                    can_id = vt.canonicalize_req(raw_id, current_ep_file)
+                    can_id = vt.canonicalize_req(raw_id)
                     if can_id in req_map:
                         modified_requirements.add(can_id)
 
@@ -531,117 +533,98 @@ def extract_claimed_trailer_requirements(base_ref: str, repo_root: Path) -> set[
     return claimed
 
 
-def compute_plan_from_files(
-    changed_files: list[str],
-    base_ref: str,
+def _build_full_regression_plan(
     repo_root: Path,
-    eps_dir: Path | None = None,
-    full_run: bool = False,
-    ep_diff_requirements: set[str] | None = None,
-    claimed_requirements: set[str] | None = None,
+    base_ref: str,
+    claimed_requirements: set[str] | None,
+    graph: DependencyGraph,
+    req_map: dict[str, Any],
 ) -> Plan:
-    """Compute the deterministic CI execution plan from a list of changed files."""
-    resolved_eps_dir = (eps_dir or (repo_root / "docs" / "eps")).resolve()
-    graph = build_dependency_graph(repo_root)
-    req_map, _ = vt.collect_all_requirements(resolved_eps_dir, repo_root)
-    all_test_mappings = vt.collect_all_tests(repo_root)
-
-    if full_run:
-        all_cpp_files = sorted(graph.all_cpp_test_files)
-        all_suites = sorted({s for suites in graph.cpp_test_suites.values() for s in suites})
-        all_py_files = sorted(graph.all_python_test_files)
-        implemented_requirements = sorted(
-            r.req_id for r in req_map.values() if r.is_implemented and r.is_unit_testable
-        )
-        builds = BuildsPlan(
-            validate_docs=True,
-            lint_cpp=True,
-            test_ubuntu=True,
-            test_macos=True,
-            test_windows=True,
-        )
-        return Plan(
-            base_ref=base_ref,
-            has_changes=True,
-            is_full_run=True,
-            changed_files=changed_files,
-            affected_components=["all"],
-            affected_cpp_test_files=all_cpp_files,
-            affected_cpp_suites=all_suites,
-            ctest_filter="",
-            affected_python_test_files=all_py_files,
-            needs_python_bindings_build=bool(graph.python_rfl_test_files),
-            impacted_requirements=implemented_requirements,
-            claimed_requirements=sorted(claimed_requirements or set()),
-            requirement_triggers={r: ["full-run"] for r in implemented_requirements},
-            builds=builds,
-            required_checks=[
-                "validate_docs",
-                "lint",
-                "test_ubuntu",
-                "test_macos",
-                "test_windows",
-            ],
-        )
-
-    if not changed_files and not claimed_requirements and not ep_diff_requirements:
-        return Plan(
-            base_ref=base_ref,
-            has_changes=False,
-            is_full_run=False,
-            changed_files=[],
-            affected_components=[],
-            affected_cpp_test_files=[],
-            affected_cpp_suites=[],
-            ctest_filter="",
-            affected_python_test_files=[],
-            needs_python_bindings_build=False,
-            impacted_requirements=[],
-            claimed_requirements=[],
-            requirement_triggers={},
-            builds=BuildsPlan(),
-            required_checks=[],
-        )
-
-    # Detect build-wide or workflow-wide changes
-    cpp_build_wide = any(
-        f in ("CMakeLists.txt", "src/core/CMakeLists.txt", "src/core/tests/CMakeLists.txt")
-        or f.startswith("cmake/")
-        or f.startswith(".github/actions/")
-        for f in changed_files
+    """Build full regression execution plan when full run is requested."""
+    all_cpp_files = sorted(graph.all_cpp_test_files)
+    all_suites = sorted({s for suites in graph.cpp_test_suites.values() for s in suites})
+    all_py_files = sorted(graph.all_python_test_files)
+    implemented_requirements = sorted(
+        r.req_id for r in req_map.values() if r.is_implemented and r.is_unit_testable
     )
-    py_build_wide = any(
-        f in ("pyproject.toml", "src/python_bindings/CMakeLists.txt") for f in changed_files
+    builds = BuildsPlan(
+        validate_docs=True,
+        lint_cpp=True,
+        test_ubuntu=True,
+        test_macos=True,
+        test_windows=True,
     )
-    workflow_changed = any(
-        f.startswith(".github/workflows/") or f == "mise.toml" for f in changed_files
-    )
-    cpp_source_or_header_changed = any(
-        f.endswith((".cpp", ".hpp", ".h", ".cc")) and not vt.is_test_file_path(f)
-        for f in changed_files
-    )
-    any_cpp_file_changed = any(
-        f.endswith((".cpp", ".hpp", ".h", ".cc")) or f == ".clang-format" for f in changed_files
+    return Plan(
+        base_ref=base_ref,
+        has_changes=True,
+        is_full_run=True,
+        changed_files=["all"],
+        affected_components=["all"],
+        affected_cpp_test_files=all_cpp_files,
+        affected_cpp_suites=all_suites,
+        ctest_filter="",
+        affected_python_test_files=all_py_files,
+        needs_python_bindings_build=bool(graph.python_rfl_test_files),
+        impacted_requirements=implemented_requirements,
+        claimed_requirements=sorted(claimed_requirements or set()),
+        requirement_triggers={r: ["full-run"] for r in implemented_requirements},
+        builds=builds,
+        required_checks=[
+            "validate_docs",
+            "lint",
+            "test_ubuntu",
+            "test_macos",
+            "test_windows",
+        ],
     )
 
-    # --- HOP 1: Reverse Transitive Dependency Closure (Code -> Affected Files & Tests) ---
+
+def _build_empty_plan(base_ref: str) -> Plan:
+    """Build empty execution plan when no changes or requirements are detected."""
+    return Plan(
+        base_ref=base_ref,
+        has_changes=False,
+        is_full_run=False,
+        changed_files=[],
+        affected_components=[],
+        affected_cpp_test_files=[],
+        affected_cpp_suites=[],
+        ctest_filter="",
+        affected_python_test_files=[],
+        needs_python_bindings_build=False,
+        impacted_requirements=[],
+        claimed_requirements=[],
+        requirement_triggers={},
+        builds=BuildsPlan(),
+        required_checks=[],
+    )
+
+
+def _resolve_affected_files_and_tests(
+    changed_files: list[str],
+    graph: DependencyGraph,
+    cpp_build_wide: bool,
+    py_build_wide: bool,
+) -> tuple[set[str], set[str], set[str]]:
+    """Hop 1: Transitive reverse dependency traversal via BFS queue."""
     affected_files: set[str] = set(changed_files)
-    queue = list(changed_files)
+    queue: deque[str] = deque(changed_files)
 
-    # If bindings.cpp itself was directly modified, all Python `rfl` tests are affected
+    # If bindings.cpp was modified, all Python rfl tests are affected
     if "src/python_bindings/bindings.cpp" in affected_files:
         for py_rfl_test in graph.python_rfl_test_files:
             if py_rfl_test not in affected_files:
                 affected_files.add(py_rfl_test)
                 queue.append(py_rfl_test)
 
-    # If pyproject.toml or src/python_bindings/CMakeLists.txt changed, all Python tests are affected
+    # If pyproject.toml or python_bindings/CMakeLists.txt changed, all Python tests are affected
     if py_build_wide:
         for py_test in graph.all_python_test_files:
             if py_test not in affected_files:
                 affected_files.add(py_test)
                 queue.append(py_test)
 
+    # If root CMake or core CMake changed, all C++ tests are affected
     if cpp_build_wide:
         for cpp_test in graph.all_cpp_test_files:
             if cpp_test not in affected_files:
@@ -649,20 +632,26 @@ def compute_plan_from_files(
                 queue.append(cpp_test)
 
     while queue:
-        curr = queue.pop(0)
+        curr = queue.popleft()
         for dependent in graph.reverse_deps.get(curr, set()):
             if dependent not in affected_files:
                 affected_files.add(dependent)
                 queue.append(dependent)
 
-    affected_cpp_test_files: set[str] = {
-        f for f in affected_files if f in graph.all_cpp_test_files
-    }
-    affected_python_test_files: set[str] = {
-        f for f in affected_files if f in graph.all_python_test_files
-    }
+    affected_cpp_tests = {f for f in affected_files if f in graph.all_cpp_test_files}
+    affected_py_tests = {f for f in affected_files if f in graph.all_python_test_files}
+    return affected_files, affected_cpp_tests, affected_py_tests
 
-    # --- HOP 2: Impacted Requirements Discovery (Tests + EP Diffs + Trailers -> REQs) ---
+
+def _infer_impacted_requirements(
+    affected_cpp_test_files: set[str],
+    affected_python_test_files: set[str],
+    ep_diff_requirements: set[str] | None,
+    claimed_requirements: set[str] | None,
+    req_map: dict[str, Any],
+    all_test_mappings: list[Any],
+) -> tuple[list[str], dict[str, set[str]]]:
+    """Hop 2: Infer impacted requirements from affected tests, EP diffs, and Git trailers."""
     req_triggers: dict[str, set[str]] = {}
 
     # 2a. From affected component tests (Two-Hop inference without source code tags)
@@ -689,15 +678,133 @@ def compute_plan_from_files(
         for req_id in claimed_requirements:
             req_triggers.setdefault(req_id, set()).add("git-trailer")
 
-    impacted_requirements = sorted(req_triggers.keys())
+    return sorted(req_triggers.keys()), req_triggers
 
-    # --- HOP 3: Requirement Test Closure (Impacted REQs -> All Mapped Tests) ---
+
+def _expand_tests_from_requirements(
+    req_triggers: dict[str, set[str]],
+    all_test_mappings: list[Any],
+    graph: DependencyGraph,
+    affected_cpp_test_files: set[str],
+    affected_python_test_files: set[str],
+) -> None:
+    """Hop 3: Expand impacted requirements to all mapped tests (Requirement Closure)."""
     for mapping in all_test_mappings:
         if mapping.req_id in req_triggers:
             if mapping.source_file in graph.all_cpp_test_files:
                 affected_cpp_test_files.add(mapping.source_file)
             elif mapping.source_file in graph.all_python_test_files:
                 affected_python_test_files.add(mapping.source_file)
+
+
+def _determine_builds_and_checks(
+    changed_files: list[str],
+    affected_files: set[str],
+    affected_cpp_suites: set[str],
+    cpp_build_wide: bool,
+    workflow_changed: bool,
+    cpp_source_or_header_changed: bool,
+    any_cpp_file_changed: bool,
+) -> tuple[BuildsPlan, list[str]]:
+    """Determine downstream CI matrix jobs and required checks."""
+    run_validate_docs = True
+    run_lint_cpp = any_cpp_file_changed or cpp_build_wide or workflow_changed
+    run_test_ubuntu = (
+        bool(affected_cpp_suites)
+        or cpp_source_or_header_changed
+        or cpp_build_wide
+        or workflow_changed
+    )
+    run_cross_platform = cpp_source_or_header_changed or cpp_build_wide or workflow_changed
+    run_test_macos = run_cross_platform
+    run_test_windows = run_cross_platform
+
+    builds = BuildsPlan(
+        validate_docs=run_validate_docs,
+        lint_cpp=run_lint_cpp,
+        test_ubuntu=run_test_ubuntu,
+        test_macos=run_test_macos,
+        test_windows=run_test_windows,
+    )
+
+    required_checks: list[str] = []
+    if builds.validate_docs:
+        required_checks.append("validate_docs")
+    if builds.lint_cpp:
+        required_checks.append("lint")
+    if builds.test_ubuntu:
+        required_checks.append("test_ubuntu")
+    if builds.test_macos:
+        required_checks.append("test_macos")
+    if builds.test_windows:
+        required_checks.append("test_windows")
+
+    return builds, required_checks
+
+
+def compute_plan_from_files(
+    changed_files: list[str],
+    base_ref: str,
+    repo_root: Path,
+    eps_dir: Path | None = None,
+    full_run: bool = False,
+    ep_diff_requirements: set[str] | None = None,
+    claimed_requirements: set[str] | None = None,
+) -> Plan:
+    """Compute the deterministic CI execution plan from a list of changed files."""
+    resolved_eps_dir = (eps_dir or (repo_root / "docs" / "eps")).resolve()
+    graph = build_dependency_graph(repo_root)
+    req_map, _ = vt.collect_all_requirements(resolved_eps_dir, repo_root)
+    all_test_mappings = vt.collect_all_tests(repo_root)
+
+    if full_run:
+        return _build_full_regression_plan(
+            repo_root, base_ref, claimed_requirements, graph, req_map
+        )
+
+    if not changed_files and not claimed_requirements and not ep_diff_requirements:
+        return _build_empty_plan(base_ref)
+
+    # Detect build-wide or workflow-wide changes
+    cpp_build_wide = any(
+        f in ("CMakeLists.txt", "src/core/CMakeLists.txt", "src/core/tests/CMakeLists.txt")
+        or f.startswith("cmake/")
+        or f.startswith(".github/actions/")
+        for f in changed_files
+    )
+    py_build_wide = any(
+        f in ("pyproject.toml", "src/python_bindings/CMakeLists.txt") for f in changed_files
+    )
+    workflow_changed = any(
+        f.startswith(".github/workflows/") or f == "mise.toml" for f in changed_files
+    )
+    cpp_source_or_header_changed = any(
+        f.endswith((".cpp", ".hpp", ".h", ".cc")) and not vt.is_test_file_path(f)
+        for f in changed_files
+    )
+    any_cpp_file_changed = any(
+        f.endswith((".cpp", ".hpp", ".h", ".cc")) or f == ".clang-format" for f in changed_files
+    )
+
+    # --- HOP 1: Reverse Transitive Dependency Closure (Code -> Affected Files & Tests) ---
+    affected_files, affected_cpp_test_files, affected_python_test_files = _resolve_affected_files_and_tests(
+        changed_files, graph, cpp_build_wide, py_build_wide
+    )
+
+    # --- HOP 2: Impacted Requirements Discovery (Tests + EP Diffs + Trailers -> REQs) ---
+    impacted_requirements, req_triggers = _infer_impacted_requirements(
+        affected_cpp_test_files,
+        affected_python_test_files,
+        ep_diff_requirements,
+        claimed_requirements,
+        req_map,
+        all_test_mappings,
+    )
+
+    # --- HOP 3: Requirement Test Closure (Impacted REQs -> All Mapped Tests) ---
+    _expand_tests_from_requirements(
+        req_triggers, all_test_mappings, graph, affected_cpp_test_files, affected_python_test_files
+    )
 
     # Collect C++ GoogleTest suite names for all affected C++ test files
     affected_cpp_suites: set[str] = set()
@@ -731,39 +838,15 @@ def compute_plan_from_files(
         )
     )
 
-    # Determine which CI jobs need to execute
-    run_validate_docs = True
-    run_lint_cpp = any_cpp_file_changed or cpp_build_wide or workflow_changed
-    run_test_ubuntu = (
-        bool(affected_cpp_suites)
-        or cpp_source_or_header_changed
-        or cpp_build_wide
-        or workflow_changed
+    builds, required_checks = _determine_builds_and_checks(
+        changed_files,
+        affected_files,
+        affected_cpp_suites,
+        cpp_build_wide,
+        workflow_changed,
+        cpp_source_or_header_changed,
+        any_cpp_file_changed,
     )
-    # Run macOS and Windows when C++ production code, CMake, or workflows change
-    run_cross_platform = cpp_source_or_header_changed or cpp_build_wide or workflow_changed
-    run_test_macos = run_cross_platform
-    run_test_windows = run_cross_platform
-
-    builds = BuildsPlan(
-        validate_docs=run_validate_docs,
-        lint_cpp=run_lint_cpp,
-        test_ubuntu=run_test_ubuntu,
-        test_macos=run_test_macos,
-        test_windows=run_test_windows,
-    )
-
-    required_checks: list[str] = []
-    if builds.validate_docs:
-        required_checks.append("validate_docs")
-    if builds.lint_cpp:
-        required_checks.append("lint")
-    if builds.test_ubuntu:
-        required_checks.append("test_ubuntu")
-    if builds.test_macos:
-        required_checks.append("test_macos")
-    if builds.test_windows:
-        required_checks.append("test_windows")
 
     return Plan(
         base_ref=base_ref,
@@ -1067,15 +1150,18 @@ def cmd_test_affected(args: argparse.Namespace, repo_root: Path) -> int:
         if plan.affected_cpp_suites or plan.is_full_run:
             build_dir = repo_root / args.build_dir
             if not args.no_build:
-                if not build_dir.exists():
-                    print(f"--> Configuring and building C++ targets in {build_dir}...")
-                    subprocess.run(
-                        ["cmake", "-B", str(build_dir), "-S", str(repo_root), "-G", "Ninja"],
-                        cwd=repo_root,
-                        check=True,
-                    )
+                if not (build_dir / "CMakeCache.txt").exists():
+                    print(f"--> Configuring C++ targets in {build_dir}...")
+                    configure_cmd = ["cmake", "-B", str(build_dir), "-S", str(repo_root)]
+                    if shutil.which("ninja"):
+                        configure_cmd.extend(["-G", "Ninja"])
+                    conf_res = subprocess.run(configure_cmd, cwd=repo_root)
+                    if conf_res.returncode != 0:
+                        return conf_res.returncode
+
                 build_res = subprocess.run(["cmake", "--build", str(build_dir)], cwd=repo_root)
-                if build_res.returncode != 0 and not (build_dir / "CTestTestfile.cmake").exists():
+                if build_res.returncode != 0:
+                    print("❌ C++ build failed. Aborting test execution.", file=sys.stderr)
                     return build_res.returncode
 
             ctest_cmd = [
@@ -1114,14 +1200,15 @@ def cmd_test_affected(args: argparse.Namespace, repo_root: Path) -> int:
                     exit_code = rc
 
             if rfl_tests and not os.environ.get("RFL_SKIP_PYBIND_TESTS"):
-                # Check if uv or pytest is available to run rfl binding tests
-                uv_bin = subprocess.run(["which", "uv"], capture_output=True, text=True)
-                if uv_bin.returncode == 0 and not os.environ.get("CI"):
+                # Check if uv is available to run rfl binding tests
+                if shutil.which("uv"):
                     pytest_cmd = ["uv", "run", "--group", "test", "pytest", *rfl_tests]
                     print(f"--> Running affected Python binding tests: {' '.join(pytest_cmd)}")
                     res = subprocess.run(pytest_cmd, cwd=repo_root)
                     if res.returncode != 0:
                         exit_code = res.returncode
+                else:
+                    print("⚠️  'uv' executable not found in PATH; skipping Python binding tests.", file=sys.stderr)
         else:
             print("--> No Python test files affected. Skipping Python tests.")
 
