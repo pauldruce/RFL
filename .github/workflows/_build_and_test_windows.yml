@@ -107,7 +107,12 @@ jobs:
         shell: pwsh
         run: cmake --build build --config ${{ inputs.build_type }}
 
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Test
-        shell: pwsh
-        run: ctest --test-dir build -C "${{ inputs.build_type }}" --parallel "$env:NUMBER_OF_PROCESSORS" --output-on-failure -R "${{ inputs.ctest_filter }}"
+        shell: bash
+        run: mise run ci:test-cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}"
 

@@ -43,6 +43,10 @@ run = "python3 scripts/ci_plan.py gate"
 description = "Run CI documentation, link, spelling, traceability, and script unit test checks"
 depends = ["lint:links", "lint:spelling", "lint:traceability", "test:scripts"]
 
+[tasks."ci:test-cpp"]
+description = "Execute C++ test suite in CI with parallel workers, output-on-failure, and optional regex filter"
+run = "python3 scripts/ci_plan.py ctest"
+
 [tasks.plan]
 description = "Alias for ci:plan"
 depends = ["ci:plan"]
@@ -60,8 +64,8 @@ description = "Run standard-library unit tests for repository automation and CI 
 run = "python3 -m unittest discover -s scripts/tests"
 
 [tasks."test:cpp"]
-description = "Build and execute C++ test suite using CTest"
-run = "cmake --build build && ctest --test-dir build --output-on-failure"
+description = "Execute C++ test suite using CTest (accepts optional -R regex filter and CTest flags)"
+run = "python3 scripts/ci_plan.py ctest"
 
 [tasks."test:python"]
 description = "Execute Python test suite using uv and pytest"

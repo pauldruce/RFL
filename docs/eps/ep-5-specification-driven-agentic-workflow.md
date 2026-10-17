@@ -162,7 +162,7 @@ As illustrated in Figure 5.1, the traceability and execution planning pipeline c
 
 4. PLAN, QUALIFY & MERGE (3-Tier CI & Human Review)
    - Tier 1 (`plan`): `mise run ci:plan` outputs `plan.json` (affected tests & impacted REQs)
-   - Tier 2 (Execution): Runs `mise run ci:docs`, targeted CTest (`-R`), and `mise run ci:verify-pr`
+   - Tier 2 (Execution): Runs `mise run ci:docs`, targeted CTest (`mise run ci:test-cpp`), and `mise run ci:verify-pr`
    - Tier 3 (`ci-gate`): `mise run ci:gate` verifies all `required_checks` in `plan.json` succeeded
 ```
 
@@ -179,6 +179,12 @@ mise run ci:plan
 
 # Run C++ and Python unit tests strictly on affected components and impacted requirements
 mise run test:affected
+
+# Execute C++ unit tests with optional regex filter and parallel execution
+mise run test:cpp -- -R "^(DiracOperatorTests)\."
+
+# Execute C++ test suite in CI runners with regex filter and JUnit XML output
+mise run ci:test-cpp -- -C Release -R "^(CliffordTests)\." --junit junit.xml
 
 # Audit repository for duplicate IDs, orphaned tags, and missing test coverage
 mise run lint:traceability

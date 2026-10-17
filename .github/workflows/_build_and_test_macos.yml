@@ -101,6 +101,11 @@ jobs:
       - name: Build
         run: cmake --build build --config ${{ inputs.build_type }}
 
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Test
-        run: ctest --test-dir build -C "${{ inputs.build_type }}" --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure -R "${{ inputs.ctest_filter }}"
+        run: mise run ci:test-cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}"
 

@@ -1222,6 +1222,52 @@ def cmd_gate() -> int:
     return 0
 
 
+def cmd_ctest(args: argparse.Namespace, repo_root: Path) -> int:
+    """Execute CTest with optional regex filter, parallel workers, and JUnit XML."""
+    build_dir = (repo_root / args.build_dir).resolve()
+    if not build_dir.exists():
+        print(f"❌ Build directory not found: {build_dir}", file=sys.stderr)
+        return 1
+
+    parallel = (
+        args.parallel
+        or os.environ.get("CTEST_PARALLEL_LEVEL")
+        or str(os.cpu_count() or 2)
+    )
+    build_type = args.build_type or os.environ.get("BUILD_TYPE") or "Release"
+    filter_regex = (args.filter or os.environ.get("CTEST_FILTER") or "").strip()
+    junit_xml = (args.junit or os.environ.get("CTEST_JUNIT") or "").strip()
+
+    ctest_cmd = [
+        "ctest",
+        "--test-dir",
+        str(build_dir),
+        "-C",
+        str(build_type),
+        "--parallel",
+        str(parallel),
+        "--output-on-failure",
+    ]
+
+    if filter_regex:
+        ctest_cmd.extend(["-R", filter_regex])
+
+    if junit_xml:
+        xml_path = (repo_root / junit_xml).resolve()
+        xml_path.parent.mkdir(parents=True, exist_ok=True)
+        ctest_cmd.extend(["--output-junit", str(xml_path)])
+
+    extra = getattr(args, "extra_ctest_args", [])
+    if extra:
+        if extra[0] == "--":
+            extra = extra[1:]
+        ctest_cmd.extend(extra)
+
+    print(f"--> Running CTest: {' '.join(ctest_cmd)}")
+    res = subprocess.run(ctest_cmd, cwd=repo_root)
+    return res.returncode
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="RFL Deterministic CI Execution Planner & Component/Requirement Impact Analyser"
@@ -1296,6 +1342,32 @@ def build_parser() -> argparse.ArgumentParser:
         "gate", help="Evaluate upstream CI job statuses from $NEEDS_JSON against required_checks"
     )
 
+    # `ctest` sub-command
+    ctest_p = sub_parsers.add_parser(
+        "ctest",
+        help="Execute CTest with optional regex filter, parallel workers, and JUnit XML",
+    )
+    ctest_p.add_argument(
+        "-R", "--filter", type=str, default="", help="Regular expression filter for test names"
+    )
+    ctest_p.add_argument(
+        "-C", "--build-type", type=str, default="", help="CMake build configuration (Release, Debug)"
+    )
+    ctest_p.add_argument(
+        "-j", "--parallel", type=str, default="", help="Number of parallel test jobs"
+    )
+    ctest_p.add_argument(
+        "--build-dir", type=str, default="build", help="CMake build directory (default: build)"
+    )
+    ctest_p.add_argument(
+        "--junit", type=str, default="", help="Output path for CTest JUnit XML report"
+    )
+    ctest_p.add_argument(
+        "extra_ctest_args",
+        nargs=argparse.REMAINDER,
+        help="Additional arguments forwarded directly to CTest",
+    )
+
     return parser
 
 
@@ -1314,6 +1386,8 @@ def main() -> int:
         return cmd_check_milestone()
     if args.command == "gate":
         return cmd_gate()
+    if args.command == "ctest":
+        return cmd_ctest(args, repo_root)
 
     # Default to `affected` human summary if invoked without sub-command
     default_args = argparse.Namespace(base_ref="", all=False, json=False)

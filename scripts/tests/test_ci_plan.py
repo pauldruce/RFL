@@ -15,6 +15,7 @@ Verifies:
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 from pathlib import Path
@@ -302,6 +303,53 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
                     os.environ.pop(k, None)
                 else:
                     os.environ[k] = v
+
+    def test_cmd_ctest_missing_build_dir(self) -> None:
+        args = argparse.Namespace(
+            build_dir="non_existent_build_dir",
+            filter="",
+            build_type="Release",
+            parallel="2",
+            junit="",
+            extra_ctest_args=[],
+        )
+        self.assertEqual(ci_plan.cmd_ctest(args, REPO_ROOT), 1)
+
+    def test_cmd_ctest_construction(self) -> None:
+        from unittest.mock import patch
+
+        args = argparse.Namespace(
+            build_dir="build",
+            filter="^(CliffordTests)\\.",
+            build_type="Release",
+            parallel="4",
+            junit="build/junit.xml",
+            extra_ctest_args=["-V"],
+        )
+
+        with tempfile.TemporaryDirectory() as td:
+            build_path = Path(td) / "build"
+            build_path.mkdir()
+
+            with patch("subprocess.run") as mock_run:
+                mock_run.return_value.returncode = 0
+                rc = ci_plan.cmd_ctest(args, Path(td))
+                self.assertEqual(rc, 0)
+                mock_run.assert_called_once()
+                cmd = mock_run.call_args[0][0]
+
+                self.assertIn("ctest", cmd[0])
+                self.assertIn("--test-dir", cmd)
+                self.assertIn(str(build_path.resolve()), cmd)
+                self.assertIn("-C", cmd)
+                self.assertIn("Release", cmd)
+                self.assertIn("--parallel", cmd)
+                self.assertIn("4", cmd)
+                self.assertIn("--output-on-failure", cmd)
+                self.assertIn("-R", cmd)
+                self.assertIn("^(CliffordTests)\\.", cmd)
+                self.assertIn("--output-junit", cmd)
+                self.assertIn("-V", cmd)
 
 
 if __name__ == "__main__":
