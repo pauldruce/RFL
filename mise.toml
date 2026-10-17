@@ -58,7 +58,7 @@ run = "python3 scripts/ci_plan.py ctest"
 
 [tasks."ci:test:python"]
 description = "Execute Python test suite with JUnit XML output"
-run = "uv run --group test pytest ${PYTEST_TARGETS:-src/python_bindings/tests} --junit-xml=build/junit-py.xml"
+run = "uv run --group test pytest ${PYTEST_TARGETS:-} --junit-xml=build/junit-py.xml"
 
 [tasks.plan]
 description = "Alias for ci:plan"

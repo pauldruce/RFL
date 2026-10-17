@@ -27,6 +27,16 @@ on:
         type: string
         required: false
         default: ''
+      test_python:
+        description: 'Whether to execute Python binding tests and generate junit-py.xml'
+        type: boolean
+        required: false
+        default: false
+      verify_pr:
+        description: 'Whether to execute pull request traceability verification'
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -103,11 +113,11 @@ jobs:
         run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit build/junit.xml
 
       - name: Test Python Bindings
-        if: inputs.install_system_armadillo == true
+        if: inputs.test_python == true
         run: mise run ci:test:python
 
       - name: Verify PR traceability
-        if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'
+        if: github.event_name == 'pull_request' && inputs.verify_pr == true && inputs.build_type == 'Release'
         run: mise run ci:verify:pr
 
 

@@ -112,6 +112,8 @@ jobs:
     with:
       os: ubuntu-latest
       install_system_armadillo: true
+      test_python: true
+      verify_pr: true
       ctest_filter: ${{ needs.plan.outputs.ctest_filter }}
 
   test_macos:
