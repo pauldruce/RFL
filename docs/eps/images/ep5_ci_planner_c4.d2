@@ -78,7 +78,7 @@ consumers: "Execution and Governance Gates" {
 }
 
 # Cross-boundary relationships
-inputs.codebase -> planner.graph_builder: scans AST and #includes
+inputs.codebase -> planner.graph_builder: "scans AST and #include directives"
 inputs.git_diff -> planner.hop1: changed_files
 inputs.git_diff -> planner.hop2: EP diffs and trailers
 inputs.specs -> planner.hop2: REQ map and test tags
