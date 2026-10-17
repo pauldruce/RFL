@@ -13,7 +13,7 @@ All documentation, code docstrings, comments, Enhancement Proposals (EPs), and r
 
 | Approved Term | Definition | Unapproved Synonyms (Avoid) |
 | :--- | :--- | :--- |
-| **Dirac Operator** | The matrix operator $D = \sum \gamma^i \otimes H_i + \sum \gamma^{p+j} \otimes L_j$ that defines the geometry. | *Dirac matrix (when referring to the operator object)* |
+| **Dirac Operator** | The matrix operator $D = \sum e^a \otimes \mathcal{D} _a$ (or in geometric coordinates $\sum \gamma^i \otimes \lbrace H_i, \cdot \rbrace + \sum \gamma^{p+j} \otimes [L_j, \cdot]$) that defines the geometry. | *Dirac matrix (when referring to the operator object)* |
 | **Clifford Module** | The real or complex representation of the Clifford algebra $\text{Cl}(p,q)$ holding gamma matrices $\gamma^a$. | *Clifford algebra engine, Gamma set* |
 | **Gamma Matrix** | A generator matrix $\gamma^a$ of the Clifford algebra satisfying $\lbrace \gamma^a, \gamma^b \rbrace = 2\eta^{ab}\mathbb{I}$. | *Dirac gamma, Clifford matrix* |
 | **Spectral Triple** | The mathematical triplet $(A, \mathcal{H}, D)$ that defines a noncommutative geometry. | *NCG triplet, Connes triple* |

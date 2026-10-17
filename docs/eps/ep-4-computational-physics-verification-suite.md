@@ -51,7 +51,7 @@ $$
 To establish scientific validity, RFL must verify six fundamental pillars:
 1. **Axiomatic Geometric Invariants:** The assembled Dirac operator must satisfy all spectral triple axioms across all 8 KO dimensions. These axioms include Hermiticity, real structure relations ($J^2, DJ, J\Gamma$), and chirality grading ($\lbrace \Gamma, D \rbrace = 0$).
 2. **Continuous Symmetries & Gauge Invariance:** The spectral action and eigenvalue spectra must be invariant under unitary transformations $D \to UDU^\dagger$ for $U \in \mathrm{U}(N)$.
-3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action evaluations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants guarantee that samplers experience true physical energy and conservative forces without numerical drift.
+3. **Internal Energy & Derivative Invariants:** Incremental action updates $\Delta S$ (`delta24`) must match full action calculations $S(D_f) - S(D_i)$ within scale-aware cancellation bounds. Analytic variations must match central finite differences to optimal floating-point precision $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$. In MCMC and HMC, these invariants guarantee that samplers experience true physical energy and conservative forces without numerical drift.
 4. **Exact Limiting Theorems:** In solvable limits, simulated observables must reproduce analytical predictions. In the Gaussian regime with $g_4 = 0$, spectral moments must match the self-convolution of the Wigner semicircle distribution. One-matrix reductions of signature $(0, 1)$ must match exact Riemann-Hilbert solutions.
 5. **Statistical Mechanics & Ergodicity:** Markov chain updates must satisfy detailed balance with respect to the Boltzmann weight. Multi-chain simulations must verify convergence using rank-normalised folded split $\hat{R}$ and Effective Sample Size diagnostics ($\mathrm{ESS} \ge 400$).
 6. **Physical Scaling Invariants for General Regimes:** In interactive regimes without analytical solutions, simulations must satisfy exact parameter rescaling and coupling monotonicity laws.
@@ -63,12 +63,12 @@ Single-step action updates, geometric axioms, gauge transformations, and finite-
 Longer stochastic simulations must only test collective properties, ergodicity, and asymptotic distributions that unit tests cannot cover.
 
 Automating these checks guarantees that RFL provides reliable, mathematically sound foundations for research.
-Researchers and peer reviewers can independently confirm that the software samples the true physical distribution.
+Researchers and peer reviewers can independently verify that the software samples the true physical distribution.
 
 ### 2.2 Goals
-* **Goal 1:** Verify the incremental action update $\Delta S$ (`delta24`) against full action evaluation to scale-aware precision.
+* **Goal 1:** Verify the incremental action update $\Delta S$ (`delta24`) against full action calculation to scale-aware precision.
 * **Goal 2:** Verify fundamental spectral triple axioms (Hermiticity, complete 8-fold KO real structure table, chirality) for all generated configurations.
-* **Goal 3:** Verify unitary gauge invariance ($U(N)$ symmetry) for action evaluations and eigenvalue spectra under random Haar unitary transformations.
+* **Goal 3:** Verify unitary gauge invariance ($U(N)$ symmetry) for action calculations and eigenvalue spectra under random Haar unitary transformations.
 * **Goal 4:** Verify analytical action derivatives and variations against numerical central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$.
 * **Goal 5:** Implement an automated Gaussian-limit test comparing MCMC eigenvalue moments to the exact Wigner semicircle self-convolution and Simulation-Based Calibration (SBC).
 * **Goal 6:** Verify 1-matrix models of signature $(0, 1)$ against exact analytical Riemann-Hilbert solutions from published literature.
@@ -87,16 +87,16 @@ Researchers and peer reviewers can independently confirm that the software sampl
 1. **Scenario 1 (Continuous Integration Verification):**
    A developer modifies C++ matrix algebra.
    The fast test runner runs deterministic algebraic and geometric invariant tests.
-   The runner confirms that action calculations, unitary gauge symmetry, and Clifford relations match exact mathematical identities within machine precision.
+   The runner verifies that action calculations, unitary gauge symmetry, and Clifford relations match exact mathematical identities within machine precision.
 
 2. **Scenario 2 (Academic Peer-Review Audit):**
    A journal reviewer downloads RFL from GitHub.
    The reviewer runs `pytest tests/physics/` or `ctest`.
-   The suite outputs statistical verification metrics and confirms detailed balance without requiring manual configuration.
+   The suite outputs statistical verification metrics and verifies detailed balance without requiring manual configuration.
 
 3. **Scenario 3 (Verification in General Interactive Regimes):**
    A researcher runs simulations in parameter regimes without analytical solutions with $g_4 > 0$ and $N > 1$.
-   The test suite verifies parameter rescaling invariance and coupling monotonicity to confirm physical behaviour.
+   The test suite verifies parameter rescaling invariance and coupling monotonicity to verify physical behaviour.
 
 ### 3.2 Functional Requirements & Invariants
 
@@ -159,7 +159,7 @@ Similarly, charge conjugation $J$ and grading $\Gamma$ represent signed index pe
 Matrix multiplication by these operators incurs zero cancellation and minimal floating-point error bounded by $c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$.
 
 #### 2. Catastrophic Cancellation in Action Differences (REQ-001)
-When updating a single matrix element, full action evaluation computes:
+When updating a single matrix element, full action calculation computes:
 
 
 $$
@@ -194,7 +194,7 @@ For $M \approx 100$, $\lvert S \rvert \approx 10^4$, and empirical constants $c_
 
 #### 3. Unitary Gauge & Spectral Invariance (REQ-008)
 Unitary transformation $D \to U D U^\dagger$ involves matrix multiplication.
-The operator $\mathrm{fl}(\cdot)$ denotes the IEEE 754 rounded floating-point machine evaluation of an expression (Higham 2002)[^higham2002].
+The operator $\mathrm{fl}(\cdot)$ denotes the IEEE 754 rounded floating-point machine calculation of an expression (Higham 2002)[^higham2002].
 Numerical matrix multiplication of dimension $M$ incurs rounding error bounded by Wilkinson's theorem:
 
 
@@ -203,7 +203,7 @@ $$
 $$
 
 
-Trace evaluation of $(UDU^\dagger)^4$ accumulates additional error of order $M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$.
+Calculating the trace of $(UDU^\dagger)^4$ accumulates additional error of order $M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$.
 For eigenvalue spectra, the Hoffman-Wielandt and Weyl perturbation theorems bound eigenvalue drift by the operator 2-norm:
 
 
@@ -267,7 +267,7 @@ Tests must use a relative tolerance scaled by $\mathcal{O}(\epsilon_{\mathrm{mac
 #### 1. Verification Without Analytical Solutions
 Computational physics software often lacks analytical solutions for general parameter regimes.
 Interactive multi-matrix models with $g_4 > 0$ and dimension $N > 1$ have no closed-form solutions.
-Standard unit tests cannot confirm whether an MCMC simulation samples the true physical distribution.
+Standard unit tests cannot verify whether an MCMC simulation samples the true physical distribution.
 To solve this problem, leading scientific codes use cross-path verification and physical scaling laws.
 Two independent algorithms compute the same physical quantity using different mathematical formulations.
 Exact agreement between these independent pathways verifies algorithmic and physical correctness.
@@ -291,7 +291,7 @@ $$
 
 
 RFL computes this quantity through two independent pathways:
-* **Global Evaluation Path:** Reassembles the complete Dirac operator $D \in \mathbb{C}^{M \times M}$ and computes explicit matrix powers and traces in $\mathcal{O}(M^3)$ operations.
+* **Global Calculation Path:** Reassembles the complete Dirac operator $D \in \mathbb{C}^{M \times M}$ and calculates explicit matrix powers and traces in $\mathcal{O}(M^3)$ operations.
 * **Local Incremental Path (`delta24`):** Exploits single-element matrix variations. It calculates $\Delta S$ via on-the-fly matrix products in $\mathcal{O}(V^3 N^3)$ operations (optimisable to $\mathcal{O}(V^3 N^2)$ with sweep-level matrix caching) using precomputed Clifford trace tensors ($\Omega$ table).
 
 *Physical Failure Mode:*
@@ -309,7 +309,7 @@ Verifying REQ-001 guarantees that the local update exactly mirrors the global in
 * **Molecular Dynamics (GROMACS, LAMMPS):**
   In microcanonical ($NVE$) ensembles, total energy $E = E_{\mathrm{kin}} + E_{\mathrm{pot}}$ is a conserved Hamiltonian invariant.
   GROMACS verifies integrators using the physical validation framework of Merz et al. (2018)[^merz2018].
-  The framework tracks energy drift against the shadow Hamiltonian to confirm physical correctness.
+  The framework tracks energy drift against the shadow Hamiltonian to verify physical correctness.
 
 #### 3. Derivative Invariants: Generalised Forces & Symplectic Consistency
 In physical dynamics, the negative gradient $-\nabla S$ represents the generalised force driving degrees of freedom (Betancourt 2017)[^betancourt2017].
@@ -323,7 +323,7 @@ $$
 
 RFL computes and verifies action gradients through two independent pathways:
 * **Analytical Path:** Calculates symbolic matrix variations derived from trace cyclicity and noncommutative differential calculus.
-* **Numerical Finite-Difference Path:** Calculates directional derivatives using central finite difference stencils:
+* **Numerical Finite-Difference Path:** Computes directional derivatives using central finite difference stencils:
 
 
 $$
@@ -438,7 +438,7 @@ Vehtari et al. (2021)[^vehtari2021] resolved these flaws with three enhancements
 
 **Enhancement 1: Chain Splitting (Split R-hat)**
 The algorithm splits each chain into two halves.
-This doubles the number of chains to $2M$ and detects non-stationarity or initial burn-in drift.
+This doubles the number of chains to $2M$ and detects non-stationarity or initial thermalisation drift.
 
 **Enhancement 2: Rank Normalisation (Inverse Normal Transformation)**
 The algorithm pools all scalar draws across chains.
@@ -467,7 +467,7 @@ $$
 
 This transformation diagnoses localised scale differences when chain means match but chain variances differ.
 
-The final diagnostic takes the maximum across both rank-transformed and folded-rank evaluations:
+The final diagnostic takes the maximum across both rank-transformed and folded-rank calculations:
 
 
 $$

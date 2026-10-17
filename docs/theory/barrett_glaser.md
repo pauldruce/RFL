@@ -2,11 +2,13 @@
 
 This document provides the mathematical derivations, trace factorisations, and local variation formulae implemented by `BarrettGlaserAction` in `src/core/BarrettGlaser/BarrettGlaserAction.hpp`.
 
+<!-- cspell:words axax -->
+
 ---
 
 ## 1. Noncommutative Geometry & Finite Spectral Triples
 
-A finite spectral triple $(\mathcal{A}, \mathcal{H}, D, \gamma, J)$ models a fuzzy space in noncommutative geometry.
+A finite spectral triple $(\mathcal{A}, \mathcal{H}, D, \Gamma, J)$ models a fuzzy space in noncommutative geometry.
 
 In the Barrett-Glaser formulation, the Hilbert space is the tensor product of a spinor space and the algebra of complex matrices:
 
@@ -17,46 +19,47 @@ $$
 where:
 * $d_\gamma$ is the dimension of the Clifford algebra representation.
 * $N$ is the matrix dimension.
-* $V = p + q$ is the number of Clifford generators.
+* $V = p + q$ is the number of Clifford generators in the fundamental representation (extended to the odd Clifford subspace dimension for higher signatures).
 
 The Dirac operator $D: \mathcal{H} \to \mathcal{H}$ decomposes into $p$ Hermitian matrices $H_a$ and $q$ anti-Hermitian matrices $L_b$:
 
 $$
-D = \sum_{a=1}^p e^a \otimes \lbrace H_a, \cdot \rbrace + \sum_{b=1}^q e^{p+b} \otimes [L_b, \cdot]
+D = \sum_{a=1}^p \gamma^a \otimes \lbrace H_a, \cdot \rbrace + \sum_{b=1}^q \gamma^{p+b} \otimes [L_b, \cdot]
 $$
 
-where $e^1, \dots, e^{p+q}$ are generators of the real Clifford algebra $\mathcal{C}\ell(p, q)$, satisfying:
+where $\gamma^1, \dots, \gamma^{p+q}$ are generators of the real Clifford algebra $\mathcal{C}\ell(p, q)$, satisfying:
 
 $$
-\lbrace e^a, e^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}_{d_\gamma}
+\lbrace \gamma^a, \gamma^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}_{d_\gamma}
 $$
 
-with $\epsilon_a = +1$ for $a \le p$ and $\epsilon_a = -1$ for $a > p$.
+with $\epsilon_a = +1$ for $a \le p$ (Hermitian) and $\epsilon_a = -1$ for $a > p$ (anti-Hermitian).
 
 ### 1.1 The Hermitian Coordinate Basis
 
 To parameterise the space of Dirac operators using solely Hermitian matrices $M_a$:
 
 1. Substitute the anti-Hermitian matrices with Hermitian matrices: $L_b = i M_{p+b}$.
-2. Absorb the factor of $i$ into the anti-Hermitian Clifford generators:
+2. Absorb the factor of $i$ into the anti-Hermitian Clifford generators to define the Hermitian generators $e^a$:
 
 $$
-\gamma^a = e^a \quad (a \le p), \qquad \gamma^{p+b} = i e^{p+b} \quad (b \le q)
+e^a = \gamma^a \quad (a \le p), \qquad e^{p+b} = i \gamma^{p+b} \quad (b \le q)
 $$
 
-Under this basis transformation, every generator $\gamma^a$ is Hermitian and squares to $+\mathbf{1}$:
+In RFL's C++ implementation, these $e^a$ generators are stored as `m_omegas` in `DiracOperator`.
+Under this basis transformation, every generator $e^a$ is Hermitian and squares to $+\mathbf{1}$:
 
 $$
-(\gamma^a)^2 = \mathbf{1}_{d_\gamma}, \quad \lbrace \gamma^a, \gamma^b \rbrace = 2 \delta^{ab} \mathbf{1}_{d_\gamma}
+(e^a)^\dagger = e^a, \qquad (e^a)^2 = \mathbf{1}_{d_\gamma}, \qquad \lbrace e^a, e^b \rbrace = 2 \delta^{ab} \mathbf{1}_{d_\gamma}
 $$
 
 Consequently, the spinor trace is strictly positive definite:
 
 $$
-\mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \delta^{ab}
+\mathrm{tr}(e^a e^b) = d_\gamma \delta^{ab}
 $$
 
-The metric signs $\epsilon_a \in \lbrace +1, -1 \rbrace$ move entirely into the matrix superoperator:
+The metric signs $\epsilon_a \in \lbrace +1, -1 \rbrace$ transfer entirely into the matrix superoperator:
 
 $$
 \mathcal{D}_a = M_a \otimes \mathbf{1}_N + \epsilon_a \mathbf{1}_N \otimes M_a^T
@@ -67,7 +70,7 @@ where $\epsilon_a = +1$ gives the anticommutator $\lbrace M_a, \cdot \rbrace$, a
 In this unified Hermitian basis, the Dirac operator reads:
 
 $$
-D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a
+D = \sum_{a=1}^V e^a \otimes \mathcal{D}_a
 $$
 
 ---
@@ -105,10 +108,10 @@ constant prefactors cancel identically in MCMC acceptance ratios. Setting the qu
 
 ### 2.1 Quadratic Trace $\mathrm{Tr}(D^2)$
 
-Expanding $D^2$ and applying Clifford trace orthogonality $\mathrm{tr}(\gamma^a \gamma^b) = d_\gamma \delta^{ab}$:
+Expanding $D^2$ and applying Clifford trace orthogonality $\mathrm{tr}(e^a e^b) = d_\gamma \delta^{ab}$:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}(D^2) = \sum_{a,b=1}^V \mathrm{tr}(\gamma^a \gamma^b) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \mathcal{D}_b) = d_\gamma \sum_{a=1}^V \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2)
+\mathrm{Tr}_{\mathcal{H}}(D^2) = \sum_{a,b=1}^V \mathrm{tr}(e^a e^b) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \mathcal{D}_b) = d_\gamma \sum_{a=1}^V \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2)
 $$
 
 Expanding the squared algebra operator $\mathcal{D}_a^2$:
@@ -137,7 +140,7 @@ $$
 \mathrm{Tr}_{\mathcal{H}}(D^4) = \sum_{a,b,c,d=1}^V \Omega_{abcd} \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \mathcal{D}_b \mathcal{D}_c \mathcal{D}_d)
 $$
 
-where $\Omega_{abcd} = \mathrm{tr}(\gamma^a \gamma^b \gamma^c \gamma^d)$ is the 4-gamma Clifford trace tensor.
+where $\Omega_{abcd} = \mathrm{tr}(e^a e^b e^c e^d)$ is the 4-generator Clifford trace tensor (calculated and stored as `m_omega_table` in `DiracOperator`).
 
 #### Index Classification ($B_n$ Notation)
 
@@ -148,19 +151,19 @@ $$
 \mathcal{D}_a \mathcal{D}_b \mathcal{D}_c \mathcal{D}_d
 $$
 
-The Clifford trace vanishes for any term containing an odd count of any gamma generator.
+The Clifford trace vanishes for any term containing an odd count of any generator $e^a$.
 Therefore, index combinations with odd counts (such as $[3, 1]$ or $[2, 1, 1]$) vanish identically.
 The non-vanishing contractions partition into three symmetry classes:
 
-* **Four distinct indices** ($B_4$, $n=4$): Terms where all four indices $(a, b, c, d)$ are distinct, coupling four different matrices via the anti-symmetrised Clifford tensor.
-* **Two pairs** ($B_2$, $n=2$): Terms with two distinct index pairs ($a \ne b$), where each index appears twice. Because $(\gamma^a)^2 = \epsilon_a \mathbf{1}$, the Clifford tensor collapses to signed spinor dimensions: $\Omega_{aabb} = \epsilon_a \epsilon_b d_\gamma$, $\Omega_{abab} = -\epsilon_a \epsilon_b d_\gamma$, and $\Omega_{abba} = \epsilon_a \epsilon_b d_\gamma$. These terms describe quartic interactions between pairs of distinct matrices $M_a$ and $M_b$ (such as $\mathrm{Tr}(M_a^2 M_b^2)$ and cyclically permuted $\mathrm{Tr}(M_a M_b M_a M_b)$ terms).
-* **Single index** ($B$ or $B_1$, $n=1$): Quartic self-couplings where all four indices coincide ($a = b = c = d$). Here $(\gamma^a)^4 = \mathbf{1}$, yielding $\Omega_{aaaa} = d_\gamma$ and single-matrix self-interactions $\mathrm{Tr}(M_a^4)$.
+* **Four distinct indices** ($B_4$, $n=4$): Terms where all four indices $(a, b, c, d)$ are distinct, coupling four different matrices through the anti-symmetrised Clifford tensor.
+* **Two pairs** ($B_2$, $n=2$): Terms with two distinct index pairs ($a \ne b$), where each index appears twice. Because $(e^a)^2 = \mathbf{1}$, the Clifford tensor collapses to spinor dimensions. For fundamental anti-commuting generators, $\Omega_{aabb} = d_\gamma$, $\Omega_{abab} = -d_\gamma$, and $\Omega_{abba} = d_\gamma$. For higher signatures ($p + q \ge 3$) where odd multi-gamma products can commute, $\Omega_{abab} = +d_\gamma$. RFL accounts for both signs using the computed table entry $\Omega_{axax}$. These terms describe quartic interactions between pairs of distinct matrices $M_a$ and $M_b$.
+* **Single index** ($B$ or $B_1$, $n=1$): Quartic self-couplings where all four indices coincide ($a = b = c = d$). Here $(e^a)^4 = \mathbf{1}$, yielding $\Omega_{aaaa} = d_\gamma$ and single-matrix self-interactions $\mathrm{Tr}(M_a^4)$.
 
 ---
 
 ## 3. Elementary Perturbations & Local Variations
 
-In MCMC simulations, a local move perturbs a single matrix element of component matrix $M_x$:
+In MCMC simulations, a local step perturbs a single matrix element of component matrix $M_x$:
 
 $$
 M_x \to M_x + \delta M
@@ -180,7 +183,7 @@ $$
 
 ### 3.1 Diagonal vs Off-Diagonal Perturbations
 
-**Off-diagonal move** ($i \neq j$):
+**Off-diagonal step** ($i \neq j$):
 Updates both $(i, j)$ and $(j, i)$:
 
 $$
@@ -189,18 +192,18 @@ $$
 
 The trace vanishes: $\mathrm{Tr}(\delta M) = 0$.
 
-**Diagonal move** ($i = j$):
+**Diagonal step** ($i = j$):
 The variation collapses to:
 
 $$
 \delta M_{ii} = z + \bar{z} = 2 \mathrm{Re}(z)
 $$
 
-The imaginary component $\mathrm{Im}(z)$ has zero effect, ensuring $\mathrm{Im}(M_{ii}) = 0$.
+The imaginary component $\mathrm{Im}(z)$ has zero effect, which guarantees $\mathrm{Im}(M_{ii}) = 0$.
 
 ---
 
-### 3.2 Quadratic Variation $\Delta S_2$: From $D$ to $M$
+### 3.2 Quadratic Variation $\Delta S_2$
 
 The exact change in the quadratic trace is:
 
@@ -219,16 +222,16 @@ $$
 Substitute the operator decomposition and perturbation:
 
 $$
-D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a, \quad \delta D = \gamma^x \otimes \delta \mathcal{D}_x
+D = \sum_{a=1}^V e^a \otimes \mathcal{D}_a, \quad \delta D = e^x \otimes \delta \mathcal{D}_x
 $$
 
 Factor the Hilbert space trace $\mathrm{Tr} \otimes \mathrm{Tr}$:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}(D \delta D) = \sum_{a=1}^V \mathrm{tr}(\gamma^a \gamma^x) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x)
+\mathrm{Tr}_{\mathcal{H}}(D \delta D) = \sum_{a=1}^V \mathrm{tr}(e^a e^x) \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x)
 $$
 
-Apply Clifford trace orthogonality $\mathrm{tr}(\gamma^a \gamma^x) = d_\gamma \delta^{ax}$. Only the $x$-th term survives:
+Apply Clifford trace orthogonality $\mathrm{tr}(e^a e^x) = d_\gamma \delta^{ax}$. Only the $x$-th term survives:
 
 $$
 \mathrm{Tr}_{\mathcal{H}}(D \delta D) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x \delta \mathcal{D}_x)
@@ -237,7 +240,7 @@ $$
 Similarly, for the variation squared:
 
 $$
-\mathrm{Tr}_{\mathcal{H}}((\delta D)^2) = \mathrm{tr}((\gamma^x)^2) \cdot \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2)
+\mathrm{Tr}_{\mathcal{H}}((\delta D)^2) = \mathrm{tr}((e^x)^2) \cdot \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^2)
 $$
 
 Combining these yields the algebra-level variation:
@@ -256,7 +259,7 @@ $$
 Expand the operator product on $\mathbb{C}^N \otimes \mathbb{C}^N$:
 
 $$
-\mathcal{D}_x \delta \mathcal{D}_x = (M_x \delta M) \otimes \mathbf{1}_N + \epsilon_x M_x \otimes \delta M^T + \epsilon_x \delta M \otimes M_x^T + \mathbf{1}_N \otimes (M_x \delta M)^T
+\mathcal{D}_x \delta \mathcal{D}_x = (M_x \delta M) \otimes \mathbf{1}_N + \epsilon_x M_x \otimes \delta M^T + \epsilon_x \delta M \otimes M_x^T + \mathbf{1}_N \otimes (\delta M M_x)^T
 $$
 
 Calculate the trace using $\mathrm{Tr}(\mathbf{1}_N) = N$ and $\mathrm{Tr}(A^T) = \mathrm{Tr}(A)$:
@@ -277,17 +280,17 @@ $$
 \Delta \mathrm{Tr}(D^2) = 4 d_\gamma \left[ N \mathrm{Tr}(M_x \delta M) + \epsilon_x \mathrm{Tr}(M_x) \mathrm{Tr}(\delta M) \right] + 2 d_\gamma \left[ N \mathrm{Tr}((\delta M)^2) + \epsilon_x (\mathrm{Tr}(\delta M))^2 \right]
 $$
 
-**Step 4 (Calculation on elementary move):**
+**Step 4 (Calculation on elementary step):**
 Substitute the elementary perturbation $\delta M = z E_{ij} + \bar{z} E_{ji}$ into the master formula.
 
-**Off-diagonal move** ($i \neq j$):
+**Off-diagonal step** ($i \neq j$):
 The diagonal elements are zero, so $\mathrm{Tr}(\delta M) = 0$. The terms containing $\epsilon_x$ drop out: $\mathrm{Tr}(M_x \delta M) = 2 \mathrm{Re}(z M_x(j, i))$ and $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$. Substituting these yields:
 
 $$
 \Delta_2 = 4 d_\gamma N \left( 2 \mathrm{Re}(z M_x(j, i)) + |z|^2 \right)
 $$
 
-**Diagonal move** ($i = j$):
+**Diagonal step** ($i = j$):
 Here $\delta M = 2 \mathrm{Re}(z) E_{ii}$. With $\delta = 2 \mathrm{Re}(z)$, we have $\mathrm{Tr}(\delta M) = \delta$, $\mathrm{Tr}(M_x \delta M) = \delta M_x(i, i)$, and $\mathrm{Tr}((\delta M)^2) = (\mathrm{Tr}(\delta M))^2 = \delta^2$. Substituting these and factoring out $2 \delta = 4 \mathrm{Re}(z)$ yields:
 
 $$
@@ -296,7 +299,7 @@ $$
 
 ---
 
-### 3.3 Quartic Variation $\Delta S_4$: From $D$ to $M$
+### 3.3 Quartic Variation $\Delta S_4$
 
 The exact change in the quartic trace is:
 
@@ -308,20 +311,20 @@ $$
 Expand $((D + \delta D)^4 - D^4)$ and apply trace cyclicity to group terms by perturbation order:
 
 $$
-\Delta \mathrm{Tr}(D^4) = \underbrace{4 \mathrm{Tr}_{\mathcal{H}}(D^3 \delta D)}_{\text{Linear } O(z)} + \underbrace{2 \mathrm{Tr}_{\mathcal{H}}(D^2 (\delta D)^2) + \mathrm{Tr}_{\mathcal{H}}(D \delta D D \delta D)}_{\text{Quadratic } O(z^2)} + \underbrace{4 \mathrm{Tr}_{\mathcal{H}}(D (\delta D)^3)}_{\text{Cubic } O(z^3)} + \underbrace{\mathrm{Tr}_{\mathcal{H}}((\delta D)^4)}_{\text{Quartic } O(z^4)}
+\Delta \mathrm{Tr}(D^4) = \underbrace{4 \mathrm{Tr}_{\mathcal{H}}(D^3 \delta D)}_{\text{Linear } O(z)} + \underbrace{4 \mathrm{Tr}_{\mathcal{H}}(D^2 (\delta D)^2) + 2 \mathrm{Tr}_{\mathcal{H}}(D \delta D D \delta D)}_{\text{Quadratic } O(z^2)} + \underbrace{4 \mathrm{Tr}_{\mathcal{H}}(D (\delta D)^3)}_{\text{Cubic } O(z^3)} + \underbrace{\mathrm{Tr}_{\mathcal{H}}((\delta D)^4)}_{\text{Quartic } O(z^4)}
 $$
 
 **Step 2 (Clifford trace factorisation):**
 Substitute the operator decomposition and perturbation:
 
 $$
-D = \sum_{a=1}^V \gamma^a \otimes \mathcal{D}_a, \quad \delta D = \gamma^x \otimes \delta \mathcal{D}_x
+D = \sum_{a=1}^V e^a \otimes \mathcal{D}_a, \quad \delta D = e^x \otimes \delta \mathcal{D}_x
 $$
 
 Factoring the trace isolates the Clifford trace tensors:
 
 $$
-\Omega_{abcd} = \mathrm{tr}(\gamma^a \gamma^b \gamma^c \gamma^d)
+\Omega_{abcd} = \mathrm{tr}(e^a e^b e^c e^d)
 $$
 
 **Linear term**, order $O(z)$:
@@ -331,23 +334,27 @@ $$
 $$
 
 **Quadratic terms**, order $O(z^2)$:
+Because $(e^x)^2 = \mathbf{1}$, the first quadratic term collapses using $\mathrm{tr}((e^a)^2 (e^x)^2) = d_\gamma$:
 
 $$
-\begin{aligned}
-2 \mathrm{Tr}_{\mathcal{H}}(D^2 (\delta D)^2) &= 2 d_\gamma \epsilon_x \sum_{a=1}^V \epsilon_a \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2 (\delta \mathcal{D}_x)^2) \\
-\mathrm{Tr}_{\mathcal{H}}(D \delta D D \delta D) &= \sum_{a,b=1}^V \Omega_{axbx} \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x \mathcal{D}_b \delta \mathcal{D}_x)
-\end{aligned}
+4 \mathrm{Tr}_{\mathcal{H}}(D^2 (\delta D)^2) = 4 d_\gamma \sum_{a=1}^V \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2 (\delta \mathcal{D}_x)^2)
+$$
+
+For the cross-term $\mathrm{Tr}_{\mathcal{H}}(D \delta D D \delta D)$, the spinor factor is $\mathrm{tr}(e^a e^x e^b e^x)$. When $a \neq b$, generators $e^a$ and $e^b$ each appear with odd multiplicity (count = 1). By Clifford trace parity, any Clifford trace with an odd generator count vanishes identically. Therefore $\mathrm{tr}(e^a e^x e^b e^x) \equiv 0$ for all $a \neq b$, collapsing the double sum to a single sum:
+
+$$
+2 \mathrm{Tr}_{\mathcal{H}}(D \delta D D \delta D) = 2 \sum_{a=1}^V \Omega_{axax} \cdot \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x \mathcal{D}_a \delta \mathcal{D}_x)
 $$
 
 **Cubic term**, order $O(z^3)$:
-Because $(\gamma^x)^3 = \epsilon_x \gamma^x$, Clifford orthogonality leaves only $a = x$:
+Because $(e^x)^3 = e^x$, Clifford orthogonality $\mathrm{tr}(e^a e^x) = d_\gamma \delta^{ax}$ leaves only $a = x$:
 
 $$
 4 \mathrm{Tr}_{\mathcal{H}}(D (\delta D)^3) = 4 d_\gamma \mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3)
 $$
 
 **Quartic term**, order $O(z^4)$:
-Because $(\gamma^x)^4 = \mathbf{1}$ (spinor identity):
+Because $(e^x)^4 = \mathbf{1}$:
 
 $$
 \mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = d_\gamma \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4)
@@ -415,8 +422,10 @@ Calculate the algebra traces:
 
 $$
 \begin{aligned}
-\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2 (\delta \mathcal{D}_x)^2) &= 2 N \mathrm{Tr}(M_a^2 (\delta M)^2) + 4 \epsilon_a \epsilon_x (\mathrm{Tr}(M_a \delta M))^2 + 2 \mathrm{Tr}(M_a^2) \mathrm{Tr}((\delta M)^2) \\
-\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x \mathcal{D}_a \delta \mathcal{D}_x) &= 2 N \mathrm{Tr}((M_a \delta M)^2) + 4 \epsilon_a \epsilon_x \mathrm{Tr}(M_a^2) \mathrm{Tr}((\delta M)^2) + 2 (\mathrm{Tr}(M_a \delta M))^2
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a^2 (\delta \mathcal{D}_x)^2) =\;& 2 N \mathrm{Tr}(M_a^2 (\delta M)^2) + 4 \epsilon_a \epsilon_x (\mathrm{Tr}(M_a \delta M))^2 + 2 \mathrm{Tr}(M_a^2) \mathrm{Tr}((\delta M)^2) \\
+&+\; 4 \epsilon_a \mathrm{Tr}(M_a) \mathrm{Tr}(M_a (\delta M)^2) + 4 \epsilon_x \mathrm{Tr}(M_a^2 \delta M) \mathrm{Tr}(\delta M) \\
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_a \delta \mathcal{D}_x \mathcal{D}_a \delta \mathcal{D}_x) =\;& 2 N \mathrm{Tr}((M_a \delta M)^2) + 4 \epsilon_a \epsilon_x \mathrm{Tr}(M_a^2) \mathrm{Tr}((\delta M)^2) + 2 (\mathrm{Tr}(M_a \delta M))^2 \\
+&+\; 4 \epsilon_a \mathrm{Tr}(M_a) \mathrm{Tr}(M_a (\delta M)^2) + 4 \epsilon_x \mathrm{Tr}(M_a^2 \delta M) \mathrm{Tr}(\delta M)
 \end{aligned}
 $$
 
@@ -456,7 +465,7 @@ $$
 \mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4) = 2 N \mathrm{Tr}((\delta M)^4) + 8 \epsilon_x \mathrm{Tr}((\delta M)^3) \mathrm{Tr}(\delta M) + 6 (\mathrm{Tr}((\delta M)^2))^2
 $$
 
-**Step 4 (Calculation on elementary move):**
+**Step 4 (Calculation on elementary step):**
 
 Substituting the rank-1 matrix unit perturbation avoids full matrix multiplications:
 
@@ -469,28 +478,60 @@ $$
 where $P$ denotes precomputed matrix products:
 
 $$
-P \in \lbrace M_{i_1} M_{i_2} M_{i_3}, \; M_{i_1} M_{i_2}, \; M_{i_1} \rbrace
+P \in \lbrace M_{i_1} M_{i_2} M_{i_3}, \quad M_{i_1} M_{i_2}, \quad M_{i_1} \rbrace
 $$
 
-Higher powers contract algebraically:
+**Off-diagonal step** ($i \neq j$):
+
+Because diagonal elements are zero, the trace vanishes: $\mathrm{Tr}(\delta M) = 0$. Higher powers contract using matrix units $E_{ij} E_{kl} = \delta_{jk} E_{il}$:
 
 $$
-(\delta M)^2 = |z|^2 (E_{ii} + E_{jj}) + (z^2 E_{ij}^2 + \bar{z}^2 E_{ji}^2)
+(\delta M)^2 = |z|^2 (E_{ii} + E_{jj}), \quad (\delta M)^3 = |z|^2 \delta M, \quad (\delta M)^4 = |z|^4 (E_{ii} + E_{jj})
 $$
 
-For off-diagonal moves ($i \neq j$), the scalar quartic term contracts to:
+Taking matrix traces yields $\mathrm{Tr}((\delta M)^2) = 2 |z|^2$, $\mathrm{Tr}((\delta M)^3) = 0$, and $\mathrm{Tr}((\delta M)^4) = 2 |z|^4$.
+
+Substituting these traces into the quartic algebra formula:
+
+$$
+\mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4) = 2 N (2 |z|^4) + 0 + 6 (2 |z|^2)^2 = 4 (N + 6) |z|^4
+$$
+
+Multiplying by spinor dimension $d_\gamma$ yields the scalar quartic term:
 
 $$
 \mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = 4 d_\gamma (N + 6) |z|^4
 $$
 
-For diagonal moves ($i = j$), where $\delta M = 2 \mathrm{Re}(z) E_{ii}$, the scalar quartic term contracts to:
+Similarly, substituting into the cubic algebra formula yields:
+
+$$
+\mathrm{Tr}_{\mathrm{alg}}(\mathcal{D}_x (\delta \mathcal{D}_x)^3) = 2 N \mathrm{Tr}(M_x |z|^2 \delta M) + 6 \mathrm{Tr}(M_x \delta M) (2 |z|^2) = 2 (N + 6) |z|^2 \mathrm{Tr}(M_x \delta M)
+$$
+
+Multiplying by $4 d_\gamma$ yields the cubic variation:
+
+$$
+4 \mathrm{Tr}_{\mathcal{H}}(D (\delta D)^3) = 16 d_\gamma (N + 6) |z|^2 \mathrm{Re}(z M_x(j, i))
+$$
+
+**Diagonal step** ($i = j$):
+
+Here $\delta M = 2 \mathrm{Re}(z) E_{ii}$. With $\delta = 2 \mathrm{Re}(z)$, every power satisfies $(\delta M)^k = \delta^k E_{ii}$ and $\mathrm{Tr}((\delta M)^k) = \delta^k$.
+
+Substituting these traces into the quartic algebra formula:
+
+$$
+\mathrm{Tr}_{\mathrm{alg}}((\delta \mathcal{D}_x)^4) = 2 N \delta^4 + 8 \epsilon_x \delta^4 + 6 \delta^4 = 2 (N + 3 + 4 \epsilon_x) \delta^4
+$$
+
+Because $\delta = 2 \mathrm{Re}(z)$, substituting $\delta^4 = 16 \mathrm{Re}(z)^4$ and multiplying by $d_\gamma$ yields:
 
 $$
 \mathrm{Tr}_{\mathcal{H}}((\delta D)^4) = 32 d_\gamma (N + 3 + 4 \epsilon_x) \mathrm{Re}(z)^4
 $$
 
-Calculating trace updates at index $(i, j)$ avoids full $O((d_\gamma N)^3)$ Dirac recalculation. Computing on-the-fly matrix products runs in $O(V^3 N^3)$ operations per move. Caching matrix products across a sweep can reduce this to $O(V^3 N^2)$ operations.
+Calculating trace updates at index $(i, j)$ avoids full $O((d_\gamma N)^3)$ Dirac recalculation. Computing on-the-fly matrix products runs in $O(V^3 N^3)$ operations per step. Caching matrix products across a sweep can reduce this to $O(V^3 N^2)$ operations.
 
 ### 3.4 Total Variation & Acceptance
 

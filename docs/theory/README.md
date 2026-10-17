@@ -26,8 +26,10 @@ All theory notes and code comments adhere to these mathematical symbols:
 | $d_\gamma$ | Spinor dimension | Representation dimension of the Clifford algebra $\mathcal{C}\ell(p, q)$. |
 | $\gamma^a$ | Gamma matrices | Generators satisfying $\lbrace \gamma^a, \gamma^b \rbrace = 2 \epsilon_a \delta^{ab} \mathbf{1}$. |
 | $\epsilon_a$ | Clifford signs | Generator signs: $(\gamma^a)^2 = \epsilon_a \mathbf{1}$, with $\epsilon_a = +1$ for $a \le p$ and $\epsilon_a = -1$ for $a > p$. |
+| $e^a$ | Hermitian basis | Basis with imaginary unit absorbed: $(e^a)^2 = \mathbf{1}$. |
 | $M_a$ | Component matrices | Set of $V$ Hermitian matrices parameterising the geometry. |
-| $D$ | Dirac operator | Assembled operator: $D = \sum_{a=1}^V \gamma^a \otimes M_a$. |
+| $\mathcal{D} _a$ | Superoperator | Matrix superoperator: $\mathcal{D} _a = M_a \otimes \mathbf{1} _N + \epsilon_a \mathbf{1} _N \otimes M_a^T$. |
+| $D$ | Dirac operator | Assembled operator: $D = \sum_{a=1}^V e^a \otimes \mathcal{D} _a$. |
 | $g_2, g_4$ | Coupling constants | Quadratic ($g_2$) and quartic ($g_4$) coupling parameters. |
 | $S(D)$ | Spectral action | Action functional: $S(D) = g_2 \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)$. |
 
