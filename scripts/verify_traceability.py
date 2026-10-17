@@ -888,7 +888,13 @@ def check_pull_request(
         if stdlib_tests and not py_xml_default.exists():
             ci_plan.run_unittest_with_junit_xml(stdlib_tests, repo_root, py_xml_default)
         discovered_xml = [
-            p for p in (repo_root / "build" / "junit.xml", py_xml_default) if p.exists()
+            p
+            for p in (
+                repo_root / "build" / "junit.xml",
+                repo_root / "junit.xml",
+                py_xml_default,
+            )
+            if p.exists()
         ]
         if discovered_xml:
             xml_paths = discovered_xml

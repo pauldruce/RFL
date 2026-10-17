@@ -184,7 +184,7 @@ mise run test:affected
 mise run test:cpp -- -R "^(DiracOperatorTests)\."
 
 # Execute C++ test suite in CI runners with regex filter and JUnit XML output
-mise run ci:test:cpp -- -C Release -R "^(CliffordTests)\." --junit junit.xml
+mise run ci:test:cpp -- -C Release -R "^(CliffordTests)\." --junit build/junit.xml
 
 # Audit repository for duplicate IDs, orphaned tags, and missing test coverage
 mise run lint:traceability
