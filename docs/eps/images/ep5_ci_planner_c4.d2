@@ -1,4 +1,4 @@
-# RFL CI Execution Planner and Two-Hop Impact Analyser (C4 Component Diagram)
+# RFL CI Execution Planner and Change Impact Analyser (C4 Component Diagram)
 # Regenerate SVG: python3 scripts/check_d2_images.py --fix
 
 direction: down
@@ -37,15 +37,15 @@ planner: "CI Execution Planner and Traceability Subsystem" {
     class: internal_component
   }
 
-  hop1: "2. Hop 1: Component and Test Resolver\n«ci_plan.py»\n--\nReverse dependency BFS traversal\npyproject.toml / CMake build-wide triggers" {
+  hop1: "2. Component and Test Resolver\n«ci_plan.py»\n--\nReverse dependency BFS traversal\npyproject.toml / CMake build-wide triggers" {
     class: internal_component
   }
 
-  hop2: "3. Hop 2: Requirement Impact Analyser\n«ci_plan.py + verify_traceability.py»\n--\nExtracts REQ IDs from affected tests,\nmodified EP table rows, and Git trailers" {
+  hop2: "3. Requirement Impact Analyser\n«ci_plan.py + verify_traceability.py»\n--\nExtracts REQ IDs from affected tests,\nmodified EP table rows, and Git trailers" {
     class: internal_component
   }
 
-  hop3: "4. Hop 3: Test Closure and Job Planner\n«ci_plan.py»\n--\nExpands impacted REQs to all mapped tests\nEmits plan.json, ctest_filter and GITHUB_OUTPUT" {
+  hop3: "4. Test Closure and Job Planner\n«ci_plan.py»\n--\nExpands impacted REQs to all mapped tests\nEmits plan.json, ctest_filter and GITHUB_OUTPUT" {
     class: internal_component
   }
 

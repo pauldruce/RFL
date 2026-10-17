@@ -17,7 +17,7 @@ The table below tracks the status of each implementation phase:
 | :--- | :--- | :--- | :--- | :--- |
 | **Phase 1** | Global specification schema and requirement namespacing standard (`REQ-<SYS>-<NUM>`) across EPs | `v0.3.0` | [#84](https://github.com/pauldruce/RFL/pull/84) | ✅ Implemented |
 | **Phase 2** | Zero-dependency requirement-to-test traceability engine across C++ and Python test suites (ADR-1) | `v0.3.0` | [#84](https://github.com/pauldruce/RFL/pull/84) | ✅ Implemented |
-| **Phase 3** | Deterministic two-hop impact analysis and dependency graph planner across C++ and Python (ADR-3) | `v0.3.0` | [#84](https://github.com/pauldruce/RFL/pull/84) | ✅ Implemented |
+| **Phase 3** | Automated change impact analysis and selective test execution planner across C++ and Python (ADR-3) | `v0.3.0` | [#84](https://github.com/pauldruce/RFL/pull/84) | ✅ Implemented |
 | **Phase 4** | Shift-left developer feedback loops and pull request quality gate summaries via encapsulated task contracts (ADR-2, ADR-4) | `v0.3.0` | [#84](https://github.com/pauldruce/RFL/pull/84) | ✅ Implemented |
 
 ---
@@ -36,7 +36,7 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 ### 2.2 Goals
 * **Deterministic Verification:** Provide zero-dependency automated verification that maps requirement specifications (`REQ-<SYS>-<NUM>`) to test cases across C++ and Python test frameworks.
 * **Domain-Aware Auditing:** Distinguish unit-testable code and physics invariants (`ARCH`, `PHY`, `TRC`) from CI and packaging rules (`CI`, `PKG`).
-* **Two-Hop Execution Planning:** Trace C++ `#include` graphs and Python ASTs to select affected tests and impacted requirements deterministically.
+* **Selective Execution Planning:** Deterministically identify affected tests and impacted requirements from code and specification changes without requiring full regression runs.
 * **Shift-Left Agentic Feedback:** Execute fast static checks during local pre-commit in under 1 second, and run affected test suites before push.
 * **Low-Friction PR Governance:** Publish automated traceability tables and modified-test diff alerts to pull request summaries without blocking refactoring PRs.
 * **Preserve CI Budget:** Complete all traceability audits and execution planning in under 200 ms, preserving the sub-120-second CI budget (`REQ-CI-001`).
@@ -58,7 +58,7 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 | **REQ-TRC-002** | **Lifecycle and Domain Awareness** | Phase 1 (Implemented) | Section 3 requirement tables across all EPs must maintain four columns: `Requirement ID`, `Requirement Summary`, `Lifecycle Status`, and an invariant definition column (`Operational and Architectural Invariant`). Traceability audits evaluate unit-testable requirements (`ARCH`, `PHY`, `TRC`) marked `Implemented`. |
 | **REQ-TRC-003** | **Zero-Dependency Traceability Engine** | Phase 2 (Implemented) | The traceability verification engine must use Python ($\ge 3.10$) standard library modules only. Process exit codes must be deterministic: 0 (pass), 1 (validation error), 2 (command-line usage error). Execution must complete in under 200 ms. |
 | **REQ-TRC-004** | **Multi-Framework Tag Support** | Phase 2 (Implemented) | The verification engine must extract tags from GoogleTest comments (`// [REQ-...]`), Catch2 tags (`[REQ-...]`), and Pytest test functions (`def test_*` via marks, docstrings, or comments), ignoring non-test helper methods. |
-| **REQ-TRC-005** | **Two-Hop Impact Planner and PR Summary** | Phase 3 (Implemented) | The execution planner must resolve affected tests and impacted requirements using C++ `#include` graphs, Python AST bridges, specification diffs, and Git metadata. Verification gates must validate test results via JUnit XML and highlight modified test files in pull request summaries. |
+| **REQ-TRC-005** | **Automated Change Impact Analysis** | Phase 3 (Implemented) | Given a changeset across source files, bindings, build configurations, or specifications, the execution planner must deterministically identify all affected test suites and impacted requirements without source code annotations. Verification gates must validate test results via JUnit XML and highlight modified test files in pull request summaries. |
 | **REQ-TRC-006** | **Shift-Left Local Git Hooks** | Phase 4 (Implemented) | Local git hooks must enforce fast pre-commit static validation (spelling, documentation links, specification audits) in under 1 second. Pre-push validation must run linting and affected component and requirement test suites to block broken changes before remote transmission. |
 
 ---
@@ -93,9 +93,9 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 
 ---
 
-### 4.3 ADR-3: Two-Hop Component and Requirement Impact Planner vs Source Tagging and Static Path Filters
+### 4.3 ADR-3: Automated Dependency Impact Planning vs Source Code Tagging and Static Path Filters
 
-| Criteria | Option A: Source Code Tagging & Static `dorny/paths-filter` | Option B: Two-Hop Dependency Graph via `#include` and `pybind11` AST (Selected) |
+| Criteria | Option A: Source Code Tagging & Static `dorny/paths-filter` | Option B: Automated Dependency Graph via `#include` and `pybind11` AST (Selected) |
 | :--- | :--- | :--- |
 | **Source Code Cleanliness** | ❌ Poor (Pollutes C++ headers and sources with governance tags) | ✅ **100% Clean (`src/` contains zero requirement tags or CI comments)** |
 | **Cross-Language Semantic Bridge** | Manual `# +ci:depends_on` comments that rot over time | **Automatic (`bindings.cpp` symbol table + Python AST `rfl.<Symbol>`)** |
@@ -126,9 +126,9 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 
 ## 5. Target Architecture and Workflow
 
-![RFL CI Execution Planner and Two-Hop Impact Analyser](images/ep5_ci_planner_c4.svg)
+![RFL CI Execution Planner and Change Impact Analyser](images/ep5_ci_planner_c4.svg)
 
-*Figure 5.1: C4 component architecture of the CI Execution Planner and Two-Hop Impact Analyser. Source script co-located at [`docs/eps/images/ep5_ci_planner_c4.d2`](images/ep5_ci_planner_c4.d2).*
+*Figure 5.1: C4 component architecture of the CI Execution Planner and Change Impact Analyser. Source script co-located at [`docs/eps/images/ep5_ci_planner_c4.d2`](images/ep5_ci_planner_c4.d2).*
 
 ### 5.1 Core Subsystem Architecture and Component Responsibilities
 As illustrated in Figure 5.1, the traceability and execution planning pipeline divides responsibilities across five distinct architectural stages:
@@ -136,13 +136,13 @@ As illustrated in Figure 5.1, the traceability and execution planning pipeline d
 1. **Dependency Graph Builder:**
    Parses C++ `#include` statements across `src/` and `tests/` using an in-memory resolution cache to construct a bidirectional dependency graph without redundant filesystem access. Pairs `.cpp` implementation files with their corresponding `.hpp` headers. Traverses `src/python_bindings/bindings.cpp` to map exposed C++ types to `rfl.<Symbol>` exports. Parses Python test ASTs to map library imports and symbol calls back to underlying C++ components.
 
-2. **Component and Test Resolver (Hop 1):**
+2. **Component and Test Resolver (Stage 1):**
    Ingests changed files from `git diff` against the merge base (or uncommitted working changes). Conducts a reverse breadth-first search (BFS) through the dependency graph to find all affected C++ compilation units and test executables. Traces Python test dependencies and flags build-wide modifications (such as `CMakeLists.txt` or `pyproject.toml`) that require full-suite execution.
 
-3. **Requirement Impact Analyser (Hop 2):**
-   Inspects the affected tests identified in Hop 1 to extract associated `[REQ-...]` tags. Scans `git diff` for modified requirement rows in `docs/eps/ep-*.md` specification tables. Parses `Implements: REQ-...` commit trailers to capture explicitly declared targets. Merges these inputs into a consolidated list of impacted requirements.
+3. **Requirement Impact Analyser (Stage 2):**
+   Inspects the affected tests identified in Stage 1 to extract associated `[REQ-...]` tags. Scans `git diff` for modified requirement rows in `docs/eps/ep-*.md` specification tables. Parses `Implements: REQ-...` commit trailers to capture explicitly declared targets. Merges these inputs into a consolidated list of impacted requirements.
 
-4. **Test Closure and Execution Planner (Hop 3):**
+4. **Test Closure and Execution Planner (Stage 3):**
    Queries the traceability database to find all tests that verify the impacted requirements (requirement test closure). Merges directly affected tests with requirement-closure tests into a minimal, sufficient execution set. Emits structured execution plans (`plan.json`), regex filters for CTest (`ctest -R <filter>`), Python test target paths, and CI runner step outputs.
 
 5. **Governance and Verification Gates:**
