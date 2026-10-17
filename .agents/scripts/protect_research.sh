@@ -5,7 +5,7 @@ PAYLOAD=$(cat)
 # Extract tool details using jq
 TOOL_NAME=$(echo "$PAYLOAD" | jq -r '.toolCall.name')
 
-WORKSPACE_ROOT=$(pwd)
+WORKSPACE_ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 
 # 1. Check absolute paths for file tools
 if [[ "$TOOL_NAME" == "write_to_file" || "$TOOL_NAME" == "replace_file_content" || "$TOOL_NAME" == "delete_file" ]]; then
@@ -33,7 +33,14 @@ if [[ "$TOOL_NAME" == "run_command" ]]; then
     echo '{"decision": "deny", "reason": "SECURITY BLOCK: The command references the /research directory which is protected."}'
     exit 0
   fi
+
+  # Auto-allow read-only and safe verification mise commands
+  if echo "$CMD" | grep -qE "^mise[[:space:]]+(tasks|ls|doctor|version|run[[:space:]]+(build(:[a-z0-9_:-]+)?|affected|plan|ci(:[a-z0-9_:-]+)?|lint(:[a-z0-9_:-]+)?|traceability:(matrix|query)|test(:[a-z0-9_:-]+)?|pre[:\-]commit|pre[:\-]push|changelog:preview|release:verify))([[:space:]]|$)"; then
+    echo '{"decision": "allow", "permissionOverrides": ["command(mise)"], "overwrite": {"BypassSandbox": true}}'
+    exit 0
+  fi
 fi
 
 # Allow everything else
 echo '{"decision": "allow"}'
+

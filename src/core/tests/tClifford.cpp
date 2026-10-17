@@ -91,6 +91,7 @@ TEST(CliffordTests, GetGammas) {
   }
 }
 
+// [REQ-ARCH-001] Verify Clifford gamma generators satisfy signature Hermiticity signs.
 TEST(CliffordTests, GammasHaveCorrectHermiticity) {
   vector<CliffordData> data;
   data.push_back({1, 0});
@@ -154,6 +155,8 @@ TEST(CliffordTests, GammasSatisfyAntiCommutationRelations) {
   vector<CliffordData> data;
   data.push_back({1, 0});
   data.push_back({0, 1});
+  data.push_back({2, 0});
+  data.push_back({0, 2});
   for (int p = 1; p < 5; p++) {
     for (int q = 1; q < 5; q++) {
       data.push_back({p, q});
@@ -188,9 +191,10 @@ TEST(CliffordTests, GammasSatisfyAntiCommutationRelations) {
   }
 }
 
-// TODO: Find the minimum set of (p,q) signatures to cover all code paths.
+// TODO: Reduce the (p, q) grid to the minimal representative signatures modulo 8 that cover all decomp() and operator*=() branches.
+// [REQ-ARCH-003] Verify chirality grading operator matches Clifford product definition.
 TEST(CliffordTests, ChiralityIsCorrect) {
-  // TODO: Fix source code because this test fails when max_p or max_q is 6 or greater.
+  // TODO: Fix chirality phase accumulation in Clifford::operator*=() and sortGammas(), which fails when max_p or max_q >= 6.
   constexpr int max_p = 5;
   vector<CliffordData> data = {};
 
@@ -254,4 +258,3 @@ TEST(CliffordTests, CliffordModuleMultiplication) {
   EXPECT_EQ(C2.getP(), 2);
   EXPECT_EQ(C2.getQ(), 1);
 }
-// TODO: Write a test to verify that initial signatures have correct gamma matrices.

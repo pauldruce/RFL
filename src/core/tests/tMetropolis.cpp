@@ -8,7 +8,6 @@
 #include <gtest/gtest.h>
 
 TEST(MetropolisTests, ConstructorDoesNotThrow) {
-  // TODO: Add unit tests for randomised state sampling.
   auto rng = std::make_unique<StdRng>();
   constexpr double scale = 0.1;
   constexpr int num_steps = 20;
@@ -35,3 +34,5 @@ TEST(MetropolisTests, UpdateDiracUpdatesTheDirac) {
 
   ASSERT_FALSE(diracs_are_equal) << "The Dirac operator matrix must change.";
 }
+
+// TODO(EP-1, #13): Add deterministic seeded tests for Metropolis detailed balance and dual-averaging scale calibration.

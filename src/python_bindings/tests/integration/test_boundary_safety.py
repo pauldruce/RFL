@@ -4,6 +4,7 @@ import pytest
 import rfl
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_exception_bubbling():
     """Verify that invalid parameters raise C++ exceptions in Python."""
     # 1. Verify that a negative matrix dimension raises an exception.
@@ -31,6 +32,7 @@ def test_exception_bubbling():
     rfl.set_max_clifford_mode(default_max)
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_numpy_integration():
     """Verify that NumPy arrays converted from C++ maintain memory safety."""
     dirac = rfl.DiracOperator(1, 3, 10)
@@ -46,6 +48,7 @@ def test_numpy_integration():
     assert eigenvals.flags.owndata or eigenvals.base is not None
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_lifecycle_and_gc():
     """Verify object destruction during repeated allocation cycles."""
     for _ in range(1000):

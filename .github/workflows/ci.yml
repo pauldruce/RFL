@@ -14,125 +14,126 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  filter:
-    name: Path Filtering
+  plan:
+    name: CI Execution Planner
     runs-on: ubuntu-latest
     outputs:
-      docs: ${{ steps.filter.outputs.docs }}
-      code: ${{ steps.filter.outputs.code }}
+      has_changes: ${{ steps.plan.outputs.has_changes }}
+      validate_docs: ${{ steps.plan.outputs.validate_docs }}
+      lint_cpp: ${{ steps.plan.outputs.lint_cpp }}
+      test_ubuntu: ${{ steps.plan.outputs.test_ubuntu }}
+      test_macos: ${{ steps.plan.outputs.test_macos }}
+      test_windows: ${{ steps.plan.outputs.test_windows }}
+      ctest_filter: ${{ steps.plan.outputs.ctest_filter }}
+      required_checks: ${{ steps.plan.outputs.required_checks }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-
-      - uses: dorny/paths-filter@v4
-        id: filter
         with:
-          filters: .github/filters.yaml
+          fetch-depth: 0
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
+      - name: Compute CI execution plan
+        id: plan
+        run: mise run ci:plan -- --output plan.json
+
+      - name: Upload execution plan
+        uses: actions/upload-artifact@v7
+        with:
+          name: pipeline-plan
+          path: plan.json
+          retention-days: 7
 
   check_milestone:
     name: Milestone Verification
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
       - name: Verify PR has assigned milestone
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          MILESTONE="${{ github.event.pull_request.milestone.title }}"
-          if [ -z "$MILESTONE" ]; then
-            # Query live GitHub API in case milestone was attached immediately after PR creation
-            MILESTONE=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json milestone --jq '.milestone.title // empty' 2>/dev/null || true)
-          fi
-          if [ -z "$MILESTONE" ]; then
-            echo "::error::Pull Request #${{ github.event.pull_request.number }} does not have an assigned milestone. All PRs targeting main must belong to an active milestone."
-            exit 1
-          fi
-          echo "✅ Pull request is assigned to milestone: $MILESTONE"
+        run: mise run ci:milestone
 
   validate_docs:
-    name: Documentation, Links & Spelling Integrity
+    name: Documentation, Links, Spelling & Traceability
+    needs: plan
+    if: needs.plan.outputs.validate_docs == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
-
-      - name: Set up Python
-        uses: actions/setup-python@v7
         with:
-          python-version: "3.12"
+          fetch-depth: 0
 
-      - name: Validate links and badges
-        run: python3 scripts/check_links.py
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
 
-      - name: Spell & British English Check (CSpell)
-        run: npx cspell lint --dot .
+      - name: Validate documentation, links, spelling & traceability
+        run: mise run ci:docs
+
+      - name: Verify PR traceability (docs / script-only PRs)
+        if: github.event_name == 'pull_request' && needs.plan.outputs.test_ubuntu != 'true'
+        run: mise run ci:verify:pr
 
   lint:
-    name: "C++ Linter (${{ matrix.path }})"
-    needs: filter
-    if: >-
-      needs.filter.outputs.code == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    name: C++ Linter
+    needs: plan
+    if: needs.plan.outputs.lint_cpp == 'true'
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        path:
-          - "src"
-          - "examples"
-          - "playground"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
 
-      - name: Run clang-format style check for ${{ matrix.path }}
-        uses: jidicula/clang-format-action@v4.18.0
-        with:
-          clang-format-version: "16"
-          check-path: ${{ matrix.path }}
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+
+      - name: Run C++ Style Linter
+        run: mise run lint:cpp
 
   test_ubuntu:
     name: Ubuntu PR Smoke Test
-    needs: filter
-    if: >-
-      needs.filter.outputs.code == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    needs: plan
+    if: needs.plan.outputs.test_ubuntu == 'true'
     uses: ./.github/workflows/_build_and_test_linux.yml
     with:
       os: ubuntu-latest
       install_system_armadillo: true
+      test_python: true
+      verify_pr: true
+      ctest_filter: ${{ needs.plan.outputs.ctest_filter }}
 
   test_macos:
     name: macOS PR Smoke Test
-    needs: filter
-    if: >-
-      needs.filter.outputs.code == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    needs: plan
+    if: needs.plan.outputs.test_macos == 'true'
     uses: ./.github/workflows/_build_and_test_macos.yml
     with:
       os: macos-latest
       install_system_armadillo: true
+      ctest_filter: ${{ needs.plan.outputs.ctest_filter }}
 
   test_windows:
     name: Windows PR Smoke Test
-    needs: filter
-    if: >-
-      needs.filter.outputs.code == 'true' ||
-      github.event_name == 'workflow_dispatch'
+    needs: plan
+    if: needs.plan.outputs.test_windows == 'true'
     uses: ./.github/workflows/_build_and_test_windows.yml
     with:
       os: windows-latest
       install_system_armadillo: true
+      ctest_filter: ${{ needs.plan.outputs.ctest_filter }}
 
   matrix_linux:
     name: "Matrix Linux"
-    needs: filter
-    if: >-
-      (
-        needs.filter.outputs.code == 'true' ||
-        github.event_name == 'workflow_dispatch'
-      ) &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    needs: plan
+    if: needs.plan.outputs.test_ubuntu == 'true' && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -146,13 +147,8 @@ jobs:
 
   matrix_macos:
     name: "Matrix macOS"
-    needs: filter
-    if: >-
-      (
-        needs.filter.outputs.code == 'true' ||
-        github.event_name == 'workflow_dispatch'
-      ) &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    needs: plan
+    if: needs.plan.outputs.test_macos == 'true' && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -166,13 +162,8 @@ jobs:
 
   matrix_windows:
     name: "Matrix Windows"
-    needs: filter
-    if: >-
-      (
-        needs.filter.outputs.code == 'true' ||
-        github.event_name == 'workflow_dispatch'
-      ) &&
-      contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
+    needs: plan
+    if: needs.plan.outputs.test_windows == 'true' && contains(github.event.pull_request.labels.*.name, 'ci:full-matrix')
     strategy:
       fail-fast: false
       matrix:
@@ -186,82 +177,17 @@ jobs:
 
   ci-gate:
     name: CI Gatekeeper
-    needs: [filter, check_milestone, validate_docs, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
+    needs: [plan, check_milestone, validate_docs, lint, test_ubuntu, test_macos, test_windows, matrix_linux, matrix_macos, matrix_windows]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Evaluate results
-        run: |
-          echo "Filter result: ${{ needs.filter.result }}"
-          echo "Milestone check result: ${{ needs.check_milestone.result }}"
-          echo "Documentation & link check result: ${{ needs.validate_docs.result }}"
-          echo "Lint result: ${{ needs.lint.result }}"
-          echo "Ubuntu smoke test result: ${{ needs.test_ubuntu.result }}"
-          echo "macOS smoke test result: ${{ needs.test_macos.result }}"
-          echo "Windows smoke test result: ${{ needs.test_windows.result }}"
-          echo "Linux matrix result: ${{ needs.matrix_linux.result }}"
-          echo "macOS matrix result: ${{ needs.matrix_macos.result }}"
-          echo "Windows matrix result: ${{ needs.matrix_windows.result }}"
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
-          if [ "${{ needs.filter.result }}" = "failure" ] || \
-             [ "${{ needs.filter.result }}" = "cancelled" ]; then
-            echo "❌ Path filtering job failed or was cancelled."
-            exit 1
-          fi
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
 
-          if [ "${{ needs.check_milestone.result }}" = "failure" ] || \
-             [ "${{ needs.check_milestone.result }}" = "cancelled" ]; then
-            echo "❌ Milestone verification failed: pull request must have an assigned milestone."
-            exit 1
-          fi
-
-          if [ "${{ needs.validate_docs.result }}" = "failure" ] || \
-             [ "${{ needs.validate_docs.result }}" = "cancelled" ]; then
-            echo "❌ Documentation and link integrity validation failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.lint.result }}" = "failure" ] || \
-             [ "${{ needs.lint.result }}" = "cancelled" ]; then
-            echo "❌ C++ linting failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.test_ubuntu.result }}" = "failure" ] || \
-             [ "${{ needs.test_ubuntu.result }}" = "cancelled" ]; then
-            echo "❌ Ubuntu PR smoke test failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.test_macos.result }}" = "failure" ] || \
-             [ "${{ needs.test_macos.result }}" = "cancelled" ]; then
-            echo "❌ macOS PR smoke test failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.test_windows.result }}" = "failure" ] || \
-             [ "${{ needs.test_windows.result }}" = "cancelled" ]; then
-            echo "❌ Windows PR smoke test failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.matrix_linux.result }}" = "failure" ] || \
-             [ "${{ needs.matrix_linux.result }}" = "cancelled" ]; then
-            echo "❌ Linux compatibility matrix failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.matrix_macos.result }}" = "failure" ] || \
-             [ "${{ needs.matrix_macos.result }}" = "cancelled" ]; then
-            echo "❌ macOS compatibility matrix failed or was cancelled."
-            exit 1
-          fi
-
-          if [ "${{ needs.matrix_windows.result }}" = "failure" ] || \
-             [ "${{ needs.matrix_windows.result }}" = "cancelled" ]; then
-            echo "❌ Windows compatibility matrix failed or was cancelled."
-            exit 1
-          fi
-
-          echo "✅ All required checks passed or were safely skipped."
-          exit 0
+      - name: Evaluate required checks
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: mise run ci:gate
