@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
 
       - name: Verify release tag and changelog integrity
         run: |
@@ -86,7 +86,7 @@ jobs:
         uses: ./.github/actions/install-windows-deps
 
       - name: Build and test wheels with cibuildwheel
-        uses: pypa/cibuildwheel@v4.2.1
+        uses: pypa/cibuildwheel@v4.3.1
         with:
           package-dir: .
         env:
@@ -112,7 +112,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v4
 
       - name: Build sdist
         run: mise run build:sdist
