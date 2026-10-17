@@ -61,5 +61,3 @@ Authors must follow these formatting rules to prevent parser collisions:
 * **Thin Spacing (`\thinspace`):** Use `\thinspace` before differentials ($\mathrm{d}x$). Do not use `\,` because CommonMark strips the backslash before punctuation, rendering an unwanted comma.
 * **Set Braces (`\lbrace`, `\rbrace`):** Use `\lbrace` and `\rbrace` for set notation and anticommutators. Markdown strips backslashes before literal braces `\{` and `\}`.
 * **Separation (`\quad`, `\qquad`):** Use `\quad` and `\qquad` to separate distinct equations or conditions. Avoid `~` in equations.
-
-

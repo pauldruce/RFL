@@ -219,4 +219,3 @@ The script `scripts/verify_comments.py` runs under `mise run lint`. It fails if:
 * Doxygen tags (`\f$`, `\f[`, `/// \brief`, `/**`) appear in any test file (`*/tests/*`).
 * Doxygen docblocks (`/**`) appear in implementation `.cpp` files.
 * Raw LaTeX formulas appear in header `@brief` lines.
-
