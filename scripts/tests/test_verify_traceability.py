@@ -1,0 +1,418 @@
+#!/usr/bin/env python3
+"""scripts/tests/test_verify_traceability.py
+
+Unit test suite for the RFL Requirements Traceability and Governance Engine.
+Verifies requirement ID validation, EP table parsing, domain-aware coverage classification,
+C++ (GTest/Catch2) extraction, Python AST extraction (ignoring non-test helper functions),
+JUnit XML evaluation, and shift-left hook integrity.
+
+Conforms to EP-5 (REQ-TRC-001 through REQ-TRC-006).
+Uses standard Python library only (runnable via unittest or pytest).
+"""
+
+from __future__ import annotations
+
+from contextlib import redirect_stdout
+import io
+import json
+import os
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+import verify_traceability as vt
+
+
+def req(*req_ids: str):
+    """Test marker attaching requirement IDs for AST extraction [REQ-TRC-004]."""
+
+    def decorator(func):
+        return func
+
+    return decorator
+
+
+class TestRequirementIDValidation(unittest.TestCase):
+    """Test requirement ID regex and namespacing rules [REQ-TRC-001]."""
+
+    def test_valid_canonical_ids(self) -> None:
+        valid_ids = [
+            "REQ-ARCH-001",
+            "REQ-PKG-009",
+            "REQ-CI-010",
+            "REQ-PHY-001",
+            "REQ-TRC-006",
+            "REQ-AI-042",
+        ]
+        for req_id in valid_ids:
+            self.assertIsNotNone(
+                vt.REQ_ID_PATTERN.match(req_id),
+                f"Expected valid ID '{req_id}' to match pattern",
+            )
+
+    def test_invalid_canonical_ids(self) -> None:
+        invalid_ids = [
+            "REQ-001",          # Un-namespaced legacy format
+            "REQ-A-001",        # Subsystem code too short (< 2 letters)
+            "REQ-INVALID-001",  # Subsystem code too long (> 4 letters)
+            "REQ-arch-001",     # Lowercase subsystem code
+            "REQ-ARCH-1",       # Non-zero-padded number
+            "REQ-ARCH-01",      # 2-digit number
+            "ARCH-001",         # Missing REQ prefix
+            "REQ-008b",         # Alphanumeric suffix
+        ]
+        for req_id in invalid_ids:
+            self.assertIsNone(
+                vt.REQ_ID_PATTERN.match(req_id),
+                f"Expected invalid ID '{req_id}' to fail pattern match",
+            )
+
+
+class TestStrictRequirementIDEnforcement(unittest.TestCase):
+    """Test strict requirement ID enforcement and rejection of un-namespaced IDs [REQ-TRC-003]."""
+
+    @req("REQ-TRC-003")
+    def test_canonical_id_unchanged(self) -> None:
+        canonical_id = vt.canonicalize_req("REQ-ARCH-001")
+        self.assertEqual(canonical_id, "REQ-ARCH-001")
+
+    @req("REQ-TRC-003")
+    def test_legacy_ids_not_rewritten_and_fail_pattern(self) -> None:
+        legacy_ids = ["REQ-001", "REQ-ARC-001", "REQ-PKG-01"]
+        for legacy_id in legacy_ids:
+            # Legacy IDs must NOT be silently rewritten to canonical IDs
+            rewritten = vt.canonicalize_req(legacy_id)
+            self.assertEqual(rewritten, legacy_id)
+
+        # Legacy IDs with invalid syntax must fail the canonical REQ_ID_PATTERN match
+        self.assertIsNone(vt.REQ_ID_PATTERN.match("REQ-001"))
+        self.assertIsNone(vt.REQ_ID_PATTERN.match("REQ-PKG-01"))
+
+
+class TestMathPipeShielding(unittest.TestCase):
+    """Test LaTeX math pipe character shielding to preserve Markdown table integrity [REQ-TRC-002]."""
+
+    def test_single_dollar_math_shielding(self) -> None:
+        text = "Formula $|S|$ and $\\lvert A \\rvert \\le B$ in text"
+        shielded = vt.shield_math_pipes(text)
+        self.assertNotIn("|", shielded)
+        restored = vt.restore_math_pipes(shielded)
+        self.assertEqual(restored, text)
+
+    def test_double_dollar_math_shielding(self) -> None:
+        text = "$$\\lVert D - D^\\dagger \\rVert_F \\le c_2 (p+q) \\epsilon_{\\mathrm{mach}} \\lVert D \\rVert_F$$"
+        shielded = vt.shield_math_pipes(text)
+        self.assertNotIn("|", shielded)
+        restored = vt.restore_math_pipes(shielded)
+        self.assertEqual(restored, text)
+
+    def test_bracket_math_shielding(self) -> None:
+        text_inline = r"Inline math \(|x| < 1\) with pipe"
+        shielded_inline = vt.shield_math_pipes(text_inline)
+        self.assertNotIn("|", shielded_inline)
+        self.assertEqual(vt.restore_math_pipes(shielded_inline), text_inline)
+
+        text_display = r"Display math \[\lvert A \rvert \le B\] with pipe"
+        shielded_display = vt.shield_math_pipes(text_display)
+        self.assertNotIn("|", shielded_display)
+        self.assertEqual(vt.restore_math_pipes(shielded_display), text_display)
+
+
+class TestEPTableParserAndDomainAwareness(unittest.TestCase):
+    """Test Markdown requirement table extraction and domain classification [REQ-TRC-002]."""
+
+    def test_parse_four_column_ep_table(self) -> None:
+        ep_content = """# EP-99: Test Proposal
+
+## 3. Research Workflows & Scientific Requirements
+
+### 3.2 Functional Requirements & Invariants
+
+| Requirement ID | Requirement Summary | Lifecycle Status | Operational & Physical Invariant |
+| :--- | :--- | :--- | :--- |
+| **REQ-ARCH-001** | **Hermiticity Preservation** | Phase 1 (Implemented) | Matrix variations $\\delta M_k$ must preserve $H_i^\\dagger = H_i$. |
+| **REQ-ARCH-002** | **Analytic Variation** | Phase 2 (Planned) | Fast $\\mathcal{O}(N^3)$ local variation equals global recomputation. |
+| **REQ-CI-001** | **Fast Dual-Platform PR Gate** | Phase 1 (Implemented) | PR gate finishes in under 120 seconds. |
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            ep_file = tmp_root / "ep-99-test.md"
+            ep_file.write_text(ep_content, encoding="utf-8")
+
+            parsed_requirements, errors = vt.parse_ep_file(ep_file, tmp_root)
+            self.assertEqual(len(errors), 0, f"Errors: {errors}")
+            self.assertEqual(len(parsed_requirements), 3)
+
+            self.assertEqual(parsed_requirements[0].req_id, "REQ-ARCH-001")
+            self.assertTrue(parsed_requirements[0].is_implemented)
+            self.assertTrue(parsed_requirements[0].is_unit_testable)
+
+            self.assertEqual(parsed_requirements[1].req_id, "REQ-ARCH-002")
+            self.assertFalse(parsed_requirements[1].is_implemented)
+            self.assertTrue(parsed_requirements[1].is_unit_testable)
+
+            self.assertEqual(parsed_requirements[2].req_id, "REQ-CI-001")
+            self.assertTrue(parsed_requirements[2].is_implemented)
+            self.assertFalse(parsed_requirements[2].is_unit_testable)
+
+
+class TestCppTestExtraction(unittest.TestCase):
+    """Test requirement tag extraction from GoogleTest and Catch2 source files [REQ-TRC-004]."""
+
+    def test_extract_googletest_comments(self) -> None:
+        cpp_content = """
+#include <gtest/gtest.h>
+
+// [REQ-ARCH-001]
+TEST(DiracOperatorTests, PreservesHermiticity) {
+    EXPECT_TRUE(true);
+}
+
+// [REQ-ARCH-002] Multi-tag test
+// [REQ-ARCH-003]
+TEST_F(DiracFixture, EvaluatesVariation) {
+    EXPECT_TRUE(true);
+}
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            src_file = tmp_root / "tDirac.cpp"
+            src_file.write_text(cpp_content, encoding="utf-8")
+
+            mappings = vt.extract_cpp_tests(src_file, tmp_root)
+            self.assertEqual(len(mappings), 3)
+
+            req_symbols = {(m.req_id, m.full_symbol) for m in mappings}
+            self.assertIn(("REQ-ARCH-001", "DiracOperatorTests.PreservesHermiticity"), req_symbols)
+            self.assertIn(("REQ-ARCH-002", "DiracFixture.EvaluatesVariation"), req_symbols)
+            self.assertIn(("REQ-ARCH-003", "DiracFixture.EvaluatesVariation"), req_symbols)
+
+    def test_extract_catch2_bracketed_tags(self) -> None:
+        cpp_content = """
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("Dirac Operator Hermiticity", "[core][REQ-ARCH-001]") {
+    SECTION("Sub-variation test", "[REQ-ARCH-002]") {
+        REQUIRE(true);
+    }
+}
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            src_file = tmp_root / "tCatch.cpp"
+            src_file.write_text(cpp_content, encoding="utf-8")
+
+            mappings = vt.extract_cpp_tests(src_file, tmp_root)
+            self.assertEqual(len(mappings), 2)
+            req_ids = {m.req_id for m in mappings}
+            self.assertIn("REQ-ARCH-001", req_ids)
+            self.assertIn("REQ-ARCH-002", req_ids)
+
+
+class TestPythonTestExtraction(unittest.TestCase):
+    """Test requirement tag extraction from Pytest files via Python AST [REQ-TRC-004]."""
+
+    def test_extract_pytest_markers_and_ignore_helpers(self) -> None:
+        py_content = """
+import pytest
+
+@pytest.mark.req("REQ-ARCH-006")
+def test_zero_copy_numpy_buffer():
+    pass
+
+def _helper_not_a_test():
+    \"\"\"Helper mentioning REQ-ARCH-001 should not be recorded as a test.\"\"\"
+    pass
+
+class TestDiracSuite:
+    \"\"\"Suite verifying [REQ-ARCH-001].\"\"\"
+
+    def __init__(self):
+        pass
+
+    def _init_fixture(self):
+        pass
+
+    def test_hermiticity_check(self):
+        pass
+
+    # [REQ-ARCH-003]
+    def test_spectral_symmetry(self):
+        pass
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            py_file = tmp_root / "test_physics.py"
+            py_file.write_text(py_content, encoding="utf-8")
+
+            mappings = vt.extract_python_tests(py_file, tmp_root)
+            symbols = {m.full_symbol for m in mappings}
+
+            self.assertIn("test_physics.test_zero_copy_numpy_buffer", symbols)
+            self.assertIn("test_physics.TestDiracSuite.test_hermiticity_check", symbols)
+            self.assertIn("test_physics.TestDiracSuite.test_spectral_symmetry", symbols)
+            # Non-test helpers must be excluded
+            self.assertNotIn("test_physics._helper_not_a_test", symbols)
+            self.assertNotIn("test_physics.TestDiracSuite.__init__", symbols)
+            self.assertNotIn("test_physics.TestDiracSuite._init_fixture", symbols)
+
+    def test_extract_python_tests_markers(self) -> None:
+        py_content = """
+import pytest
+
+@pytest.mark.req("REQ-ARCH-001")
+def test_func_with_req():
+    pass
+
+@pytest.mark.requirement("REQ-ARCH-006")
+def test_func_with_requirement():
+    pass
+
+@pytest.mark.requirement("REQ-TRC-001")
+class TestClassWithMarker:
+    def test_method(self):
+        pass
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            py_file = tmp_root / "test_markers.py"
+            py_file.write_text(py_content, encoding="utf-8")
+
+            mappings = vt.extract_python_tests(py_file, tmp_root)
+            req_symbols = {(m.req_id, m.full_symbol) for m in mappings}
+
+            self.assertIn(("REQ-ARCH-001", "test_markers.test_func_with_req"), req_symbols)
+            self.assertIn(("REQ-ARCH-006", "test_markers.test_func_with_requirement"), req_symbols)
+            self.assertIn(("REQ-TRC-001", "test_markers.TestClassWithMarker.test_method"), req_symbols)
+
+    def test_extract_comments_above_decorators(self) -> None:
+        py_content = """
+import pytest
+
+# [REQ-ARCH-001]
+@pytest.mark.parametrize("x", [1, 2])
+def test_decorated_func(x):
+    pass
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            py_file = tmp_root / "test_dec.py"
+            py_file.write_text(py_content, encoding="utf-8")
+            mappings = vt.extract_python_tests(py_file, tmp_root)
+            self.assertEqual(len(mappings), 1)
+            self.assertEqual(mappings[0].req_id, "REQ-ARCH-001")
+
+
+class TestJUnitXMLAndPRSummary(unittest.TestCase):
+    """Test JUnit XML parsing and PR test-diff detection [REQ-TRC-005]."""
+
+    def test_parse_junit_states(self) -> None:
+        xml_content = """<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="TestSuite" tests="4">
+    <testcase classname="DiracTests" name="PassTest" time="0.001" />
+    <testcase classname="DiracTests" name="FailTest" time="0.002">
+      <failure message="Expected equality">Mismatch at (0,0)</failure>
+    </testcase>
+    <testcase classname="DiracTests" name="ErrorTest" time="0.003">
+      <error message="std::logic_error">Index out of bounds</error>
+    </testcase>
+    <testcase classname="DiracTests" name="SkipTest" time="0.000">
+      <skipped message="Disabled on macOS" />
+    </testcase>
+  </testsuite>
+</testsuites>
+"""
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            tmp_root = Path(tmp_dir)
+            xml_file = tmp_root / "junit.xml"
+            xml_file.write_text(xml_content, encoding="utf-8")
+
+            results = vt.parse_junit_xml(xml_file)
+            self.assertEqual(results["DiracTests.PassTest"].status, "PASSED")
+            self.assertEqual(results["DiracTests.FailTest"].status, "FAILED")
+            self.assertEqual(results["DiracTests.ErrorTest"].status, "ERROR")
+            self.assertEqual(results["DiracTests.SkipTest"].status, "SKIPPED")
+
+    def test_is_test_file_path_detection(self) -> None:
+        self.assertTrue(vt.is_test_file_path("src/core/tests/tDiracOperator.cpp"))
+        self.assertTrue(vt.is_test_file_path("src/python_bindings/tests/unit/test_dirac.py"))
+        self.assertTrue(vt.is_test_file_path("scripts/tests/test_verify_traceability.py"))
+        self.assertFalse(vt.is_test_file_path("src/core/DiracOperator.cpp"))
+        self.assertFalse(vt.is_test_file_path("docs/eps/ep-5.md"))
+
+
+class TestCLIAndMatrixOutput(unittest.TestCase):
+    """Test CLI commands: query, generate-matrix, dump-json, and audit [REQ-TRC-003, REQ-TRC-005]."""
+
+    def test_query_requirement(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = vt.query_requirement("REQ-ARCH-001", REPO_ROOT, REPO_ROOT / "docs" / "eps")
+        self.assertEqual(rc, 0)
+        output = buf.getvalue()
+        self.assertIn("Requirement: REQ-ARCH-001", output)
+        self.assertIn("Phase 1 (Implemented)", output)
+
+    def test_generate_traceability_matrix_stdout(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            vt.generate_traceability_matrix(None, REPO_ROOT, REPO_ROOT / "docs" / "eps")
+        output = buf.getvalue()
+        self.assertIn("# RFL Requirements Traceability Matrix", output)
+        self.assertIn("REQ-ARCH-001", output)
+        self.assertIn("REQ-TRC-001", output)
+
+    def test_dump_json(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            vt.dump_json(REPO_ROOT, REPO_ROOT / "docs" / "eps")
+        data = json.loads(buf.getvalue())
+        self.assertIn("requirements", data)
+        self.assertIn("total_requirements", data)
+        self.assertIn("total_test_mappings", data)
+        self.assertIn("REQ-ARCH-001", [r["req_id"] for r in data["requirements"]])
+
+    def test_audit_repository(self) -> None:
+        buf = io.StringIO()
+        with redirect_stdout(buf):
+            rc = vt.audit_repository(REPO_ROOT, REPO_ROOT / "docs" / "eps")
+        self.assertEqual(rc, 0)
+        output = buf.getvalue()
+        self.assertIn("RFL Specification Traceability & Governance Audit", output)
+        self.assertIn("Coverage Statistics", output)
+
+
+class TestShiftLeftGitHooks(unittest.TestCase):
+    """Test shift-left local git hooks presence and executable configuration [REQ-TRC-006]."""
+
+    @unittest.skipUnless((REPO_ROOT / ".githooks").exists(), ".githooks directory not present")
+    def test_git_hooks_exist_and_are_executable(self) -> None:
+        pre_commit = REPO_ROOT / ".githooks" / "pre-commit"
+        pre_push = REPO_ROOT / ".githooks" / "pre-push"
+
+        self.assertTrue(pre_commit.exists(), "Missing .githooks/pre-commit")
+        self.assertTrue(pre_push.exists(), "Missing .githooks/pre-push")
+        self.assertTrue(os.access(pre_commit, os.X_OK), ".githooks/pre-commit must be executable")
+        self.assertTrue(os.access(pre_push, os.X_OK), ".githooks/pre-push must be executable")
+
+        pre_commit_text = pre_commit.read_text(encoding="utf-8")
+        self.assertIn("mise run pre:commit", pre_commit_text)
+
+        pre_push_text = pre_push.read_text(encoding="utf-8")
+        self.assertIn("mise run pre:push", pre_push_text)
+        self.assertIn("mise run release:verify", pre_push_text)
+
+        mise_toml = (REPO_ROOT / "mise.toml").read_text(encoding="utf-8")
+        self.assertIn('[tasks."pre:commit"]', mise_toml)
+        self.assertIn('[tasks."pre:push"]', mise_toml)
+        self.assertIn("verify_traceability.py --audit", mise_toml)
+
+
+if __name__ == "__main__":
+    unittest.main()
+

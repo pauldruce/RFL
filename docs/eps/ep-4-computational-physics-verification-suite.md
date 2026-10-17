@@ -100,19 +100,19 @@ Researchers and peer reviewers can independently verify that the software sample
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Physical & Mathematical Invariant | Target Tier |
+| Requirement ID | Requirement Summary | Lifecycle Status | Operational & Physical Invariant |
 | :--- | :--- | :--- | :--- |
-| **REQ-001** | **Incremental Action Invariant** | $\lvert (S_f - S_i) - \Delta S \rvert \le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert + \lvert g_2 \rvert \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)) + c_0 M^2 \epsilon_{\mathrm{mach}}$ (Section 3.3). | Tier 1 (Smoke) |
-| **REQ-002** | **Dirac Hermiticity** | $\lVert D - D^\dagger \rVert_F \le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ for assembled Dirac operators. | Tier 1 (Smoke) |
-| **REQ-003** | **Complete KO Real Structure** | $\lVert J^2 - \epsilon' I \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$, $\lVert D J - \epsilon J D \rVert_F \le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$, and $\lVert J \Gamma - \epsilon'' \Gamma J \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$ across all 8 KO dimensions. | Tier 1 (Smoke) |
-| **REQ-004** | **Chirality & Spectral Anti-Symmetry** | $\lVert \Gamma D + D \Gamma \rVert_F \le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ and $\lbrace \lambda_i \rbrace \equiv \lbrace -\lambda_i \rbrace$ to machine precision for even spectral triples. | Tier 1 (Smoke) |
-| **REQ-005** | **Gaussian Limit Moments** | MCMC eigenvalue moments match Wigner self-convolution within $3$ standard errors. | Tier 2 (Integration) |
-| **REQ-006** | **Detailed Balance** | Transition probabilities satisfy microscopic reversibility and coarse-grained state-flux balance $N_{A \to B} \approx N_{B \to A}$. | Tier 2 (Integration) |
-| **REQ-007** | **Chain Convergence** | Rank-normalised folded split $\hat{R} < 1.05$ with bulk $\mathrm{ESS} \ge 400$ across independent chains. | Tier 3 (Validation) |
-| **REQ-008** | **Unitary Gauge Invariance** | $\lvert S(U D U^\dagger) - S(D) \rvert \le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ and $\max_i \lvert \lambda_i(U D U^\dagger) - \lambda_i(D) \rvert \le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ for Haar unitary $U \in \mathrm{U}(N)$. | Tier 1 (Smoke) |
-| **REQ-009** | **Action Derivatives** | Analytical matrix variations match central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$ (Section 3.3). | Tier 1 (Smoke) |
-| **REQ-010** | **Simulation-Based Calibration** | Posterior rank statistics from Gaussian ensemble MCMC pass Kolmogorov-Smirnov uniformity test with $p > 0.01$ (Talts et al. 2018)[^talts2018]. | Tier 3 (Validation) |
-| **REQ-011** | **Physical Scaling Laws** | Rescaling $(g_2, g_4) \to (\alpha^{-2} g_2, \alpha^{-4} g_4)$ and monotonicity of $\langle \mathrm{Tr}(D^2) \rangle$ hold for general potentials. | Tier 2 (Integration) |
+| **REQ-PHY-001** | **Incremental Action Invariant** | Phase 1 (Planned) | (Tier 1 Smoke) $\lvert (S_f - S_i) - \Delta S \rvert \le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert + \lvert g_2 \rvert \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)) + c_0 M^2 \epsilon_{\mathrm{mach}}$ (Section 3.3). |
+| **REQ-PHY-002** | **Dirac Hermiticity** | Phase 1 (Planned) | (Tier 1 Smoke) $\lVert D - D^\dagger \rVert_F \le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ for assembled Dirac operators. |
+| **REQ-PHY-003** | **Complete KO Real Structure** | Phase 1 (Planned) | (Tier 1 Smoke) $\lVert J^2 - \epsilon' I \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$, $\lVert D J - \epsilon J D \rVert_F \le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$, and $\lVert J \Gamma - \epsilon'' \Gamma J \rVert_F \le c_3 \epsilon_{\mathrm{mach}}$ across all 8 KO dimensions. |
+| **REQ-PHY-004** | **Chirality & Spectral Anti-Symmetry** | Phase 1 (Planned) | (Tier 1 Smoke) $\lVert \Gamma D + D \Gamma \rVert_F \le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ and $\lbrace \lambda_i \rbrace \equiv \lbrace -\lambda_i \rbrace$ to machine precision for even spectral triples. |
+| **REQ-PHY-005** | **Gaussian Limit Moments** | Phase 1 (Planned) | (Tier 2 Integration) MCMC eigenvalue moments match Wigner self-convolution within $3$ standard errors. |
+| **REQ-PHY-006** | **Detailed Balance** | Phase 2 (Planned) | (Tier 2 Integration) Transition probabilities satisfy microscopic reversibility and coarse-grained state-flux balance $N_{A \to B} \approx N_{B \to A}$. |
+| **REQ-PHY-007** | **Chain Convergence** | Phase 2 (Planned) | (Tier 3 Validation) Rank-normalised folded split $\hat{R} < 1.05$ with $\mathrm{ESS} _{\mathrm{bulk}} \ge 400$ across independent chains. |
+| **REQ-PHY-008** | **Unitary Gauge Invariance** | Phase 1 (Planned) | (Tier 1 Smoke) $\lvert S(U D U^\dagger) - S(D) \rvert \le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ and $\max_i \lvert \lambda_i(U D U^\dagger) - \lambda_i(D) \rvert \le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ for Haar unitary $U \in \mathrm{U}(N)$. |
+| **REQ-PHY-009** | **Action Derivatives** | Phase 1 (Planned) | (Tier 1 Smoke) Analytical matrix variations match central finite differences to $\mathcal{O}(\epsilon_{\mathrm{mach}}^{2/3}) \lVert \nabla S \rVert$ (Section 3.3). |
+| **REQ-PHY-010** | **Simulation-Based Calibration** | Phase 2 (Planned) | (Tier 3 Validation) Posterior rank statistics from Gaussian ensemble MCMC pass Kolmogorov-Smirnov uniformity test with $p > 0.01$ (Talts et al. 2018)[^talts2018]. |
+| **REQ-PHY-011** | **Physical Scaling Laws** | Phase 2 (Planned) | (Tier 2 Integration) Rescaling $(g_2, g_4) \to (\alpha^{-2} g_2, \alpha^{-4} g_4)$ and monotonicity of $\langle \mathrm{Tr}(D^2) \rangle$ hold for general potentials. |
 
 ---
 
@@ -136,7 +136,7 @@ $$
 
 
 
-#### 1. Structural Algebraic Invariants (REQ-002, REQ-003, REQ-004)
+#### 1. Structural Algebraic Invariants (REQ-PHY-002, REQ-PHY-003, REQ-PHY-004)
 The Dirac operator is assembled by summing $p+q$ Kronecker tensor products:
 
 
@@ -158,7 +158,7 @@ $$
 Similarly, charge conjugation $J$ and grading $\Gamma$ represent signed index permutations.
 Matrix multiplication by these operators incurs zero cancellation and minimal floating-point error bounded by $c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$.
 
-#### 2. Catastrophic Cancellation in Action Differences (REQ-001)
+#### 2. Catastrophic Cancellation in Action Differences (REQ-PHY-001)
 When updating a single matrix element, full action calculation computes:
 
 
@@ -192,7 +192,7 @@ $$
 
 For $M \approx 100$, $\lvert S \rvert \approx 10^4$, and empirical constants $c_1 \approx 10, c_0 \approx 5$, this bound calculates to approximately $10^{-10}$.
 
-#### 3. Unitary Gauge & Spectral Invariance (REQ-008)
+#### 3. Unitary Gauge & Spectral Invariance (REQ-PHY-008)
 Unitary transformation $D \to U D U^\dagger$ involves matrix multiplication.
 The operator $\mathrm{fl}(\cdot)$ denotes the IEEE 754 rounded floating-point machine calculation of an expression (Higham 2002)[^higham2002].
 Numerical matrix multiplication of dimension $M$ incurs rounding error bounded by Wilkinson's theorem:
@@ -214,7 +214,7 @@ $$
 
 For $M \le 100$ and $\lVert D \rVert_2 \approx 10$, eigenvalue drift remains below $10^{-13}$.
 
-#### 4. Theoretical Bound for Central Finite Differences (REQ-009)
+#### 4. Theoretical Bound for Central Finite Differences (REQ-PHY-009)
 Central finite difference approximations balance truncation error and floating-point cancellation:
 
 
@@ -254,13 +254,13 @@ Tests must use a relative tolerance scaled by $\mathcal{O}(\epsilon_{\mathrm{mac
 
 | Requirement ID | Error Bound Mechanism | Mathematical Error Bound | Empirical Constant |
 | :--- | :--- | :--- | :--- |
-| **REQ-001** | Trace Cancellation | $\le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert + \lvert g_2 \rvert \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)) + c_0 M^2 \epsilon_{\mathrm{mach}}$ | $c_1 \approx 10, c_0 \approx 5$ |
-| **REQ-002** | Additive Hermiticity | $\le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | $c_2 \approx 5$ |
-| **REQ-003** | Permutation Invariance | $\le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | $c_3 \approx 5$ |
-| **REQ-004** | Sign Anti-commutation | $\le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | Exact |
-| **REQ-008** | Unitary Action Invariance | $\le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ | $c_4 \approx 20$ |
-| **REQ-008b** | Weyl Eigenvalue Bound | $\le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ | $c_5 \approx 5$ |
-| **REQ-009** | Central Finite Difference | $\le c_6 \epsilon_{\mathrm{mach}}^{2/3} \lVert \nabla S \rVert$ | $c_6 \approx 50$ |
+| **REQ-PHY-001** | Trace Cancellation | $\le c_1 M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert + \lvert g_2 \rvert \mathrm{Tr}(D^2) + g_4 \mathrm{Tr}(D^4)) + c_0 M^2 \epsilon_{\mathrm{mach}}$ | $c_1 \approx 10, c_0 \approx 5$ |
+| **REQ-PHY-002** | Additive Hermiticity | $\le c_2 (p+q) \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | $c_2 \approx 5$ |
+| **REQ-PHY-003** | Permutation Invariance | $\le c_3 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | $c_3 \approx 5$ |
+| **REQ-PHY-004** | Sign Anti-commutation | $\le 2 \epsilon_{\mathrm{mach}} \lVert D \rVert_F$ | Exact |
+| **REQ-PHY-008** | Unitary Action Invariance | $\le c_4 M^2 \epsilon_{\mathrm{mach}} \lvert S(D) \rvert$ | $c_4 \approx 20$ |
+| **REQ-PHY-008b** | Weyl Eigenvalue Bound | $\le c_5 M \epsilon_{\mathrm{mach}} \lVert D \rVert_2$ | $c_5 \approx 5$ |
+| **REQ-PHY-009** | Central Finite Difference | $\le c_6 \epsilon_{\mathrm{mach}}^{2/3} \lVert \nabla S \rVert$ | $c_6 \approx 50$ |
 
 ### 3.4 Dual-Path Verification & Physical Invariants in Scientific Computing
 
@@ -299,7 +299,7 @@ If a sign error or indexing flaw corrupts the precomputed $\Omega$ tensor, the p
 All matrix configurations remain strictly Hermitian.
 However, the Metropolis filter calculates an incorrect energy difference.
 The Markov chain drifts away from the true Boltzmann distribution $\mathrm{e}^{-S(D)}$ and samples an unphysical ensemble.
-Verifying REQ-001 guarantees that the local update exactly mirrors the global internal energy change.
+Verifying REQ-PHY-001 guarantees that the local update exactly mirrors the global internal energy change.
 
 *Precedents in Major Scientific Software:*
 * **Lattice QCD (Grid, Chroma, USQCD, MILC):**
@@ -335,7 +335,7 @@ $$
 An error in analytical forces violates Liouville's theorem of phase space volume conservation.
 In HMC, trajectories fail energy conservation ($\Delta H \gg 0$), collapsing Metropolis acceptance rates.
 In Langevin simulations without acceptance steps, erroneous forces silently bias stationary expectation values.
-Verifying REQ-009 guarantees symplectic consistency and correct force fields before running dynamical sampling.
+Verifying REQ-PHY-009 guarantees symplectic consistency and correct force fields before running dynamical sampling.
 
 *Precedents in Major Scientific Software:*
 * **Stan (Bayesian Modelling & HMC):**
@@ -358,7 +358,7 @@ Leading scientific software projects document verification invariants through st
 * **Diagnostic Verification Tools:** Software exposes diagnostic commands (such as Stan's `test_grad` and GROMACS's `gmx check`) allowing users to verify algorithmic consistency.
 * **Theory-to-Code Traceability:** Technical documentation links code routines directly to underlying theoretical equations and literature citations.
 
-### 3.5 Statistical Convergence & Multi-Chain Diagnostics (REQ-007)
+### 3.5 Statistical Convergence & Multi-Chain Diagnostics (REQ-PHY-007)
 
 #### 1. The Multi-Chain Requirement in Matrix Ensembles
 Markov Chain Monte Carlo simulations can easily produce misleading convergence signals.
@@ -481,7 +481,7 @@ Modern computational standards established by Vehtari et al. (2021)[^vehtari2021
 * **Threshold:** $\hat{R} < 1.05$ across all primary observables ($\mathrm{Tr}(D^2)$, $\mathrm{Tr}(D^4)$, and spectral radii).
 * **Effective Sample Size:** Bulk effective sample size $\mathrm{ESS}_{\mathrm{bulk}} \ge 400$ across chains.
 
-In RFL (REQ-007), Tier 3 nightly validation runs 4 independent chains.
+In RFL (REQ-PHY-007), Tier 3 nightly validation runs 4 independent chains.
 Passing this test proves that the noncommutative geometry ensemble has equilibrated to the true Boltzmann distribution.
 
 ---
@@ -564,16 +564,16 @@ tests/physics/
 
 | Verification Gate | Command / Test Description | Target Invariant | Target Tier |
 | :--- | :--- | :--- | :--- |
-| **Algebraic Invariants** | `ctest --test-dir build -R DeltaTests` | Verifies $\Delta S$ matches full action differences (REQ-001). | Tier 1 (PR Gate) |
-| **Spectral Axioms** | `pytest tests/physics/test_axiomatic_invariants.py` | Verifies Hermiticity, KO table, and chirality (REQ-002–004). | Tier 1 (PR Gate) |
-| **Gauge Invariance** | `pytest tests/physics/test_gauge_invariance.py` | Verifies $S(UDU^\dagger) = S(D)$ and spectral invariance (REQ-008). | Tier 1 (PR Gate) |
-| **Derivative Consistency** | `pytest tests/physics/test_derivative_consistency.py` | Verifies variations match central finite differences (REQ-009). | Tier 1 (PR Gate) |
-| **Gaussian Limit** | `pytest tests/physics/test_gaussian_limit.py` | Verifies convergence to Wigner convolution law (REQ-005). | Tier 2 (Merge Gate) |
-| **Detailed Balance** | `pytest tests/physics/test_detailed_balance.py` | Verifies microscopic reversibility and state-flux balance (REQ-006). | Tier 2 (Merge Gate) |
-| **Physical Scaling Laws** | `pytest tests/physics/test_scaling_invariants.py` | Verifies parameter rescaling and coupling monotonicity (REQ-011). | Tier 2 (Merge Gate) |
+| **Algebraic Invariants** | `ctest --test-dir build -R DeltaTests` | Verifies $\Delta S$ matches full action differences (REQ-PHY-001). | Tier 1 (PR Gate) |
+| **Spectral Axioms** | `pytest tests/physics/test_axiomatic_invariants.py` | Verifies Hermiticity, KO table, and chirality (REQ-PHY-002–REQ-PHY-004). | Tier 1 (PR Gate) |
+| **Gauge Invariance** | `pytest tests/physics/test_gauge_invariance.py` | Verifies $S(UDU^\dagger) = S(D)$ and spectral invariance (REQ-PHY-008). | Tier 1 (PR Gate) |
+| **Derivative Consistency** | `pytest tests/physics/test_derivative_consistency.py` | Verifies variations match central finite differences (REQ-PHY-009). | Tier 1 (PR Gate) |
+| **Gaussian Limit** | `pytest tests/physics/test_gaussian_limit.py` | Verifies convergence to Wigner convolution law (REQ-PHY-005). | Tier 2 (Merge Gate) |
+| **Detailed Balance** | `pytest tests/physics/test_detailed_balance.py` | Verifies microscopic reversibility and state-flux balance (REQ-PHY-006). | Tier 2 (Merge Gate) |
+| **Physical Scaling Laws** | `pytest tests/physics/test_scaling_invariants.py` | Verifies parameter rescaling and coupling monotonicity (REQ-PHY-011). | Tier 2 (Merge Gate) |
 | **1-Matrix Benchmark** | `pytest tests/physics/test_riemann_hilbert_1matrix.py` | Verifies agreement with Riemann-Hilbert analytical solutions. | Tier 3 (Nightly) |
-| **MCMC Calibration (SBC)** | `pytest tests/physics/test_gaussian_sbc.py` | Verifies uniform posterior ranks in Gaussian ensembles (REQ-010). | Tier 3 (Nightly) |
-| **Chain Convergence** | `pytest tests/physics/test_chain_convergence.py` | Verifies rank-normalised split $\hat{R} < 1.05$ and $\mathrm{ESS} \ge 400$ (REQ-007). | Tier 3 (Nightly) |
+| **MCMC Calibration (SBC)** | `pytest tests/physics/test_gaussian_sbc.py` | Verifies uniform posterior ranks in Gaussian ensembles (REQ-PHY-010). | Tier 3 (Nightly) |
+| **Chain Convergence** | `pytest tests/physics/test_chain_convergence.py` | Verifies rank-normalised split $\hat{R} < 1.05$ and $\mathrm{ESS} \ge 400$ (REQ-PHY-007). | Tier 3 (Nightly) |
 
 ---
 

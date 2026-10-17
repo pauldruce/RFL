@@ -134,8 +134,11 @@ public:
 
   /**
    * Returns a constant reference to the vector of conjugate momenta matrices.
+   *
+   * Each Hermitian matrix stores the conjugate momentum paired with the
+   * corresponding matrix in getMatrices() during Hamiltonian Monte Carlo trajectories.
    */
-  // TODO: Move to Hamiltonian class or document usage.
+  // TODO(EP-1, #13): Move HMC conjugate momenta storage out of DiracOperator into Hamiltonian.
   const std::vector<arma::cx_mat>& getMomenta() const override { return m_momenta; }
 
   /**

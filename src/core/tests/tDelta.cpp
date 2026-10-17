@@ -139,6 +139,7 @@ double calculateDirectDelta24(
 // Unit Tests
 // =============================================================================
 
+// [REQ-PHY-001]
 // 1. Invariant: Action variation under Hermitian rank-1 update Tr(D^2(M + delta_M)) - Tr(D^2(M)).
 // 2. Reference: Barrett & Glaser (2016), arXiv:1510.01377, Eq. (3.1).
 // 3. Dual-Path Verification: BarrettGlaserAction::delta2 vs calculateDirectDelta2.
@@ -169,6 +170,7 @@ TEST(DeltaTests, Delta2MatchesTraceDifference) {
   }
 }
 
+// [REQ-PHY-001]
 // 1. Invariant: Action variation under Hermitian rank-1 update Tr(D^4(M + delta_M)) - Tr(D^4(M)).
 // 2. Reference: Barrett & Glaser (2016), arXiv:1510.01377, Eq. (3.2).
 // 3. Dual-Path Verification: BarrettGlaserAction::delta4 vs calculateDirectDelta4.
@@ -199,6 +201,7 @@ TEST(DeltaTests, Delta4MatchesTraceDifference) {
   }
 }
 
+// [REQ-PHY-001]
 // 1. Invariant: Total action variation Delta S = g_2 * Delta_2 + g_4 * Delta_4.
 // 2. Reference: Barrett & Glaser (2016), arXiv:1510.01377, Eq. (1.1).
 // 3. Dual-Path Verification: BarrettGlaserAction::delta24 vs calculateDirectDelta24.
@@ -235,6 +238,7 @@ TEST(DeltaTests, Delta24MatchesActionDifference) {
   }
 }
 
+// [REQ-PHY-001]
 // 1. Invariant: Diagonal variation with purely real z (delta_M = 2 * Re(z) * E_{ii}).
 // 2. Reference: Barrett & Glaser (2016), arXiv:1510.01377, Section 3.
 // 3. Dual-Path Verification: BarrettGlaserAction::delta24 vs calculateDirectDelta24 with fixed seed.
@@ -256,6 +260,7 @@ TEST(DeltaTests, DeterministicDiagonalUpdateMatchesActionDifference) {
   EXPECT_NEAR(direct, analytic, kTolerance);
 }
 
+// [REQ-PHY-001]
 // 1. Invariant: Off-diagonal variation with complex z (delta_M = z * E_{ij} + conj(z) * E_{ji}).
 // 2. Reference: Barrett & Glaser (2016), arXiv:1510.01377, Section 3.
 // 3. Dual-Path Verification: BarrettGlaserAction::delta24 vs calculateDirectDelta24 with fixed seed.
@@ -277,6 +282,7 @@ TEST(DeltaTests, DeterministicOffDiagonalUpdateMatchesActionDifference) {
   EXPECT_NEAR(direct, analytic, kTolerance);
 }
 
+// [REQ-PHY-009]
 // 1. Invariant: Action derivative along Hermitian tangent direction matches directional gradient.
 //    lim_{eps -> 0} (S(M_k + eps * H) - S(M_k - eps * H)) / (2 * eps) == Re(Tr(nabla_{M_k} S * H)).
 // 2. Reference: EP-4 Computational Physics Verification Suite, Section 3.
@@ -369,7 +375,8 @@ TEST(DeltaTests, QuarticCouplingScalesLinearly) {
   EXPECT_NEAR(max_diff, 0.0, 1e-12);
 }
 
-// 1. Invariant: Action invariance under Dirac field rescaling (EP-4, REQ-011).
+// [REQ-PHY-011]
+// 1. Invariant: Action invariance under Dirac field rescaling (EP-4).
 //    S(alpha * D; alpha^(-2) * g_2, alpha^(-4) * g_4) == S(D; g_2, g_4).
 //    Specifically for alpha = g_4^(1/4): S(g_4^(1/4) * D; g_2 / sqrt(g_4), 1.0) == S(D; g_2, g_4).
 // 2. Reference: Barrett & Glaser (2016), arXiv:1510.01377, Section 2; docs/theory/barrett_glaser.md#field-rescaling--literature-conventions.

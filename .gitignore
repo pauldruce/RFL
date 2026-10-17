@@ -23,3 +23,4 @@ uv.lock
 /research
 /vault
 .agents/handoffs/
+/.worktrees/

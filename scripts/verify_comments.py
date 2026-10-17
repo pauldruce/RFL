@@ -22,6 +22,7 @@ WORKSPACE_ROOT = Path(__file__).resolve().parent.parent
 
 IGNORE_DIRS = {
     ".git",
+    ".worktrees",
     "build",
     "_deps",
     ".venv",

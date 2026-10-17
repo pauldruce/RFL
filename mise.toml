@@ -6,73 +6,148 @@ python = "3.12"
 uv = "latest"
 node = "lts"
 "clang-format" = "16.0.6"
-"aqua:terrastruct/d2" = "0.8.2"
+d2 = "0.8.2"
+
+[tasks."build:configure"]
+description = "Configure CMake build directory with Ninja"
+run = "cmake -B build -S . -G Ninja"
+
+[tasks."build:cpp"]
+description = "Build all C++ targets using CMake"
+run = "cmake --build build"
+
+[tasks."build:sdist"]
+description = "Build Python source distribution package via uv"
+run = "uv build --sdist --out-dir dist"
 
 [tasks.build]
 description = "Configure and build C++ targets using CMake and Ninja"
-run = "cmake -B build -G Ninja && cmake --build build"
+depends = ["build:configure", "build:cpp"]
 
-[tasks.test-cpp]
-description = "Build and execute C++ test suite using CTest"
-run = "cmake --build build && ctest --test-dir build --output-on-failure"
-
-[tasks.test-python]
-description = "Execute Python test suite using uv and pytest"
-run = "uv run --group test pytest src/python_bindings/tests"
-
-[tasks.test]
-description = "Execute both C++ and Python test suites"
-depends = ["test-cpp", "test-python"]
-
-[tasks.lint-cpp]
-description = "Check C++ source formatting against clang-format 16"
-run = "clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.hpp' '*.h')"
+[tasks."build:d2"]
+description = "Recompile all SVG diagrams from D2 sources"
+run = "python3 scripts/check_d2_images.py --fix"
 
 [tasks.fmt]
 description = "Format all C++ source files using clang-format 16"
 run = "clang-format -i $(git ls-files '*.cpp' '*.hpp' '*.h')"
 
-[tasks.lint-spelling]
+[tasks."ci:plan"]
+description = "Analyse changes and output deterministic CI execution plan as JSON"
+run = "python3 scripts/ci_plan.py plan --json"
+
+[tasks."ci:milestone"]
+description = "Verify that the current pull request has an assigned milestone"
+run = "python3 scripts/ci_plan.py check-milestone"
+
+[tasks."ci:verify:pr"]
+description = "Verify pull request requirements traceability, test diffs, and JUnit XML"
+run = "python3 scripts/verify_traceability.py --check-pr"
+
+[tasks."ci:gate"]
+description = "Evaluate upstream CI job statuses against required_checks"
+run = "python3 scripts/ci_plan.py gate"
+
+[tasks."ci:docs"]
+description = "Run CI documentation, link, spelling, D2, traceability, and script unit test checks"
+depends = ["lint:links", "lint:spelling", "lint:d2", "lint:traceability", "test:scripts"]
+
+[tasks."ci:test:cpp"]
+description = "Execute C++ test suite in CI with parallel workers, output-on-failure, and optional regex filter"
+run = "python3 scripts/ci_plan.py ctest"
+
+[tasks."ci:test:python"]
+description = "Execute Python test suite with JUnit XML output"
+run = "uv run --group test pytest ${PYTEST_TARGETS:-} --junit-xml=build/junit-py.xml"
+
+[tasks.plan]
+description = "Alias for ci:plan"
+depends = ["ci:plan"]
+
+[tasks.affected]
+description = "Calculate affected components, test suites, and requirements (including uncommitted work)"
+run = "python3 scripts/ci_plan.py affected"
+
+[tasks."test:affected"]
+description = "Run C++ and Python unit tests strictly on affected components and impacted requirements"
+run = "python3 scripts/ci_plan.py test-affected"
+
+[tasks."test:scripts"]
+description = "Run standard-library unit tests for repository automation and CI scripts"
+run = "python3 -m unittest discover -s scripts/tests"
+
+[tasks."test:cpp"]
+description = "Execute C++ test suite using CTest (accepts optional -R regex filter and CTest flags)"
+run = "python3 scripts/ci_plan.py ctest"
+
+[tasks."test:python"]
+description = "Execute Python test suite using uv and pytest"
+run = "uv run --group test pytest src/python_bindings/tests scripts/tests"
+
+[tasks."test:all"]
+description = "Execute all C++ and Python test suites across the repository"
+depends = ["test:cpp", "test:python"]
+
+[tasks.test]
+description = "Alias for test:all"
+depends = ["test:all"]
+
+[tasks."lint:cpp"]
+description = "Check C++ source formatting against clang-format 16"
+run = "clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.hpp' '*.h')"
+
+[tasks."lint:spelling"]
 description = "Check repository spelling and British English compliance with CSpell"
 run = "npx cspell lint --dot ."
 
-[tasks.check-links]
+[tasks."lint:links"]
 description = "Validate internal documentation links and workflow badges"
 run = "python3 scripts/check_links.py"
 
-[tasks.lint-d2]
+[tasks."lint:d2"]
 description = "Check that all compiled SVG diagrams match their D2 sources"
 run = "python3 scripts/check_d2_images.py"
 
-[tasks.lint-comments]
+[tasks."lint:comments"]
 description = "Validate code comment standards and hygiene across C++ and Python"
 run = "python3 scripts/verify_comments.py"
 
-[tasks.build-d2]
-description = "Recompile all SVG diagrams from D2 sources"
-run = "python3 scripts/check_d2_images.py --fix"
+[tasks."lint:traceability"]
+description = "Verify requirements traceability across Enhancement Proposals and test suites"
+run = "python3 scripts/verify_traceability.py --audit"
 
 [tasks.lint]
-description = "Execute all linting checks (C++, spelling, links, D2, comments)"
-depends = ["lint-cpp", "lint-spelling", "check-links", "lint-d2", "lint-comments"]
+description = "Execute all linting checks (C++, spelling, links, D2, comments, traceability)"
+depends = ["lint:cpp", "lint:spelling", "lint:links", "lint:d2", "lint:comments", "lint:traceability"]
 
-[tasks.pre-push]
-description = "Execute pre-push verification suite (linting and test suites)"
-depends = ["lint", "test"]
+[tasks."traceability:matrix"]
+description = "Generate requirements traceability matrix to stdout"
+run = "python3 scripts/verify_traceability.py --generate-matrix"
 
+[tasks."traceability:query"]
+description = "Query detailed status, invariant, and mapped tests for a requirement ID"
+run = "python3 scripts/verify_traceability.py --query"
 
-[tasks.changelog-preview]
+[tasks."pre:commit"]
+description = "Execute pre-commit verification suite (spelling, links, and traceability)"
+depends = ["lint:spelling", "lint:links", "lint:traceability"]
+
+[tasks."pre:push"]
+description = "Execute pre-push verification suite (linting and affected component/requirement tests)"
+depends = ["lint", "test:affected"]
+
+[tasks."changelog:preview"]
 description = "Preview release notes and changelog diff for upcoming release"
 run = "python3 scripts/draft_changelog.py --preview"
 
-[tasks.changelog-write]
+[tasks."changelog:write"]
 description = "Update CHANGELOG.md locally with latest release notes"
 run = "python3 scripts/draft_changelog.py --write"
 
-[tasks.release-verify]
+[tasks."release:verify"]
 description = "Verify release tag and CHANGELOG.md integrity"
 run = "python3 scripts/verify_changelog.py"
 
-[tasks.release-qualify]
+[tasks."release:qualify"]
 description = "Run pre-release qualification suite against PyPI, FetchContent, and local examples"
 run = "python3 scripts/qualify_release_candidate.py"

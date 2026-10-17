@@ -59,6 +59,7 @@ def test_clifford_mode_functions_signature():
     assert rfl.get_max_clifford_mode() == 9
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_dirac_operator_surface():
     """Verify DiracOperator constructor signature, methods, and hierarchy."""
     assert issubclass(rfl.DiracOperator, rfl.IDiracOperator)
@@ -76,6 +77,7 @@ def test_dirac_operator_surface():
     assert hasattr(eigenvalues, "shape")
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_action_surface():
     """Verify Action constructor signature, methods, and parameters."""
     doc = rfl.Action.__init__.__doc__ or ""
@@ -91,6 +93,7 @@ def test_action_surface():
     assert isinstance(value, float)
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_std_rng_surface():
     """Verify StdRng and alias GslRng constructor signatures and sampling methods."""
     doc = rfl.StdRng.__init__.__doc__ or ""
@@ -122,6 +125,7 @@ def test_std_rng_surface():
     assert compat_rng is not None
 
 
+@pytest.mark.req("REQ-ARCH-006")
 def test_metropolis_surface():
     """Verify Metropolis constructor signature and update method."""
     doc = rfl.Metropolis.__init__.__doc__ or ""

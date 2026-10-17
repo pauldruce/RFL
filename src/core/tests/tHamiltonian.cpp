@@ -9,7 +9,6 @@
 
 TEST(HamiltonianTests, ConstructorDoesNotThrow) {
   constexpr Integrator integrator = LEAPFROG;
-  // TODO: Add unit tests for randomised state generation.
   constexpr double step_size = 0.1;
   auto action = std::make_unique<Action>(1.0, 1.0);
   ASSERT_NO_THROW(
@@ -54,3 +53,5 @@ TEST(HamiltonianTests, UpdateDiracUpdatesTheDirac) {
 
   ASSERT_FALSE(diracs_are_equal) << "The Dirac operator matrix must change.";
 }
+
+// TODO(EP-1, #13): Add deterministic seeded tests for leapfrog/Omelyan trajectory reversibility and dual-averaging step-size calibration.

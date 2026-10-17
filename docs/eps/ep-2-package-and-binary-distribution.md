@@ -60,17 +60,17 @@ The codebase also suffered from historical directory naming debt (`new_RFL` and 
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Physical & Technical Invariant |
-| :--- | :--- | :--- |
-| **REQ-PKG-01** | **Directory & Target Standardisation** | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
-| **REQ-PKG-02** | **Multi-Platform Binary Wheels** | Build standalone wheels for Linux (`manylinux_2_28_x86_64`), macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`), and Windows (`win_amd64`) covering Python 3.9–3.13. |
-| **REQ-PKG-03** | **Vendored Shared Libraries** | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) via `auditwheel`, `delocate`, and `delvewheel` so wheels execute on clean systems. |
-| **REQ-PKG-04** | **Pre-Publication Test Gate** | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
-| **REQ-PKG-05** | **Secure PyPI Publishing** | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |
-| **REQ-PKG-06** | **CMake FetchContent Support** | Export namespaced alias `RFL::core` and `RFL::rfl` in top-level CMake configuration. |
-| **REQ-PKG-07** | **Standard CMake Installation** | Define CMake `install()` targets for public headers, compiled libraries, and CMake config packages. |
-| **REQ-PKG-08** | **CPack Binary Packaging** | Generate `.tar.gz` release archives containing headers, static libraries, and package configuration files. |
-| **REQ-PKG-09** | **Ecosystem Package Distribution** | Provide recipes for Homebrew Tap, Conda-Forge, and evaluate C++ registries (Conan, vcpkg). |
+| Requirement ID | Requirement Summary | Lifecycle Status | Operational & Technical Invariant |
+| :--- | :--- | :--- | :--- |
+| **REQ-PKG-001** | **Directory & Target Standardisation** | Phase 1 (Implemented) | Restructure `new_RFL/` → `core/` (target `rfl_core`, alias `RFL::core`) and `old_RFL/` → `legacy/` (target `rfl_legacy`). |
+| **REQ-PKG-002** | **Multi-Platform Binary Wheels** | Phase 1 (Implemented) | Build standalone wheels for Linux (`manylinux_2_28_x86_64`), macOS (`macosx_14_0_arm64`, `macosx_15_0_x86_64`), and Windows (`win_amd64`) covering Python 3.9–3.13. |
+| **REQ-PKG-003** | **Vendored Shared Libraries** | Phase 1 (Implemented) | Bundle dynamic dependencies (`openblas`, `gsl`, `armadillo`) via `auditwheel`, `delocate`, and `delvewheel` so wheels execute on clean systems. |
+| **REQ-PKG-004** | **Pre-Publication Test Gate** | Phase 1 (Implemented) | Execute Python test suite (`pytest`) inside clean wheel environments before publication. |
+| **REQ-PKG-005** | **Secure PyPI Publishing** | Phase 1 (Implemented) | Use OpenID Connect (OIDC) Trusted Publishing to prevent static secret exposure. |
+| **REQ-PKG-006** | **CMake FetchContent Support** | Phase 1 (Implemented) | Export namespaced alias `RFL::core` and `RFL::rfl` in top-level CMake configuration. |
+| **REQ-PKG-007** | **Standard CMake Installation** | Phase 2 (Planned) | Define CMake `install()` targets for public headers, compiled libraries, and CMake config packages. |
+| **REQ-PKG-008** | **CPack Binary Packaging** | Phase 2 (Planned) | Generate `.tar.gz` release archives containing headers, static libraries, and package configuration files. |
+| **REQ-PKG-009** | **Ecosystem Package Distribution** | Phase 3 (Planned) | Provide recipes for Homebrew Tap, Conda-Forge, and evaluate C++ registries (Conan, vcpkg). |
 
 ---
 

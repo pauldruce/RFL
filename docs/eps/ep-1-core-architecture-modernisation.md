@@ -64,15 +64,15 @@ Consequently, the legacy codebase exhibits structural bottlenecks:
 
 ### 3.2 Functional Requirements & Invariants
 
-| Requirement ID | Requirement Summary | Physical & Mathematical Invariant |
-| :--- | :--- | :--- |
-| **REQ-001** | **Hermiticity & Signature Preservation** | Matrix variations $\delta M_k$ must strictly preserve $H_i^\dagger = H_i$ and $L_j^\dagger = -L_j$ dictated by signature signs $\epsilon_k \in \lbrace +1, -1 \rbrace$. |
-| **REQ-002** | **Exact Analytic Variation** $\Delta S$ | Fast $\mathcal{O}(N^3)$ local variation must equal global recomputation $S(D + \delta D) - S(D)$ within scale-aware tolerance $\mathcal{O}(M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert))$. |
-| **REQ-003** | **Spectral Symmetry Preservation** | For symmetric geometries (where $\lbrace \Gamma, D \rbrace = 0$), the computed spectrum must satisfy $\lbrace \lambda_i \rbrace = \lbrace -\lambda_i \rbrace$ within scale-aware bound $\mathcal{O}(\epsilon_{\mathrm{mach}} \lVert D \rVert_2)$. |
-| **REQ-004** | **Detailed Balance & Ergodicity** | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
-| **REQ-005** | **Automated Step-Size Calibration** | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during thermalisation. |
-| **REQ-006** | **Zero-Copy NumPy Interoperability** | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
-| **REQ-007** | **Active LTS Platform Policy** | Maintain compatibility with active Ubuntu LTS (≥ 22.04), macOS (≥ 14), Armadillo (≥ 11.4), and conforming C++17 compilers. |
+| Requirement ID | Requirement Summary | Lifecycle Status | Operational & Physical Invariant |
+| :--- | :--- | :--- | :--- |
+| **REQ-ARCH-001** | **Hermiticity & Signature Preservation** | Phase 1 (Implemented) | Matrix variations $\delta M_k$ must strictly preserve $H_i^\dagger = H_i$ and $L_j^\dagger = -L_j$ dictated by signature signs $\epsilon_k \in \lbrace +1, -1 \rbrace$. |
+| **REQ-ARCH-002** | **Exact Analytic Variation** $\Delta S$ | Phase 2 (Planned) | Fast $\mathcal{O}(N^3)$ local variation must equal global recomputation $S(D + \delta D) - S(D)$ within scale-aware tolerance $\mathcal{O}(M \epsilon_{\mathrm{mach}} (\lvert S_f \rvert + \lvert S_i \rvert))$. |
+| **REQ-ARCH-003** | **Spectral Symmetry Preservation** | Phase 1 (Implemented) | For symmetric geometries (where $\lbrace \Gamma, D \rbrace = 0$), the computed spectrum must satisfy $\lbrace \lambda_i \rbrace = \lbrace -\lambda_i \rbrace$ within scale-aware bound $\mathcal{O}(\epsilon_{\mathrm{mach}} \lVert D \rVert_2)$. |
+| **REQ-ARCH-004** | **Detailed Balance & Ergodicity** | Phase 3 (Planned) | The MCMC stepper must satisfy detailed balance and provide an integrated autocorrelation estimator $\tau_{\text{int}}$ to compute rigorous observable errors. |
+| **REQ-ARCH-005** | **Automated Step-Size Calibration** | Phase 3 (Planned) | Dual-averaging sweeps must tune the proposal scale to achieve target acceptance rates (e.g. $0.65 \pm 0.03$) during thermalisation. |
+| **REQ-ARCH-006** | **Zero-Copy NumPy Interoperability** | Phase 1 (Implemented) | C++ matrix and eigenvalue buffers must be exposed to Python/NumPy without memory copying or pointer slicing bugs. |
+| **REQ-ARCH-007** | **Active LTS Platform Policy** | Phase 1 (Implemented) | Maintain compatibility with active Ubuntu LTS (≥ 22.04), macOS (≥ 14), Armadillo (≥ 11.4), and conforming C++17 compilers. |
 
 ---
 

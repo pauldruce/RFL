@@ -92,6 +92,7 @@ TEST(DiracOperatorTests, GetType) {
   }
 }
 
+// [REQ-ARCH-003] Verify Dirac spectrum matches symmetric eigenvalue decomposition.
 TEST(DiracOperatorTests, GetEigenvalues) {
   const std::vector<std::pair<int, int>> data = {
       {1, 1},
@@ -129,6 +130,7 @@ TEST(DiracOperatorTests, CopyConstructorWorks) {
       1e-10));
 }
 
+// [REQ-ARCH-001] Verify Hermitian factor matrices preserve H_i^dagger = H_i across signatures.
 TEST(DiracOperatorTests, GetHermitianMatricesReturnsHermitianMatrices) {
   typedef struct {
     int p;
@@ -156,6 +158,7 @@ TEST(DiracOperatorTests, GetHermitianMatricesReturnsHermitianMatrices) {
   }
 }
 
+// [REQ-ARCH-001] Verify anti-Hermitian factor matrices preserve L_j^dagger = -L_j across signatures.
 TEST(DiracOperatorTests, GetAntiHermitianMatricesReturnsAntiHermitianMatrices) {
   typedef struct {
     int p;
