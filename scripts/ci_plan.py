@@ -1124,6 +1124,99 @@ def cmd_test_affected(args: argparse.Namespace, repo_root: Path) -> int:
     return exit_code
 
 
+def cmd_check_milestone() -> int:
+    """Verify that a GitHub pull request has an assigned milestone."""
+    milestone = ""
+    pr_number: str | int = ""
+    repo = os.environ.get("GITHUB_REPOSITORY", "")
+
+    event_path = os.environ.get("GITHUB_EVENT_PATH")
+    if event_path and Path(event_path).exists():
+        try:
+            event_data = json.loads(Path(event_path).read_text(encoding="utf-8"))
+            pr_data = event_data.get("pull_request") or {}
+            pr_number = pr_data.get("number", "")
+            milestone_obj = pr_data.get("milestone") or {}
+            milestone = (milestone_obj.get("title") or "").strip()
+        except Exception:
+            pass
+
+    if not milestone and pr_number and repo:
+        res = subprocess.run(
+            [
+                "gh",
+                "pr",
+                "view",
+                str(pr_number),
+                "--repo",
+                repo,
+                "--json",
+                "milestone",
+                "--jq",
+                ".milestone.title // empty",
+            ],
+            capture_output=True,
+            text=True,
+        )
+        if res.returncode == 0:
+            milestone = res.stdout.strip()
+
+    if not milestone:
+        pr_label = f"#{pr_number}" if pr_number else "current PR"
+        print(
+            f"::error::Pull Request {pr_label} does not have an assigned milestone. "
+            "All PRs targeting main must belong to an active milestone.",
+            file=sys.stderr,
+        )
+        return 1
+
+    print(f"✅ Pull request is assigned to milestone: {milestone}")
+    return 0
+
+
+def cmd_gate() -> int:
+    """Evaluate upstream CI job statuses from $NEEDS_JSON against required_checks."""
+    needs_raw = os.environ.get("NEEDS_JSON", "").strip()
+    if not needs_raw:
+        print("❌ NEEDS_JSON environment variable is empty or unset.", file=sys.stderr)
+        return 1
+
+    try:
+        needs = json.loads(needs_raw)
+    except Exception as exc:
+        print(f"❌ Failed to parse NEEDS_JSON: {exc}", file=sys.stderr)
+        return 1
+
+    if needs.get("plan", {}).get("result") != "success":
+        print("❌ CI Execution Planner failed or was cancelled.", file=sys.stderr)
+        return 1
+
+    if needs.get("check_milestone", {}).get("result") in ("failure", "cancelled"):
+        print(
+            "❌ Milestone verification failed: pull request must have an assigned milestone.",
+            file=sys.stderr,
+        )
+        return 1
+
+    required_raw = needs.get("plan", {}).get("outputs", {}).get("required_checks", "[]")
+    try:
+        required: list[str] = json.loads(required_raw or "[]")
+    except Exception:
+        required = []
+
+    failed = [j for j in required if needs.get(j, {}).get("result") != "success"]
+    for matrix_job in ("matrix_linux", "matrix_macos", "matrix_windows"):
+        if needs.get(matrix_job, {}).get("result") in ("failure", "cancelled"):
+            failed.append(matrix_job)
+
+    if failed:
+        print(f"❌ Failed or cancelled required checks: {failed}", file=sys.stderr)
+        return 1
+
+    print(f"✅ All required checks passed: {required}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description="RFL Deterministic CI Execution Planner & Component/Requirement Impact Analyser"
@@ -1188,6 +1281,16 @@ def build_parser() -> argparse.ArgumentParser:
         "--py-xml", type=str, default="", help="Output path for Python JUnit XML report"
     )
 
+    # `check-milestone` sub-command
+    sub_parsers.add_parser(
+        "check-milestone", help="Verify that the current GitHub pull request has an assigned milestone"
+    )
+
+    # `gate` sub-command
+    sub_parsers.add_parser(
+        "gate", help="Evaluate upstream CI job statuses from $NEEDS_JSON against required_checks"
+    )
+
     return parser
 
 
@@ -1202,6 +1305,10 @@ def main() -> int:
         return cmd_test_affected(args, repo_root)
     if args.command == "plan":
         return cmd_plan(args, repo_root)
+    if args.command == "check-milestone":
+        return cmd_check_milestone()
+    if args.command == "gate":
+        return cmd_gate()
 
     # Default to `affected` human summary if invoked without sub-command
     default_args = argparse.Namespace(base_ref="", all=False, json=False)

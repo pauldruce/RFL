@@ -161,12 +161,14 @@ As illustrated in Figure 5.1, the traceability and execution planning pipeline c
    - Local pre-push hook runs `mise run pre-push` (lint + affected component/requirement tests)
 
 4. PLAN, QUALIFY & MERGE (3-Tier CI & Human Review)
-   - Tier 1 (`plan`): `scripts/ci_plan.py` outputs `plan.json` (affected tests & impacted REQs)
-   - Tier 2 (Execution): Runs targeted CTest (`-R`) and Pytest suites, emitting JUnit XML
-   - Tier 3 (`ci-gate`): Verifies all `required_checks` in `plan.json` succeeded
+   - Tier 1 (`plan`): `mise run ci:plan` outputs `plan.json` (affected tests & impacted REQs)
+   - Tier 2 (Execution): Runs `mise run ci:docs`, targeted CTest (`-R`), and `mise run ci:verify-pr`
+   - Tier 3 (`ci-gate`): `mise run ci:gate` verifies all `required_checks` in `plan.json` succeeded
 ```
 
-### 5.3 CLI Interface (`mise` & `scripts/`)
+### 5.3 CLI Interface (`mise` Contract Layer)
+
+All local hooks and GitHub Actions workflows invoke `mise` targets rather than calling underlying scripts directly:
 
 ```bash
 # Inspect affected components, test suites, and impacted requirements
@@ -185,10 +187,10 @@ mise run lint:traceability
 mise run traceability:matrix
 
 # Query detailed status, invariant, and mapped tests for a requirement
-python3 scripts/verify_traceability.py --query REQ-ARCH-001
+mise run traceability:query -- REQ-ARCH-001
 
 # Validate pull request branch against origin/main (impacted REQs, test diffs, JUnit XML)
-python3 scripts/verify_traceability.py --check-pr
+mise run ci:verify-pr
 ```
 
 ---
@@ -197,9 +199,10 @@ python3 scripts/verify_traceability.py --check-pr
 
 | Verification Gate | Command / Target | Target Invariant |
 | :--- | :--- | :--- |
-| **Pre-Commit Hook** | `.githooks/pre-commit` | CSpell, markdown link checks, and `verify_traceability.py --audit` complete in < 1s. |
-| **Pre-Push Hook** | `.githooks/pre-push` | Executes `mise run pre-push` (`lint` + `test:affected`) before push. |
+| **Pre-Commit Hook** | `mise run pre-commit` | CSpell, markdown link checks, and traceability audit complete in ~1.5s. |
+| **Pre-Push Hook** | `mise run pre-push` | Executes `lint` and `test:affected` before push. |
 | **CI Execution Planner** | `mise run ci:plan` | Computes affected C++ and Python tests and impacted `REQ-` IDs in < 200 ms (`plan.json`). |
 | **Static ID Audit** | `mise run lint:traceability` | All `REQ-` IDs are globally unique across EPs; zero orphaned test tags. |
-| **Tool Unit Tests** | `python3 -m unittest discover -s scripts/tests` | Unit tests verify EP tables, test extraction, `pybind11` AST bridge, and `plan.json`. |
-| **CI Smart Gatekeeper** | `.github/workflows/ci.yml` (`ci-gate`) | Enforces all `required_checks` from `plan.json` and renders impact tables in `$GITHUB_STEP_SUMMARY`. |
+| **Tool Unit Tests** | `mise run test:scripts` | Unit tests verify EP tables, test extraction, `pybind11` AST bridge, and `ci:gate`. |
+| **CI Smart Gatekeeper** | `mise run ci:gate` | Enforces all `required_checks` from `plan.json` and renders impact tables in `$GITHUB_STEP_SUMMARY`. |
+

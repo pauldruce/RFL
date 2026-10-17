@@ -102,7 +102,14 @@ jobs:
       - name: Test
         run: ctest --test-dir build -C "${{ inputs.build_type }}" --parallel "$(nproc 2>/dev/null || sysctl -n hw.logicalcpu || echo 2)" --output-on-failure --output-junit junit.xml -R "${{ inputs.ctest_filter }}"
 
+      - name: Set up Mise
+        if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Verify PR traceability
         if: github.event_name == 'pull_request' && inputs.install_system_armadillo == true && inputs.build_type == 'Release'
-        run: python3 scripts/verify_traceability.py --check-pr
+        run: mise run ci:verify-pr
+
 

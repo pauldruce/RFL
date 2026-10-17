@@ -32,9 +32,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Compute CI execution plan
         id: plan
-        run: python3 scripts/ci_plan.py plan --output plan.json
+        run: mise run ci:plan -- --output plan.json
 
       - name: Upload execution plan
         uses: actions/upload-artifact@v7
@@ -48,19 +53,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Verify PR has assigned milestone
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          MILESTONE="${{ github.event.pull_request.milestone.title }}"
-          if [ -z "$MILESTONE" ]; then
-            MILESTONE=$(gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json milestone --jq '.milestone.title // empty' 2>/dev/null || true)
-          fi
-          if [ -z "$MILESTONE" ]; then
-            echo "::error::Pull Request #${{ github.event.pull_request.number }} does not have an assigned milestone. All PRs targeting main must belong to an active milestone."
-            exit 1
-          fi
-          echo "✅ Pull request is assigned to milestone: $MILESTONE"
+        run: mise run ci:milestone
 
   validate_docs:
     name: Documentation, Links, Spelling & Traceability
@@ -73,20 +77,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Validate links and badges
-        run: python3 scripts/check_links.py
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
 
-      - name: Spell & British English Check (CSpell)
-        run: npx cspell lint --dot .
-
-      - name: Audit requirement IDs and traceability engine
-        run: |
-          python3 scripts/verify_traceability.py --audit
-          python3 -m unittest discover -s scripts/tests
+      - name: Validate documentation, links, spelling & traceability
+        run: mise run ci:docs
 
       - name: Verify PR traceability (docs / script-only PRs)
         if: github.event_name == 'pull_request' && needs.plan.outputs.test_ubuntu != 'true'
-        run: python3 scripts/verify_traceability.py --check-pr
+        run: mise run ci:verify-pr
 
   lint:
     name: "C++ Linter (${{ matrix.path }})"
@@ -188,21 +189,15 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
+        with:
+          install: false
+
       - name: Evaluate required checks
         env:
           NEEDS_JSON: ${{ toJSON(needs) }}
-        run: |
-          python3 -c '
-          import json, os, sys
-          needs = json.loads(os.environ["NEEDS_JSON"])
-          if needs["plan"]["result"] != "success":
-              sys.exit("❌ CI Execution Planner failed or was cancelled.")
-          if needs["check_milestone"]["result"] in ("failure", "cancelled"):
-              sys.exit("❌ Milestone verification failed: pull request must have an assigned milestone.")
-          required = json.loads(needs["plan"]["outputs"].get("required_checks", "[]"))
-          failed = [j for j in required if needs[j]["result"] != "success"]
-          failed += [j for j in ("matrix_linux", "matrix_macos", "matrix_windows") if needs[j]["result"] in ("failure", "cancelled")]
-          if failed:
-              sys.exit(f"❌ Failed or cancelled required checks: {failed}")
-          print(f"✅ All required checks passed: {required}")
-          '
+        run: mise run ci:gate

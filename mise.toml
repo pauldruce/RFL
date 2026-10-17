@@ -1,3 +1,6 @@
+[settings]
+task.run_auto_install = false
+
 [tools]
 cmake = "latest"
 ninja = "latest"
@@ -24,6 +27,22 @@ run = "clang-format -i $(git ls-files '*.cpp' '*.hpp' '*.h')"
 description = "Analyse changes and output deterministic CI execution plan as JSON"
 run = "python3 scripts/ci_plan.py plan --json"
 
+[tasks."ci:milestone"]
+description = "Verify that the current pull request has an assigned milestone"
+run = "python3 scripts/ci_plan.py check-milestone"
+
+[tasks."ci:verify-pr"]
+description = "Verify pull request requirements traceability, test diffs, and JUnit XML"
+run = "python3 scripts/verify_traceability.py --check-pr"
+
+[tasks."ci:gate"]
+description = "Evaluate upstream CI job statuses against required_checks"
+run = "python3 scripts/ci_plan.py gate"
+
+[tasks."ci:docs"]
+description = "Run CI documentation, link, spelling, traceability, and script unit test checks"
+depends = ["lint:links", "lint:spelling", "lint:traceability", "test:scripts"]
+
 [tasks.plan]
 description = "Alias for ci:plan"
 depends = ["ci:plan"]
@@ -35,6 +54,10 @@ run = "python3 scripts/ci_plan.py affected"
 [tasks."test:affected"]
 description = "Run C++ and Python unit tests strictly on affected components and impacted requirements"
 run = "python3 scripts/ci_plan.py test-affected"
+
+[tasks."test:scripts"]
+description = "Run standard-library unit tests for repository automation and CI scripts"
+run = "python3 -m unittest discover -s scripts/tests"
 
 [tasks."test:cpp"]
 description = "Build and execute C++ test suite using CTest"
@@ -79,6 +102,14 @@ depends = ["lint:cpp", "lint:spelling", "lint:links", "lint:d2", "lint:traceabil
 [tasks."traceability:matrix"]
 description = "Generate requirements traceability matrix to stdout"
 run = "python3 scripts/verify_traceability.py --generate-matrix"
+
+[tasks."traceability:query"]
+description = "Query detailed status, invariant, and mapped tests for a requirement ID"
+run = "python3 scripts/verify_traceability.py --query"
+
+[tasks.pre-commit]
+description = "Execute pre-commit verification suite (spelling, links, and traceability)"
+depends = ["lint:spelling", "lint:links", "lint:traceability"]
 
 [tasks.pre-push]
 description = "Execute pre-push verification suite (linting and affected component/requirement tests)"

@@ -332,7 +332,15 @@ class TestShiftLeftGitHooks(unittest.TestCase):
         self.assertTrue(os.access(pre_push, os.X_OK), ".githooks/pre-push must be executable")
 
         pre_commit_text = pre_commit.read_text(encoding="utf-8")
-        self.assertIn("verify_traceability.py --audit", pre_commit_text)
+        self.assertIn("mise run pre-commit", pre_commit_text)
+
+        pre_push_text = pre_push.read_text(encoding="utf-8")
+        self.assertIn("mise run pre-push", pre_push_text)
+        self.assertIn("mise run release:verify", pre_push_text)
+
+        mise_toml = (REPO_ROOT / "mise.toml").read_text(encoding="utf-8")
+        self.assertIn("[tasks.pre-commit]", mise_toml)
+        self.assertIn("verify_traceability.py --audit", mise_toml)
 
 
 class TestCIPlannerAndDependencyGraph(unittest.TestCase):
@@ -485,6 +493,45 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         self.assertTrue(plan.builds.validate_docs)
         self.assertFalse(plan.builds.lint_cpp)
         self.assertTrue(plan.builds.test_ubuntu)
+
+    def test_cmd_gate_evaluation(self) -> None:
+        import json
+        import os
+        import ci_plan
+
+        old_needs = os.environ.get("NEEDS_JSON")
+        try:
+            os.environ["NEEDS_JSON"] = json.dumps(
+                {
+                    "plan": {
+                        "result": "success",
+                        "outputs": {"required_checks": '["validate_docs", "test_ubuntu"]'},
+                    },
+                    "check_milestone": {"result": "success"},
+                    "validate_docs": {"result": "success"},
+                    "test_ubuntu": {"result": "success"},
+                    "test_macos": {"result": "skipped"},
+                }
+            )
+            self.assertEqual(ci_plan.cmd_gate(), 0)
+
+            os.environ["NEEDS_JSON"] = json.dumps(
+                {
+                    "plan": {
+                        "result": "success",
+                        "outputs": {"required_checks": '["validate_docs", "test_ubuntu"]'},
+                    },
+                    "check_milestone": {"result": "success"},
+                    "validate_docs": {"result": "success"},
+                    "test_ubuntu": {"result": "failure"},
+                }
+            )
+            self.assertEqual(ci_plan.cmd_gate(), 1)
+        finally:
+            if old_needs is None:
+                os.environ.pop("NEEDS_JSON", None)
+            else:
+                os.environ["NEEDS_JSON"] = old_needs
 
 
 if __name__ == "__main__":

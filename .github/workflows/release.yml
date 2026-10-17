@@ -40,19 +40,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v7
+      - name: Set up Mise
+        uses: jdx/mise-action@v2
         with:
-          python-version: "3.12"
+          install: false
 
       - name: Verify release tag and changelog integrity
         run: |
           if [ "${{ github.event_name }}" = "release" ]; then
-            TAG_NAME="${{ github.event.release.tag_name }}"
-            python3 scripts/verify_changelog.py --tag "$TAG_NAME"
+            mise run release:verify -- --tag "${{ github.event.release.tag_name }}"
           elif [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.dry_run }}" != "true" ]; then
-            TAG_NAME="${{ github.ref_name }}"
-            python3 scripts/verify_changelog.py --tag "$TAG_NAME"
+            mise run release:verify -- --tag "${{ github.ref_name }}"
           else
             echo "Skipping strict tag validation for event: ${{ github.event_name }}"
           fi
