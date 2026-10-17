@@ -369,7 +369,7 @@ def build_dependency_graph(repo_root: Path) -> DependencyGraph:
             continue
         for ext in ("*.cpp", "*.hpp", "*.h", "*.cc"):
             for cpp_file in cpp_dir.rglob(ext):
-                if "OldCode" in cpp_file.parts:
+                if "OldCode" in cpp_file.parts or "performance" in cpp_file.parts:
                     continue
                 rel_path = cpp_file.relative_to(repo_root).as_posix()
                 is_test = vt.is_test_file_path(rel_path)
@@ -981,18 +981,18 @@ def write_step_summary(plan: Plan) -> None:
         f.write("\n".join(lines) + "\n")
 
 
-def write_github_output(plan: ExecutionPlan) -> None:
+def write_github_output(plan: Plan) -> None:
     """Export execution plan keys to $GITHUB_OUTPUT when running in GitHub Actions."""
     output_path = os.environ.get("GITHUB_OUTPUT")
     if not output_path:
         return
     lines = [
         f"has_changes={'true' if plan.has_changes else 'false'}",
-        f"validate_docs={'true' if plan.builds.get('validate_docs') else 'false'}",
-        f"lint_cpp={'true' if plan.builds.get('lint_cpp') else 'false'}",
-        f"test_ubuntu={'true' if plan.builds.get('test_ubuntu') else 'false'}",
-        f"test_macos={'true' if plan.builds.get('test_macos') else 'false'}",
-        f"test_windows={'true' if plan.builds.get('test_windows') else 'false'}",
+        f"validate_docs={'true' if plan.builds.validate_docs else 'false'}",
+        f"lint_cpp={'true' if plan.builds.lint_cpp else 'false'}",
+        f"test_ubuntu={'true' if plan.builds.test_ubuntu else 'false'}",
+        f"test_macos={'true' if plan.builds.test_macos else 'false'}",
+        f"test_windows={'true' if plan.builds.test_windows else 'false'}",
         f"ctest_filter={plan.ctest_filter}",
         f"required_checks={json.dumps(plan.required_checks)}",
     ]

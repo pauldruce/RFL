@@ -398,6 +398,32 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
             ["validate_docs", "lint", "test_ubuntu", "test_macos", "test_windows"],
         )
 
+    def test_write_github_output(self) -> None:
+        import os
+        import tempfile
+        import ci_plan
+
+        plan = ci_plan.compute_plan_from_files(
+            changed_files=["src/core/BarrettGlaser/Hamiltonian.cpp"],
+            base_ref="origin/main",
+            repo_root=REPO_ROOT,
+        )
+        with tempfile.NamedTemporaryFile(mode="r+", encoding="utf-8") as tmp:
+            old_env = os.environ.get("GITHUB_OUTPUT")
+            os.environ["GITHUB_OUTPUT"] = tmp.name
+            try:
+                ci_plan.write_github_output(plan)
+            finally:
+                if old_env is None:
+                    os.environ.pop("GITHUB_OUTPUT", None)
+                else:
+                    os.environ["GITHUB_OUTPUT"] = old_env
+            tmp.seek(0)
+            content = tmp.read()
+        self.assertIn("has_changes=true", content)
+        self.assertIn("test_ubuntu=true", content)
+        self.assertIn("ctest_filter=^(HamiltonianTests)\\.", content)
+
 
 if __name__ == "__main__":
     unittest.main()
