@@ -1,9 +1,9 @@
-# RFL CI Execution Planner & Two-Hop Impact Analyser (C4 Component Diagram)
+# RFL CI Execution Planner and Two-Hop Impact Analyser (C4 Component Diagram)
 # Regenerate SVG: python3 scripts/check_d2_images.py --fix
 
 direction: down
 
-inputs: "Repository & Git Inputs" {
+inputs: "Repository and Git Inputs" {
   style: {
     fill: "#f8fafc"
     stroke: "#cbd5e1"
@@ -11,20 +11,20 @@ inputs: "Repository & Git Inputs" {
     border-radius: 8
   }
 
-  git_diff: "Git Diff & Commit Trailers\n«git»\n--\nChanged files • EP row diffs\nImplements: REQ-..." {
+  git_diff: "Git Diff and Commit Trailers\n«git»\n--\nChanged files • EP row diffs\nImplements: REQ-..." {
     class: external_system
   }
 
-  codebase: "C++, Python & Build Config\n«codebase»\n--\nsrc/core/ • bindings.cpp\npyproject.toml • CMakeLists.txt" {
+  codebase: "C++, Python and Build Config\n«codebase»\n--\nsrc/core/ • bindings.cpp\npyproject.toml • CMakeLists.txt" {
     class: external_system
   }
 
-  specs: "EP Specs & Tagged Tests\n«traceability»\n--\ndocs/eps/ep-*.md tables\nGTest & Pytest [REQ-...] tags" {
+  specs: "EP Specifications and Tagged Tests\n«traceability»\n--\ndocs/eps/ep-*.md tables\nGTest and Pytest [REQ-...] tags" {
     class: external_system
   }
 }
 
-planner: "CI Planner & Traceability Container (scripts/)" {
+planner: "CI Execution Planner and Traceability Subsystem" {
   style: {
     fill: "#f8fafc"
     stroke: "#94a3b8"
@@ -33,11 +33,11 @@ planner: "CI Planner & Traceability Container (scripts/)" {
     border-radius: 8
   }
 
-  graph_builder: "1. Dependency Graph Builder\n«ci_plan.py»\n--\nLRU-cached C++ #include resolver\nbindings.cpp py::class_ -> Python AST" {
+  graph_builder: "1. Dependency Graph Builder\n«ci_plan.py»\n--\nC++ #include resolution cache\nbindings.cpp py::class_ -> Python AST" {
     class: internal_component
   }
 
-  hop1: "2. Hop 1: Component & Test Resolver\n«ci_plan.py»\n--\nReverse BFS traversal (O(1) deque)\npyproject.toml / CMake build-wide triggers" {
+  hop1: "2. Hop 1: Component and Test Resolver\n«ci_plan.py»\n--\nReverse dependency BFS traversal\npyproject.toml / CMake build-wide triggers" {
     class: internal_component
   }
 
@@ -45,16 +45,16 @@ planner: "CI Planner & Traceability Container (scripts/)" {
     class: internal_component
   }
 
-  hop3: "4. Hop 3: Test Closure & Job Planner\n«ci_plan.py»\n--\nExpands impacted REQs to all mapped tests\nEmits plan.json, ctest_filter & GITHUB_OUTPUT" {
+  hop3: "4. Hop 3: Test Closure and Job Planner\n«ci_plan.py»\n--\nExpands impacted REQs to all mapped tests\nEmits plan.json, ctest_filter and GITHUB_OUTPUT" {
     class: internal_component
   }
 
   graph_builder -> hop1: reverse_deps graph
-  hop1 -> hop2: affected C++ & Python tests
+  hop1 -> hop2: affected C++ and Python tests
   hop2 -> hop3: impacted_requirements
 }
 
-consumers: "Execution & Governance Gates" {
+consumers: "Execution and Governance Gates" {
   style: {
     fill: "#f8fafc"
     stroke: "#cbd5e1"
@@ -66,26 +66,26 @@ consumers: "Execution & Governance Gates" {
     class: external_system
   }
 
-  ci_jobs: "GitHub Actions CI Matrix\n«.github/workflows/ci.yml»\n--\nConditional docs, lint & OS jobs\nEmits CTest & Pytest junit.xml" {
+  ci_jobs: "GitHub Actions CI Matrix\n«.github/workflows/ci.yml»\n--\nConditional docs, lint and OS jobs\nEmits CTest and Pytest junit.xml" {
     class: external_system
   }
 
-  gatekeeper: "Smart Gatekeeper & PR Auditor\n«ci:gate + ci:verify:pr»\n--\nStatic requirement mapping audit\nDynamic JUnit XML execution verification" {
+  gatekeeper: "Smart Gatekeeper and PR Auditor\n«ci:gate + ci:verify:pr»\n--\nStatic requirement mapping audit\nDynamic JUnit XML execution verification" {
     class: external_system
   }
 
-  ci_jobs -> gatekeeper: junit.xml & job status {style.stroke-dash: 4}
+  ci_jobs -> gatekeeper: junit.xml and job status {style.stroke-dash: 4}
 }
 
 # Cross-boundary relationships
-inputs.codebase -> planner.graph_builder: scans AST & #includes
+inputs.codebase -> planner.graph_builder: scans AST and #includes
 inputs.git_diff -> planner.hop1: changed_files
-inputs.git_diff -> planner.hop2: EP diffs & trailers
-inputs.specs -> planner.hop2: REQ map & test tags
+inputs.git_diff -> planner.hop2: EP diffs and trailers
+inputs.specs -> planner.hop2: REQ map and test tags
 
 planner.hop3 -> consumers.local_gate: Execution Plan
-planner.hop3 -> consumers.ci_jobs: GITHUB_OUTPUT flags & ctest_filter
-planner.hop3 -> consumers.gatekeeper: required_checks & impacted REQs {style.stroke-dash: 4}
+planner.hop3 -> consumers.ci_jobs: GITHUB_OUTPUT flags and ctest_filter
+planner.hop3 -> consumers.gatekeeper: required_checks and impacted REQs {style.stroke-dash: 4}
 
 # C4 Styling Palette
 classes: {
