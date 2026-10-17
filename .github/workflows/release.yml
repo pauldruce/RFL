@@ -42,8 +42,6 @@ jobs:
 
       - name: Set up Mise
         uses: jdx/mise-action@v2
-        with:
-          install: false
 
       - name: Verify release tag and changelog integrity
         run: |

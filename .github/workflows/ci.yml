@@ -34,8 +34,6 @@ jobs:
 
       - name: Set up Mise
         uses: jdx/mise-action@v2
-        with:
-          install: false
 
       - name: Compute CI execution plan
         id: plan
@@ -58,8 +56,6 @@ jobs:
 
       - name: Set up Mise
         uses: jdx/mise-action@v2
-        with:
-          install: false
 
       - name: Verify PR has assigned milestone
         env:
@@ -79,8 +75,6 @@ jobs:
 
       - name: Set up Mise
         uses: jdx/mise-action@v2
-        with:
-          install: false
 
       - name: Validate documentation, links, spelling & traceability
         run: mise run ci:docs
@@ -192,8 +186,6 @@ jobs:
 
       - name: Set up Mise
         uses: jdx/mise-action@v2
-        with:
-          install: false
 
       - name: Evaluate required checks
         env:
