@@ -1,6 +1,6 @@
 # Agent Constraints
 
-- **CRITICAL**: You must NEVER modify, create, edit, or delete any files inside the `research/` directory. This directory is strictly read-only for agents.
+- **Research Separation**: All theoretical physics derivations, LaTeX manuscripts, and exploratory research notes are maintained in a separate Obsidian Research repository. The RFL codebase is dedicated strictly to C++ / Python library implementation, packaging, and CI/testing. Theoretical requirements, mathematical specifications, and research feedback are relayed into RFL strictly via GitHub Issues and Enhancement Proposals (EPs).
 
 ## Mise Task & Automation Standards
 

@@ -407,7 +407,6 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
       - '*.md'
       - '.agents/**'
       - 'research/**'
-      - 'vault/**'
       - '.gitignore'
     code:
       - 'src/**'
@@ -448,8 +447,8 @@ CMAKE_CXX_COMPILER_LAUNCHER = "ccache"
 | **Doc-Only PR Gate** | Push commit modifying only `docs/README.md` | PR check passes in under 30 seconds with zero C++ compilation. |
 | **Core C++ PR Gate** | Push commit modifying `src/RFL/core/DiracOperator.cpp` | PR check tests Ubuntu + macOS and passes in under 120 seconds. |
 | **Incremental Rebuild Speed** | Touch leaf `.cpp` file and run `cmake --build build` | Incremental compilation completes in < 2 seconds with `ccache`. |
-| **Mise Test Task** | `mise run test` | Builds and executes all unit tests with 100% pass rate. |
-| **Pre-Commit Linter Execution** | `mise run lint` | Evaluates C++, Python, and spelling cleanly in < 2 seconds. |
+| **Mise Test Task** | `mise run test:all` | Builds and executes all unit tests with 100% pass rate. |
+| **Pre-Commit Linter Execution** | `mise run lint:all` | Evaluates C++, Python, and spelling cleanly in < 2 seconds. |
 | **Mainline Trigger** | Push commit to `main` | Automatically triggers `main.yml` across full matrix. |
 
 ---

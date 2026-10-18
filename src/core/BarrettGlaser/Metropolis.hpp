@@ -22,12 +22,12 @@
 class Metropolis final : public IAlgorithm {
 public:
   /**
-   * Default constructor deleted.
+   * @brief Default constructor deleted.
    */
   Metropolis() = delete;
 
   /**
-   * Constructs a Metropolis algorithm instance.
+   * @brief Constructs a Metropolis algorithm instance.
    *
    * @param action Unique pointer to a Barrett-Glaser Action object.
    * @param scale Step scale for matrix element proposals.
@@ -35,10 +35,10 @@ public:
    * @param rng Unique pointer to random number generator engine.
    */
   Metropolis(std::unique_ptr<Action>&& action, const double scale, const int num_steps, std::unique_ptr<IRng>&& rng)
-      : m_action(std::move(action)), m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)){};
+      : m_action(std::move(action)), m_scale(scale), m_num_steps(num_steps), m_rng(std::move(rng)) {}
 
   /**
-   * Updates sampling parameters and random number generator.
+   * @brief Updates sampling parameters and random number generator.
    *
    * @param scale Step scale for matrix element proposals.
    * @param number_of_steps Number of sweeps per call.
@@ -51,7 +51,7 @@ public:
   }
 
   /**
-   * Runs Metropolis sweeps on the Dirac operator.
+   * @brief Runs Metropolis sweeps on the Dirac operator.
    *
    * @param dirac Dirac operator to update.
    * @return Mean acceptance rate across sweeps.
@@ -70,34 +70,19 @@ private:
   double run(IDiracOperator& dirac) const;
 
   // MCMC routine with dual-averaging.
-  double runDualAverage(IDiracOperator& dirac,
-                        double target);
+  double runDualAverage(
+      IDiracOperator& dirac,
+      double target);
 
-  double delta24(const IDiracOperator& dirac,
-                 const int& x,
-                 const int& row_index,
-                 const int& column_index,
-                 const arma::cx_double& z) const;
+  double runDualAverageCore(
+      IDiracOperator& dirac,
+      const double* s_i,
+      double* s_f) const;
 
-  static double delta2(const IDiracOperator& dirac,
-                       const int& x,
-                       const int& row_index,
-                       const int& column_index,
-                       const arma::cx_double& z);
-
-  static double delta4(const IDiracOperator& dirac,
-                       const int& x,
-                       const int& row_index,
-                       const int& column_index,
-                       const arma::cx_double& z);
-
-  double runDualAverageCore(IDiracOperator& dirac,
-                            const double* s_i,
-                            double* s_f) const;
-
-  double runCore(IDiracOperator& dirac,
-                 const double* s_i,
-                 double* s_f) const;
+  double runCore(
+      IDiracOperator& dirac,
+      const double* s_i,
+      double* s_f) const;
 };
 
 #endif//RFL_METROPOLIS_HPP

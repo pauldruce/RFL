@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Post-checkout Hook: Advisory check for toolchain or build configuration changes
+# ==============================================================================
+set -euo pipefail
+
+PREV_HEAD="${1:-}"
+NEW_HEAD="${2:-}"
+BRANCH_FLAG="${3:-0}"
+
+# Only check on branch checkouts (flag == 1)
+if [ "$BRANCH_FLAG" -eq 1 ] && [ -n "$PREV_HEAD" ] && [ -n "$NEW_HEAD" ]; then
+    CHANGED=$(git diff --name-only "$PREV_HEAD" "$NEW_HEAD" 2>/dev/null || true)
+    if echo "$CHANGED" | grep -qE "(mise\.toml|pyproject\.toml|CMakeLists\.txt|uv\.lock)"; then
+        echo ""
+        echo "🔔 [RFL Hook] Notice: Toolchain or build configuration files changed on branch switch."
+        echo "             Run 'mise install', 'uv sync', or reconfigure CMake if necessary."
+        echo ""
+    fi
+fi
+
+exit 0

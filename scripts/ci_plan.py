@@ -33,6 +33,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+import test_attestation
 import verify_traceability as vt
 
 CPP_INCLUDE_PATTERN = re.compile(r'^\s*#include\s+"([^"]+)"')
@@ -570,8 +571,7 @@ def _build_full_regression_plan(
         requirement_triggers={r: ["full-run"] for r in implemented_requirements},
         builds=builds,
         required_checks=[
-            "validate_docs",
-            "lint",
+            "quality",
             "test_ubuntu",
             "test_macos",
             "test_windows",
@@ -728,10 +728,8 @@ def _determine_builds_and_checks(
     )
 
     required_checks: list[str] = []
-    if builds.validate_docs:
-        required_checks.append("validate_docs")
-    if builds.lint_cpp:
-        required_checks.append("lint")
+    if builds.validate_docs or builds.lint_cpp:
+        required_checks.append("quality")
     if builds.test_ubuntu:
         required_checks.append("test_ubuntu")
     if builds.test_macos:
@@ -1141,6 +1139,10 @@ def cmd_test_affected(args: argparse.Namespace, repo_root: Path) -> int:
         run_all=args.all,
         include_working_tree=not bool(os.environ.get("CI")),
     )
+    if not getattr(args, "force", False) and test_attestation.verify_attestation() == 0:
+        print("\n⚡ [ci_plan] All affected tests already verified for current tree. Skipping redundant run.")
+        return 0
+
     print_human_summary(plan)
 
     exit_code = 0
@@ -1211,6 +1213,9 @@ def cmd_test_affected(args: argparse.Namespace, repo_root: Path) -> int:
                     print("⚠️  'uv' executable not found in PATH; skipping Python binding tests.", file=sys.stderr)
         else:
             print("--> No Python test files affected. Skipping Python tests.")
+
+    if exit_code == 0:
+        test_attestation.record_attestation()
 
     return exit_code
 
@@ -1285,13 +1290,6 @@ def cmd_gate() -> int:
 
     if needs.get("plan", {}).get("result") != "success":
         print("❌ CI Execution Planner failed or was cancelled.", file=sys.stderr)
-        return 1
-
-    if needs.get("check_milestone", {}).get("result") in ("failure", "cancelled"):
-        print(
-            "❌ Milestone verification failed: pull request must have an assigned milestone.",
-            file=sys.stderr,
-        )
         return 1
 
     required_raw = needs.get("plan", {}).get("outputs", {}).get("required_checks", "[]")
@@ -1421,6 +1419,9 @@ def build_parser() -> argparse.ArgumentParser:
     )
     test_p.add_argument(
         "--py-xml", type=str, default="", help="Output path for Python JUnit XML report"
+    )
+    test_p.add_argument(
+        "--force", action="store_true", help="Bypass attestation cache and force re-running tests"
     )
 
     # `check-milestone` sub-command

@@ -395,13 +395,28 @@ class TestShiftLeftGitHooks(unittest.TestCase):
         pre_commit = REPO_ROOT / ".githooks" / "pre-commit"
         pre_push = REPO_ROOT / ".githooks" / "pre-push"
 
+        commit_msg = REPO_ROOT / ".githooks" / "commit-msg"
+        post_merge = REPO_ROOT / ".githooks" / "post-merge"
+        post_checkout = REPO_ROOT / ".githooks" / "post-checkout"
+
         self.assertTrue(pre_commit.exists(), "Missing .githooks/pre-commit")
         self.assertTrue(pre_push.exists(), "Missing .githooks/pre-push")
+        self.assertTrue(commit_msg.exists(), "Missing .githooks/commit-msg")
+        self.assertTrue(post_merge.exists(), "Missing .githooks/post-merge")
+        self.assertTrue(post_checkout.exists(), "Missing .githooks/post-checkout")
+
         self.assertTrue(os.access(pre_commit, os.X_OK), ".githooks/pre-commit must be executable")
         self.assertTrue(os.access(pre_push, os.X_OK), ".githooks/pre-push must be executable")
+        self.assertTrue(os.access(commit_msg, os.X_OK), ".githooks/commit-msg must be executable")
+        self.assertTrue(os.access(post_merge, os.X_OK), ".githooks/post-merge must be executable")
+        self.assertTrue(os.access(post_checkout, os.X_OK), ".githooks/post-checkout must be executable")
 
         pre_commit_text = pre_commit.read_text(encoding="utf-8")
         self.assertIn("mise run pre:commit", pre_commit_text)
+        self.assertIn("git diff-index --check", pre_commit_text)
+
+        commit_msg_text = commit_msg.read_text(encoding="utf-8")
+        self.assertIn("mise run lint:commit-msg", commit_msg_text)
 
         pre_push_text = pre_push.read_text(encoding="utf-8")
         self.assertIn("mise run pre:push", pre_push_text)
@@ -410,6 +425,8 @@ class TestShiftLeftGitHooks(unittest.TestCase):
         mise_toml = (REPO_ROOT / "mise.toml").read_text(encoding="utf-8")
         self.assertIn('[tasks."pre:commit"]', mise_toml)
         self.assertIn('[tasks."pre:push"]', mise_toml)
+        self.assertIn('[tasks."lint:commit-msg"]', mise_toml)
+        self.assertIn('[tasks."lint:configs"]', mise_toml)
         self.assertIn("verify_traceability.py --audit", mise_toml)
 
 

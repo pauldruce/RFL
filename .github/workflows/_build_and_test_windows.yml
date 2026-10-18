@@ -35,6 +35,10 @@ jobs:
   run:
     name: "Windows (${{ inputs.os }}, ${{ inputs.build_type }})"
     runs-on: ${{ inputs.os }}
+    env:
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: "1"
+      CCACHE_COMPRESS: "1"
     steps:
       - name: Validate inputs
         shell: pwsh
@@ -65,13 +69,21 @@ jobs:
         with:
           arch: x64
 
-      - name: Set up Mise
-        uses: jdx/mise-action@v2
-
       - name: Install dependencies
         uses: ./.github/actions/install-windows-deps
         with:
           install-armadillo: ${{ inputs.install_system_armadillo }}
+
+      - name: Set up Mise
+        uses: jdx/mise-action@v5
+
+      - name: Add Mise bin to PATH
+        shell: pwsh
+        run: |
+          $miseBin = if ($env:LOCALAPPDATA) { Join-Path $env:LOCALAPPDATA "mise\bin" } else { Join-Path $env:USERPROFILE "AppData\Local\mise\bin" }
+          if (Test-Path $miseBin) {
+            $miseBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          }
 
       - name: Set up ccache
         uses: hendrikmuhs/ccache-action@v1.2.24
@@ -81,15 +93,13 @@ jobs:
             ccache-${{ inputs.os }}-${{ inputs.build_type }}-
             ccache-${{ inputs.os }}-
           max-size: 500M
+          verbose: 1
 
       - name: Configure CMake
         shell: pwsh
-        env:
-          CCACHE_BASEDIR: ${{ github.workspace }}
-          CCACHE_NOHASHDIR: "1"
-          CCACHE_COMPRESS: "1"
         run: |
-          $vcpkgToolchain = Join-Path $env:VCPKG_INSTALLATION_ROOT "scripts/buildsystems/vcpkg.cmake"
+          $vcpkgRoot = if ($env:VCPKG_INSTALLATION_ROOT) { $env:VCPKG_INSTALLATION_ROOT } else { "C:\vcpkg" }
+          $vcpkgToolchain = Join-Path $vcpkgRoot "scripts/buildsystems/vcpkg.cmake"
           $cmakeArgs = @(
             "-DCMAKE_BUILD_TYPE=${{ inputs.build_type }}",
             "-DCMAKE_TOOLCHAIN_FILE=$vcpkgToolchain",
@@ -107,7 +117,10 @@ jobs:
         shell: pwsh
         run: mise run build:cpp -- --config ${{ inputs.build_type }}
 
+      - name: Ccache statistics
+        shell: bash
+        run: ccache -s
+
       - name: Test
         shell: bash
         run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit build/junit.xml
-

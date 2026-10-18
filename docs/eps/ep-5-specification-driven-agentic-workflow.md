@@ -85,7 +85,7 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 | :--- | :--- | :--- |
 | **C++ Iteration Ergonomics** | ❌ Poor (Fights interactive debugging, rebasing, and fixup commits) | ✅ **Optimal (Standard atomic commits across headers, source, and tests)** |
 | **Test Addition Friction** | ❌ High (Editing tests or fixing tolerances breaks hash manifests) | ✅ **Zero (New or modified tests require no manifest regeneration)** |
-| **Tamper Visibility** | Cryptographic hash mismatch requires manual override label | **Explicit alert in `$GITHUB_STEP_SUMMARY` listing modified test files** |
+| **Tamper Visibility** | Cryptographic hash mismatch requires manual override label | **Explicit alert in** `$GITHUB_STEP_SUMMARY` **listing modified test files** |
 | **Execution Proof** | Fragile Git checkout time-travel in CI | **Direct verification of CTest and Pytest JUnit XML results** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
@@ -120,7 +120,7 @@ Without clear structural guardrails, agentic workflows exhibit four recurring fa
 | **Developer Flow** | Context-switching while waiting for remote checks | **Seamless (immediate feedback within active turn)** |
 | **Decision** | Rejected | **Selected (Option B)** |
 
-*Rationale:* Wiring CSpell, `check_links.py`, and `verify_traceability.py --audit` into `.githooks/pre-commit` shifts verification left into the agent's inner loop. If an agent introduces a broken link, typo, or malformed requirement tag, `git commit` fails immediately in the terminal output. The agent can self-correct in the same turn. The `.githooks/pre-push` hook executes `mise run pre:push` (`lint` + `test:affected`), guaranteeing that affected component and requirement tests pass before code leaves the workstation.
+*Rationale:* Wiring CSpell, `check_links.py`, and `verify_traceability.py --audit` into `.githooks/pre-commit` shifts verification left into the agent's inner loop. If an agent introduces a broken link, typo, or malformed requirement tag, `git commit` fails immediately in the terminal output. The agent can self-correct in the same turn. The `.githooks/pre-push` hook executes `mise run pre:push` (`lint:all` + `test:affected`), guaranteeing that affected component and requirement tests pass before code leaves the workstation.
 
 ---
 
@@ -161,7 +161,7 @@ As illustrated in Figure 5.1, the traceability and execution planning pipeline d
    - Local pre-commit hook verifies spelling, links, and traceability (< 1s)
 
 3. VERIFY LOCALLY (Pre-Push Gate)
-   - Local pre-push hook runs `mise run pre:push` (lint + affected component/requirement tests)
+   - Local pre-push hook runs `mise run pre:push` (lint:all + affected component/requirement tests)
 
 4. PLAN, QUALIFY AND MERGE (3-Tier CI and Human Review)
    - Tier 1 (`plan`): `mise run ci:plan` outputs `plan.json` (affected tests and impacted REQs)
@@ -175,7 +175,7 @@ All local hooks and GitHub Actions workflows invoke `mise` targets rather than c
 
 ```bash
 # Inspect affected components, test suites, and impacted requirements
-mise run affected
+mise run plan:affected
 
 # Generate deterministic CI execution plan as JSON
 mise run ci:plan
@@ -209,7 +209,7 @@ mise run ci:verify:pr
 | Verification Gate | Command / Target | Target Invariant |
 | :--- | :--- | :--- |
 | **Pre-Commit Hook** | `mise run pre:commit` | CSpell, markdown link checks, and traceability audit complete in ~1.5s. |
-| **Pre-Push Hook** | `mise run pre:push` | Executes `lint` and `test:affected` before push. |
+| **Pre-Push Hook** | `mise run pre:push` | Executes `lint:all` and `test:affected` before push. |
 | **CI Execution Planner** | `mise run ci:plan` | Computes affected C++ and Python tests and impacted `REQ-` IDs in < 200 ms (`plan.json`). |
 | **Static ID Audit** | `mise run lint:traceability` | All `REQ-` IDs are globally unique across EPs; zero orphaned test tags. |
 | **Tool Unit Tests** | `mise run test:scripts` | Unit tests verify EP tables, test extraction, `pybind11` AST bridge, and `ci:gate`. |

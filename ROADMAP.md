@@ -15,7 +15,7 @@ This document defines the release roadmap, execution order, and component depend
 | :--- | :--- | :--- |
 | **`v0.1.0`** | Python wheel packaging, `pybind11` bindings, Carma zero-copy NumPy interoperability, ASD-STE100 standardisation | ✅ Shipped |
 | **`v0.2.0`** | Dependency decoupling with CMake `FetchContent`, tiered CI pipeline, native Windows MSVC support | ✅ Shipped |
-| **`v0.3.0`** | Value-type Dirac operator, non-blocking simulation stepper API, CMake target exports, and scientific verification suite | 🔄 Active |
+| **`v0.3.0`** | Value-type Dirac operator, simulation stepper API, CMake target exports, scientific verification, and specification-driven development traceability | 🔄 Active |
 | **`v0.4.0`** | Community package managers (Homebrew, Conda-Forge, Conan, vcpkg) and asymptotic Riemann-Hilbert benchmarks | 💡 Planned |
 
 ---
@@ -30,7 +30,8 @@ Phase 0: Pre-flight & Baseline Assurance
   ├── #62 (Windows vcpkg DLL copying race)
   ├── #56 (Codify C++ & Python contract baseline tests)
   ├── #67 (Replace GSL with StdRng, BSD-3-Clause licence, CITATION.cff)
-  └── #49 (Fix MSVC /W4 conversion warnings & discrete sampling)
+  ├── #49 (Fix MSVC /W4 conversion warnings & discrete sampling)
+  └── #84 (Specification-driven agentic workflow & traceability - EP-5)
 
 Phase 1: Core Mathematical Foundation
   ├── #46 & #12 (DiracOperator value type, lazy omega table, strict const)
@@ -60,7 +61,7 @@ Phase 5: Documentation, Profiling & Release Qualification
 
 | Phase | Component | Issues & Deliverables | Dependencies | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Phase 0** | **Pre-flight & Quality Assurance** | • [#62](https://github.com/pauldruce/RFL/issues/62): Fix Windows parallel DLL file collisions<br/>• [#56](https://github.com/pauldruce/RFL/issues/56): Compile-time C++ contract and Python API surface tests<br/>• [#67](https://github.com/pauldruce/RFL/issues/67): Implement `StdRng`, remove GSL, add BSD-3-Clause `LICENSE` & `CITATION.cff`<br/>• [#49](https://github.com/pauldruce/RFL/issues/49): Address MSVC conversion warnings and uniform discrete sampling | None | ✅ Completed |
+| **Phase 0** | **Pre-flight & Quality Assurance** | • [#62](https://github.com/pauldruce/RFL/issues/62): Fix Windows parallel DLL file collisions<br/>• [#56](https://github.com/pauldruce/RFL/issues/56): Compile-time C++ contract and Python API surface tests<br/>• [#67](https://github.com/pauldruce/RFL/issues/67): Implement `StdRng`, remove GSL, add BSD-3-Clause `LICENSE` & `CITATION.cff`<br/>• [#49](https://github.com/pauldruce/RFL/issues/49): Address MSVC conversion warnings and uniform discrete sampling<br/>• [#84](https://github.com/pauldruce/RFL/pull/84): Specification-driven agentic workflow and traceability engine ([EP-5](docs/eps/ep-5-specification-driven-agentic-workflow.md)) | None | ✅ Completed |
 | **Phase 1** | **Core Mathematical Foundation** | • [#46](https://github.com/pauldruce/RFL/issues/46): Optimise `DiracOperator` omega table initialisation<br/>• [#12](https://github.com/pauldruce/RFL/issues/12): Refactor `DiracOperator` into regular value type with strict `const` correctness<br/>• [#14](https://github.com/pauldruce/RFL/issues/14): Extract analytic trace variations into `BarrettGlaserAction`<br/>• Port `src/core/tests/tDelta.cpp` unit tests | Phase 0 | 🔄 In Progress |
 | **Phase 2** | **Sampler Decoupling & Stepper API** | • [#59](https://github.com/pauldruce/RFL/issues/59): Eliminate raw pointer members in `Metropolis` and `Hamiltonian`<br/>• [#13](https://github.com/pauldruce/RFL/issues/13): Implement `MetropolisSampler` stepper, `ISimulationObserver`, and dual-averaging step calibration | Phase 1 | ⏳ Scheduled |
 | **Phase 3** | **Scientific Verification Suite** | • [#69](https://github.com/pauldruce/RFL/issues/69): Implement EP-4 Phase 1 test suite (Hermiticity, 8-fold KO table, chirality, Haar gauge invariance, finite differences, Gaussian limit moments, CI tiers) | Phase 2 | ⏳ Scheduled |
@@ -77,6 +78,7 @@ Every architectural modernisation task traces directly to an approved Enhancemen
 * **[EP-2: Multi-Platform Package and Binary Distribution](docs/eps/ep-2-package-and-binary-distribution.md):** Governs CMake `install()` targets, `RFLConfig.cmake` package files, and CPack release archives.
 * **[EP-3: Resource-Efficient CI Pipeline](docs/eps/ep-3-resource-efficient-ci-pipeline.md):** Governs modular compilation targets, build caching, and Precompiled Headers.
 * **[EP-4: Computational Physics Verification Suite](docs/eps/ep-4-computational-physics-verification-suite.md):** Governs physical validation standards, geometric axioms, gauge symmetries, and limiting spectral distributions.
+* **[EP-5: Specification-Driven Agentic Workflow and Traceability Infrastructure](docs/eps/ep-5-specification-driven-agentic-workflow.md):** Governs global requirement namespacing, zero-dependency test traceability, automated change impact planning, and shift-left local Git hooks.
 
 ---
 

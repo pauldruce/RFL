@@ -19,8 +19,6 @@ runs:
       run: |
         sudo apt-get update -y
         PACKAGES=(
-          cmake
-          ninja-build
           libopenblas-dev
           liblapack-dev
           libarpack2-dev

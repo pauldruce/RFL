@@ -5,6 +5,7 @@ add_library(rfl_core
 
 set(rfl_core_HEADERS
         BarrettGlaser/Action.hpp
+        BarrettGlaser/BarrettGlaserAction.hpp
         BarrettGlaser/Hamiltonian.hpp
         BarrettGlaser/Metropolis.hpp
         Clifford.hpp
@@ -18,7 +19,7 @@ set(rfl_core_HEADERS
 target_sources(
         rfl_core
         PRIVATE
-        BarrettGlaser/Action.cpp
+        BarrettGlaser/BarrettGlaserAction.cpp
         BarrettGlaser/Hamiltonian.cpp
         BarrettGlaser/Metropolis.cpp
         Clifford.cpp

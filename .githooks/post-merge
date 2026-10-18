@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Post-merge Hook: Advisory check for toolchain or build configuration changes
+# ==============================================================================
+set -euo pipefail
+
+# In post-merge, check if head commit changed build or toolchain definitions
+CHANGED=$(git diff-tree -r --name-only --no-commit-id ORIG_HEAD HEAD 2>/dev/null || true)
+
+if echo "$CHANGED" | grep -qE "(mise\.toml|pyproject\.toml|CMakeLists\.txt|uv\.lock)"; then
+    echo ""
+    echo "🔔 [RFL Hook] Notice: Toolchain or build configuration files changed."
+    echo "             Run 'mise install', 'uv sync', or reconfigure CMake if necessary."
+    echo ""
+fi
+
+exit 0
