@@ -148,6 +148,7 @@
     "msvc",
     "msvcp",
     "musllinux",
+    "nabla",
     "nbformat",
     "ndarray",
     "ninja",
@@ -228,6 +229,7 @@
     "Blom",
     "Blom's",
     "Probit",
+    "readwrite",
     "scipy",
     "superoperator"
   ],

@@ -570,8 +570,7 @@ def _build_full_regression_plan(
         requirement_triggers={r: ["full-run"] for r in implemented_requirements},
         builds=builds,
         required_checks=[
-            "validate_docs",
-            "lint",
+            "quality",
             "test_ubuntu",
             "test_macos",
             "test_windows",
@@ -728,10 +727,8 @@ def _determine_builds_and_checks(
     )
 
     required_checks: list[str] = []
-    if builds.validate_docs:
-        required_checks.append("validate_docs")
-    if builds.lint_cpp:
-        required_checks.append("lint")
+    if builds.validate_docs or builds.lint_cpp:
+        required_checks.append("quality")
     if builds.test_ubuntu:
         required_checks.append("test_ubuntu")
     if builds.test_macos:
@@ -1285,13 +1282,6 @@ def cmd_gate() -> int:
 
     if needs.get("plan", {}).get("result") != "success":
         print("❌ CI Execution Planner failed or was cancelled.", file=sys.stderr)
-        return 1
-
-    if needs.get("check_milestone", {}).get("result") in ("failure", "cancelled"):
-        print(
-            "❌ Milestone verification failed: pull request must have an assigned milestone.",
-            file=sys.stderr,
-        )
         return 1
 
     required_raw = needs.get("plan", {}).get("outputs", {}).get("required_checks", "[]")

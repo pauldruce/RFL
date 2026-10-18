@@ -20,7 +20,7 @@ run = "cmake --build build"
 description = "Build Python source distribution package via uv"
 run = "uv build --sdist --out-dir dist"
 
-[tasks.build]
+[tasks."build:all"]
 description = "Configure and build C++ targets using CMake and Ninja"
 depends = ["build:configure", "build:cpp"]
 
@@ -28,7 +28,7 @@ depends = ["build:configure", "build:cpp"]
 description = "Recompile all SVG diagrams from D2 sources"
 run = "python3 scripts/check_d2_images.py --fix"
 
-[tasks.fmt]
+[tasks."fmt:cpp"]
 description = "Format all C++ source files using clang-format 16"
 run = "clang-format -i $(git ls-files '*.cpp' '*.hpp' '*.h')"
 
@@ -49,8 +49,8 @@ description = "Evaluate upstream CI job statuses against required_checks"
 run = "python3 scripts/ci_plan.py gate"
 
 [tasks."ci:docs"]
-description = "Run CI documentation, link, spelling, D2, traceability, and script unit test checks"
-depends = ["lint:links", "lint:spelling", "lint:d2", "lint:traceability", "test:scripts"]
+description = "Run CI documentation, link, spelling, math, D2, traceability, and script unit test checks"
+depends = ["lint:links", "lint:spelling", "lint:math", "lint:d2", "lint:traceability", "test:scripts"]
 
 [tasks."ci:test:cpp"]
 description = "Execute C++ test suite in CI with parallel workers, output-on-failure, and optional regex filter"
@@ -60,11 +60,7 @@ run = "python3 scripts/ci_plan.py ctest"
 description = "Execute Python test suite with JUnit XML output"
 run = "uv run --group test pytest ${PYTEST_TARGETS:-} --junit-xml=build/junit-py.xml"
 
-[tasks.plan]
-description = "Alias for ci:plan"
-depends = ["ci:plan"]
-
-[tasks.affected]
+[tasks."plan:affected"]
 description = "Calculate affected components, test suites, and requirements (including uncommitted work)"
 run = "python3 scripts/ci_plan.py affected"
 
@@ -82,15 +78,11 @@ run = "python3 scripts/ci_plan.py ctest"
 
 [tasks."test:python"]
 description = "Execute Python test suite using uv and pytest"
-run = "uv run --group test pytest src/python_bindings/tests scripts/tests"
+run = "uv run --group test pytest src/python_bindings/tests"
 
 [tasks."test:all"]
-description = "Execute all C++ and Python test suites across the repository"
-depends = ["test:cpp", "test:python"]
-
-[tasks.test]
-description = "Alias for test:all"
-depends = ["test:all"]
+description = "Execute all C++, Python, and tooling test suites across the repository"
+depends = ["test:cpp", "test:python", "test:scripts"]
 
 [tasks."lint:cpp"]
 description = "Check C++ source formatting against clang-format 16"
@@ -98,11 +90,15 @@ run = "clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.hpp' '*.h')"
 
 [tasks."lint:spelling"]
 description = "Check repository spelling and British English compliance with CSpell"
-run = "npx cspell lint --dot ."
+run = "npx cspell lint --no-progress --dot ."
 
 [tasks."lint:links"]
 description = "Validate internal documentation links and workflow badges"
 run = "python3 scripts/check_links.py"
+
+[tasks."lint:math"]
+description = "Check mathematical notation formatting in Markdown documents"
+run = "python3 scripts/check_math_markdown.py"
 
 [tasks."lint:d2"]
 description = "Check that all compiled SVG diagrams match their D2 sources"
@@ -116,9 +112,9 @@ run = "python3 scripts/verify_comments.py"
 description = "Verify requirements traceability across Enhancement Proposals and test suites"
 run = "python3 scripts/verify_traceability.py --audit"
 
-[tasks.lint]
-description = "Execute all linting checks (C++, spelling, links, D2, comments, traceability)"
-depends = ["lint:cpp", "lint:spelling", "lint:links", "lint:d2", "lint:comments", "lint:traceability"]
+[tasks."lint:all"]
+description = "Execute all linting checks (C++, spelling, links, math, D2, comments, traceability)"
+depends = ["lint:cpp", "lint:spelling", "lint:links", "lint:math", "lint:d2", "lint:comments", "lint:traceability"]
 
 [tasks."traceability:matrix"]
 description = "Generate requirements traceability matrix to stdout"
@@ -134,7 +130,7 @@ depends = ["lint:spelling", "lint:links", "lint:traceability"]
 
 [tasks."pre:push"]
 description = "Execute pre-push verification suite (linting and affected component/requirement tests)"
-depends = ["lint", "test:affected"]
+depends = ["lint:all", "test:affected"]
 
 [tasks."changelog:preview"]
 description = "Preview release notes and changelog diff for upcoming release"

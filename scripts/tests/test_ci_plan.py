@@ -106,7 +106,7 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         self.assertFalse(plan.builds.test_ubuntu)
         self.assertFalse(plan.builds.test_macos)
         self.assertFalse(plan.builds.test_windows)
-        self.assertEqual(plan.required_checks, ["validate_docs"])
+        self.assertEqual(plan.required_checks, ["quality"])
 
     def test_full_run_plan(self) -> None:
         plan = ci_plan.compute_plan_from_files(
@@ -119,7 +119,7 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         self.assertEqual(plan.ctest_filter, "")
         self.assertEqual(
             plan.required_checks,
-            ["validate_docs", "lint", "test_ubuntu", "test_macos", "test_windows"],
+            ["quality", "test_ubuntu", "test_macos", "test_windows"],
         )
 
     def test_cmake_change_triggers_full_cross_platform_run(self) -> None:
@@ -204,10 +204,10 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
         passing_needs = {
             "plan": {
                 "result": "success",
-                "outputs": {"required_checks": '["validate_docs", "test_ubuntu"]'},
+                "outputs": {"required_checks": '["quality", "test_ubuntu"]'},
             },
             "check_milestone": {"result": "success"},
-            "validate_docs": {"result": "success"},
+            "quality": {"result": "success"},
             "test_ubuntu": {"result": "success"},
             "test_macos": {"result": "skipped"},
         }
@@ -221,9 +221,9 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
              redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             self.assertEqual(ci_plan.cmd_gate(), 1)
 
-        failing_milestone = dict(passing_needs)
-        failing_milestone["check_milestone"] = {"result": "failure"}
-        with patch.dict(os.environ, {"NEEDS_JSON": json.dumps(failing_milestone)}), \
+        failing_plan = dict(passing_needs)
+        failing_plan["plan"] = {"result": "failure"}
+        with patch.dict(os.environ, {"NEEDS_JSON": json.dumps(failing_plan)}), \
              redirect_stdout(io.StringIO()), redirect_stderr(io.StringIO()):
             self.assertEqual(ci_plan.cmd_gate(), 1)
 

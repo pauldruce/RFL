@@ -161,10 +161,10 @@ cmake --build build --target help
 
 RFL provides task automation using [mise](https://mise.jdx.dev/):
 
-* `mise run build` - Configure and build all C++ targets
-* `mise run test` - Execute both C++ (CTest) and Python (pytest) test suites
-* `mise run lint` - Execute code formatting, spell checking, markdown links, and D2 diagram validation
-* `mise run pre:push` - Execute complete pre-push verification suite (linting and test suites)
+* `mise run build:all` - Configure and build all C++ targets
+* `mise run test:all` - Execute all C++, Python, and tooling test suites
+* `mise run lint:all` - Execute code formatting, spell checking, markdown links, math syntax, comments, and D2 diagram validation
+* `mise run pre:push` - Execute complete pre-push verification suite (linting and affected test suites)
 
 ---
 

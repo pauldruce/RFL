@@ -45,6 +45,10 @@ jobs:
   run:
     name: "Linux (${{ inputs.os }}, ${{ inputs.build_type }})"
     runs-on: ${{ inputs.os }}
+    env:
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_NOHASHDIR: "1"
+      CCACHE_COMPRESS: "1"
     steps:
       - name: Validate inputs
         shell: bash
@@ -71,7 +75,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v5
 
       - name: Install dependencies
         uses: ./.github/actions/install-linux-deps
@@ -86,12 +90,9 @@ jobs:
             ccache-${{ inputs.os }}-${{ inputs.build_type }}-
             ccache-${{ inputs.os }}-
           max-size: 500M
+          verbose: 1
 
       - name: Configure CMake
-        env:
-          CCACHE_BASEDIR: ${{ github.workspace }}
-          CCACHE_NOHASHDIR: "1"
-          CCACHE_COMPRESS: "1"
         run: |
           CMAKE_ARGS=(
             -DCMAKE_BUILD_TYPE=${{ inputs.build_type }}
@@ -108,6 +109,9 @@ jobs:
 
       - name: Build
         run: mise run build:cpp -- --config ${{ inputs.build_type }}
+
+      - name: Ccache statistics
+        run: ccache -s
 
       - name: Test C++
         run: mise run ci:test:cpp -- -C "${{ inputs.build_type }}" -R "${{ inputs.ctest_filter }}" --junit build/junit.xml

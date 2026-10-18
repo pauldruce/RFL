@@ -215,7 +215,7 @@ Never assert bare magic constants without explaining their derivation:
   ```
 
 ### 7.6 Automated Enforcement
-The script `scripts/verify_comments.py` runs under `mise run lint`. It fails if:
+The script `scripts/verify_comments.py` runs under `mise run lint:all`. It fails if:
 * Doxygen tags (`\f$`, `\f[`, `/// \brief`, `/**`) appear in any test file (`*/tests/*`).
 * Doxygen docblocks (`/**`) appear in implementation `.cpp` files.
 * Raw LaTeX formulas appear in header `@brief` lines.

@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v5
 
       - name: Verify release tag and changelog integrity
         run: |
@@ -56,7 +56,7 @@ jobs:
   build_wheels:
     name: Wheel on ${{ matrix.os }} (${{ matrix.cibw_arch }})
     needs: [validate_release]
-    if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
+    if: (github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner) && (github.event_name != 'pull_request' || contains(github.event.pull_request.labels.*.name, 'ci:build-wheels'))
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -112,7 +112,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v5
 
       - name: Build sdist
         run: mise run build:sdist
