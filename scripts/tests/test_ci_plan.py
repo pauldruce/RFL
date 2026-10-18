@@ -308,6 +308,31 @@ class TestCIPlannerAndDependencyGraph(unittest.TestCase):
                 self.assertIn("--output-junit", cmd)
                 self.assertIn("-V", cmd)
 
+    def test_cmd_test_affected_attestation_skip(self) -> None:
+        parser = ci_plan.build_parser()
+        args = parser.parse_args(["test-affected"])
+        with patch("test_attestation.verify_attestation", return_value=0) as mock_verify, \
+             patch("ci_plan.compute_plan") as mock_plan, \
+             redirect_stdout(io.StringIO()):
+            mock_plan.return_value = unittest.mock.MagicMock()
+            rc = ci_plan.cmd_test_affected(args, REPO_ROOT)
+            self.assertEqual(rc, 0)
+            mock_verify.assert_called_once()
+
+    def test_cmd_test_affected_force_bypasses_attestation(self) -> None:
+        parser = ci_plan.build_parser()
+        args = parser.parse_args(["test-affected", "--force", "--only-python"])
+        with patch("test_attestation.verify_attestation") as mock_verify, \
+             patch("ci_plan.compute_plan") as mock_plan, \
+             redirect_stdout(io.StringIO()):
+            mock_plan.return_value = unittest.mock.MagicMock(
+                affected_cpp_suites=[],
+                affected_python_test_files=[],
+            )
+            rc = ci_plan.cmd_test_affected(args, REPO_ROOT)
+            self.assertEqual(rc, 0)
+            mock_verify.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
