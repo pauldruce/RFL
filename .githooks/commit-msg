@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Commit-msg Hook: Enforce Conventional Commits and REQ trailer format
+# ==============================================================================
+set -euo pipefail
+
+# Clear inherited Git worktree environment variables
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_PREFIX
+export PATH="$HOME/.local/bin:$PATH"
+
+mise run lint:commit-msg -- "$1"

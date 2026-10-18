@@ -19,8 +19,6 @@ __pycache__/
 *_venv/
 .venv/
 uv.lock
-
-/research
-/vault
 .agents/handoffs/
 /.worktrees/
+/.private/

@@ -6,7 +6,6 @@
     "**/build/**",
     "**/cmake-build/**",
     "**/venv/**",
-    "**/research/**",
     "**/.agents/**",
     "**/*.log",
     "**/*.ipynb",
@@ -231,7 +230,8 @@
     "Probit",
     "readwrite",
     "scipy",
-    "superoperator"
+    "superoperator",
+    "pyyaml"
   ],
   "flagWords": [
     "initialize",

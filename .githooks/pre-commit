@@ -8,9 +8,13 @@ set -euo pipefail
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_PREFIX
 export PATH="$HOME/.local/bin:$PATH"
 
-# Skip if no non-deleted files are staged
+# 1. Skip if no non-deleted files are staged
 if [ -z "$(git diff --cached --name-only --diff-filter=d || true)" ]; then
     exit 0
 fi
 
+# 2. Native Git check for trailing whitespace, space-before-tab, and unresolved merge conflicts (< 5ms)
+git diff-index --check --cached HEAD --
+
+# 3. Execute encapsulated fast static verification suite via mise
 mise run pre:commit

@@ -35,6 +35,7 @@ dev = ["jupyter", "nbformat"]
 test = [
     "pytest>=7.0",
     "packaging",
+    "pyyaml",
 ]
 dev = [
     "jupyter",

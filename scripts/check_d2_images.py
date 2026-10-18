@@ -18,7 +18,6 @@ from pathlib import Path
 
 DEFAULT_EXCLUDES = [
     "**/build/**",
-    "**/research/**",
     "**/.worktrees/**",
     "**/venv/**",
     "**/.*/**",

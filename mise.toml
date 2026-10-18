@@ -8,6 +8,10 @@ node = "lts"
 "clang-format" = "16.0.6"
 d2 = "0.8.2"
 
+[tasks."setup:hooks"]
+description = "Configure Git to use repository .githooks directory"
+run = "git config core.hooksPath .githooks"
+
 [tasks."build:configure"]
 description = "Configure CMake build directory with Ninja"
 run = "cmake -B build -S . -G Ninja"
@@ -112,9 +116,17 @@ run = "python3 scripts/verify_comments.py"
 description = "Verify requirements traceability across Enhancement Proposals and test suites"
 run = "python3 scripts/verify_traceability.py --audit"
 
+[tasks."lint:configs"]
+description = "Validate configuration files (TOML, JSON, and workflow YAML)"
+run = "uv run python scripts/check_configs.py"
+
+[tasks."lint:commit-msg"]
+description = "Validate commit message against Conventional Commits and REQ trailer format"
+run = "python3 scripts/check_commit_msg.py"
+
 [tasks."lint:all"]
-description = "Execute all linting checks (C++, spelling, links, math, D2, comments, traceability)"
-depends = ["lint:cpp", "lint:spelling", "lint:links", "lint:math", "lint:d2", "lint:comments", "lint:traceability"]
+description = "Execute all linting checks (C++, spelling, links, math, D2, comments, traceability, configs)"
+depends = ["lint:cpp", "lint:spelling", "lint:links", "lint:math", "lint:d2", "lint:comments", "lint:traceability", "lint:configs"]
 
 [tasks."traceability:matrix"]
 description = "Generate requirements traceability matrix to stdout"
@@ -125,8 +137,8 @@ description = "Query detailed status, invariant, and mapped tests for a requirem
 run = "python3 scripts/verify_traceability.py --query"
 
 [tasks."pre:commit"]
-description = "Execute pre-commit verification suite (spelling, links, and traceability)"
-depends = ["lint:spelling", "lint:links", "lint:traceability"]
+description = "Execute fast pre-commit static audit (whitespace, comments, math, links, spelling, traceability, configs)"
+depends = ["lint:comments", "lint:math", "lint:links", "lint:spelling", "lint:traceability", "lint:configs"]
 
 [tasks."pre:push"]
 description = "Execute pre-push verification suite (linting and affected component/requirement tests)"
